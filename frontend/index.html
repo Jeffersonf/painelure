@@ -111,6 +111,7 @@
 <nav class="fnav" id="fnav">
   <div class="fn-item active" data-page="dashboard"><span class="fni">📊</span>Inicio</div>
   <div class="fn-item" data-page="schools"><span class="fni">🏫</span>Escolas</div>
+  <div class="fn-item" data-page="supervisors"><span class="fni">👥</span>Superv.</div>
   <div class="fn-item" data-page="assets"><span class="fni">💻</span>Invent.</div>
   <div class="fn-item acc-n" data-page="calls"><span class="fni">🔧</span>Cham.</div>
 </nav>
@@ -131,6 +132,7 @@
   <nav>
     <div class="nav-item active" data-page="dashboard"><span class="ico">📊</span>Painel</div>
     <div class="nav-item" data-page="schools"><span class="ico">🏫</span>Escolas</div>
+    <div class="nav-item" data-page="supervisors"><span class="ico">👥</span>Supervisores</div>
     <div class="nav-item" data-page="assets"><span class="ico">💻</span>Ativos</div>
     <div class="nav-item an" data-page="calls"><span class="ico">🔧</span>Atendimentos</div>
     <div class="nav-item" data-page="agenda"><span class="ico">🗓️</span>Agenda</div>
@@ -634,6 +636,96 @@
     </div>
   </div>
 
+  <div class="page" id="page-supervisors">
+    <div class="ph">
+      <div>
+        <div class="pt">Supervisores e Visitas</div>
+        <div class="ps">Categoria dedicada para acompanhar supervisor, escolas vinculadas e quantitativo de visitas por unidade.</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-g btn-sm" id="seedSupervisorVisitsBtn" type="button">Gerar visitas teste</button>
+      </div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-l">Supervisores</div>
+        <div class="insight-v private" id="supervisorMetricCount">0</div>
+        <div class="sync-meta">nomes na base de supervisao</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Escolas vinculadas</div>
+        <div class="insight-v private" id="supervisorMetricSchools">0</div>
+        <div class="sync-meta">relacao teste ate chegar o CSV</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Visitas</div>
+        <div class="insight-v private" id="supervisorMetricVisits">0</div>
+        <div class="sync-meta">registros quantitativos</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Cobertura media</div>
+        <div class="insight-v private" id="supervisorMetricCoverage">0%</div>
+        <div class="sync-meta">escolas com ao menos uma visita</div>
+      </div>
+    </div>
+    <div class="setechub-command-grid supervisor-command-grid">
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Filtro do BI</div><div class="cs">Escolha um supervisor para ver escolas e visitas.</div></div>
+        </div>
+        <div class="setechub-action-col">
+          <select class="fi" id="supervisorFilterSelect">
+            <option value="todos">Todos os supervisores</option>
+          </select>
+          <div class="sync-meta">Quando o CSV oficial chegar, esta tela passa a usar a distribuicao real.</div>
+        </div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Ranking de visitas</div><div class="cs">Comparativo quantitativo por supervisor.</div></div>
+        </div>
+        <div id="supervisorRankingList" class="stack-list"></div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Escolas sem visita</div><div class="cs">Onde ainda nao ha registro no recorte atual.</div></div>
+        </div>
+        <div id="supervisorGapList" class="stack-list"></div>
+      </section>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Supervisores e escolas</div><div class="cs">Lista por supervisor com escolas atribuidas, alertas e atalhos para abrir a ficha.</div></div>
+      </div>
+      <div id="supervisorSchoolMatrix" class="supervisor-school-matrix"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Registrar visita teste</div><div class="cs">Use para validar o BI ate o modelo CSV oficial chegar.</div></div>
+      </div>
+      <form id="supervisorVisitForm" class="setechub-form setechub-form-wide">
+        <select class="fi" id="visitSupervisorSelect"></select>
+        <select class="fi" id="visitSchoolSelect"></select>
+        <input class="fi" id="visitDate" type="date">
+        <select class="fi" id="visitType">
+          <option value="Rotina">Rotina</option>
+          <option value="Acompanhamento">Acompanhamento</option>
+          <option value="Busca ativa">Busca ativa</option>
+          <option value="Formacao">Formacao</option>
+          <option value="Emergencial">Emergencial</option>
+        </select>
+        <input class="fi" id="visitNotes" placeholder="Observacao da visita">
+        <button class="btn btn-p" type="submit">Salvar visita</button>
+      </form>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Base de visitas</div><div class="cs">Tabela quantitativa inicial para conferencia e importacao futura.</div></div>
+      </div>
+      <div id="supervisorVisitTable" class="setechub-table-wrap"></div>
+    </div>
+  </div>
+
   <div class="page" id="page-assets">
     <div class="ph">
       <div>
@@ -886,6 +978,26 @@
         <div class="sync-meta" id="serverHealthMeta">Servidor local nao verificado.</div>
       </div>
       <div id="snapshotList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Supabase online</div><div class="cs">Base PostgreSQL para sincronizar o estado do GitHub Pages sem expor chave secreta.</div></div>
+      </div>
+      <form id="supabaseConfigForm" class="setechub-form setechub-note-form">
+        <input class="fi" id="supabaseUrl" placeholder="https://seu-projeto.supabase.co">
+        <input class="fi" id="supabaseAnonKey" placeholder="Anon public key">
+        <button class="btn btn-p" type="submit">Salvar configuracao Supabase</button>
+      </form>
+      <div class="setechub-action-col">
+        <button class="btn btn-p" id="saveSupabaseBtn" type="button">Salvar estado no Supabase</button>
+        <button class="btn btn-g" id="loadSupabaseBtn" type="button">Carregar estado do Supabase</button>
+        <button class="btn btn-g" id="checkSupabaseBtn" type="button">Testar conexao</button>
+        <div class="sync-meta" id="supabaseStatusMeta">Supabase nao configurado.</div>
+      </div>
+      <div class="setechub-summary-card">
+        <div class="ct">Tabela esperada</div>
+        <div class="sync-meta">Crie uma tabela chamada <strong>app_state</strong> com colunas: <strong>id text primary key</strong>, <strong>state jsonb not null</strong>, <strong>updated_at timestamptz default now()</strong>.</div>
+      </div>
     </div>
     <div class="setechub-two-col">
       <div class="box">

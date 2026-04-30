@@ -11,6 +11,7 @@ let currentSchoolFilter = 'todas';
 let currentDirectoryFilter = 'todos';
 let currentSchoolZoneFilter = 'todas';
 let currentSchoolSort = 'prioridade';
+let currentSupervisorFilter = 'todos';
 let currentAssetFilter = 'todos';
 let currentImportFilter = 'todos';
 let currentImportSchoolContext = '';
@@ -23,6 +24,7 @@ let currentSchoolDetail = '';
 let currentSearchQuery = '';
 let serverStatus = { available: false, message: 'Servidor local nao verificado.' };
 let serverSnapshots = [];
+let supabaseStatus = { configured: false, message: 'Supabase nao configurado.' };
 let searchTimer = null;
 
 const PAGE_KEY = 'setechub_page';
@@ -515,6 +517,7 @@ function saveUiContext() {
       schoolFilter: currentSchoolFilter,
       schoolZoneFilter: currentSchoolZoneFilter,
       schoolSort: currentSchoolSort,
+      supervisorFilter: currentSupervisorFilter,
       schoolSearch: currentSchoolSearch,
       assetFilter: currentAssetFilter,
       importFilter: currentImportFilter,
@@ -544,6 +547,7 @@ function restoreUiContext() {
     currentSchoolFilter = context.schoolFilter || currentSchoolFilter;
     currentSchoolZoneFilter = context.schoolZoneFilter || currentSchoolZoneFilter;
     currentSchoolSort = context.schoolSort || currentSchoolSort;
+    currentSupervisorFilter = context.supervisorFilter || currentSupervisorFilter;
     currentSchoolSearch = context.schoolSearch || '';
     currentAssetFilter = context.assetFilter || currentAssetFilter;
     currentImportFilter = context.importFilter || currentImportFilter;
@@ -708,6 +712,41 @@ function sortSchoolsByCurrentView(schools) {
     if (currentSchoolSort === 'alertas') return signalB.alertUnits - signalA.alertUnits || signalB.riskScore - signalA.riskScore || a.name.localeCompare(b.name);
     if (currentSchoolSort === 'dados') return schoolDataScore(b.name) - schoolDataScore(a.name) || a.name.localeCompare(b.name);
     return signalB.riskScore - signalA.riskScore || signalB.alertUnits - signalA.alertUnits || a.name.localeCompare(b.name);
+  });
+}
+
+function filteredSupervisors() {
+  if (currentSupervisorFilter === 'todos') return state.supervisors || [];
+  return (state.supervisors || []).filter((item) => normalizeKey(item.name) === currentSupervisorFilter);
+}
+
+function supervisorVisitRows() {
+  const selectedNames = new Set(filteredSupervisors().map((item) => item.name));
+  return (state.supervisorVisits || []).filter((item) =>
+    currentSupervisorFilter === 'todos' || selectedNames.has(item.supervisor)
+  );
+}
+
+function supervisorStats() {
+  const visits = state.supervisorVisits || [];
+  const schools = state.schools || [];
+  return (state.supervisors || []).map((supervisor) => {
+    const assignedSchools = supervisor.schools || [];
+    const supervisorVisits = visits.filter((visit) => visit.supervisor === supervisor.name);
+    const visitedSchools = new Set(supervisorVisits.map((visit) => visit.school));
+    const openCalls = state.calls.filter((call) => assignedSchools.includes(call.school) && call.status !== 'resolvido').length;
+    const alerts = assignedSchools.reduce((sum, school) => sum + schoolAlertUnits(school), 0);
+    const knownSchools = assignedSchools.filter((name) => schools.some((school) => school.name === name)).length;
+    return {
+      supervisor,
+      assignedSchools,
+      knownSchools,
+      visits: supervisorVisits.length,
+      visitedSchools: visitedSchools.size,
+      coverage: assignedSchools.length ? Math.round((visitedSchools.size / assignedSchools.length) * 100) : 0,
+      openCalls,
+      alerts
+    };
   });
 }
 
@@ -961,7 +1000,7 @@ function handleSearch(query) {
 }
 
 function shiftFocusCard(direction) {
-  const pages = ['dashboard', 'schools', 'school-record', 'assets', 'calls', 'agenda', 'reports'];
+  const pages = ['dashboard', 'schools', 'school-record', 'supervisors', 'assets', 'calls', 'agenda', 'reports'];
   const currentIndex = pages.indexOf(currentPage);
   const nextIndex = currentIndex < 0 ? 0 : (currentIndex + direction + pages.length) % pages.length;
   showPage(pages[nextIndex]);
@@ -1019,6 +1058,7 @@ function refreshAll() {
   renderCalls();
   renderCallHistory();
   renderSchools();
+  renderSupervisors();
   renderSchoolDetail();
   renderAssets();
   renderReports();

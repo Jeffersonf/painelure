@@ -1024,6 +1024,147 @@ function renderSchoolDetail() {
   document.getElementById('schoolProfileNotes').value = profile?.notes || '';
 }
 
+function renderSupervisors() {
+  const metricCount = document.getElementById('supervisorMetricCount');
+  if (!metricCount) return;
+  const stats = supervisorStats();
+  const filteredStats = currentSupervisorFilter === 'todos'
+    ? stats
+    : stats.filter((item) => normalizeKey(item.supervisor.name) === currentSupervisorFilter);
+  const visits = supervisorVisitRows();
+  const assignedSchoolCount = new Set(filteredStats.flatMap((item) => item.assignedSchools)).size;
+  const averageCoverage = filteredStats.length
+    ? Math.round(filteredStats.reduce((sum, item) => sum + item.coverage, 0) / filteredStats.length)
+    : 0;
+
+  metricCount.textContent = String(filteredStats.length);
+  document.getElementById('supervisorMetricSchools').textContent = String(assignedSchoolCount);
+  document.getElementById('supervisorMetricVisits').textContent = String(visits.length);
+  document.getElementById('supervisorMetricCoverage').textContent = `${averageCoverage}%`;
+
+  const filterSelect = document.getElementById('supervisorFilterSelect');
+  const visitSupervisorSelect = document.getElementById('visitSupervisorSelect');
+  const visitSchoolSelect = document.getElementById('visitSchoolSelect');
+  const supervisorOptions = [
+    '<option value="todos">Todos os supervisores</option>',
+    ...stats.map(({ supervisor }) => `<option value="${esc(normalizeKey(supervisor.name))}">${esc(supervisor.name)}</option>`)
+  ].join('');
+  if (filterSelect) {
+    filterSelect.innerHTML = supervisorOptions;
+    filterSelect.value = currentSupervisorFilter;
+  }
+  if (visitSupervisorSelect) {
+    visitSupervisorSelect.innerHTML = stats.map(({ supervisor }) => `<option value="${esc(supervisor.name)}">${esc(supervisor.name)}</option>`).join('');
+  }
+  if (visitSchoolSelect) {
+    const selectedSupervisor = visitSupervisorSelect?.value || stats[0]?.supervisor.name || '';
+    const selected = stats.find((item) => item.supervisor.name === selectedSupervisor) || stats[0];
+    visitSchoolSelect.innerHTML = (selected?.assignedSchools || state.schools.map((school) => school.name))
+      .map((school) => `<option value="${esc(school)}">${esc(school)}</option>`)
+      .join('');
+  }
+  const visitDate = document.getElementById('visitDate');
+  if (visitDate && !visitDate.value) visitDate.value = new Date().toISOString().slice(0, 10);
+
+  const ranking = document.getElementById('supervisorRankingList');
+  if (ranking) {
+    const maxVisits = Math.max(...stats.map((item) => item.visits), 1);
+    ranking.innerHTML = stats
+      .slice()
+      .sort((a, b) => b.visits - a.visits || b.coverage - a.coverage || a.supervisor.name.localeCompare(b.supervisor.name))
+      .map((item) => `
+        <div class="setechub-item">
+          <div class="setechub-head">
+            <div>
+              <strong>${esc(item.supervisor.name)}</strong>
+              <div class="sync-meta">${esc(String(item.visits))} visita(s) | ${esc(String(item.assignedSchools.length))} escola(s) | cobertura ${esc(String(item.coverage))}%</div>
+            </div>
+            <span class="diag-pill ${item.alerts ? 'pill-warn' : 'pill-ok'}">${esc(String(item.alerts))} alertas</span>
+          </div>
+          <div class="setechub-bar"><span style="width:${Math.max(4, Math.round((item.visits / maxVisits) * 100))}%"></span></div>
+        </div>
+      `).join('') || '<div class="sync-empty">Nenhum supervisor cadastrado.</div>';
+  }
+
+  const gapList = document.getElementById('supervisorGapList');
+  if (gapList) {
+    const gaps = filteredStats.flatMap((item) => {
+      const visited = new Set((state.supervisorVisits || [])
+        .filter((visit) => visit.supervisor === item.supervisor.name)
+        .map((visit) => visit.school));
+      return item.assignedSchools
+        .filter((school) => !visited.has(school))
+        .map((school) => ({ supervisor: item.supervisor.name, school }));
+    }).slice(0, 12);
+    gapList.innerHTML = gaps.map((item) => `
+      <div class="setechub-item setechub-clickable" onclick="openSchoolRecord('${esc(item.school)}')">
+        <strong>${esc(item.school)}</strong>
+        <div class="sync-meta">${esc(item.supervisor)} | sem visita registrada no teste atual</div>
+      </div>
+    `).join('') || '<div class="sync-empty">Todas as escolas do recorte possuem ao menos uma visita.</div>';
+  }
+
+  const matrix = document.getElementById('supervisorSchoolMatrix');
+  if (matrix) {
+    matrix.innerHTML = filteredStats.map((item) => `
+      <article class="supervisor-card">
+        <div class="setechub-head">
+          <div>
+            <strong>${esc(item.supervisor.name)}</strong>
+            <div class="sync-meta">${esc(item.supervisor.email || '')} | ${esc(item.supervisor.phone || '')}</div>
+          </div>
+          <span class="diag-pill">${esc(item.supervisor.source === 'teste' ? 'dados teste' : 'oficial')}</span>
+        </div>
+        <div class="school-overview-kpis">
+          <div><span>Escolas</span><strong>${esc(String(item.assignedSchools.length))}</strong></div>
+          <div><span>Visitas</span><strong>${esc(String(item.visits))}</strong></div>
+          <div><span>Cobertura</span><strong>${esc(String(item.coverage))}%</strong></div>
+          <div><span>Chamados</span><strong>${esc(String(item.openCalls))}</strong></div>
+        </div>
+        <div class="supervisor-school-list">
+          ${item.assignedSchools.map((schoolName) => {
+            const signal = schoolByName(schoolName) ? schoolOperationalSnapshot(schoolByName(schoolName)) : null;
+            return `
+              <button class="supervisor-school-row" type="button" onclick="openSchoolRecord('${esc(schoolName)}')">
+                <span>${esc(schoolName)}</span>
+                <strong>${esc(String(signal?.alertUnits || 0))} alertas</strong>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </article>
+    `).join('') || '<div class="sync-empty">Nenhum supervisor encontrado.</div>';
+  }
+
+  const table = document.getElementById('supervisorVisitTable');
+  if (table) {
+    table.innerHTML = visits.length ? `
+      <table class="setechub-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Supervisor</th>
+            <th>Escola</th>
+            <th>Tipo</th>
+            <th>Observacao</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${visits.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).map((visit) => `
+            <tr>
+              <td>${esc(visit.date || '--')}</td>
+              <td>${esc(visit.supervisor)}</td>
+              <td><button class="link-button" type="button" onclick="openSchoolRecord('${esc(visit.school)}')">${esc(visit.school)}</button></td>
+              <td><span class="diag-pill">${esc(visit.type || 'Visita')}</span></td>
+              <td>${esc(visit.notes || '')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    ` : '<div class="sync-empty">Nenhuma visita registrada neste recorte.</div>';
+  }
+}
+
 function renderOfficialData() {
   const list = document.getElementById('officialList');
   list.innerHTML = state.officialLinks.slice(0, 6).map((item) => `
@@ -1434,6 +1575,7 @@ function renderDiagnostics() {
     { label: 'Prototipo antigo', value: localStorage.getItem(LEGACY_STORAGE_KEY) ? 'Encontrado' : 'Nao encontrado' },
     { label: 'Sessao local', value: sessionStorage.getItem(SESSION_KEY) === 'ok' ? 'Desbloqueada' : 'Bloqueada' },
     { label: 'Servidor local', value: serverStatus.message },
+    { label: 'Supabase', value: supabaseStatus.message },
     { label: 'Snapshots no servidor', value: String(serverSnapshots.length) },
     { label: 'Cobertura de importacao', value: `${operationalCoverage().importCoverage}%` },
     { label: 'Tarefas abertas', value: String(state.tasks.filter((item) => !item.done).length) },
@@ -1454,6 +1596,7 @@ function renderDiagnostics() {
     : 'Nenhum estado legado encontrado no navegador atual.';
   const serverMeta = document.getElementById('serverHealthMeta');
   if (serverMeta) serverMeta.textContent = serverStatus.message;
+  updateSupabaseStatus(supabaseStatus.message, supabaseStatus.configured);
   const snapshotList = document.getElementById('snapshotList');
   if (snapshotList) {
     snapshotList.innerHTML = serverSnapshots.length ? serverSnapshots.map((item) => `

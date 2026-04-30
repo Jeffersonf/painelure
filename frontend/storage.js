@@ -6,6 +6,7 @@ const LEGACY_STORAGE_KEY = 'setec-hub-v2';
 const THEME_KEY = 'setechub_theme';
 const PRIVACY_KEY = 'setechub_privacy';
 const SESSION_KEY = 'setechub_session';
+const SUPABASE_CONFIG_KEY = 'setechub_supabase_config';
 const GENERATED_SCHOOL_DATA = typeof window !== 'undefined' && window.SETECHUB_SCHOOL_DATA
   ? window.SETECHUB_SCHOOL_DATA
   : { generalAssets: [], schoolImports: [], schoolAssets: [], schoolNetworks: [] };
@@ -133,8 +134,54 @@ function defaultSchoolProfiles(schools) {
   }));
 }
 
+function defaultSupervisors(schools) {
+  const supervisorContacts = [
+    { name: 'Daiane Aparecida de Oliveira Ribeiro', email: 'daiane.ribeiro@educacao.sp.gov.br', phone: '(15) 3526-6227' },
+    { name: 'Edilene da Silva Almeida Oliveira', email: 'edilene.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6217' },
+    { name: 'Magda Gisele Silva de Oliveira', email: 'magda.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6232' },
+    { name: 'Marcio Nunes da Cruz', email: 'marcio.cruz@educacao.sp.gov.br', phone: '(15) 3526-6208' },
+    { name: 'Maria Luiza Brizolla de Queiroz', email: 'maria.queiroz14@educacao.sp.gov.br', phone: '(15) 3526-6216' },
+    { name: 'Adilson Fogaca', email: 'adilson.fogaca@educacao.sp.gov.br', phone: '(15) 3526-6224' }
+  ];
+  return supervisorContacts.map((supervisor, index) => ({
+    id: `sup-${index + 1}`,
+    ...supervisor,
+    schools: schools
+      .filter((_, schoolIndex) => schoolIndex % supervisorContacts.length === index)
+      .map((school) => school.name),
+    source: 'teste'
+  }));
+}
+
+function defaultSupervisorVisits(supervisors) {
+  const currentYear = new Date().getFullYear();
+  return supervisors.flatMap((supervisor, supervisorIndex) =>
+    supervisor.schools.slice(0, 3).map((school, schoolIndex) => ({
+      id: `visit-${supervisorIndex + 1}-${schoolIndex + 1}`,
+      supervisor: supervisor.name,
+      school,
+      date: `${currentYear}-${String((schoolIndex + supervisorIndex) % 12 + 1).padStart(2, '0')}-${String(8 + schoolIndex * 6).padStart(2, '0')}`,
+      type: schoolIndex % 2 === 0 ? 'Rotina' : 'Acompanhamento',
+      notes: 'Registro de teste para validar o BI de supervisao.'
+    }))
+  );
+}
+
+function loadSupabaseConfig() {
+  try {
+    return JSON.parse(localStorage.getItem(SUPABASE_CONFIG_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function saveSupabaseConfig(config) {
+  localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify(config || {}));
+}
+
 function createDefaults() {
   const schools = SCHOOL_MASTER.map((school) => ({ id: uid(), ...school }));
+  const supervisors = defaultSupervisors(schools);
   return {
     stateVersion: STATE_VERSION,
     lastUpdatedAt: new Date().toISOString(),
@@ -281,6 +328,8 @@ function createDefaults() {
     tasks: [],
     calls: [],
     schools,
+    supervisors,
+    supervisorVisits: defaultSupervisorVisits(supervisors),
     schoolProfiles: defaultSchoolProfiles(schools),
     schoolImports: GENERATED_SCHOOL_DATA.schoolImports || [],
     schoolAssets: GENERATED_SCHOOL_DATA.schoolAssets || [],
@@ -337,6 +386,10 @@ function mergeState(saved) {
   const savedCalls = Array.isArray(repaired.calls)
     ? repaired.calls.map((item) => ({ ...item, school: canonicalSchoolName(item.school) || item.school }))
     : base.calls;
+  const savedSupervisors = Array.isArray(repaired.supervisors) ? repaired.supervisors : [];
+  const savedSupervisorVisits = Array.isArray(repaired.supervisorVisits)
+    ? repaired.supervisorVisits.map((item) => ({ ...item, school: canonicalSchoolName(item.school) || item.school }))
+    : [];
   return {
     ...base,
     stateVersion: Math.max(STATE_VERSION, savedVersion),
@@ -351,6 +404,12 @@ function mergeState(saved) {
     tasks: savedTasks,
     calls: savedCalls,
     schools: mergedSchools,
+    supervisors: mergeUniqueBy(base.supervisors, savedSupervisors, (item) => normalizeKey(item.email || item.name)),
+    supervisorVisits: mergeUniqueBy(
+      base.supervisorVisits,
+      savedSupervisorVisits,
+      (item) => normalizeKey(`${item.supervisor}|${item.school}|${item.date}|${item.type}`)
+    ),
     schoolProfiles: mergeUniqueBy(
       baseProfiles,
       Array.isArray(repaired.schoolProfiles) ? repaired.schoolProfiles : [],

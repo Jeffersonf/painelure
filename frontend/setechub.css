@@ -138,6 +138,71 @@
   justify-content: center;
 }
 
+.supervisor-command-grid {
+  grid-template-columns: .85fr 1.1fr 1fr;
+}
+
+.supervisor-school-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.supervisor-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf2);
+  min-width: 0;
+}
+
+.supervisor-school-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.supervisor-school-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: rgba(255,255,255,.035);
+  color: var(--tx);
+  text-align: left;
+  cursor: pointer;
+}
+
+.supervisor-school-row span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.supervisor-school-row strong {
+  flex-shrink: 0;
+  color: var(--mt);
+  font-size: 11px;
+}
+
+.link-button {
+  border: 0;
+  background: transparent;
+  color: var(--ac);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
 .school-record-nav {
   position: sticky;
   top: 10px;

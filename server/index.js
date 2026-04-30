@@ -68,6 +68,8 @@ function validateStateShape(candidate) {
     'tasks',
     'calls',
     'schools',
+    'supervisors',
+    'supervisorVisits',
     'schoolProfiles',
     'schoolImports',
     'schoolAssets',

@@ -116,3 +116,87 @@ async function syncFromServerIfUseful() {
     return;
   }
 }
+
+function normalizeSupabaseUrl(url) {
+  return String(url || '').trim().replace(/\/+$/, '');
+}
+
+function supabaseConfig() {
+  const config = loadSupabaseConfig();
+  return {
+    url: normalizeSupabaseUrl(config.url),
+    anonKey: String(config.anonKey || '').trim()
+  };
+}
+
+function updateSupabaseStatus(message, configured = false) {
+  supabaseStatus = { configured, message };
+  const node = document.getElementById('supabaseStatusMeta');
+  if (node) node.textContent = message;
+  const urlInput = document.getElementById('supabaseUrl');
+  const keyInput = document.getElementById('supabaseAnonKey');
+  const config = supabaseConfig();
+  if (urlInput && !urlInput.value) urlInput.value = config.url || '';
+  if (keyInput && !keyInput.value) keyInput.value = config.anonKey || '';
+}
+
+async function supabaseRequest(path, options = {}) {
+  const config = supabaseConfig();
+  if (!config.url || !config.anonKey) {
+    throw new Error('Configure URL e anon key do Supabase na tela Conta.');
+  }
+  const response = await fetch(`${config.url}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: config.anonKey,
+      Authorization: `Bearer ${config.anonKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+      ...(options.headers || {})
+    }
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Falha Supabase HTTP ${response.status}`);
+  }
+  if (response.status === 204) return null;
+  return response.json();
+}
+
+async function checkSupabaseConnection() {
+  try {
+    await supabaseRequest('app_state?select=id,updated_at&id=eq.setechub_state&limit=1');
+    updateSupabaseStatus('Supabase conectado. Tabela app_state acessivel.', true);
+  } catch (error) {
+    updateSupabaseStatus(`Falha no Supabase: ${error.message}`, false);
+  }
+}
+
+async function saveStateToSupabase() {
+  try {
+    await supabaseRequest('app_state?on_conflict=id', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation,resolution=merge-duplicates' },
+      body: JSON.stringify({ id: 'setechub_state', state, updated_at: new Date().toISOString() })
+    });
+    updateSupabaseStatus('Estado salvo no Supabase.', true);
+  } catch (error) {
+    updateSupabaseStatus(`Nao foi possivel salvar no Supabase: ${error.message}`, false);
+  }
+}
+
+async function loadStateFromSupabase() {
+  try {
+    const rows = await supabaseRequest('app_state?select=state,updated_at&id=eq.setechub_state&limit=1');
+    const remoteState = rows?.[0]?.state;
+    if (!remoteState) {
+      updateSupabaseStatus('Nenhum estado setechub_state encontrado no Supabase.', true);
+      return;
+    }
+    state = mergeState(remoteState);
+    refreshAll();
+    updateSupabaseStatus(`Estado carregado do Supabase. Atualizado em ${rows[0].updated_at || 'data nao informada'}.`, true);
+  } catch (error) {
+    updateSupabaseStatus(`Nao foi possivel carregar do Supabase: ${error.message}`, false);
+  }
+}

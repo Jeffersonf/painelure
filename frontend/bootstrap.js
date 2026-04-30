@@ -6,6 +6,12 @@ restoreUiContext();
 restorePageFromHash();
 refreshAll();
 showPage(currentPage || sessionStorage.getItem(PAGE_KEY) || 'dashboard');
+updateSupabaseStatus(
+  supabaseConfig().url && supabaseConfig().anonKey
+    ? 'Supabase configurado neste navegador.'
+    : 'Supabase nao configurado.',
+  !!(supabaseConfig().url && supabaseConfig().anonKey)
+);
 
 window.addEventListener('hashchange', () => {
   restorePageFromHash();

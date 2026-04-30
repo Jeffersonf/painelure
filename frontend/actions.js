@@ -174,6 +174,26 @@ function removeSector(id) {
   refreshAll();
 }
 
+function addSupervisorTestVisits() {
+  const today = new Date().toISOString().slice(0, 10);
+  supervisorStats().forEach(({ supervisor, assignedSchools }) => {
+    const alreadyVisited = new Set((state.supervisorVisits || [])
+      .filter((visit) => visit.supervisor === supervisor.name)
+      .map((visit) => visit.school));
+    const nextSchool = assignedSchools.find((school) => !alreadyVisited.has(school)) || assignedSchools[0];
+    if (!nextSchool) return;
+    state.supervisorVisits.unshift({
+      id: uid(),
+      supervisor: supervisor.name,
+      school: nextSchool,
+      date: today,
+      type: 'Rotina',
+      notes: 'Visita teste gerada para validar o BI.'
+    });
+  });
+  refreshAll();
+}
+
 function removeSchoolImport(id) {
   const target = state.schoolImports.find((item) => item.id === id);
   if (target) logSchoolEvent(target.school, 'import', `Importacao removida: ${target.label || target.filename || 'arquivo'}.`);
@@ -699,6 +719,19 @@ function setupEventListeners() {
     }
   });
 
+  document.getElementById('supervisorVisitForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const supervisor = document.getElementById('visitSupervisorSelect').value;
+    const school = document.getElementById('visitSchoolSelect').value;
+    const date = document.getElementById('visitDate').value || new Date().toISOString().slice(0, 10);
+    const type = document.getElementById('visitType').value;
+    const notes = document.getElementById('visitNotes').value.trim();
+    if (!supervisor || !school) return;
+    state.supervisorVisits.unshift({ id: uid(), supervisor, school, date, type, notes });
+    event.target.reset();
+    refreshAll();
+  });
+
   document.getElementById('loginForm').addEventListener('submit', (event) => {
     event.preventDefault();
     const name = document.getElementById('loginName').value.trim();
@@ -768,6 +801,18 @@ function setupEventListeners() {
   document.getElementById('saveServerBtn').addEventListener('click', saveStateToServer);
   document.getElementById('loadServerBtn').addEventListener('click', loadStateFromServer);
   document.getElementById('refreshSnapshotsBtn').addEventListener('click', loadServerSnapshots);
+  document.getElementById('saveSupabaseBtn')?.addEventListener('click', saveStateToSupabase);
+  document.getElementById('loadSupabaseBtn')?.addEventListener('click', loadStateFromSupabase);
+  document.getElementById('checkSupabaseBtn')?.addEventListener('click', checkSupabaseConnection);
+  document.getElementById('seedSupervisorVisitsBtn')?.addEventListener('click', addSupervisorTestVisits);
+  document.getElementById('supabaseConfigForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    saveSupabaseConfig({
+      url: document.getElementById('supabaseUrl').value.trim(),
+      anonKey: document.getElementById('supabaseAnonKey').value.trim()
+    });
+    updateSupabaseStatus('Configuracao Supabase salva neste navegador.', true);
+  });
   document.getElementById('copySchoolSummaryBtn').addEventListener('click', copySchoolSummary);
   document.getElementById('openSchoolMapsBtn').addEventListener('click', () => {
     const profile = currentSchoolProfile();
@@ -816,6 +861,14 @@ function setupEventListeners() {
     renderSchools();
     saveUiContext();
   });
+
+  document.getElementById('supervisorFilterSelect')?.addEventListener('change', (event) => {
+    currentSupervisorFilter = event.target.value;
+    renderSupervisors();
+    saveUiContext();
+  });
+
+  document.getElementById('visitSupervisorSelect')?.addEventListener('change', renderSupervisors);
 
   document.querySelectorAll('[data-directory-filter]').forEach((button) => {
     button.addEventListener('click', () => {
