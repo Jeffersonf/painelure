@@ -21,15 +21,22 @@ function logSchoolEvent(school, kind, text) {
   });
 }
 
+function requireEditAccess() {
+  if (canEditData()) return true;
+  alert('Seu perfil tem acesso de leitura. Edicao liberada apenas para SEINTEC, CTC e administrador.');
+  return false;
+}
+
 function exportJson() {
   downloadFile('setechub-backup.json', JSON.stringify(state, null, 2), 'application/json');
 }
 
 function exportSummary() {
+  const user = currentUser();
   const summary = [
     'SETECHUB | Resumo operacional',
-    `Responsavel: ${state.profile.name}`,
-    `Unidade: ${state.profile.unit}`,
+    `Responsavel: ${user?.name || state.profile.name}`,
+    `Perfil: ${ROLE_LABELS[user?.role] || state.profile.unit}`,
     '',
     `Tarefas totais: ${state.tasks.length}`,
     `Tarefas concluidas: ${state.tasks.filter((item) => item.done).length}`,
@@ -39,6 +46,16 @@ function exportSummary() {
     `Ponto: ${state.ponto.entrada || '--:--'} ate ${state.ponto.saida || '--:--'}`
   ].join('\n');
   downloadFile('setechub-resumo.txt', summary, 'text/plain');
+}
+
+function toggleUserActive(id) {
+  if (!canManageUsers()) return;
+  const user = state.users.find((item) => item.id === id);
+  if (!user || user.id === currentUser()?.id) return;
+  state.users = state.users.map((item) =>
+    item.id === id ? { ...item, active: item.active === false } : item
+  );
+  refreshAll();
 }
 
 function restoreState(file) {
@@ -72,11 +89,13 @@ function importLegacyState() {
 }
 
 function toggleTask(id) {
+  if (!requireEditAccess()) return;
   state.tasks = state.tasks.map((item) => item.id === id ? { ...item, done: !item.done } : item);
   refreshAll();
 }
 
 function removeTask(id) {
+  if (!requireEditAccess()) return;
   state.tasks = state.tasks.filter((item) => item.id !== id);
   refreshAll();
 }
@@ -87,6 +106,7 @@ function toggleChecklist(id) {
 }
 
 function advanceCall(id) {
+  if (!requireEditAccess()) return;
   const order = ['aberto', 'em_rota', 'resolvido'];
   state.calls = state.calls.map((item) => {
     if (item.id !== id) return item;
@@ -98,11 +118,13 @@ function advanceCall(id) {
 }
 
 function removeCall(id) {
+  if (!requireEditAccess()) return;
   state.calls = state.calls.filter((item) => item.id !== id);
   refreshAll();
 }
 
 function cycleSchool(id) {
+  if (!requireEditAccess()) return;
   const order = ['estavel', 'atencao', 'critico'];
   state.schools = state.schools.map((item) => {
     if (item.id !== id) return item;
@@ -114,6 +136,7 @@ function cycleSchool(id) {
 }
 
 function removeSchool(id) {
+  if (!requireEditAccess()) return;
   const target = state.schools.find((item) => item.id === id);
   if (target?.fixedName) {
     alert('Os nomes oficiais das escolas da URE Itapeva permanecem fixos na base inicial.');
@@ -129,6 +152,7 @@ function removeSchool(id) {
 }
 
 function createTaskFromSchool(id) {
+  if (!requireEditAccess()) return;
   const school = state.schools.find((item) => item.id === id);
   if (!school) return;
   state.tasks.unshift({
@@ -146,6 +170,7 @@ function createTaskFromSchool(id) {
 }
 
 function cycleAsset(id) {
+  if (!requireEditAccess()) return;
   const order = ['ok', 'manutencao', 'defeito'];
   state.assets = state.assets.map((item) => {
     if (item.id !== id) return item;
@@ -201,6 +226,10 @@ function selectSupervisor(name) {
 }
 
 function openSupervisorRecord(name) {
+  if (!canViewSupervisor(name)) {
+    showPage('supervisors');
+    return;
+  }
   currentSupervisorDetail = name;
   currentSupervisorFilter = normalizeKey(name);
   showPage('supervisor-record');
@@ -209,6 +238,7 @@ function openSupervisorRecord(name) {
 }
 
 function removeSchoolImport(id) {
+  if (!requireEditAccess()) return;
   const target = state.schoolImports.find((item) => item.id === id);
   if (target) logSchoolEvent(target.school, 'import', `Importacao removida: ${target.label || target.filename || 'arquivo'}.`);
   state.schoolImports = state.schoolImports.filter((item) => item.id !== id);
@@ -216,6 +246,7 @@ function removeSchoolImport(id) {
 }
 
 function approveSchoolImport(id) {
+  if (!requireEditAccess()) return;
   state.schoolImports = state.schoolImports.map((item) => {
     if (item.id !== id) return item;
     logSchoolEvent(item.school, 'review', `Importacao confirmada: ${item.label || item.filename || 'arquivo'}.`);
@@ -225,6 +256,7 @@ function approveSchoolImport(id) {
 }
 
 function rejectSchoolImport(id) {
+  if (!requireEditAccess()) return;
   const target = state.schoolImports.find((item) => item.id === id);
   if (!target) return;
   const key = normalizeKey(target.school);
@@ -245,6 +277,7 @@ function rejectSchoolImport(id) {
 }
 
 function cycleSchoolAsset(id) {
+  if (!requireEditAccess()) return;
   const order = ['ok', 'manutencao', 'defeito'];
   state.schoolAssets = state.schoolAssets.map((item) => {
     if (item.id !== id) return item;
@@ -254,11 +287,16 @@ function cycleSchoolAsset(id) {
 }
 
 function removeSchoolAsset(id) {
+  if (!requireEditAccess()) return;
   state.schoolAssets = state.schoolAssets.filter((item) => item.id !== id);
   refreshAll();
 }
 
 function showSchoolDetail(name) {
+  if (!canViewSchool(name)) {
+    showPage('schools');
+    return;
+  }
   currentSchoolDetail = name;
   currentInventorySchool = name;
   currentSchoolSearch = '';
@@ -274,6 +312,10 @@ function showSchoolDetail(name) {
 }
 
 function setInventorySchool(name) {
+  if (!canViewSchool(name)) {
+    showPage('schools');
+    return;
+  }
   currentInventorySchool = name;
   currentInventorySearch = '';
   showPage('assets');
@@ -478,6 +520,15 @@ async function extractImportPreview(file, type) {
 }
 
 function setupEventListeners() {
+  document.addEventListener('submit', (event) => {
+    if (event.target.closest('#setup')) return;
+    if (['profileForm', 'userForm', 'supabaseConfigForm'].includes(event.target.id)) return;
+    if (!canEditData()) {
+      event.preventDefault();
+      requireEditAccess();
+    }
+  }, true);
+
   document.getElementById('taskForm').addEventListener('submit', (event) => {
     event.preventDefault();
     const title = document.getElementById('taskTitle').value.trim();
@@ -652,10 +703,13 @@ function setupEventListeners() {
   document.getElementById('profileForm').addEventListener('submit', (event) => {
     event.preventDefault();
     const name = document.getElementById('profileName').value.trim();
-    const unit = document.getElementById('profileUnit').value.trim();
     const pin = document.getElementById('profilePin').value.trim();
-    if (!name || !unit || !pin) return;
-    state.profile = { name, unit, pin };
+    const user = currentUser();
+    if (!name || !pin || !user) return;
+    state.users = (state.users || []).map((item) =>
+      item.id === user.id ? { ...item, name, login: item.login || name, pin } : item
+    );
+    if (user.role === 'admin') state.profile = { ...state.profile, name, pin };
     refreshAll();
     alert('Perfil atualizado.');
   });
@@ -766,10 +820,19 @@ function setupEventListeners() {
     const name = document.getElementById('loginName').value.trim();
     const pin = document.getElementById('loginPin').value.trim();
     const error = document.getElementById('loginError');
-    if (name.toLowerCase() === state.profile.name.toLowerCase() && pin === state.profile.pin) {
+    const user = (state.users || []).find((item) =>
+      item.active !== false &&
+      normalizeKey(item.login || item.name) === normalizeKey(name) &&
+      String(item.pin || '') === pin
+    );
+    if (user) {
       sessionStorage.setItem(SESSION_KEY, 'ok');
+      sessionStorage.setItem(ACTIVE_USER_KEY, user.id);
       document.getElementById('setup').style.display = 'none';
       error.textContent = '';
+      currentPage = defaultPageForUser();
+      refreshAll();
+      showPage(currentPage);
       return;
     }
     error.textContent = 'Nome ou PIN invalido.';
@@ -780,6 +843,7 @@ function setupEventListeners() {
   document.getElementById('exportSummaryBtn').addEventListener('click', exportSummary);
   document.getElementById('logoutBtn').addEventListener('click', () => {
     sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(ACTIVE_USER_KEY);
     document.getElementById('setup').style.display = '';
   });
   document.getElementById('resetBtn').addEventListener('click', () => {
@@ -834,6 +898,31 @@ function setupEventListeners() {
   document.getElementById('loadSupabaseBtn')?.addEventListener('click', loadStateFromSupabase);
   document.getElementById('checkSupabaseBtn')?.addEventListener('click', checkSupabaseConnection);
   document.getElementById('seedSupervisorVisitsBtn')?.addEventListener('click', addSupervisorTestVisits);
+  document.getElementById('userForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!canManageUsers()) return;
+    const name = document.getElementById('userName').value.trim();
+    const login = document.getElementById('userLogin').value.trim() || name;
+    const pin = document.getElementById('userPin').value.trim() || '1234';
+    const role = document.getElementById('userRole').value;
+    const supervisorName = document.getElementById('userSupervisorName').value;
+    if (!name || !login) return;
+    const existing = (state.users || []).find((item) => normalizeKey(item.login || item.name) === normalizeKey(login));
+    const nextUser = {
+      id: existing?.id || `user-${uid()}`,
+      name,
+      login,
+      pin,
+      role,
+      supervisorName: role === 'supervisor' ? supervisorName || name : '',
+      active: true
+    };
+    state.users = existing
+      ? state.users.map((item) => item.id === existing.id ? nextUser : item)
+      : [nextUser, ...(state.users || [])];
+    event.target.reset();
+    refreshAll();
+  });
   document.getElementById('supabaseConfigForm')?.addEventListener('submit', (event) => {
     event.preventDefault();
     saveSupabaseConfig({

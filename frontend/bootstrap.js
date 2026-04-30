@@ -19,6 +19,10 @@ window.addEventListener('hashchange', () => {
 });
 
 if (sessionStorage.getItem(SESSION_KEY) === 'ok') {
+  if (!sessionStorage.getItem(ACTIVE_USER_KEY)) {
+    const fallbackUser = (state.users || []).find((item) => item.role === 'admin') || state.users?.[0];
+    if (fallbackUser) sessionStorage.setItem(ACTIVE_USER_KEY, fallbackUser.id);
+  }
   document.getElementById('setup').style.display = 'none';
 }
 

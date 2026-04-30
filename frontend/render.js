@@ -66,17 +66,18 @@ function renderDashboardAccess() {
   const linksNode = document.getElementById('dashboardQuickLinks');
   const drilldownNode = document.getElementById('dashboardDrilldownGrid');
   const callCount = state.calls.filter((item) => item.status !== 'resolvido').length;
-  const schoolAlertCount = state.schools.filter((item) => item.status !== 'estavel').length;
+  const schools = visibleSchools();
+  const schoolAlertCount = schools.filter((item) => item.status !== 'estavel').length;
   const importCount = state.schoolImports.length;
   const inventoryAlertCount = state.schoolAssets.filter((item) => item.status !== 'ok').length;
-  const criticalSchools = state.schools.filter((item) => item.status === 'critico').length;
-  const noProfileSchools = state.schools.filter((item) => schoolProfileCompletion(item.name) < 35).length;
-  const noNetworkSchools = state.schools.filter((item) => !schoolNetworkRecord(item.name)).length;
+  const criticalSchools = schools.filter((item) => item.status === 'critico').length;
+  const noProfileSchools = schools.filter((item) => schoolProfileCompletion(item.name) < 35).length;
+  const noNetworkSchools = schools.filter((item) => !schoolNetworkRecord(item.name)).length;
   const unresolvedCalls = state.calls.filter((item) => item.status === 'aberto').length;
   const routeCalls = state.calls.filter((item) => item.status === 'em_rota').length;
   const recentImports = recentSchoolImports(8).length;
   const categories = [
-    { title: 'Escolas', meta: `${state.schools.length} bases | ${schoolAlertCount} em atencao`, action: `showPage('schools')`, tone: 'lime', priority: 'primary' },
+    { title: 'Escolas', meta: `${schools.length} bases | ${schoolAlertCount} em atencao`, action: `showPage('schools')`, tone: 'lime', priority: 'primary' },
     { title: 'Inventario', meta: `${state.schoolAssets.length} linhas | ${inventoryAlertCount} alertas`, action: `showPage('assets')`, tone: 'teal', priority: 'primary' },
     { title: 'Chamados', meta: `${callCount} ativos`, action: `showPage('calls')`, tone: 'red', priority: 'primary' },
     { title: 'Importacoes', meta: `${importCount} registros`, action: `showPage('schools')`, tone: 'blue', priority: 'secondary' },
@@ -210,7 +211,7 @@ function renderPendingQueue() {
 }
 
 function renderSchoolCommandCenter() {
-  const filtered = sortSchoolsByCurrentView(state.schools.slice());
+  const filtered = sortSchoolsByCurrentView(visibleSchools());
   const focusSchool = schoolByName(currentSchoolDetail) || filtered[0] || null;
   const coverage = schoolCoverageSummary();
   const focusNode = document.getElementById('schoolFocusPanel');
@@ -354,7 +355,7 @@ function renderInventoryWorkspace() {
   const issueNode = document.getElementById('inventoryIssuesList');
   if (schoolSelect) {
     schoolSelect.innerHTML = [`<option value="todas">Todas as escolas</option>`]
-      .concat(state.schools.slice().sort((a, b) => a.name.localeCompare(b.name)).map((school) => `<option value="${esc(school.name)}">${esc(school.name)}</option>`))
+      .concat(visibleSchools().slice().sort((a, b) => a.name.localeCompare(b.name)).map((school) => `<option value="${esc(school.name)}">${esc(school.name)}</option>`))
       .join('');
     schoolSelect.value = currentInventorySchool;
   }
@@ -507,7 +508,7 @@ function renderInventoryWorkspace() {
 function renderSetupStats() {
   document.getElementById('setupTaskCount').textContent = `${state.tasks.filter((item) => !item.done).length} tarefas`;
   document.getElementById('setupCallCount').textContent = `${state.calls.filter((item) => item.status !== 'resolvido').length} em aberto`;
-  document.getElementById('setupSchoolCount').textContent = `${state.schools.filter((item) => item.status !== 'estavel').length} escolas`;
+  document.getElementById('setupSchoolCount').textContent = `${visibleSchools().filter((item) => item.status !== 'estavel').length} escolas`;
   document.getElementById('setupChecklistCount').textContent = `${state.checklist.length} itens`;
   document.getElementById('setupAssetCount').textContent = `${state.assets.filter((item) => item.status !== 'ok').length + state.schoolAssets.filter((item) => item.status !== 'ok').length} em observacao`;
   document.getElementById('setupHours').textContent = bankHours();
@@ -516,7 +517,7 @@ function renderSetupStats() {
 function renderMetrics() {
   document.getElementById('metricPending').textContent = state.tasks.filter((item) => !item.done).length;
   document.getElementById('metricCalls').textContent = state.calls.filter((item) => item.status !== 'resolvido').length;
-  document.getElementById('metricSchools').textContent = state.schools.filter((item) => item.status !== 'estavel').length;
+  document.getElementById('metricSchools').textContent = visibleSchools().filter((item) => item.status !== 'estavel').length;
   document.getElementById('metricHours').textContent = bankHours();
 }
 
@@ -577,7 +578,7 @@ function renderPonto() {
 function renderRoutes() {
   const list = document.getElementById('routeList');
   const order = { critico: 0, atencao: 1, estavel: 2 };
-  const items = state.schools
+  const items = visibleSchools()
     .filter((item) => item.status !== 'estavel')
     .slice()
     .sort((a, b) => (order[a.status] ?? 99) - (order[b.status] ?? 99) || a.name.localeCompare(b.name));
@@ -670,12 +671,12 @@ function renderSchoolImports() {
   const select = document.getElementById('importSchoolSelect');
   if (select) {
     const selected = currentImportSchoolContext || currentSchoolDetail || select.value;
-    select.innerHTML = state.schools
+    select.innerHTML = visibleSchools()
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((school) => `<option value="${esc(school.name)}">${esc(school.name)}</option>`)
       .join('');
-    if (selected && state.schools.some((school) => school.name === selected)) {
+    if (selected && visibleSchools().some((school) => school.name === selected)) {
       select.value = selected;
     }
   }
@@ -717,7 +718,7 @@ function renderSchoolImports() {
 
 function renderSchoolDetail() {
   const select = document.getElementById('schoolDetailSelect');
-  const sortedSchools = state.schools.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const sortedSchools = visibleSchools().slice().sort((a, b) => a.name.localeCompare(b.name));
   const schoolNames = sortedSchools.map((item) => item.name);
   if (!currentSchoolDetail || !schoolNames.includes(currentSchoolDetail)) {
     currentSchoolDetail = schoolNames[0] || '';
@@ -727,7 +728,11 @@ function renderSchoolDetail() {
     select.value = currentSchoolDetail;
   }
 
-  const school = state.schools.find((item) => item.name === currentSchoolDetail);
+  const school = visibleSchools().find((item) => item.name === currentSchoolDetail);
+  if (!school) {
+    showPage('schools');
+    return;
+  }
   const profile = currentSchoolProfile();
   const imports = state.schoolImports.filter((item) => item.school === currentSchoolDetail);
   const approvedImports = imports.filter((item) => item.reviewStatus !== 'pending');
@@ -1056,7 +1061,7 @@ function renderSupervisors() {
   if (visitSchoolSelect) {
     const selectedSupervisor = visitSupervisorSelect?.value || stats[0]?.supervisor.name || '';
     const selected = stats.find((item) => item.supervisor.name === selectedSupervisor) || stats[0];
-    visitSchoolSelect.innerHTML = (selected?.assignedSchools || state.schools.map((school) => school.name))
+    visitSchoolSelect.innerHTML = (selected?.assignedSchools || visibleSchools().map((school) => school.name))
       .map((school) => `<option value="${esc(school)}">${esc(school)}</option>`)
       .join('');
   }
@@ -1678,7 +1683,7 @@ function renderSchools() {
   `).join('') : '<div class="sync-empty">Nenhuma escola encontrada neste filtro.</div>';
   const options = document.getElementById('officialSchoolOptions');
   if (options) {
-    options.innerHTML = state.schools
+    options.innerHTML = visibleSchools()
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((school) => `<option value="${esc(school.name)}"></option>`)
@@ -1714,7 +1719,7 @@ function renderAssets() {
   const bulkSchoolSelect = document.getElementById('schoolAssetBulkSchool');
   if (schoolSelect) {
     const selected = schoolSelect.value;
-    schoolSelect.innerHTML = state.schools
+    schoolSelect.innerHTML = visibleSchools()
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((school) => `<option value="${esc(school.name)}">${esc(school.name)}</option>`)
@@ -1723,7 +1728,7 @@ function renderAssets() {
   }
   if (bulkSchoolSelect) {
     const selected = bulkSchoolSelect.value;
-    bulkSchoolSelect.innerHTML = state.schools
+    bulkSchoolSelect.innerHTML = visibleSchools()
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((school) => `<option value="${esc(school.name)}">${esc(school.name)}</option>`)
@@ -1908,7 +1913,7 @@ function renderReports() {
   const total = state.tasks.length || 1;
   document.getElementById('reportTasks').textContent = state.tasks.length;
   document.getElementById('reportCalls').textContent = state.calls.filter((item) => item.status !== 'resolvido').length;
-  document.getElementById('reportCriticalSchools').textContent = state.schools.filter((item) => item.status !== 'estavel').length;
+  document.getElementById('reportCriticalSchools').textContent = visibleSchools().filter((item) => item.status !== 'estavel').length;
   document.getElementById('reportAssets').textContent = state.assets.filter((item) => item.status !== 'ok').length + state.schoolAssets.filter((item) => item.status !== 'ok').length;
   document.getElementById('taskProgressBar').style.width = `${Math.round((done / total) * 100)}%`;
   document.getElementById('reportSummaryPreview').textContent = buildSummaryPreview();
@@ -1966,6 +1971,31 @@ function renderDiagnostics() {
       </div>
     `).join('') : '<div class="sync-empty">Nenhum snapshot salvo no servidor local.</div>';
   }
+}
+
+function renderUsers() {
+  const list = document.getElementById('userList');
+  if (!list) return;
+  const supervisorSelect = document.getElementById('userSupervisorName');
+  if (supervisorSelect) {
+    supervisorSelect.innerHTML = '<option value="">Sem vinculo</option>' + (state.supervisors || [])
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((item) => `<option value="${esc(item.name)}">${esc(item.name)}</option>`)
+      .join('');
+  }
+  list.innerHTML = (state.users || []).map((user) => `
+    <div class="admin-user-row">
+      <div class="admin-user-main">
+        <strong>${esc(user.name)}</strong>
+        <div class="sync-meta">${esc(user.login || user.name)} | ${esc(ROLE_LABELS[user.role] || badgeText(user.role))}${user.supervisorName ? ` | ${esc(user.supervisorName)}` : ''}</div>
+      </div>
+      <div class="admin-user-actions">
+        <span class="diag-pill ${user.active === false ? 'pill-warn' : 'pill-ok'}">${user.active === false ? 'Inativo' : 'Ativo'}</span>
+        <button class="btn btn-g btn-sm" type="button" onclick="toggleUserActive('${esc(user.id)}')">${user.active === false ? 'Ativar' : 'Bloquear'}</button>
+      </div>
+    </div>
+  `).join('') || '<div class="sync-empty">Nenhum usuario cadastrado.</div>';
 }
 
 function renderVisitHistory() {

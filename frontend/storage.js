@@ -168,6 +168,53 @@ function defaultSupervisorVisits(supervisors) {
   );
 }
 
+function defaultUsers(supervisors) {
+  const supervisorUsers = supervisors.map((supervisor, index) => ({
+    id: `user-supervisor-${index + 1}`,
+    name: supervisor.name,
+    login: supervisor.name,
+    pin: '1234',
+    role: 'supervisor',
+    supervisorName: supervisor.name,
+    active: true
+  }));
+  return [
+    {
+      id: 'user-admin-jefferson',
+      name: 'Jefferson',
+      login: 'Jefferson',
+      pin: '1234',
+      role: 'admin',
+      active: true
+    },
+    {
+      id: 'user-dirigente',
+      name: 'Dirigente',
+      login: 'Dirigente',
+      pin: '1234',
+      role: 'dirigente',
+      active: true
+    },
+    {
+      id: 'user-seintec',
+      name: 'SEINTEC',
+      login: 'SEINTEC',
+      pin: '1234',
+      role: 'seintec',
+      active: true
+    },
+    {
+      id: 'user-ctc',
+      name: 'CTC',
+      login: 'CTC',
+      pin: '1234',
+      role: 'ctc',
+      active: true
+    },
+    ...supervisorUsers
+  ];
+}
+
 function loadSupabaseConfig() {
   try {
     return JSON.parse(localStorage.getItem(SUPABASE_CONFIG_KEY) || '{}');
@@ -191,6 +238,7 @@ function createDefaults() {
       unit: 'URE Itapeva',
       pin: '1234'
     },
+    users: defaultUsers(supervisors),
     officialContacts: {
       office: 'Unidade Regional de Ensino de Itapeva - URE | Rua Torquato Raimundo, 96 - Jardim Ferrari - Itapeva/SP | Tel. (15) 3526-6200 | deitv@educacao.sp.gov.br',
       officeName: 'Unidade Regional de Ensino de Itapeva - URE',
@@ -396,6 +444,11 @@ function mergeState(saved) {
     stateVersion: Math.max(STATE_VERSION, savedVersion),
     lastUpdatedAt,
     profile: { ...base.profile, ...(repaired.profile || {}) },
+    users: mergeUniqueBy(
+      base.users,
+      Array.isArray(repaired.users) ? repaired.users : [],
+      (item) => normalizeKey(item.id || item.login || item.name)
+    ).map((item) => ({ ...item, active: item.active !== false })),
     officialContacts: { ...base.officialContacts, ...(repaired.officialContacts || {}) },
     municipalities: mergeUniqueBy(base.municipalities, savedMunicipalities, (item) => normalizeKey(item.name)),
     sectors: mergeUniqueBy(base.sectors, savedSectors, (item) => normalizeKey(item.code || item.name)),

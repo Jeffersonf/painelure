@@ -30,6 +30,15 @@ let searchTimer = null;
 
 const PAGE_KEY = 'setechub_page';
 const CONTEXT_KEY = 'setechub_context';
+const ACTIVE_USER_KEY = 'setechub_active_user';
+
+const ROLE_LABELS = {
+  admin: 'Administrador',
+  dirigente: 'Dirigente',
+  seintec: 'SEINTEC',
+  ctc: 'CTC',
+  supervisor: 'Supervisor'
+};
 
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -133,6 +142,9 @@ function timelineItems() {
 }
 
 function showPage(page) {
+  if (!canAccessPage(page)) {
+    page = defaultPageForUser();
+  }
   currentPage = page;
   sessionStorage.setItem(PAGE_KEY, page);
   document.querySelectorAll('.page').forEach((node) => node.classList.toggle('active', node.id === `page-${page}`));
@@ -149,17 +161,140 @@ function showPage(page) {
     window.location.hash = hash;
   }
   saveUiContext();
+  applyAccessControl();
+}
+
+function currentUser() {
+  const activeId = sessionStorage.getItem(ACTIVE_USER_KEY);
+  const users = state.users || [];
+  return users.find((item) => item.id === activeId && item.active !== false) ||
+    users.find((item) => item.role === 'admin' && item.active !== false) ||
+    null;
+}
+
+function currentUserRole() {
+  return currentUser()?.role || 'admin';
+}
+
+function isSupervisorUser() {
+  return currentUserRole() === 'supervisor';
+}
+
+function canEditData() {
+  return ['admin', 'seintec', 'ctc'].includes(currentUserRole());
+}
+
+function canManageUsers() {
+  return currentUserRole() === 'admin';
+}
+
+function assignedSchoolsForCurrentUser() {
+  const user = currentUser();
+  if (!user || user.role !== 'supervisor') return state.schools.map((item) => item.name);
+  const supervisor = (state.supervisors || []).find((item) =>
+    normalizeKey(item.name) === normalizeKey(user.supervisorName || user.name || user.login)
+  );
+  return supervisor?.schools || [];
+}
+
+function visibleSchools() {
+  if (!isSupervisorUser()) return state.schools || [];
+  const allowed = new Set(assignedSchoolsForCurrentUser());
+  return (state.schools || []).filter((school) => allowed.has(school.name));
+}
+
+function visibleSupervisors() {
+  if (!isSupervisorUser()) return state.supervisors || [];
+  const user = currentUser();
+  return (state.supervisors || []).filter((supervisor) =>
+    normalizeKey(supervisor.name) === normalizeKey(user?.supervisorName || user?.name || user?.login)
+  );
+}
+
+function canViewSchool(name) {
+  if (!isSupervisorUser()) return true;
+  return assignedSchoolsForCurrentUser().includes(name);
+}
+
+function canViewSupervisor(name) {
+  if (!isSupervisorUser()) return true;
+  const user = currentUser();
+  return normalizeKey(name) === normalizeKey(user?.supervisorName || user?.name || user?.login);
+}
+
+function defaultPageForUser() {
+  return isSupervisorUser() ? 'schools' : 'dashboard';
+}
+
+function canAccessPage(page) {
+  if (!isSupervisorUser()) return true;
+  return ['schools', 'school-record', 'supervisors', 'supervisor-record', 'settings'].includes(page);
+}
+
+function applyAccessControl() {
+  const role = currentUserRole();
+  document.body.dataset.role = role;
+  document.body.classList.toggle('is-read-only', !canEditData());
+  document.querySelectorAll('.nav-item, .fn-item').forEach((node) => {
+    node.hidden = !canAccessPage(node.dataset.page);
+  });
+  document.querySelectorAll('.sidebar-icon-btn, .sidebar-mini-btn').forEach((node) => {
+    const target = node.getAttribute('onclick') || '';
+    node.hidden = isSupervisorUser() && !/schools|supervisors|settings/.test(target);
+  });
+  document.querySelectorAll('[data-edit-scope]').forEach((node) => {
+    node.hidden = !canEditData();
+  });
+  document.querySelectorAll('[data-admin-only]').forEach((node) => {
+    node.hidden = !canManageUsers();
+  });
+  [
+    'taskForm',
+    'callForm',
+    'schoolForm',
+    'schoolProfileForm',
+    'schoolImportForm',
+    'supervisorVisitForm',
+    'supervisorRecordVisitFormElement',
+    'assetForm',
+    'schoolAssetForm',
+    'schoolAssetBulkForm',
+    'noteForm',
+    'redeAutomationForm',
+    'officialForm',
+    'sectorForm'
+  ].forEach((id) => {
+    const node = document.getElementById(id);
+    if (node) node.hidden = !canEditData();
+  });
+  [
+    'backupBtn',
+    'restoreInput',
+    'resetBtn',
+    'saveServerBtn',
+    'loadServerBtn',
+    'saveSupabaseBtn',
+    'loadSupabaseBtn',
+    'seedSupervisorVisitsBtn',
+    'importLegacyBtn'
+  ].forEach((id) => {
+    const node = document.getElementById(id);
+    if (node) node.hidden = !canEditData();
+  });
 }
 
 function updateIdentity() {
-  document.getElementById('uName').textContent = state.profile.name;
-  document.getElementById('uRole').textContent = state.profile.unit;
-  document.getElementById('uAvatar').textContent = state.profile.name.slice(0, 2).toUpperCase();
-  document.getElementById('profileName').value = state.profile.name;
-  document.getElementById('profileUnit').value = state.profile.unit;
-  document.getElementById('profilePin').value = state.profile.pin;
-  document.getElementById('loginName').value = state.profile.name;
+  const user = currentUser() || state.users?.[0] || { name: state.profile.name, role: 'admin', pin: state.profile.pin };
+  const roleLabel = ROLE_LABELS[user.role] || badgeText(user.role || 'operacao');
+  document.getElementById('uName').textContent = user.name;
+  document.getElementById('uRole').textContent = roleLabel;
+  document.getElementById('uAvatar').textContent = user.name.slice(0, 2).toUpperCase();
+  document.getElementById('profileName').value = user.name;
+  document.getElementById('profileUnit').value = roleLabel;
+  document.getElementById('profilePin').value = user.pin || '';
+  document.getElementById('loginName').value = user.login || user.name;
   document.getElementById('todayLabel').textContent = todayLabel();
+  applyAccessControl();
 }
 
 function filteredTasks() {
@@ -179,7 +314,7 @@ function filteredCalls() {
 }
 
 function filteredSchools() {
-  return state.schools.filter((item) => {
+  return visibleSchools().filter((item) => {
     const zoneMatch = currentSchoolZoneFilter === 'todas' || item.zone === currentSchoolZoneFilter;
     if (!zoneMatch) return false;
     if (currentSchoolSearch) {
@@ -350,7 +485,7 @@ function schoolEventHistory(schoolName, limit = 8) {
 
 function pendingQueueItems(limit = 20) {
   const items = [];
-  state.schools.forEach((school) => {
+  visibleSchools().forEach((school) => {
     const missingFields = schoolMissingProfileFields(school.name);
     const pendingImports = state.schoolImports.filter((item) => item.school === school.name && item.reviewStatus === 'pending').length;
     const network = schoolNetworkRecord(school.name);
@@ -478,7 +613,7 @@ function inventorySchoolRows() {
 
 function inventoryFocusSchool() {
   if (currentInventorySchool !== 'todas') return currentInventorySchool;
-  return inventorySchoolRows()[0]?.school || state.schools[0]?.name || '';
+  return inventorySchoolRows()[0]?.school || visibleSchools()[0]?.name || '';
 }
 
 function inventoryQualitySummary() {
@@ -503,9 +638,10 @@ function inventoryIssuesForSchool(schoolName) {
 }
 
 function filteredSchoolImports() {
+  const allowedSchools = new Set(visibleSchools().map((item) => item.name));
   const source = currentImportSchoolContext
-    ? state.schoolImports.filter((item) => item.school === currentImportSchoolContext)
-    : state.schoolImports;
+    ? state.schoolImports.filter((item) => item.school === currentImportSchoolContext && allowedSchools.has(item.school))
+    : state.schoolImports.filter((item) => allowedSchools.has(item.school));
   if (currentImportFilter === 'todos') return source;
   if (currentImportFilter === 'documentos') return source.filter((item) => /doc|pdf|text/i.test(item.type || item.filename || ''));
   if (currentImportFilter === 'planilhas') return source.filter((item) => /excel|csv|xlsx|xls|tsv/i.test(item.type || item.filename || ''));
@@ -578,8 +714,8 @@ function restorePageFromHash() {
   if (!hash) return;
   if (hash.startsWith('school/')) {
     const slug = hash.slice('school/'.length);
-    const school = state.schools.find((item) => schoolSlug(item.name) === slug);
-    if (school) {
+    const school = visibleSchools().find((item) => schoolSlug(item.name) === slug);
+    if (school && canViewSchool(school.name)) {
       currentSchoolDetail = school.name;
       currentPage = 'school-record';
     }
@@ -587,8 +723,8 @@ function restorePageFromHash() {
   }
   if (hash.startsWith('supervisor/')) {
     const slug = hash.slice('supervisor/'.length);
-    const supervisor = (state.supervisors || []).find((item) => supervisorSlug(item.name) === slug);
-    if (supervisor) {
+    const supervisor = visibleSupervisors().find((item) => supervisorSlug(item.name) === slug);
+    if (supervisor && canViewSupervisor(supervisor.name)) {
       currentSupervisorDetail = supervisor.name;
       currentSupervisorFilter = normalizeKey(supervisor.name);
       currentPage = 'supervisor-record';
@@ -599,7 +735,7 @@ function restorePageFromHash() {
 }
 
 function currentSchoolProfile() {
-  const school = currentSchoolDetail || state.schools[0]?.name || '';
+  const school = currentSchoolDetail || visibleSchools()[0]?.name || '';
   return state.schoolProfiles.find((item) => item.school === school) || null;
 }
 
@@ -739,8 +875,9 @@ function sortSchoolsByCurrentView(schools) {
 }
 
 function filteredSupervisors() {
-  if (currentSupervisorFilter === 'todos') return state.supervisors || [];
-  return (state.supervisors || []).filter((item) => normalizeKey(item.name) === currentSupervisorFilter);
+  const source = visibleSupervisors();
+  if (currentSupervisorFilter === 'todos') return source;
+  return source.filter((item) => normalizeKey(item.name) === currentSupervisorFilter);
 }
 
 function supervisorVisitRows() {
@@ -752,8 +889,8 @@ function supervisorVisitRows() {
 
 function supervisorStats() {
   const visits = state.supervisorVisits || [];
-  const schools = state.schools || [];
-  return (state.supervisors || []).map((supervisor) => {
+  const schools = visibleSchools();
+  return visibleSupervisors().map((supervisor) => {
     const assignedSchools = supervisor.schools || [];
     const supervisorVisits = visits.filter((visit) => visit.supervisor === supervisor.name);
     const visitedSchools = new Set(supervisorVisits.map((visit) => visit.school));
@@ -774,10 +911,11 @@ function supervisorStats() {
 }
 
 function operationalCoverage() {
-  const totalSchools = state.schools.length || 1;
-  const schoolsWithImports = state.schools.filter((item) => schoolImportCount(item.name) > 0).length;
-  const schoolsWithAssets = state.schools.filter((item) => schoolAssetLines(item.name).length > 0).length;
-  const schoolsWithProfile = state.schools.filter((item) => schoolProfileCompletion(item.name) >= 35).length;
+  const schools = visibleSchools();
+  const totalSchools = schools.length || 1;
+  const schoolsWithImports = schools.filter((item) => schoolImportCount(item.name) > 0).length;
+  const schoolsWithAssets = schools.filter((item) => schoolAssetLines(item.name).length > 0).length;
+  const schoolsWithProfile = schools.filter((item) => schoolProfileCompletion(item.name) >= 35).length;
   const activeAlerts = state.schoolAssets.filter((item) => item.status !== 'ok').length + state.assets.filter((item) => item.status !== 'ok').length;
   return {
     totalSchools,
@@ -838,7 +976,7 @@ function dashboardHealth() {
 }
 
 function topSchoolSignals(limit = 5) {
-  return state.schools
+  return visibleSchools()
     .map((school) => ({ school, signal: schoolOperationalSnapshot(school) }))
     .sort((a, b) => b.signal.riskScore - a.signal.riskScore || a.school.name.localeCompare(b.school.name))
     .slice(0, limit);
@@ -848,7 +986,7 @@ function operationalSuggestions() {
   const suggestions = [];
   const coverage = operationalCoverage();
   const health = dashboardHealth();
-  const weakestProfile = state.schools
+  const weakestProfile = visibleSchools()
     .map((school) => ({ school, completion: schoolProfileCompletion(school.name) }))
     .filter((item) => item.completion < 35)
     .slice(0, 3);
@@ -873,7 +1011,7 @@ function operationalSuggestions() {
 function buildSummaryPreview() {
   const done = state.tasks.filter((item) => item.done).length;
   const openCalls = state.calls.filter((item) => item.status !== 'resolvido').length;
-  const criticalSchools = state.schools.filter((item) => item.status !== 'estavel').length;
+  const criticalSchools = visibleSchools().filter((item) => item.status !== 'estavel').length;
   const alertAssets = state.assets.filter((item) => item.status !== 'ok').length + state.schoolAssets.filter((item) => item.status !== 'ok').length;
   const focus = nextFocusTask();
   return [
@@ -929,7 +1067,7 @@ function runGlobalSearch(query) {
     return;
   }
 
-  const exactSchool = state.schools.find((item) =>
+  const exactSchool = visibleSchools().find((item) =>
     normalizeKey(item.name) === term || normalizeKey(item.cie || '') === term
   );
   if (exactSchool) {
@@ -940,7 +1078,7 @@ function runGlobalSearch(query) {
     return;
   }
 
-  const schoolMatches = state.schools.filter((item) =>
+  const schoolMatches = visibleSchools().filter((item) =>
     normalizeKey(`${item.name} ${item.cie || ''} ${item.zone} ${item.notes || ''}`).includes(term)
   );
   const inventoryMatches = aggregateInventoryItems(state.schoolAssets).filter((item) =>
@@ -1087,6 +1225,7 @@ function refreshAll() {
   renderAssets();
   renderReports();
   renderDiagnostics();
+  renderUsers();
   applyPrivacy();
   const searchInput = document.getElementById('sidebarSearch');
   if (searchInput && searchInput.value !== currentSearchQuery) {

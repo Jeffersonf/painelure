@@ -102,7 +102,7 @@
           <div id="loginError" class="serr"></div>
           <button class="sbtn" type="submit">Entrar no painel</button>
         </form>
-        <div class="setup-auth-note">Primeiro acesso padrao: Jefferson / 1234.</div>
+        <div class="setup-auth-note">Acesso inicial: Jefferson / 1234. Supervisores tambem usam o proprio nome / 1234 ate a troca do PIN.</div>
       </div>
     </aside>
   </div>
@@ -829,6 +829,27 @@
         <div class="pt">Conta, Backup e Publicacao</div>
         <div class="ps">Sua identidade local, exportacao e referencias oficiais.</div>
       </div>
+    </div>
+    <div class="box" data-admin-only>
+      <div class="bh">
+        <div><div class="ct">Usuarios e permissoes</div><div class="cs">Crie acessos locais por perfil. No Supabase, estes perfis viram regras de acesso.</div></div>
+      </div>
+      <form id="userForm" class="admin-user-form">
+        <input class="fi" id="userName" placeholder="Nome exibido">
+        <input class="fi" id="userLogin" placeholder="Login">
+        <input class="fi" id="userPin" placeholder="PIN">
+        <select class="fi" id="userRole">
+          <option value="supervisor">Supervisor</option>
+          <option value="dirigente">Dirigente</option>
+          <option value="seintec">SEINTEC</option>
+          <option value="ctc">CTC</option>
+          <option value="admin">Administrador</option>
+        </select>
+        <select class="fi" id="userSupervisorName"></select>
+        <button class="btn btn-p" type="submit">Criar usuario</button>
+      </form>
+      <div class="admin-panel-note">Supervisor enxerga somente Supervisores e Escolas, limitado ao proprio nome e as escolas vinculadas. Dirigente visualiza tudo. SEINTEC, CTC e administrador podem editar dados.</div>
+      <div id="userList" class="stack-list"></div>
     </div>
     <div class="setechub-two-col">
       <div class="box">
