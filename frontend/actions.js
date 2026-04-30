@@ -66,25 +66,29 @@ function findLoginUser(name, pin) {
     String(item.pin || '') === pinText
   );
   const exact = users.find((item) =>
-    [item.login, item.name, item.supervisorName]
-      .filter(Boolean)
-      .some((value) => normalizeKey(value) === loginKey)
+    loginCandidates(item).some((value) => normalizeKey(value) === loginKey)
   );
   if (exact) return exact;
   const firstNameMatches = users.filter((item) =>
-    [item.login, item.name, item.supervisorName]
-      .filter(Boolean)
+    loginCandidates(item)
       .some((value) => normalizeKey(value).split(/\s+/)[0] === loginKey)
   );
   return firstNameMatches.length === 1 ? firstNameMatches[0] : null;
+}
+
+function loginCandidates(user) {
+  const values = [user.login, user.name, user.supervisorName];
+  if (user.role && user.role !== 'supervisor') {
+    values.push(user.role, ROLE_LABELS[user.role]);
+  }
+  return values.filter(Boolean);
 }
 
 function loginNameExists(name) {
   const loginKey = normalizeKey(name);
   return (state.users || []).some((item) =>
     item.active !== false &&
-    [item.login, item.name, item.supervisorName]
-      .filter(Boolean)
+    loginCandidates(item)
       .some((value) => {
         const normalized = normalizeKey(value);
         return normalized === loginKey || normalized.split(/\s+/)[0] === loginKey;
@@ -105,6 +109,22 @@ function logoutToLogin() {
     error.classList.remove('show');
   }
   setLoginVisible(true);
+}
+
+function closeAccountMenu() {
+  const menu = document.getElementById('accountMenu');
+  const button = document.getElementById('accountMenuBtn');
+  if (menu) menu.classList.remove('open');
+  if (button) button.setAttribute('aria-expanded', 'false');
+}
+
+function toggleAccountMenu() {
+  const menu = document.getElementById('accountMenu');
+  const button = document.getElementById('accountMenuBtn');
+  if (!menu || !button) return;
+  const nextOpen = !menu.classList.contains('open');
+  menu.classList.toggle('open', nextOpen);
+  button.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
 }
 
 function restoreState(file) {
@@ -904,6 +924,20 @@ function setupEventListeners() {
   });
   document.querySelectorAll('.logout-action').forEach((button) => {
     button.addEventListener('click', logoutToLogin);
+  });
+  document.getElementById('accountMenuBtn')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleAccountMenu();
+  });
+  document.getElementById('accountOpenBtn')?.addEventListener('click', () => {
+    closeAccountMenu();
+    showPage('settings');
+  });
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.acct-area')) closeAccountMenu();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAccountMenu();
   });
   document.getElementById('resetBtn').addEventListener('click', () => {
     state = createDefaults();

@@ -630,23 +630,12 @@ body::before {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 4px; border-radius: 14px;
   cursor: pointer; transition: background .15s; width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--tx);
+  text-align: left;
 }
 .acct-btn:hover { background: var(--sf2); }
-.acct-logout {
-  width: 100%;
-  min-height: 34px;
-  margin-top: 8px;
-  border: 1px solid rgba(245,112,90,.25);
-  border-radius: 12px;
-  background: rgba(245,112,90,.08);
-  color: var(--dan);
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.acct-logout:hover {
-  background: rgba(245,112,90,.13);
-}
 .uavatar {
   width: 34px; height: 34px; border-radius: 50%;
   background: linear-gradient(135deg, var(--ac), var(--ac2));
@@ -669,8 +658,13 @@ body::before {
 .acct-pop.open { display: block; }
 .pop-item {
   display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
   padding: 9px 12px; border-radius: 10px; cursor: pointer;
   font-size: 12px; color: var(--tx); transition: background .1s;
+  font-family: var(--font-ui);
+  text-align: left;
 }
 .pop-item:hover { background: var(--sf2); }
 .pop-item.danger { color: var(--dan); }

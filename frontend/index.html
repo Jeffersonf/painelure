@@ -161,14 +161,18 @@
     <div class="conn-wrap"></div>
     <div class="made-by">base visual inspirada no <span>finanza</span></div>
     <div class="acct-area">
-      <div class="acct-btn" onclick="showPage('settings')">
+      <button class="acct-btn" id="accountMenuBtn" type="button" aria-expanded="false" aria-controls="accountMenu">
         <div class="uavatar" id="uAvatar">JE</div>
         <div style="flex:1;min-width:0;">
           <div class="uname" id="uName">Jefferson</div>
           <div class="urole" id="uRole">Operacao SETEC</div>
         </div>
+      </button>
+      <div class="acct-pop" id="accountMenu">
+        <button class="pop-item" id="accountOpenBtn" type="button">Conta</button>
+        <div class="pop-div"></div>
+        <button class="pop-item danger logout-action" type="button">Sair da conta</button>
       </div>
-      <button class="acct-logout logout-action" type="button">Sair da conta</button>
     </div>
   </div>
 </aside>
