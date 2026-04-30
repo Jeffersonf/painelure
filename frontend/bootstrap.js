@@ -30,6 +30,8 @@ window.addEventListener('hashchange', () => {
   showPage(currentPage || 'dashboard');
 });
 
+document.addEventListener('fullscreenchange', updateSupervisorFullscreenButton);
+
 if (sessionStorage.getItem(SESSION_KEY) === 'ok') {
   if (!sessionStorage.getItem(ACTIVE_USER_KEY)) {
     const fallbackUser = (state.users || []).find((item) => item.role === 'admin') || state.users?.[0];

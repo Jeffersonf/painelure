@@ -13,8 +13,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260430-supervisor-indicators">
-<link rel="stylesheet" href="./setechub.css?v=20260430-supervisor-indicators">
+<link rel="stylesheet" href="./styles.css?v=20260430-supervisor-indicators-focus">
+<link rel="stylesheet" href="./setechub.css?v=20260430-supervisor-indicators-focus">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
@@ -547,6 +547,7 @@
         <div class="mini-actions">
           <a class="btn btn-g btn-sm" href="https://docs.google.com/spreadsheets/d/1AaHF-kDf-3RVd4euAACBCMVB7AsrsVwMkLnDhpg-LnM/edit?gid=1507846737#gid=1507846737" target="_blank" rel="noreferrer">Abrir planilha</a>
           <button class="btn btn-p btn-sm" type="button" onclick="syncSupervisorVisitSources()">Atualizar planilha</button>
+          <button class="btn btn-g btn-sm" id="supervisorFullscreenBtn" type="button" onclick="toggleSupervisorPanelFullscreen()">Tela cheia</button>
         </div>
       </div>
       <div id="supervisorPanelGrid" class="supervisor-sheet-panel"></div>
@@ -986,12 +987,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="./school-data.js?v=20260430-supervisor-indicators"></script>
-<script src="./storage.js?v=20260430-supervisor-indicators"></script>
-<script src="./app.js?v=20260430-supervisor-indicators"></script>
-<script src="./render.js?v=20260430-supervisor-indicators"></script>
-<script src="./api.js?v=20260430-supervisor-indicators"></script>
-<script src="./actions.js?v=20260430-supervisor-indicators"></script>
-<script src="./bootstrap.js?v=20260430-supervisor-indicators"></script>
+<script src="./school-data.js?v=20260430-supervisor-indicators-focus"></script>
+<script src="./storage.js?v=20260430-supervisor-indicators-focus"></script>
+<script src="./app.js?v=20260430-supervisor-indicators-focus"></script>
+<script src="./render.js?v=20260430-supervisor-indicators-focus"></script>
+<script src="./api.js?v=20260430-supervisor-indicators-focus"></script>
+<script src="./actions.js?v=20260430-supervisor-indicators-focus"></script>
+<script src="./bootstrap.js?v=20260430-supervisor-indicators-focus"></script>
 </body>
 </html>

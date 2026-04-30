@@ -49,6 +49,34 @@ function exportSummary() {
   downloadFile('setechub-resumo.txt', summary, 'text/plain');
 }
 
+async function toggleSupervisorPanelFullscreen() {
+  const panel = document.getElementById('painelSupervisor');
+  if (!panel) return;
+  const isFullscreen = document.fullscreenElement === panel;
+  try {
+    if (document.fullscreenEnabled && panel.requestFullscreen) {
+      if (isFullscreen) {
+        await document.exitFullscreen();
+      } else {
+        await panel.requestFullscreen();
+      }
+      return;
+    }
+  } catch (error) {
+    console.warn('Falha ao alternar tela cheia do painel de supervisores.', error);
+  }
+  panel.classList.toggle('supervisor-panel-fullscreen', !panel.classList.contains('supervisor-panel-fullscreen'));
+  updateSupervisorFullscreenButton();
+}
+
+function updateSupervisorFullscreenButton() {
+  const button = document.getElementById('supervisorFullscreenBtn');
+  const panel = document.getElementById('painelSupervisor');
+  if (!button || !panel) return;
+  const active = document.fullscreenElement === panel || panel.classList.contains('supervisor-panel-fullscreen');
+  button.textContent = active ? 'Sair da tela cheia' : 'Tela cheia';
+}
+
 function toggleUserActive(id) {
   if (!canManageUsers()) return;
   const user = state.users.find((item) => item.id === id);

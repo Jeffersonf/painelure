@@ -1266,28 +1266,7 @@ function renderSupervisors() {
         monthlyIndicator
       };
     });
-    const syncedCount = sheetRows.filter((row) => row.supervisor.sourceSyncedAt).length;
-    const pendingGoals = sheetRows.filter((row) => row.monthlyVisits < row.monthlyGoal).length;
-    const weeklyGoalTotal = sheetRows.reduce((sum, row) => sum + row.weeklyGoal, 0);
-    const weeklyVisitTotal = sheetRows.reduce((sum, row) => sum + row.weeklyVisits, 0);
-    const monthlyGoalTotal = sheetRows.reduce((sum, row) => sum + row.monthlyGoal, 0);
-    const monthlyVisitTotal = sheetRows.reduce((sum, row) => sum + row.monthlyVisits, 0);
-    const currentWeek = sheetRows.find((row) => row.currentWeek)?.currentWeek || 0;
     panelGrid.innerHTML = `
-      <div class="supervisor-sheet-summary">
-        ${[
-          { label: 'Semana do mes', value: currentWeek ? String(currentWeek) : '--', note: 'aba PainelSupervisor', tone: 'pill-info' },
-          { label: 'Meta semanal', value: `${weeklyVisitTotal}/${weeklyGoalTotal || 0}`, note: `${supervisorGoalPct(weeklyVisitTotal, weeklyGoalTotal)}% realizado`, tone: weeklyVisitTotal >= weeklyGoalTotal ? 'pill-ok' : 'pill-warn' },
-          { label: 'Meta mensal', value: `${monthlyVisitTotal}/${monthlyGoalTotal || 0}`, note: `${supervisorGoalPct(monthlyVisitTotal, monthlyGoalTotal)}% realizado`, tone: pendingGoals ? 'pill-warn' : 'pill-ok' },
-          { label: 'Sincronizacao', value: String(syncedCount), note: 'supervisores com dados online', tone: syncedCount === stats.length ? 'pill-ok' : 'pill-warn' }
-        ].map((card) => `
-          <div class="supervisor-sheet-card">
-            <div class="sync-meta">${esc(card.label)}</div>
-            <strong>${esc(card.value)}</strong>
-            <span class="diag-pill ${card.tone}">${esc(card.note)}</span>
-          </div>
-        `).join('')}
-      </div>
       <div class="supervisor-sheet-table-wrap">
         <table class="supervisor-sheet-table">
           <thead>
