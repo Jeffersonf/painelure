@@ -61,13 +61,28 @@ function inferImportReviewStatus(item) {
 
 const SCHOOL_ALIASES = {
   'AGROVILA I': 'PEI EE Idalicio Mendes Lima',
+  'EE BAIRRO TURVOS DOS ALMEIDAS': 'EE Bairro Turvo dos Almeidas',
+  'EE CELIA VASQUES DUCH': 'PEI EE Professora Celia Vasques Ferrari Duch',
   'EE CINIRA DANIEL DA SILVA': 'PEI EE Professora Cinira Daniel da Silva',
+  'EE DR ANTONIO DEFUNNE': 'EE Doutor Antonio Deffune',
+  'EE DR ANTONIO DEFFUNE': 'EE Doutor Antonio Deffune',
   'EE DR. RAUL VENTURELLI': 'EE Doutor Raul Venturelli',
   'EE DR RAUL VENTURELLI': 'EE Doutor Raul Venturelli',
+  'EE FRANCELINA FRANCO': 'PEI EE Professora Francelina Franco',
+  'EE GERSON DE BARROS MARGARIDO': 'EE Professor Gerson de Barros Margarido',
+  'EE IDALICIO MENDES LIMA': 'PEI EE Idalicio Mendes Lima',
   'EE JEMINIANO DAVID MUZEL': 'PEI EE Jeminiano David Muzel',
+  'EE JOAO BATISTA DO AMARAL VASCONCELLOS': 'PEI EE Professor Joao Baptista do Amaral Vasconcellos',
   'EE JOSE VASQUES FERRARI': 'PEI EE Professor Jose Vasques Ferrari',
   'EE JOSÉ VASQUES FERRARI': 'PEI EE Professor Jose Vasques Ferrari',
-  'EE NICOTA SOARES': 'PEI EE Professora Nicota Soares'
+  'EE NICOTA SOARES': 'PEI EE Professora Nicota Soares',
+  'EE OSCAR KURTZ CAMARGO': 'PEI EE Oscar Kurtz Camargo',
+  'EE OTAVIO FERRARI': 'PEI EE Otavio Ferrari',
+  'EE PADRE ARLINDO VIEIRA': 'PEI EE Padre Arlindo Vieira',
+  'EE RICARDO CAMPOLIM DE ALMEIDA': 'PEI EE Ricardo Campolim de Almeida Neto',
+  'EE SILVERIO MONTEIRO': 'EE Professor Silverio Monteiro',
+  'EE SIMPLICIANO CAMPOLIM DE ALMEIDA NETO': 'PEI EE Simpliciano Campolim de Almeida',
+  'EE ZULMIRA DE OLIVEIRA': 'PEI EE Professora Zulmira de Oliveira'
 };
 
 const SUPERVISOR_VISIT_SOURCES = [
@@ -76,10 +91,25 @@ const SUPERVISOR_VISIT_SOURCES = [
     url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkqZydw5EWNLREBCXdG-VpqcoOfuOf-AI2gYawdaeEwDNitR2m37okLvurfscimlSQMtpbHg_H_bzz/pub?output=csv',
     label: 'Planilha Google - visitas dos supervisores',
     primary: true,
-    workbookTabs: true,
+    aggregate: true,
+    requireSupervisorColumn: true,
     tabPrefix: 'DADOS_'
   }
 ];
+
+const SUPERVISOR_SOURCE_ALIASES = {
+  adilson: ['Adilson Manoel', 'Adilson Fogaca'],
+  daiane: ['Daiane Aparecida', 'Daiane Aparecida de Oliveira Ribeiro'],
+  edilene: ['Edilene Silva', 'Edilene da Silva', 'Edilene da Silva Almeida Oliveira'],
+  magda: ['Magda Gisele', 'Magda Gisele Silva de Oliveira'],
+  marcio: ['Marcio Nunes', 'Marcio Nunes da Cruz'],
+  maria: ['Maria Luiza', 'Maria Luiza Brizolla de Queiroz']
+};
+
+function supervisorSourceAliases(name) {
+  const firstName = normalizeKey(String(name || '').trim().split(/\s+/)[0]);
+  return SUPERVISOR_SOURCE_ALIASES[firstName] || [];
+}
 
 function canonicalSchoolName(value) {
   const text = String(value || '').trim();
@@ -88,7 +118,21 @@ function canonicalSchoolName(value) {
   if (direct) return direct;
   const normalized = normalizeKey(text);
   const aliasEntry = Object.entries(SCHOOL_ALIASES).find(([alias]) => normalizeKey(alias) === normalized);
-  return aliasEntry ? aliasEntry[1] : text;
+  if (aliasEntry) return aliasEntry[1];
+  const comparable = normalized
+    .replace(/\b(pei|ee|doutor|dr|professor|professora)\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const schoolMatch = typeof SCHOOL_MASTER !== 'undefined'
+    ? SCHOOL_MASTER.find((school) => {
+      const schoolComparable = normalizeKey(school.name)
+        .replace(/\b(pei|ee|doutor|dr|professor|professora)\b/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return comparable && (schoolComparable.includes(comparable) || comparable.includes(schoolComparable));
+    })
+    : null;
+  return schoolMatch ? schoolMatch.name : text;
 }
 
 const SCHOOL_MASTER = [
@@ -158,11 +202,11 @@ function defaultSchoolProfiles(schools) {
 
 function defaultSupervisors(schools) {
   const supervisorContacts = [
-    { name: 'Daiane Aparecida de Oliveira Ribeiro', email: 'daiane.ribeiro@educacao.sp.gov.br', phone: '(15) 3526-6227' },
-    { name: 'Edilene da Silva Almeida Oliveira', email: 'edilene.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6217' },
-    { name: 'Magda Gisele Silva de Oliveira', email: 'magda.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6232' },
-    { name: 'Marcio Nunes da Cruz', email: 'marcio.cruz@educacao.sp.gov.br', phone: '(15) 3526-6208' },
-    { name: 'Maria Luiza Brizolla de Queiroz', email: 'maria.queiroz14@educacao.sp.gov.br', phone: '(15) 3526-6216' },
+    { name: 'Daiane Aparecida de Oliveira Ribeiro', email: 'daiane.ribeiro@educacao.sp.gov.br', phone: '(15) 3526-6227', sourceAliases: supervisorSourceAliases('Daiane') },
+    { name: 'Edilene da Silva Almeida Oliveira', email: 'edilene.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6217', sourceAliases: supervisorSourceAliases('Edilene') },
+    { name: 'Magda Gisele Silva de Oliveira', email: 'magda.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6232', sourceAliases: supervisorSourceAliases('Magda') },
+    { name: 'Marcio Nunes da Cruz', email: 'marcio.cruz@educacao.sp.gov.br', phone: '(15) 3526-6208', sourceAliases: supervisorSourceAliases('Marcio') },
+    { name: 'Maria Luiza Brizolla de Queiroz', email: 'maria.queiroz14@educacao.sp.gov.br', phone: '(15) 3526-6216', sourceAliases: supervisorSourceAliases('Maria') },
     {
       name: 'Adilson Fogaca',
       email: 'adilson.fogaca@educacao.sp.gov.br',
@@ -171,7 +215,7 @@ function defaultSupervisors(schools) {
       visitSourceUrl: SUPERVISOR_VISIT_SOURCES[0].url,
       visitSourceLabel: SUPERVISOR_VISIT_SOURCES[0].label,
       visitSourcePrimary: true,
-      sourceAliases: ['Adilson Manoel', 'Adilson Fogaca']
+      sourceAliases: supervisorSourceAliases('Adilson')
     }
   ];
   return supervisorContacts.map((supervisor, index) => ({
@@ -422,6 +466,7 @@ function normalizeDefaultUserNames(users) {
 function enrichSupervisorSources(supervisors) {
   return (supervisors || []).map((supervisor) => {
     const source = SUPERVISOR_VISIT_SOURCES.find((item) =>
+      item.aggregate ||
       item.workbookTabs ||
       normalizeKey(item.supervisor) === normalizeKey(supervisor.name) ||
       (item.aliases || []).some((alias) => normalizeKey(alias) === normalizeKey(supervisor.name))
@@ -433,7 +478,11 @@ function enrichSupervisorSources(supervisors) {
       visitSourceUrl: supervisor.visitSourceUrl || source.url,
       visitSourceLabel: supervisor.visitSourceLabel || source.label,
       visitSourcePrimary: supervisor.visitSourcePrimary ?? source.primary,
-      sourceAliases: supervisor.sourceAliases || source.aliases || []
+      sourceAliases: [...new Set([
+        ...supervisorSourceAliases(supervisor.name),
+        ...(supervisor.sourceAliases || []),
+        ...(source.aliases || [])
+      ])]
     };
   });
 }

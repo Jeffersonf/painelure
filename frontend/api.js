@@ -270,6 +270,28 @@ function supervisorVisitSourceFor(source) {
   );
 }
 
+function supervisorForSourceRow(rowSupervisor, source = {}) {
+  const rowKey = normalizeKey(rowSupervisor);
+  if (!rowKey) return null;
+  const rowFirstName = rowKey.split(/\s+/)[0];
+  return (state.supervisors || []).find((supervisor) => {
+    const names = [
+      source.supervisor,
+      supervisor.name,
+      ...(source.aliases || []),
+      ...(supervisor.sourceAliases || [])
+    ].filter(Boolean);
+    return names.some((name) => {
+      const key = normalizeKey(name);
+      const firstName = key.split(/\s+/)[0];
+      return key === rowKey ||
+        key.startsWith(`${rowKey} `) ||
+        rowKey.startsWith(`${key} `) ||
+        (rowFirstName && firstName === rowFirstName);
+    });
+  }) || null;
+}
+
 function sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor) {
   const names = [source.supervisor, supervisor?.name, ...(source.aliases || []), ...(supervisor?.sourceAliases || [])];
   const firstNames = names.map((name) => String(name || '').trim().split(/\s+/)[0]);
@@ -328,15 +350,17 @@ function googleSheetTabCsvUrl(url, tabName) {
 }
 
 function mergeSupervisorVisitSourceRows(source, rows) {
-  const supervisor = supervisorVisitSourceFor(source);
-  if (!supervisor) return 0;
   const importedAt = new Date().toISOString();
   const incoming = rows
     .map((row) => {
       const rowSupervisor = rowSupervisorName(row) || (source.requireSupervisorColumn ? '' : source.supervisor);
+      const supervisor = source.supervisor
+        ? supervisorVisitSourceFor(source)
+        : supervisorForSourceRow(rowSupervisor, source);
       const school = canonicalSchoolName(csvValue(row, ['Escola Visitada', 'Escola']));
       const date = parseBrazilianDate(csvValue(row, ['Data Da Visita', 'Data da Visita', 'Data']));
-      if (!rowSupervisor || !school || !date || !sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor)) return null;
+      if (!supervisor || !rowSupervisor || !school || !date) return null;
+      if (source.supervisor && !sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor)) return null;
       const submittedAt = csvValue(row, ['Carimbo de data/hora', 'Timestamp']);
       const confirmation = csvValue(row, ['Confirmacao de Visita', 'Confirmacao', 'Confirmação de Visita']);
       return {
@@ -358,18 +382,24 @@ function mergeSupervisorVisitSourceRows(source, rows) {
   if (!incoming.length) return 0;
 
   const incomingKeys = new Set(incoming.map((item) => normalizeKey(`${item.supervisor}|${item.school}|${item.date}|${item.type}`)));
+  const importedSupervisors = new Set(incoming.map((item) => item.supervisor));
   state.supervisorVisits = [
     ...(state.supervisorVisits || []).filter((item) => {
       if (item.sourceId === source.id) return !incomingKeys.has(normalizeKey(`${item.supervisor}|${item.school}|${item.date}|${item.type}`));
-      if (item.supervisor !== supervisor.name) return true;
+      if (!importedSupervisors.has(item.supervisor)) return true;
       return !(item.source === 'teste' || /^visit-\d+-\d+$/.test(String(item.id || '')) || /registro de teste/i.test(item.notes || ''));
     }),
     ...incoming
   ];
 
-  const schoolsFromSource = [...new Set(incoming.map((item) => item.school))];
+  const schoolsBySupervisor = incoming.reduce((acc, item) => {
+    if (!acc[item.supervisor]) acc[item.supervisor] = new Set();
+    acc[item.supervisor].add(item.school);
+    return acc;
+  }, {});
   state.supervisors = (state.supervisors || []).map((item) => {
-    if (item.name !== supervisor.name) return item;
+    const schoolsFromSource = [...(schoolsBySupervisor[item.name] || [])];
+    if (!schoolsFromSource.length) return item;
     return {
       ...item,
       schools: [...new Set([...(item.schools || []), ...schoolsFromSource])],
@@ -378,7 +408,7 @@ function mergeSupervisorVisitSourceRows(source, rows) {
       visitSourceUrl: source.url,
       visitSourceLabel: source.label,
       visitSourcePrimary: source.primary,
-      sourceAliases: source.aliases || [],
+      sourceAliases: [...new Set([...(item.sourceAliases || []), ...(source.aliases || [])])],
       source: 'google-sheet',
       sourceSyncedAt: importedAt
     };
@@ -395,7 +425,7 @@ async function syncSupervisorVisitSource(source) {
   let fallbackToSourceCsv = false;
   const urls = [
     ...tabNames.map((tabName) => ({ url: googleSheetTabCsvUrl(source.url, tabName), requireSupervisorColumn: false })),
-    { url: googleSheetCsvUrl(source.url), requireSupervisorColumn: tabNames.length > 0 }
+    { url: googleSheetCsvUrl(source.url), requireSupervisorColumn: source.requireSupervisorColumn ?? tabNames.length > 0 }
   ];
 
   for (const item of urls) {
@@ -418,10 +448,22 @@ async function syncSupervisorVisitSource(source) {
   return mergeSupervisorVisitSourceRows({ ...source, requireSupervisorColumn: fallbackToSourceCsv }, records);
 }
 
-async function syncSupervisorVisitSources() {
+async function syncSupervisorVisitSources(options = {}) {
   if (!Array.isArray(SUPERVISOR_VISIT_SOURCES) || !SUPERVISOR_VISIT_SOURCES.length) return;
+  const silent = options.silent === true;
+  const toast = silent ? null : showToast('Lendo planilha dos supervisores...', 'syncing', { persist: true });
   let importedCount = 0;
+  let errorCount = 0;
   for (const source of SUPERVISOR_VISIT_SOURCES) {
+    if (source.aggregate) {
+      try {
+        importedCount += await syncSupervisorVisitSource(source);
+      } catch (error) {
+        errorCount += 1;
+        console.warn(`Nao foi possivel sincronizar ${source.label}:`, error);
+      }
+      continue;
+    }
     const sourceSupervisors = source.workbookTabs
       ? (state.supervisors || [])
       : [supervisorVisitSourceFor(source)].filter(Boolean);
@@ -434,11 +476,21 @@ async function syncSupervisorVisitSources() {
           tabNames: source.workbookTabs ? supervisorSheetTabNames(supervisor.name, source) : source.tabName ? [source.tabName] : []
         });
       } catch (error) {
+        errorCount += 1;
         console.warn(`Nao foi possivel sincronizar ${source.label} / ${supervisor.name}:`, error);
       }
     }
   }
   if (importedCount) refreshAll();
+  if (toast) {
+    if (importedCount) {
+      toast.update(`${importedCount} visita(s) importada(s) da planilha.`, 'success');
+    } else if (errorCount) {
+      toast.update('Nao foi possivel ler a planilha dos supervisores.', 'error', { duration: 4200 });
+    } else {
+      toast.update('Planilha lida, mas nenhum registro novo foi encontrado.', 'success');
+    }
+  }
 }
 
 async function syncCurrentSupervisorVisitSource() {
@@ -461,7 +513,8 @@ async function syncCurrentSupervisorVisitSource() {
       url: supervisor.visitSourceUrl,
       label: supervisor.visitSourceLabel || 'Planilha Google',
       primary: supervisor.visitSourcePrimary ?? true,
-      tabNames: supervisorSheetTabNames(supervisor.name)
+      tabNames: supervisorSheetTabNames(supervisor.name),
+      requireSupervisorColumn: true
     };
     await syncSupervisorVisitSource(source);
     refreshAll();
