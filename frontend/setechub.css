@@ -347,6 +347,35 @@
   background: var(--sf2);
 }
 
+#painelSupervisor:fullscreen,
+#painelSupervisor.supervisor-panel-fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  margin: 0;
+  padding: 18px;
+  border-radius: 0;
+  background: var(--bg);
+  overflow: auto;
+}
+
+#painelSupervisor:fullscreen .supervisor-sheet-panel,
+#painelSupervisor.supervisor-panel-fullscreen .supervisor-sheet-panel {
+  min-height: 0;
+  height: calc(100vh - 96px);
+}
+
+#painelSupervisor:fullscreen .supervisor-sheet-table-wrap,
+#painelSupervisor.supervisor-panel-fullscreen .supervisor-sheet-table-wrap {
+  height: 100%;
+}
+
+#painelSupervisor.supervisor-panel-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+}
+
 .supervisor-sheet-table {
   width: 100%;
   min-width: 880px;
@@ -402,6 +431,27 @@
   box-shadow: 0 8px 18px rgba(0,0,0,.16);
   font-size: 11px;
   font-weight: 900;
+}
+
+.supervisor-sheet-table th:nth-child(6),
+.supervisor-sheet-table th:nth-child(7),
+.supervisor-sheet-table td:nth-child(6),
+.supervisor-sheet-table td:nth-child(7) {
+  width: 220px;
+}
+
+.supervisor-sheet-table td:nth-child(6),
+.supervisor-sheet-table td:nth-child(7) {
+  padding-inline: 18px;
+}
+
+.supervisor-sheet-table .diag-pill {
+  min-width: 190px;
+  min-height: 28px;
+  padding: 0 18px;
+  font-size: 12px;
+  letter-spacing: .055em;
+  box-shadow: 0 10px 22px rgba(0,0,0,.24);
 }
 
 .supervisor-sheet-table .pill-ok,
@@ -1306,10 +1356,10 @@
 .setechub-monitor-card.compact .diag-pill {
   width: 100%;
   max-width: 100%;
-  justify-content: flex-start;
+  justify-content: center;
   white-space: normal;
   overflow-wrap: anywhere;
-  line-height: 1.25;
+  line-height: 1.2;
   min-height: 0;
   padding: 5px 9px;
 }
@@ -1584,13 +1634,16 @@
 .diag-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   min-height: 26px;
   padding: 0 9px;
   border-radius: 999px;
   border: 1px solid var(--bd);
   font-size: 10px;
+  line-height: 1;
   font-weight: 700;
+  text-align: center;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
