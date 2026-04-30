@@ -303,6 +303,16 @@ function supervisorSheetTabNames(supervisorName, source = {}) {
   ].filter(Boolean))];
 }
 
+function rowSupervisorName(row) {
+  return csvValue(row, [
+    'Nome do Supervisor',
+    'Primeiro nome do Supervisor',
+    'Dados primeiro nome do Supervisor',
+    'dados_primeiro nome do supervisor',
+    'Supervisor'
+  ]);
+}
+
 function googleSheetTabCsvUrl(url, tabName) {
   const text = String(url || '').trim();
   const encodedTab = encodeURIComponent(tabName);
@@ -323,13 +333,7 @@ function mergeSupervisorVisitSourceRows(source, rows) {
   const importedAt = new Date().toISOString();
   const incoming = rows
     .map((row) => {
-      const rowSupervisor = csvValue(row, [
-        'Nome do Supervisor',
-        'Primeiro nome do Supervisor',
-        'Dados primeiro nome do Supervisor',
-        'dados_primeiro nome do supervisor',
-        'Supervisor'
-      ]) || source.supervisor;
+      const rowSupervisor = rowSupervisorName(row) || (source.requireSupervisorColumn ? '' : source.supervisor);
       const school = canonicalSchoolName(csvValue(row, ['Escola Visitada', 'Escola']));
       const date = parseBrazilianDate(csvValue(row, ['Data Da Visita', 'Data da Visita', 'Data']));
       if (!rowSupervisor || !school || !date || !sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor)) return null;
@@ -388,14 +392,19 @@ async function syncSupervisorVisitSource(source) {
     : source.tabName ? [source.tabName] : [];
   let response = null;
   let lastError = null;
-  const urls = tabNames.length
-    ? tabNames.map((tabName) => googleSheetTabCsvUrl(source.url, tabName))
-    : [googleSheetCsvUrl(source.url)];
+  let fallbackToSourceCsv = false;
+  const urls = [
+    ...tabNames.map((tabName) => ({ url: googleSheetTabCsvUrl(source.url, tabName), requireSupervisorColumn: false })),
+    { url: googleSheetCsvUrl(source.url), requireSupervisorColumn: tabNames.length > 0 }
+  ];
 
-  for (const url of urls) {
+  for (const item of urls) {
     try {
-      response = await fetch(url, { cache: 'no-store' });
-      if (response.ok) break;
+      response = await fetch(item.url, { cache: 'no-store' });
+      if (response.ok) {
+        fallbackToSourceCsv = item.requireSupervisorColumn;
+        break;
+      }
       lastError = new Error(`HTTP ${response.status}`);
     } catch (error) {
       lastError = error;
@@ -406,7 +415,7 @@ async function syncSupervisorVisitSource(source) {
   const [headers, ...dataRows] = rows;
   if (!headers?.length) return 0;
   const records = dataRows.map((row) => Object.fromEntries(headers.map((header, index) => [normalizeCsvHeader(header), row[index] || ''])));
-  return mergeSupervisorVisitSourceRows(source, records);
+  return mergeSupervisorVisitSourceRows({ ...source, requireSupervisorColumn: fallbackToSourceCsv }, records);
 }
 
 async function syncSupervisorVisitSources() {

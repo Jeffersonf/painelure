@@ -11,7 +11,7 @@ Base operacional inspirada no `finanza`, adaptada para concentrar rotina tecnica
 
 ## Como esta funcionando
 
-- `index.html` redireciona para `frontend/index.html`
+- `index.html` carrega o app direto na raiz do site, mantendo a URL publica limpa
 - o app usa armazenamento local do navegador
 - ha exportacao e importacao de backup JSON
 - ha migracao direta do estado legado salvo pelo `setec_daily_app.html`

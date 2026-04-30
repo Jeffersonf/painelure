@@ -170,6 +170,12 @@
   }
 }
 
+@media (max-width: 520px) {
+  .school-overview-matrix {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .page-actions {
   display: flex;
   gap: 8px;
@@ -217,16 +223,16 @@
 
 .school-overview-matrix {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px;
 }
 
 .school-overview-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
   min-width: 0;
-  padding: 14px;
+  padding: 18px;
   border: 1px solid var(--bd);
   border-radius: 8px;
   background: var(--sf2);
@@ -236,7 +242,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 7px;
   width: 100%;
   min-width: 0;
   border: 0;
@@ -248,8 +254,8 @@
 
 .school-overview-main strong {
   max-width: 100%;
-  font-size: 14px;
-  line-height: 1.25;
+  font-size: 15px;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
@@ -262,13 +268,13 @@
 
 .school-overview-kpis {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .school-overview-kpis > div {
   min-width: 0;
-  padding: 9px 8px;
+  padding: 11px 12px;
   border: 1px solid var(--bd);
   border-radius: 8px;
   background: rgba(255,255,255,.035);
@@ -283,8 +289,8 @@
 
 .school-overview-kpis strong {
   display: block;
-  margin-top: 2px;
-  font-size: 15px;
+  margin-top: 3px;
+  font-size: 17px;
   line-height: 1.1;
 }
 
@@ -293,11 +299,11 @@
 .school-record-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .school-overview-actions .btn {
-  flex: 1 1 86px;
+  flex: 1 1 130px;
   justify-content: center;
 }
 
@@ -755,6 +761,14 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.compact-grid .setechub-monitor-card {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  overflow: hidden;
+}
+
 .setechub-clickable {
   cursor: pointer;
 }
@@ -1043,6 +1057,17 @@
 
 .setechub-monitor-card.compact strong {
   font-size: 22px;
+}
+
+.setechub-monitor-card.compact .diag-pill {
+  width: 100%;
+  max-width: 100%;
+  justify-content: flex-start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  min-height: 0;
+  padding: 5px 9px;
 }
 
 .setechub-monitor-card strong {
