@@ -1169,13 +1169,40 @@ function renderSupervisors() {
   const visitDate = document.getElementById('visitDate');
   if (visitDate && !visitDate.value) visitDate.value = new Date().toISOString().slice(0, 10);
 
+  const panelGrid = document.getElementById('supervisorPanelGrid');
+  if (panelGrid) {
+    const now = new Date();
+    const monthVisits = visits.filter((visit) => {
+      const date = new Date(`${visit.date}T00:00:00`);
+      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+    });
+    const syncedCount = stats.filter((item) => item.supervisor.sourceSyncedAt).length;
+    const pendingGoals = stats.filter((item) => {
+      const goal = Number(item.supervisor.monthlyGoal || item.assignedSchools.length || 1);
+      const count = monthVisits.filter((visit) => visit.supervisor === item.supervisor.name).length;
+      return count < goal;
+    }).length;
+    panelGrid.innerHTML = [
+      { label: 'Supervisores', value: String(stats.length), note: `${syncedCount} com leitura online`, tone: 'pill-info' },
+      { label: 'Visitas no mes', value: String(monthVisits.length), note: 'lidas das abas DADOS_', tone: 'pill-ok' },
+      { label: 'Metas pendentes', value: String(pendingGoals), note: 'supervisores abaixo da meta', tone: pendingGoals ? 'pill-warn' : 'pill-ok' },
+      { label: 'Escolas vinculadas', value: String(assignedSchoolCount), note: `${averageCoverage}% de cobertura media`, tone: averageCoverage >= 70 ? 'pill-ok' : 'pill-warn' }
+    ].map((item) => `
+      <div class="setechub-monitor-card">
+        <div class="sync-meta">${esc(item.label)}</div>
+        <strong>${esc(item.value)}</strong>
+        <div class="diag-pill ${item.tone}">${esc(item.note)}</div>
+      </div>
+    `).join('');
+  }
+
   const selectorList = document.getElementById('supervisorSelectorList');
   if (selectorList) {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
     selectorList.innerHTML = stats.map((item) => `
-      <button class="supervisor-selector-btn" type="button" onclick="openSupervisorRecord('${esc(item.supervisor.name)}')">
+      <div class="setechub-item setechub-clickable supervisor-list-card ${normalizeKey(item.supervisor.name) === currentSupervisorFilter ? 'active' : ''}" onclick="openSupervisorRecord('${esc(item.supervisor.name)}')">
         ${(() => {
           const monthlyGoal = Number(item.supervisor.monthlyGoal || item.assignedSchools.length || 1);
           const monthVisits = visits.filter((visit) => {
@@ -1187,13 +1214,22 @@ function renderSupervisors() {
           const pending = Math.max(0, item.assignedSchools.length - visitedSchools);
           const goalMet = monthVisits.length >= monthlyGoal;
           return `
-            <span class="diag-pill ${goalMet ? 'pill-ok' : 'pill-warn'}">${goalMet ? 'Meta cumprida' : 'Meta pendente'}</span>
-            <span>${esc(item.supervisor.name)}</span>
-            <strong>${esc(String(monthVisits.length))}/${esc(String(monthlyGoal))} visita(s)</strong>
-            <small>${esc(String(item.assignedSchools.length))} escola(s) | ${esc(String(visitedSchools))} visitada(s) | ${esc(String(pending))} pendente(s)</small>
+            <div class="setechub-head">
+              <div>
+                <strong>${esc(item.supervisor.name)}</strong>
+                <div class="sync-meta">${esc(item.supervisor.email || '')} | ${esc(item.supervisor.phone || '')}</div>
+              </div>
+              <span class="diag-pill ${goalMet ? 'pill-ok' : 'pill-warn'}">${goalMet ? 'Meta cumprida' : 'Meta pendente'}</span>
+            </div>
+            <div class="school-overview-kpis supervisor-list-kpis">
+              <div><span>Visitas</span><strong>${esc(String(monthVisits.length))}/${esc(String(monthlyGoal))}</strong></div>
+              <div><span>Escolas</span><strong>${esc(String(item.assignedSchools.length))}</strong></div>
+              <div><span>Visitadas</span><strong>${esc(String(visitedSchools))}</strong></div>
+              <div><span>Faltam</span><strong>${esc(String(pending))}</strong></div>
+            </div>
           `;
         })()}
-      </button>
+      </div>
     `).join('') || '<div class="sync-empty">Nenhum supervisor cadastrado.</div>';
   }
 

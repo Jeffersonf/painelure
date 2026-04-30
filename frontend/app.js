@@ -260,7 +260,11 @@ function applyAccessControl() {
   document.body.classList.toggle('is-read-only', !canEditData());
   document.querySelectorAll('.nav-item, .fn-item').forEach((node) => {
     if (node.dataset.page) {
-      node.hidden = !canAccessPage(node.dataset.page);
+      const allowed = canAccessPage(node.dataset.page);
+      node.hidden = false;
+      node.classList.toggle('nav-disabled', !allowed);
+      node.setAttribute('aria-disabled', allowed ? 'false' : 'true');
+      node.tabIndex = allowed ? 0 : -1;
     }
   });
   document.querySelectorAll('.sidebar-icon-btn, .sidebar-mini-btn').forEach((node) => {
@@ -1230,7 +1234,7 @@ function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   const themeButton = document.getElementById('thmBtn');
   if (themeButton) {
-    themeButton.innerHTML = theme === 'dark' ? '&#9728;' : '&#9790;';
+    themeButton.innerHTML = theme === 'dark' ? '&#x2600;&#xFE0F;' : '&#x1F319;';
     themeButton.title = theme === 'dark' ? 'Usar tema claro' : 'Usar tema escuro';
   }
   document.getElementById('themeColorMeta').setAttribute('content', theme === 'dark' ? '#08090d' : '#f4f7ef');

@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" id="themeColorMeta" content="#08090d">
 <title>SETECHUB</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -116,8 +117,6 @@
   <div class="fn-item" data-page="assets"><span class="fni">💻</span>Invent.</div>
   <div class="fn-item acc-n" data-page="calls"><span class="fni">🔧</span>Cham.</div>
   <div class="fn-item sl-n" data-page="info"><span class="fni">ℹ️</span>Info</div>
-  <div class="fn-item sl-n" data-page="admin"><span class="fni">🛡️</span>Admin</div>
-  <div class="fn-item sl-n" data-page="settings"><span class="fni">⚙️</span>Conta</div>
   <button class="fn-item fn-logout logout-action" type="button"><span class="fni">↩</span>Sair</button>
 </nav>
 
@@ -143,12 +142,9 @@
     <div class="nav-item" data-page="agenda"><span class="ico">🗓️</span>Agenda</div>
     <div class="nav-item fn" data-page="reports"><span class="ico">📌</span>Relatorios</div>
     <div class="nav-item sl-n" data-page="info"><span class="ico">ℹ️</span>Informacoes</div>
-    <div class="nav-item sl-n" data-page="admin"><span class="ico">🛡️</span>Admin</div>
-    <div class="nav-item sl-n" data-page="settings"><span class="ico">⚙️</span>Conta</div>
   </nav>
   <div class="sb-bottom">
     <div class="conn-wrap"></div>
-    <div class="made-by">base visual inspirada no <span>finanza</span></div>
     <div class="acct-area">
       <button class="acct-btn" id="accountMenuBtn" type="button" aria-expanded="false" aria-controls="accountMenu">
         <div class="uavatar" id="uAvatar">JE</div>
@@ -575,11 +571,22 @@
         <div class="ps">Cards de resumo por supervisor. Clique em um supervisor para abrir os dados completos.</div>
       </div>
     </div>
+    <div class="school-record-nav supervisor-tabs">
+      <button class="btn btn-p btn-sm" type="button" onclick="document.getElementById('painelSupervisor')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">painelSupervisor</button>
+      <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorSelectorList')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Lista</button>
+    </div>
+    <div class="box" id="painelSupervisor">
+      <div class="bh">
+        <div><div class="ct">painelSupervisor</div><div class="cs">Visao consolidada das abas da planilha Google por supervisor.</div></div>
+        <button class="btn btn-g btn-sm" type="button" onclick="syncSupervisorVisitSources()">Atualizar planilha</button>
+      </div>
+      <div id="supervisorPanelGrid" class="setechub-monitor-grid"></div>
+    </div>
     <div class="box">
       <div class="bh">
         <div><div class="ct">Supervisores</div><div class="cs">Resumo, meta e sinal de pendencia sem repetir os dados completos.</div></div>
       </div>
-      <div id="supervisorSelectorList" class="supervisor-selector-list"></div>
+      <div id="supervisorSelectorList" class="stack-list"></div>
     </div>
   </div>
 

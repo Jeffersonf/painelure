@@ -1054,8 +1054,21 @@ function setupEventListeners() {
 
   document.querySelectorAll('.nav-item, .fn-item').forEach((button) => {
     if (button.dataset.page) {
-      button.addEventListener('click', () => showPage(button.dataset.page));
+      button.addEventListener('click', (event) => {
+        if (button.classList.contains('nav-disabled')) {
+          event.preventDefault();
+          return;
+        }
+        showPage(button.dataset.page);
+      });
     }
+  });
+  document.addEventListener('click', (event) => {
+    const navButton = event.target.closest('.nav-item[data-page], .fn-item[data-page]');
+    if (!navButton) return;
+    event.preventDefault();
+    if (navButton.classList.contains('nav-disabled')) return;
+    showPage(navButton.dataset.page);
   });
 
   document.querySelectorAll('[data-task-filter]').forEach((button) => {

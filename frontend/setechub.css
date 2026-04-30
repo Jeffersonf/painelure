@@ -85,6 +85,19 @@
   color: var(--ac);
 }
 
+.nav-item:hover {
+  background: color-mix(in srgb, var(--ac) 10%, transparent);
+  border-color: color-mix(in srgb, var(--ac) 24%, transparent);
+  color: var(--tx);
+}
+
+.nav-item.nav-disabled:hover,
+.fn-item.nav-disabled:hover {
+  background: transparent;
+  border-color: transparent;
+  color: var(--mt);
+}
+
 .page-actions .btn,
 .setechub-action-row .btn,
 .setechub-toolbar .btn,
@@ -343,6 +356,20 @@
   color: var(--mut);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.supervisor-list-card {
+  border-color: color-mix(in srgb, var(--bd) 82%, transparent);
+  background: rgba(255,255,255,.03);
+}
+
+.supervisor-list-card.active {
+  border-color: rgba(200,245,90,.36);
+  background: rgba(200,245,90,.08);
+}
+
+.supervisor-list-kpis {
+  margin-top: 10px;
 }
 
 .supervisor-card {

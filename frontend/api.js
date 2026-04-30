@@ -286,6 +286,25 @@ function googleSheetCsvUrl(url) {
   return `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv&gid=${gid}`;
 }
 
+function supervisorSheetTabName(supervisorName, source = {}) {
+  const prefix = source.tabPrefix || 'DADOS_';
+  return `${prefix}${String(supervisorName || '').trim()}`;
+}
+
+function googleSheetTabCsvUrl(url, tabName) {
+  const text = String(url || '').trim();
+  const encodedTab = encodeURIComponent(tabName);
+  const regularMatch = text.match(/docs\.google\.com\/spreadsheets\/d\/([^/]+)/i);
+  if (regularMatch) {
+    return `https://docs.google.com/spreadsheets/d/${regularMatch[1]}/gviz/tq?tqx=out:csv&sheet=${encodedTab}`;
+  }
+  const publishedMatch = text.match(/docs\.google\.com\/spreadsheets\/d\/e\/([^/]+)/i);
+  if (publishedMatch) {
+    return `https://docs.google.com/spreadsheets/d/e/${publishedMatch[1]}/pub?output=csv&single=true&sheet=${encodedTab}`;
+  }
+  return googleSheetCsvUrl(text);
+}
+
 function mergeSupervisorVisitSourceRows(source, rows) {
   const supervisor = supervisorVisitSourceFor(source);
   if (!supervisor) return 0;
@@ -346,7 +365,10 @@ function mergeSupervisorVisitSourceRows(source, rows) {
 }
 
 async function syncSupervisorVisitSource(source) {
-  const response = await fetch(googleSheetCsvUrl(source.url), { cache: 'no-store' });
+  const url = source.tabName
+    ? googleSheetTabCsvUrl(source.url, source.tabName)
+    : googleSheetCsvUrl(source.url);
+  const response = await fetch(url, { cache: 'no-store' });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const rows = parseCsvRows(await response.text());
   const [headers, ...dataRows] = rows;
@@ -359,10 +381,20 @@ async function syncSupervisorVisitSources() {
   if (!Array.isArray(SUPERVISOR_VISIT_SOURCES) || !SUPERVISOR_VISIT_SOURCES.length) return;
   let importedCount = 0;
   for (const source of SUPERVISOR_VISIT_SOURCES) {
-    try {
-      importedCount += await syncSupervisorVisitSource(source);
-    } catch (error) {
-      console.warn(`Nao foi possivel sincronizar ${source.label}:`, error);
+    const sourceSupervisors = source.workbookTabs
+      ? (state.supervisors || [])
+      : [supervisorVisitSourceFor(source)].filter(Boolean);
+    for (const supervisor of sourceSupervisors) {
+      try {
+        importedCount += await syncSupervisorVisitSource({
+          ...source,
+          supervisor: supervisor.name,
+          aliases: supervisor.sourceAliases || source.aliases || [],
+          tabName: source.workbookTabs ? supervisorSheetTabName(supervisor.name, source) : source.tabName
+        });
+      } catch (error) {
+        console.warn(`Nao foi possivel sincronizar ${source.label} / ${supervisor.name}:`, error);
+      }
     }
   }
   if (importedCount) refreshAll();
@@ -386,7 +418,8 @@ async function syncCurrentSupervisorVisitSource() {
       aliases: supervisor.sourceAliases || [],
       url: supervisor.visitSourceUrl,
       label: supervisor.visitSourceLabel || 'Planilha Google',
-      primary: supervisor.visitSourcePrimary ?? true
+      primary: supervisor.visitSourcePrimary ?? true,
+      tabName: supervisorSheetTabName(supervisor.name)
     };
     const importedCount = await syncSupervisorVisitSource(source);
     refreshAll();

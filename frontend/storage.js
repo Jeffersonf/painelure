@@ -68,12 +68,12 @@ const SCHOOL_ALIASES = {
 
 const SUPERVISOR_VISIT_SOURCES = [
   {
-    id: 'adilson-google-visitas',
-    supervisor: 'Adilson Fogaca',
-    aliases: ['Adilson Manoel', 'Adilson Fogaca'],
+    id: 'supervisores-google-visitas',
     url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkqZydw5EWNLREBCXdG-VpqcoOfuOf-AI2gYawdaeEwDNitR2m37okLvurfscimlSQMtpbHg_H_bzz/pub?output=csv',
-    label: 'Planilha Google - visitas do Adilson',
-    primary: true
+    label: 'Planilha Google - visitas dos supervisores',
+    primary: true,
+    workbookTabs: true,
+    tabPrefix: 'DADOS_'
   }
 ];
 
@@ -163,16 +163,20 @@ function defaultSupervisors(schools) {
       name: 'Adilson Fogaca',
       email: 'adilson.fogaca@educacao.sp.gov.br',
       phone: '(15) 3526-6224',
-      visitSourceId: 'adilson-google-visitas',
+      visitSourceId: SUPERVISOR_VISIT_SOURCES[0].id,
       visitSourceUrl: SUPERVISOR_VISIT_SOURCES[0].url,
       visitSourceLabel: SUPERVISOR_VISIT_SOURCES[0].label,
       visitSourcePrimary: true,
-      sourceAliases: SUPERVISOR_VISIT_SOURCES[0].aliases
+      sourceAliases: ['Adilson Manoel', 'Adilson Fogaca']
     }
   ];
   return supervisorContacts.map((supervisor, index) => ({
     id: `sup-${index + 1}`,
     ...supervisor,
+    visitSourceId: supervisor.visitSourceId || SUPERVISOR_VISIT_SOURCES[0].id,
+    visitSourceUrl: supervisor.visitSourceUrl || SUPERVISOR_VISIT_SOURCES[0].url,
+    visitSourceLabel: supervisor.visitSourceLabel || SUPERVISOR_VISIT_SOURCES[0].label,
+    visitSourcePrimary: supervisor.visitSourcePrimary ?? true,
     schools: schools
       .filter((_, schoolIndex) => schoolIndex % supervisorContacts.length === index)
       .map((school) => school.name),
@@ -281,6 +285,7 @@ function normalizeDefaultUserNames(users) {
 function enrichSupervisorSources(supervisors) {
   return (supervisors || []).map((supervisor) => {
     const source = SUPERVISOR_VISIT_SOURCES.find((item) =>
+      item.workbookTabs ||
       normalizeKey(item.supervisor) === normalizeKey(supervisor.name) ||
       (item.aliases || []).some((alias) => normalizeKey(alias) === normalizeKey(supervisor.name))
     );
