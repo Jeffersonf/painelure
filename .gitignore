@@ -1,0 +1,11 @@
+node_modules/
+npm-debug.log*
+
+# Local server state and snapshots can contain operational data.
+server/data/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

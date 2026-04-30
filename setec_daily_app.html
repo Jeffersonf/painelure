@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a1526">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>SETEC Hub | Jefferson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08111f;
+  --panel:#0d1a2c;
+  --panel-2:#122238;
+  --glass:rgba(255,255,255,.05);
+  --glass-2:rgba(255,255,255,.08);
+  --line:rgba(164,194,255,.1);
+  --border:rgba(164,194,255,.15);
+  --text:#ecf4ff;
+  --muted:#98abca;
+  --soft:#667894;
+  --blue:#6aa8ff;
+  --cyan:#5fe0d3;
+  --gold:#ffc367;
+  --rose:#ff8aa0;
+  --green:#64d896;
+  --shadow:0 24px 70px rgba(0,0,0,.3);
+}
+body{
+  font-family:"Outfit",sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at top left, rgba(106,168,255,.18), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(95,224,211,.12), transparent 25%),
+    linear-gradient(180deg,#08111f 0%,#0b1728 100%);
+}
+body::before,body::after{
+  content:"";
+  position:fixed;
+  border-radius:999px;
+  filter:blur(42px);
+  pointer-events:none;
+  z-index:0;
+}
+body::before{top:-100px;left:-100px;width:300px;height:300px;background:rgba(106,168,255,.12)}
+body::after{right:-120px;bottom:-120px;width:340px;height:340px;background:rgba(255,195,103,.08)}
+.app{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:18px 18px 110px}
+.shell{
+  background:rgba(9,18,33,.72);
+  border:1px solid var(--border);
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(18px);
+}
+.topbar,.hero,.content{padding:22px}
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{
+  width:52px;height:52px;border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));
+  color:#08111f;font-size:20px;font-weight:800;
+}
+.brand-copy small{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.18em}
+.brand-copy strong{display:block;font-size:25px;letter-spacing:-.04em}
+.topbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.chip,.badge,.pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--glass);
+  color:var(--muted);
+  font-size:12px;
+}
+.hero{
+  display:grid;
+  grid-template-columns:1.5fr 1fr;
+  gap:18px;
+  border-bottom:1px solid var(--line);
+}
+.hero-main,.hero-side .card,.section-card,.sidebar-card,.page{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:24px;
+}
+.hero-main{
+  padding:24px;
+  background:
+    linear-gradient(135deg,rgba(106,168,255,.18),rgba(95,224,211,.06)),
+    rgba(255,255,255,.02);
+}
+.hero-main h1{
+  margin-top:14px;
+  font-size:42px;
+  line-height:1.02;
+  letter-spacing:-.06em;
+  max-width:11ch;
+}
+.hero-main p{margin-top:14px;color:var(--muted);line-height:1.7;max-width:62ch}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+.metric{
+  padding:16px;border-radius:18px;background:rgba(6,15,28,.44);border:1px solid var(--border);
+}
+.metric span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.14em}
+.metric strong{display:block;margin-top:8px;font-size:28px;letter-spacing:-.04em}
+.hero-side{display:grid;gap:14px}
+.card{padding:18px}
+.focus-title,.section-head,.item-head,.split{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap
+}
+.focus-main{
+  margin-top:14px;padding:18px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid var(--line)
+}
+.focus-main strong{display:block;font-size:22px;letter-spacing:-.04em}
+.focus-main p{margin-top:8px;color:var(--muted);line-height:1.6}
+.quick-grid,.stats-grid,.report-grid{display:grid;gap:12px}
+.quick-grid{grid-template-columns:repeat(2,1fr);margin-top:14px}
+.stats-grid{grid-template-columns:repeat(3,1fr)}
+.report-grid{grid-template-columns:1fr 1fr}
+.action-btn,.nav-btn,.ghost-btn,.primary-btn,.mini-btn{
+  border:none;
+  cursor:pointer;
+  font:inherit;
+  transition:.18s ease;
+}
+.action-btn:hover,.nav-btn:hover,.ghost-btn:hover,.primary-btn:hover,.mini-btn:hover{transform:translateY(-1px)}
+.action-btn{
+  text-align:left;padding:14px;border-radius:18px;background:var(--panel-2);border:1px solid var(--border);color:var(--text)
+}
+.action-btn span{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+.content{display:grid;grid-template-columns:270px 1fr;gap:18px}
+.sidebar{display:grid;gap:14px;align-content:start}
+.sidebar-card{padding:18px}
+.sidebar-card h3{font-size:14px}
+.sidebar-card p{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.7}
+.nav-wrap{padding:12px}
+.nav-btn{
+  width:100%;
+  padding:14px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-radius:16px;background:transparent;color:var(--muted)
+}
+.nav-btn.active{
+  color:var(--text);
+  background:linear-gradient(135deg,rgba(106,168,255,.22),rgba(95,224,211,.11));
+  border:1px solid rgba(106,168,255,.18)
+}
+.pages{display:grid}
+.page{display:none;padding:18px}
+.page.active{display:block;animation:fade .22s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-card{padding:18px}
+.section-head h2{font-size:17px;letter-spacing:-.03em}
+.section-head p{color:var(--muted);font-size:13px}
+.stack,.list{display:grid;gap:14px}
+.grid-2{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.list-item,.timeline-item,.call-card,.school-card,.asset-card,.note-card,.history-card,.report-card{
+  padding:15px;border-radius:18px;background:rgba(7,15,28,.56);border:1px solid var(--line)
+}
+.list-item h3,.timeline-item h3,.call-card h3,.school-card h3,.asset-card h3,.note-card h3,.history-card h3{font-size:15px}
+.muted{color:var(--muted);font-size:13px;line-height:1.65}
+.subtle{color:var(--soft);font-size:12px}
+.task-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.task-left{display:flex;gap:12px;align-items:flex-start}
+.check{
+  width:22px;height:22px;border-radius:8px;border:1px solid var(--border);background:transparent;color:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:1px
+}
+.check.done{background:var(--green);border-color:var(--green);color:#08111f}
+.done{text-decoration:line-through;color:var(--soft)}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{padding:5px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.p-blue{color:#9dc1ff;background:rgba(106,168,255,.12);border-color:rgba(106,168,255,.2)}
+.p-cyan{color:#7df3e7;background:rgba(95,224,211,.12);border-color:rgba(95,224,211,.18)}
+.p-gold{color:#ffd08a;background:rgba(255,195,103,.12);border-color:rgba(255,195,103,.18)}
+.p-rose{color:#ff9eb0;background:rgba(255,138,160,.12);border-color:rgba(255,138,160,.18)}
+.p-green{color:#8fedb3;background:rgba(100,216,150,.12);border-color:rgba(100,216,150,.18)}
+.timeline-item{
+  display:grid;
+  grid-template-columns:66px 12px 1fr;
+  align-items:start;
+  gap:12px;
+}
+.timeline-time{font-size:12px;color:var(--soft);text-align:right;padding-top:3px}
+.timeline-dot{
+  width:12px;height:12px;border-radius:50%;background:var(--blue);margin-top:4px;box-shadow:0 0 0 4px rgba(106,168,255,.08)
+}
+.timeline-dot.live{background:var(--gold);box-shadow:0 0 0 4px rgba(255,195,103,.12)}
+.timeline-dot.done{background:var(--green);box-shadow:0 0 0 4px rgba(100,216,150,.12)}
+.form-grid,.toolbar,.login-form{display:grid;gap:10px}
+.form-grid{grid-template-columns:2fr 120px 120px 1.2fr 1fr auto}
+.toolbar{grid-template-columns:1fr 1fr auto}
+.report-grid{margin-top:14px}
+input,select,textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(7,15,28,.76);
+  color:var(--text);
+  font:inherit;
+  outline:none;
+}
+textarea{min-height:120px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:rgba(106,168,255,.4)}
+.primary-btn{
+  padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#08111f;font-weight:700
+}
+.ghost-btn,.mini-btn{
+  padding:11px 14px;border-radius:14px;background:var(--panel-2);color:var(--text);border:1px solid var(--border)
+}
+.mini-btn{padding:8px 10px;border-radius:12px;font-size:12px}
+.progress{height:8px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:10px}
+.progress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.call-columns{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.column-card{padding:16px;border-radius:20px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.column-card h3{font-size:14px;margin-bottom:12px}
+.history-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.automation-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.code-field{
+  width:100%;
+  min-height:132px;
+  padding:14px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:rgba(7,15,28,.82);
+  color:var(--text);
+  font:12px/1.6 Consolas,"Courier New",monospace;
+  resize:vertical;
+}
+.preview-list{display:grid;gap:10px;margin-top:14px}
+.preview-item{
+  padding:14px;border-radius:16px;background:rgba(7,15,28,.56);border:1px solid var(--line)
+}
+.preview-item strong{display:block;font-size:14px}
+.preview-item .subtle{margin-top:6px}
+.status-dot{
+  width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:middle
+}
+.status-ok{background:var(--green)}
+.status-warn{background:var(--gold)}
+.inline-actions{display:flex;gap:10px;flex-wrap:wrap}
+.login-screen{
+  position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:18px;
+  background:rgba(4,10,20,.78);backdrop-filter:blur(16px)
+}
+.login-card{
+  width:100%;max-width:480px;padding:24px;border-radius:28px;background:#0c172a;border:1px solid var(--border);box-shadow:var(--shadow)
+}
+.login-card h1{font-size:32px;letter-spacing:-.05em}
+.login-card p{margin-top:10px;color:var(--muted);line-height:1.7}
+.login-form{margin-top:18px}
+.hidden{display:none!important}
+.alert{
+  margin-top:12px;padding:12px 14px;border-radius:14px;background:rgba(255,195,103,.12);border:1px solid rgba(255,195,103,.18);color:#ffd08a;font-size:13px
+}
+.mobile-nav{
+  position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
+  z-index:10;display:none;gap:6px;padding:8px;border-radius:24px;
+  background:rgba(8,17,31,.92);border:1px solid var(--border);backdrop-filter:blur(18px)
+}
+.mobile-nav button{
+  border:none;background:transparent;color:var(--muted);padding:10px 12px;border-radius:16px;cursor:pointer;font:inherit
+}
+.mobile-nav button.active{color:var(--text);background:linear-gradient(135deg,rgba(106,168,255,.22),rgba(95,224,211,.1))}
+@media (max-width:1100px){
+  .hero,.content,.grid-2,.history-grid,.report-grid,.toolbar,.call-columns,.automation-grid{grid-template-columns:1fr}
+  .metrics,.stats-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:780px){
+  .app{padding:12px 12px 96px}
+  .topbar,.hero,.content{padding:16px}
+  .content{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .mobile-nav{display:flex}
+  .hero-main h1{font-size:34px}
+  .metrics,.stats-grid,.quick-grid,.grid-3{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <span class="badge">SETEC + rotina pessoal</span>
+    <h1>SETEC Hub</h1>
+    <p>Uma base inspirada no Finanza, agora adaptada para seu dia como Jefferson na URE Itapeva. O acesso abaixo e os dados ficam salvos neste navegador.</p>
+    <form class="login-form" id="loginForm">
+      <input type="text" id="loginName" placeholder="Seu nome" value="Jefferson">
+      <input type="password" id="loginPin" placeholder="PIN local" value="1234">
+      <button class="primary-btn" type="submit">Entrar no painel</button>
+    </form>
+    <div class="alert">Primeiro acesso: nome Jefferson e PIN 1234. Depois voce pode mudar isso na area Conta.</div>
+  </div>
+</div>
+
+<div class="app">
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">SH</div>
+        <div class="brand-copy">
+          <small>Jefferson | URE Itapeva</small>
+          <strong>SETEC Hub</strong>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="chip" id="welcomeChip">Bem-vindo</div>
+        <div class="chip" id="dateChip">--</div>
+        <div class="chip" id="clockChip">--:--</div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-main">
+        <span class="badge">Base visual inspirada no Finanza</span>
+        <h1>Seu fluxo inteiro de trabalho em uma central so.</h1>
+        <p>Agenda, ponto, atendimentos, escolas, ativos, historico e relatorios em uma interface unica. A base esta personalizada para voce, com armazenamento local e estrutura pronta para publicar no GitHub Pages.</p>
+        <div class="metrics">
+          <div class="metric"><span>Pendentes</span><strong id="metricPending">0</strong></div>
+          <div class="metric"><span>Concluidas</span><strong id="metricDone">0</strong></div>
+          <div class="metric"><span>Chamados</span><strong id="metricCalls">0</strong></div>
+          <div class="metric"><span>Banco horas</span><strong id="metricBank">0h</strong></div>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="card">
+          <div class="focus-title">
+            <h2>Foco do dia</h2>
+            <span class="badge" id="focusBadge">organizar</span>
+          </div>
+          <div class="focus-main">
+            <strong id="focusTitle">Montar a rota e abrir o dia</strong>
+            <p id="focusText">Seu proximo item aparece aqui conforme voce organiza a agenda.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="focus-title">
+            <h2>Acoes rapidas</h2>
+            <span class="badge">persistencia local</span>
+          </div>
+          <div class="quick-grid">
+            <button class="action-btn" data-target="agenda">Nova tarefa<span>Agenda e prioridades</span></button>
+            <button class="action-btn" data-target="atendimentos">Novo chamado<span>Fluxo tecnico</span></button>
+            <button class="action-btn" data-target="relatorios">Gerar relatorio<span>Resumo do dia</span></button>
+            <button class="action-btn" data-target="conta">Conta e backup<span>Publicacao e dados</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="content">
+      <aside class="sidebar">
+        <div class="hero-main nav-wrap">
+          <button class="nav-btn active" data-page="painel"><span>Painel</span><span>01</span></button>
+          <button class="nav-btn" data-page="agenda"><span>Agenda</span><span>02</span></button>
+          <button class="nav-btn" data-page="atendimentos"><span>Atendimentos</span><span>03</span></button>
+          <button class="nav-btn" data-page="escolas"><span>Escolas</span><span>04</span></button>
+          <button class="nav-btn" data-page="ativos"><span>Ativos</span><span>05</span></button>
+          <button class="nav-btn" data-page="relatorios"><span>Relatorios</span><span>06</span></button>
+          <button class="nav-btn" data-page="conta"><span>Conta</span><span>07</span></button>
+        </div>
+        <div class="sidebar-card">
+          <h3>Modo atual</h3>
+          <p>Esta versao funciona como um app local de produtividade e operacao tecnica. Voce pode usar agora, ajustar sua identidade e publicar online em seguida.</p>
+        </div>
+        <div class="sidebar-card">
+          <h3>Semana</h3>
+          <div class="meta-row" id="weekBadges"></div>
+        </div>
+        <div class="sidebar-card">
+          <h3>Dados oficiais</h3>
+          <p id="officeContact"></p>
+        </div>
+      </aside>
+
+      <main class="pages">
+        <section class="page active" id="page-painel">
+          <div class="grid-2">
+            <div class="stack">
+              <div class="section-card">
+                <div class="section-head">
+                  <div>
+                    <h2>Linha do dia</h2>
+                    <p>Visao cronologica da sua operacao.</p>
+                  </div>
+                  <button class="ghost-btn" data-target="agenda">Abrir agenda</button>
+                </div>
+                <div class="list" id="timelineList"></div>
+              </div>
+
+              <div class="section-card">
+                <div class="section-head">
+                  <div>
+                    <h2>Checklist de abertura</h2>
+                    <p>Rotina rapida para nao comecar o dia no improviso.</p>
+                  </div>
+                </div>
+                <div class="list" id="checklistList"></div>
+              </div>
+            </div>
+
+            <div class="stack">
+              <div class="section-card">
+                <div class="section-head">
+                  <div>
+                    <h2>Ponto do dia</h2>
+                    <p>Registro simples da jornada.</p>
+                  </div>
+                </div>
+                <div class="stats-grid">
+                  <div class="report-card">
+                    <span class="badge">entrada</span>
+                    <h3 id="entryTime">--:--</h3>
+                  </div>
+                  <div class="report-card">
+                    <span class="badge">saida</span>
+                    <h3 id="exitTime">--:--</h3>
+                  </div>
+                  <div class="report-card">
+                    <span class="badge">total</span>
+                    <h3 id="workedToday">0h00</h3>
+                  </div>
+                </div>
+                <div class="quick-grid" style="margin-top:14px">
+                  <button class="action-btn" onclick="stampPonto('entrada')">Registrar entrada<span>Inicio da jornada</span></button>
+                  <button class="action-btn" onclick="stampPonto('saida')">Registrar saida<span>Fim da jornada</span></button>
+                </div>
+              </div>
+
+              <div class="section-card">
+                <div class="section-head">
+                  <div>
+                    <h2>Escolas em atencao</h2>
+                    <p>Locais que pedem acao hoje.</p>
+                  </div>
+                </div>
+                <div class="list" id="routeList"></div>
+              </div>
+
+              <div class="section-card">
+                <div class="section-head">
+                  <div>
+                    <h2>Base oficial da Diretoria</h2>
+                    <p>Municipios e escolas puxados do portal da DE Itapeva.</p>
+                  </div>
+                </div>
+                <div class="list" id="officialList"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-agenda">
+          <div class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>Agenda e prioridades</h2>
+                <p>Tarefas do dia, deslocamentos, reunioes e entregas.</p>
+              </div>
+            </div>
+            <form class="form-grid" id="taskForm">
+              <input type="text" id="taskTitle" placeholder="Ex: Visitar EE Prof. Ariovaldo">
+              <input type="time" id="taskTime">
+              <select id="taskPriority">
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baixa">Baixa</option>
+              </select>
+              <input type="text" id="taskPlace" placeholder="Escola, setor ou local">
+              <select id="taskCategory">
+                <option value="Visita">Visita</option>
+                <option value="Suporte">Suporte</option>
+                <option value="Relatorio">Relatorio</option>
+                <option value="Reuniao">Reuniao</option>
+                <option value="Planejamento">Planejamento</option>
+              </select>
+              <button class="primary-btn" type="submit">Adicionar</button>
+            </form>
+            <div class="list" id="taskList" style="margin-top:14px"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-atendimentos">
+          <div class="stack">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Fluxo de atendimentos</h2>
+                  <p>Do chamado aberto ate o resolvido, com historico.</p>
+                </div>
+              </div>
+              <form class="toolbar" id="callForm">
+                <input type="text" id="callTitle" placeholder="Ex: Internet oscilando no laboratorio">
+                <input type="text" id="callSchool" placeholder="Escola ou setor">
+                <button class="primary-btn" type="submit">Criar chamado</button>
+              </form>
+            </div>
+            <div class="call-columns" id="callColumns"></div>
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Historico de atendimentos</h2>
+                  <p>Registro rapido das ultimas movimentacoes.</p>
+                </div>
+              </div>
+              <div class="list" id="callHistoryList"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-escolas">
+          <div class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>Base de escolas</h2>
+                <p>Status, observacoes e criacao de tarefas a partir da escola.</p>
+              </div>
+            </div>
+            <form class="toolbar" id="schoolForm">
+              <input type="text" id="schoolName" placeholder="Nome da escola">
+              <input type="text" id="schoolZone" placeholder="Bairro ou regiao">
+              <button class="primary-btn" type="submit">Adicionar escola</button>
+            </form>
+            <div class="list" id="schoolList" style="margin-top:14px"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-ativos">
+          <div class="section-card">
+            <div class="section-head">
+              <div>
+                <h2>Inventario de ativos</h2>
+                <p>Controle rapido para manutencao, defeito e status OK.</p>
+              </div>
+            </div>
+            <form class="toolbar" id="assetForm">
+              <input type="text" id="assetName" placeholder="Ex: Notebook #0012">
+              <input type="text" id="assetPlace" placeholder="Escola ou local">
+              <button class="primary-btn" type="submit">Adicionar ativo</button>
+            </form>
+            <div class="list" id="assetList" style="margin-top:14px"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-relatorios">
+          <div class="stack">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Resumo do dia</h2>
+                  <p>Gere uma leitura rapida do seu andamento.</p>
+                </div>
+                <button class="primary-btn" id="exportSummaryBtn" type="button">Exportar resumo</button>
+              </div>
+              <div class="report-grid">
+                <div class="report-card">
+                  <span class="badge">agenda</span>
+                  <h3 id="reportTasks">0</h3>
+                  <div class="muted">tarefas registradas</div>
+                  <div class="progress"><span id="taskProgressBar" style="width:0%"></span></div>
+                </div>
+                <div class="report-card">
+                  <span class="badge">atendimentos</span>
+                  <h3 id="reportCalls">0</h3>
+                  <div class="muted">chamados em aberto e rota</div>
+                </div>
+                <div class="report-card">
+                  <span class="badge">escolas</span>
+                  <h3 id="reportCriticalSchools">0</h3>
+                  <div class="muted">escolas em atencao ou criticas</div>
+                </div>
+                <div class="report-card">
+                  <span class="badge">ativos</span>
+                  <h3 id="reportAssets">0</h3>
+                  <div class="muted">itens em manutencao ou defeito</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="history-grid">
+              <div class="section-card">
+                <div class="section-head">
+                  <div>
+                    <h2>Historico de visitas</h2>
+                    <p>Acoes convertidas a partir das escolas.</p>
+                  </div>
+                </div>
+                <div class="list" id="visitHistoryList"></div>
+              </div>
+              <div class="section-card">
+                <div class="section-head">
+                  <div>
+                    <h2>Notas operacionais</h2>
+                    <p>Lembretes, acessos e contexto rapido.</p>
+                  </div>
+                </div>
+                <form class="stack" id="noteForm">
+                  <input type="text" id="noteTitle" placeholder="Titulo da nota">
+                  <textarea id="noteBody" placeholder="Escreva o que precisa ficar visivel durante o dia..."></textarea>
+                  <button class="primary-btn" type="submit">Salvar nota</button>
+                </form>
+                <div class="list" id="noteList" style="margin-top:14px"></div>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Automacao de redes</h2>
+                  <p>Prepara o lote no SETEC Hub e executa a etapa Word/PDF com o script local do Windows.</p>
+                </div>
+                <a class="ghost-btn" href="./tools/processar_redes.ps1" download="processar_redes.ps1">Baixar script PowerShell</a>
+              </div>
+              <div class="automation-grid" style="margin-top:14px">
+                <div class="stack">
+                  <div class="report-card">
+                    <div class="section-head">
+                      <div>
+                        <h2>Lote e placeholders</h2>
+                        <p>Use o mesmo padrao de nome: Rede nº 296/26 Data: 23/04/2026.</p>
+                      </div>
+                    </div>
+                    <form class="stack" id="redeAutomationForm">
+                      <input type="text" id="redeFolderPath" placeholder="C:\\Pasta\\Das\\Redes">
+                      <div class="grid-3">
+                        <input type="text" id="redeYearSuffix" placeholder="Sufixo do ano">
+                        <input type="text" id="redeNumberPlaceholder" placeholder="{{REDE_NUMERO}}">
+                        <input type="text" id="redeDatePlaceholder" placeholder="{{REDE_DATA}}">
+                      </div>
+                      <div class="grid-2">
+                        <input type="text" id="redeHeadingPlaceholder" placeholder="{{REDE_CABECALHO}}">
+                        <input type="text" id="redeAssuntoLabel" placeholder="Assunto:">
+                      </div>
+                      <div class="inline-actions">
+                        <button class="primary-btn" type="submit">Salvar configuracao</button>
+                        <button class="ghost-btn" id="copyRedeCommandBtn" type="button">Copiar comando</button>
+                        <button class="ghost-btn" id="exportRedeBatchBtn" type="button">Exportar lote JSON</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div class="report-card">
+                    <div class="section-head">
+                      <div>
+                        <h2>Pre-visualizacao da pasta</h2>
+                        <p>Selecione uma pasta de documentos para conferir sequencia, data e novo nome.</p>
+                      </div>
+                    </div>
+                    <label class="ghost-btn" for="redeFolderInput" style="display:flex;justify-content:center">Selecionar pasta das redes</label>
+                    <input type="file" id="redeFolderInput" accept=".doc,.docx" webkitdirectory multiple class="hidden">
+                    <div class="preview-list" id="redePreviewList"></div>
+                  </div>
+                </div>
+
+                <div class="stack">
+                  <div class="report-card">
+                    <span class="badge">execucao</span>
+                    <h3 style="margin-top:10px">Comando pronto para rodar</h3>
+                    <div class="muted" style="margin-top:8px">O navegador prepara o lote; o script PowerShell faz renomeio, Word, PDF, captura do Assunto e fechamento do arquivo.</div>
+                    <textarea class="code-field" id="redeCommand" readonly></textarea>
+                  </div>
+                  <div class="report-card">
+                    <span class="badge">como funciona</span>
+                    <div class="muted" style="margin-top:10px">
+                      1. Informe a pasta e os placeholders usados no modelo do Word.<br>
+                      2. Confira a pasta pela pre-visualizacao.<br>
+                      3. Rode o comando copiado no PowerShell.<br>
+                      4. O script renomeia para a sequencia, preenche numero/data, salva em PDF, copia o Assunto para CSV/clipboard e fecha o Word.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="page" id="page-conta">
+          <div class="grid-2">
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Conta e identidade</h2>
+                  <p>Personalize nome exibido, unidade e PIN local.</p>
+                </div>
+              </div>
+              <form class="stack" id="profileForm">
+                <input type="text" id="profileName" placeholder="Seu nome">
+                <input type="text" id="profileUnit" placeholder="Unidade">
+                <input type="password" id="profilePin" placeholder="Novo PIN local">
+                <button class="primary-btn" type="submit">Salvar perfil</button>
+              </form>
+            </div>
+
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Banco local e publicacao</h2>
+                  <p>Backup, importacao e preparo para GitHub Pages.</p>
+                </div>
+              </div>
+              <div class="stack">
+                <button class="ghost-btn" id="backupBtn" type="button">Baixar backup JSON</button>
+                <label class="ghost-btn" for="restoreInput" style="display:flex;justify-content:center">Importar backup JSON</label>
+                <input type="file" id="restoreInput" accept=".json" class="hidden">
+                <button class="ghost-btn" id="logoutBtn" type="button">Sair da conta local</button>
+                <button class="ghost-btn" id="resetBtn" type="button">Restaurar dados de exemplo</button>
+                <div class="alert">Para publicar: use o arquivo index.html da pasta e ative GitHub Pages no repositiorio. O app ja foi preparado para essa estrutura.</div>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Links oficiais</h2>
+                  <p>Atalhos uteis da DE Itapeva.</p>
+                </div>
+              </div>
+              <div class="list" id="officialLinksList"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button class="active" data-page="painel">Painel</button>
+  <button data-page="agenda">Agenda</button>
+  <button data-page="atendimentos">Fluxo</button>
+  <button data-page="relatorios">Relatorios</button>
+  <button data-page="conta">Conta</button>
+</nav>
+
+<script>
+const STORAGE_KEY = "setec-hub-v2";
+const SESSION_KEY = "setec-hub-session";
+
+const defaults = {
+  profile: {
+    name: "Jefferson",
+    unit: "SETEC | URE Itapeva",
+    pin: "1234"
+  },
+  office: {
+    title: "Unidade Regional de Ensino de Itapeva - URE",
+    address: "Rua Torquato Raimundo, 96 - Jardim Ferrari - Itapeva/SP",
+    phone: "(15) 3526-6200",
+    email: "deitv@educacao.sp.gov.br"
+  },
+  officialLinks: [
+    { id: 1, label: "Portal DE Itapeva", url: "https://deitapeva.educacao.sp.gov.br/" },
+    { id: 2, label: "Mapa das Escolas", url: "https://deitapeva.educacao.sp.gov.br/mapa-das-escolas/" },
+    { id: 3, label: "Lista de Ramais", url: "https://deitapeva.educacao.sp.gov.br/lista-de-ramais/" },
+    { id: 4, label: "Itapeva em numeros", url: "https://deitapeva.educacao.sp.gov.br/unidade-regional-de-ensino-de-itapeva-em-numeros/" }
+  ],
+  officialRegions: [
+    { city: "Itapeva", total: 10 },
+    { city: "Capao Bonito", total: 4 },
+    { city: "Ribeirao Grande", total: 3 },
+    { city: "Nova Campina", total: 2 },
+    { city: "Buri", total: 1 },
+    { city: "Taquarivai", total: 1 }
+  ],
+  tasks: [
+    { id: 1, title: "Planejar rota das escolas com pendencia", time: "08:10", priority: "alta", place: "URE Itapeva", category: "Planejamento", done: false },
+    { id: 2, title: "Visitar EE Prof. Ariovaldo Lima", time: "09:30", priority: "alta", place: "Jd. Sao Paulo", category: "Visita", done: false },
+    { id: 3, title: "Fechar relatorio de equipamentos", time: "15:00", priority: "media", place: "Escritorio", category: "Relatorio", done: false }
+  ],
+  calls: [
+    { id: 11, title: "Internet oscilando no laboratorio", school: "EE Prof. Ariovaldo Lima", status: "aberto" },
+    { id: 12, title: "Desktop sem video", school: "EE Rural Santa Cruz", status: "em_rota" },
+    { id: 13, title: "Antivirus atualizado", school: "EE Cel. Siqueira Campos", status: "resolvido" }
+  ],
+  schools: [
+    { id: 21, name: "PEI EE Idalicio Mendes Lima", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 22, name: "PEI EE Antonio Deffune", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 23, name: "PEI EE Cinira Daniel da Silva", zone: "Itapeva", status: "atencao", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 24, name: "EE Gerson de Barros Margarido", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 25, name: "PEI EE Jeminiano David Muzel", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 26, name: "PEI EE Jose Vasques Ferrari", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 27, name: "PEI EE Nicota Soares", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 28, name: "PEI EE Otavio Ferrari", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 29, name: "EE Silverio Monteiro", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 30, name: "PEI EE Zulmira de Oliveira", zone: "Itapeva", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 31, name: "PEI EE Padre Arlindo Vieira", zone: "Capao Bonito", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 32, name: "EE Bairro Turvo dos Almeidas", zone: "Capao Bonito", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 33, name: "EE Dr. Raul Venturelli", zone: "Capao Bonito", status: "atencao", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 34, name: "PEI EE Joao B. do Amaral Vasconcellos", zone: "Capao Bonito", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 35, name: "PEI EE Oscar Kurtz Camargo", zone: "Ribeirao Grande", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 36, name: "EE Bairro Boa Vista Intervales", zone: "Ribeirao Grande", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 37, name: "EE Bairro Ferreira dos Matos", zone: "Ribeirao Grande", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 38, name: "PEI EE Simpliciano Campolim de Almeida", zone: "Nova Campina", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 39, name: "PEI EE Ricardo Campolim de Almeida Neto", zone: "Nova Campina", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 40, name: "PEI EE Francelina Franco", zone: "Buri", status: "critico", notes: "Escola listada no portal oficial da DE Itapeva." },
+    { id: 41, name: "PEI EE Celia Vasques Ferrari Duch", zone: "Taquarivai", status: "estavel", notes: "Escola listada no portal oficial da DE Itapeva." }
+  ],
+  assets: [
+    { id: 31, name: "Notebook #0012", place: "URE Itapeva", status: "ok" },
+    { id: 32, name: "Impressora #0031", place: "EE Prof. Ariovaldo Lima", status: "manutencao" },
+    { id: 33, name: "Desktop #0048", place: "EE Rural Santa Cruz", status: "defeito" }
+  ],
+  notes: [
+    { id: 41, title: "Contato transporte", body: "Confirmar carro antes das visitas fora do centro." },
+    { id: 42, title: "Prioridade do mes", body: "Manter escolas por criticidade e organizar historico de atendimentos." }
+  ],
+  checklist: [
+    { id: 51, title: "Verificar escolas com chamado aberto", done: true },
+    { id: 52, title: "Conferir agenda e deslocamentos", done: false },
+    { id: 53, title: "Atualizar ativos em manutencao", done: false }
+  ],
+  ponto: {
+    entrada: "",
+    saida: ""
+  },
+  histories: {
+    calls: [
+      { id: 61, text: "Chamado movido para em rota na EE Rural Santa Cruz", when: "Hoje" }
+    ],
+    visits: [
+      { id: 71, text: "Visita prevista para EE Prof. Ariovaldo Lima", when: "Hoje" }
+    ]
+  },
+  redes: {
+    folderPath: "",
+    yearSuffix: "26",
+    numberPlaceholder: "{{REDE_NUMERO}}",
+    datePlaceholder: "{{REDE_DATA}}",
+    headingPlaceholder: "{{REDE_CABECALHO}}",
+    assuntoLabel: "Assunto:"
+  }
+};
+
+let state = loadState();
+let activePage = "painel";
+let redePreview = [];
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved) return mergeState(saved);
+  } catch (error) {}
+  return structuredClone(defaults);
+}
+
+function mergeState(saved) {
+  const base = structuredClone(defaults);
+  return {
+    profile: { ...base.profile, ...(saved.profile || {}) },
+    office: { ...base.office, ...(saved.office || {}) },
+    officialLinks: saved.officialLinks || base.officialLinks,
+    officialRegions: saved.officialRegions || base.officialRegions,
+    tasks: saved.tasks || base.tasks,
+    calls: saved.calls || base.calls,
+    schools: saved.schools || base.schools,
+    assets: saved.assets || base.assets,
+    notes: saved.notes || base.notes,
+    checklist: saved.checklist || base.checklist,
+    ponto: { ...base.ponto, ...(saved.ponto || {}) },
+    histories: {
+      calls: (saved.histories && saved.histories.calls) || base.histories.calls,
+      visits: (saved.histories && saved.histories.visits) || base.histories.visits
+    },
+    redes: { ...base.redes, ...(saved.redes || {}) }
+  };
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function uid() {
+  return Date.now() + Math.floor(Math.random() * 1000);
+}
+
+function toneByPriority(priority) {
+  if (priority === "alta") return "p-rose";
+  if (priority === "media") return "p-gold";
+  return "p-cyan";
+}
+
+function toneBySchool(status) {
+  if (status === "critico") return "p-rose";
+  if (status === "atencao") return "p-gold";
+  return "p-green";
+}
+
+function toneByAsset(status) {
+  if (status === "defeito") return "p-rose";
+  if (status === "manutencao") return "p-gold";
+  return "p-green";
+}
+
+function toneByCall(status) {
+  if (status === "aberto") return "p-rose";
+  if (status === "em_rota") return "p-gold";
+  return "p-green";
+}
+
+function goToPage(page) {
+  activePage = page;
+  document.querySelectorAll(".page").forEach((item) => item.classList.toggle("active", item.id === "page-" + page));
+  document.querySelectorAll(".nav-btn").forEach((item) => item.classList.toggle("active", item.dataset.page === page));
+  document.querySelectorAll("#mobileNav button").forEach((item) => item.classList.toggle("active", item.dataset.page === page));
+}
+
+function setClock() {
+  const now = new Date();
+  document.getElementById("clockChip").textContent = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  document.getElementById("dateChip").textContent = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+}
+
+function updateIdentity() {
+  document.getElementById("welcomeChip").textContent = state.profile.name + " | " + state.profile.unit;
+  document.querySelector(".brand-copy small").textContent = state.profile.name + " | " + state.profile.unit;
+  document.getElementById("profileName").value = state.profile.name;
+  document.getElementById("profileUnit").value = state.profile.unit;
+  document.getElementById("profilePin").value = state.profile.pin;
+  document.getElementById("officeContact").innerHTML = state.office.title + "<br>" + state.office.address + "<br>" + state.office.phone + "<br>" + state.office.email;
+}
+
+function workedMinutes() {
+  if (!state.ponto.entrada || !state.ponto.saida) return 0;
+  const start = toMinutes(state.ponto.entrada);
+  const end = toMinutes(state.ponto.saida);
+  return Math.max(end - start, 0);
+}
+
+function toMinutes(hhmm) {
+  const parts = hhmm.split(":").map(Number);
+  return parts[0] * 60 + parts[1];
+}
+
+function minutesLabel(value) {
+  const hours = Math.floor(value / 60);
+  const minutes = value % 60;
+  return hours + "h" + String(minutes).padStart(2, "0");
+}
+
+function renderMetrics() {
+  const done = state.tasks.filter((item) => item.done).length;
+  const pending = state.tasks.length - done;
+  const openCalls = state.calls.filter((item) => item.status !== "resolvido").length;
+  const bank = workedMinutes() - 480;
+  document.getElementById("metricPending").textContent = pending;
+  document.getElementById("metricDone").textContent = done;
+  document.getElementById("metricCalls").textContent = openCalls;
+  document.getElementById("metricBank").textContent = (bank >= 0 ? "+" : "") + minutesLabel(Math.abs(bank));
+
+  const nextTask = state.tasks.filter((item) => !item.done).sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"))[0];
+  if (nextTask) {
+    document.getElementById("focusBadge").textContent = nextTask.priority;
+    document.getElementById("focusTitle").textContent = nextTask.title;
+    document.getElementById("focusText").textContent = (nextTask.time || "Sem horario") + " | " + nextTask.place + " | " + nextTask.category;
+  } else {
+    document.getElementById("focusBadge").textContent = "leve";
+    document.getElementById("focusTitle").textContent = "Agenda principal concluida";
+    document.getElementById("focusText").textContent = "Use o restante do dia para registrar novas demandas, fechar notas ou montar o proximo dia.";
+  }
+}
+
+function renderWeekBadges() {
+  const badges = [
+    state.tasks.filter((item) => !item.done).length + " pendentes",
+    state.calls.filter((item) => item.status === "aberto").length + " abertos",
+    state.assets.filter((item) => item.status !== "ok").length + " ativos criticos"
+  ];
+  document.getElementById("weekBadges").innerHTML = badges.map((item) => `<span class="badge">${item}</span>`).join("");
+}
+
+function renderTimeline() {
+  const list = document.getElementById("timelineList");
+  const sorted = state.tasks.slice().sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+  list.innerHTML = sorted.map((task, index) => `
+    <div class="timeline-item">
+      <div class="timeline-time">${task.time || "--:--"}</div>
+      <div class="timeline-dot ${task.done ? "done" : index === 0 ? "live" : ""}"></div>
+      <div>
+        <h3 class="${task.done ? "done" : ""}">${task.title}</h3>
+        <div class="muted">${task.place} | ${task.category}</div>
+      </div>
+    </div>
+  `).join("") || `<div class="muted">Sem tarefas cadastradas.</div>`;
+}
+
+function renderChecklist() {
+  const list = document.getElementById("checklistList");
+  list.innerHTML = state.checklist.map((item) => `
+    <div class="list-item">
+      <div class="task-left">
+        <button class="check ${item.done ? "done" : ""}" onclick="toggleChecklist(${item.id})">${item.done ? "✓" : ""}</button>
+        <div>
+          <h3>${item.title}</h3>
+          <div class="muted">${item.done ? "Conferido no dia" : "Ainda nao executado"}</div>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderPonto() {
+  document.getElementById("entryTime").textContent = state.ponto.entrada || "--:--";
+  document.getElementById("exitTime").textContent = state.ponto.saida || "--:--";
+  document.getElementById("workedToday").textContent = minutesLabel(workedMinutes());
+}
+
+function renderRoutes() {
+  const list = document.getElementById("routeList");
+  const items = state.schools.filter((item) => item.status !== "estavel");
+  list.innerHTML = (items.length ? items : state.schools).slice(0, 4).map((school) => `
+    <div class="school-card">
+      <div class="item-head">
+        <div>
+          <h3>${school.name}</h3>
+          <div class="muted">${school.zone}</div>
+        </div>
+        <span class="pill ${toneBySchool(school.status)}">${school.status}</span>
+      </div>
+      <div class="muted">${school.notes}</div>
+      <div class="meta-row">
+        <button class="mini-btn" onclick="createTaskFromSchool(${school.id})">Criar tarefa</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderOfficialData() {
+  document.getElementById("officialList").innerHTML = state.officialRegions.map((item) => `
+    <div class="report-card">
+      <span class="badge">${item.city}</span>
+      <h3>${item.total}</h3>
+      <div class="muted">escola(s) listada(s) no portal oficial</div>
+    </div>
+  `).join("");
+
+  document.getElementById("officialLinksList").innerHTML = state.officialLinks.map((item) => `
+    <div class="history-card">
+      <h3>${item.label}</h3>
+      <div class="muted"><a href="${item.url}" target="_blank" rel="noreferrer" style="color:#9dc1ff">${item.url}</a></div>
+    </div>
+  `).join("");
+}
+
+function renderTasks() {
+  const list = document.getElementById("taskList");
+  const sorted = state.tasks.slice().sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+  list.innerHTML = sorted.map((task) => `
+    <div class="list-item">
+      <div class="task-head">
+        <div class="task-left">
+          <button class="check ${task.done ? "done" : ""}" onclick="toggleTask(${task.id})">${task.done ? "✓" : ""}</button>
+          <div>
+            <h3 class="${task.done ? "done" : ""}">${task.title}</h3>
+            <div class="muted">${task.time || "Sem horario"} | ${task.place} | ${task.category}</div>
+            <div class="meta-row">
+              <span class="pill ${toneByPriority(task.priority)}">${task.priority}</span>
+              <span class="pill p-blue">${task.category}</span>
+            </div>
+          </div>
+        </div>
+        <button class="mini-btn" onclick="removeTask(${task.id})">Remover</button>
+      </div>
+    </div>
+  `).join("") || `<div class="muted">Nenhuma tarefa adicionada ainda.</div>`;
+}
+
+function renderCalls() {
+  const columns = [
+    { key: "aberto", title: "Abertos" },
+    { key: "em_rota", title: "Em rota" },
+    { key: "resolvido", title: "Resolvidos" }
+  ];
+  document.getElementById("callColumns").innerHTML = columns.map((column) => `
+    <div class="column-card">
+      <h3>${column.title}</h3>
+      <div class="list">
+        ${state.calls.filter((item) => item.status === column.key).map((item) => `
+          <div class="call-card">
+            <div class="item-head">
+              <div>
+                <h3>${item.title}</h3>
+                <div class="muted">${item.school}</div>
+              </div>
+              <span class="pill ${toneByCall(item.status)}">${item.status.replace("_", " ")}</span>
+            </div>
+            <div class="meta-row">
+              <button class="mini-btn" onclick="advanceCall(${item.id})">Avancar</button>
+              <button class="mini-btn" onclick="removeCall(${item.id})">Remover</button>
+            </div>
+          </div>
+        `).join("") || `<div class="muted">Sem itens nesta etapa.</div>`}
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderCallHistory() {
+  const list = document.getElementById("callHistoryList");
+  list.innerHTML = state.histories.calls.map((item) => `
+    <div class="history-card">
+      <h3>${item.text}</h3>
+      <div class="subtle">${item.when}</div>
+    </div>
+  `).join("") || `<div class="muted">Nenhuma movimentacao ainda.</div>`;
+}
+
+function renderSchools() {
+  const list = document.getElementById("schoolList");
+  list.innerHTML = state.schools.map((school) => `
+    <div class="school-card">
+      <div class="item-head">
+        <div>
+          <h3>${school.name}</h3>
+          <div class="muted">${school.zone}</div>
+        </div>
+        <span class="pill ${toneBySchool(school.status)}">${school.status}</span>
+      </div>
+      <div class="muted">${school.notes}</div>
+      <div class="meta-row">
+        <button class="mini-btn" onclick="cycleSchool(${school.id})">Mudar status</button>
+        <button class="mini-btn" onclick="createTaskFromSchool(${school.id})">Criar tarefa</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderAssets() {
+  const list = document.getElementById("assetList");
+  list.innerHTML = state.assets.map((asset) => `
+    <div class="asset-card">
+      <div class="item-head">
+        <div>
+          <h3>${asset.name}</h3>
+          <div class="muted">${asset.place}</div>
+        </div>
+        <span class="pill ${toneByAsset(asset.status)}">${asset.status}</span>
+      </div>
+      <div class="meta-row">
+        <button class="mini-btn" onclick="cycleAsset(${asset.id})">Atualizar status</button>
+        <button class="mini-btn" onclick="removeAsset(${asset.id})">Remover</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderReports() {
+  const done = state.tasks.filter((item) => item.done).length;
+  const taskPercent = state.tasks.length ? Math.round((done / state.tasks.length) * 100) : 0;
+  document.getElementById("reportTasks").textContent = state.tasks.length;
+  document.getElementById("reportCalls").textContent = state.calls.filter((item) => item.status !== "resolvido").length;
+  document.getElementById("reportCriticalSchools").textContent = state.schools.filter((item) => item.status !== "estavel").length;
+  document.getElementById("reportAssets").textContent = state.assets.filter((item) => item.status !== "ok").length;
+  document.getElementById("taskProgressBar").style.width = taskPercent + "%";
+  renderRedeAutomation();
+}
+
+function renderVisitHistory() {
+  const list = document.getElementById("visitHistoryList");
+  list.innerHTML = state.histories.visits.map((item) => `
+    <div class="history-card">
+      <h3>${item.text}</h3>
+      <div class="subtle">${item.when}</div>
+    </div>
+  `).join("") || `<div class="muted">Nenhuma visita registrada ainda.</div>`;
+}
+
+function renderNotes() {
+  const list = document.getElementById("noteList");
+  list.innerHTML = state.notes.map((note) => `
+    <div class="note-card">
+      <div class="item-head">
+        <h3>${note.title}</h3>
+        <button class="mini-btn" onclick="removeNote(${note.id})">Remover</button>
+      </div>
+      <div class="muted">${note.body}</div>
+    </div>
+  `).join("") || `<div class="muted">Nenhuma nota salva.</div>`;
+}
+
+function toggleTask(id) {
+  state.tasks = state.tasks.map((item) => item.id === id ? { ...item, done: !item.done } : item);
+  refresh();
+}
+
+function removeTask(id) {
+  state.tasks = state.tasks.filter((item) => item.id !== id);
+  refresh();
+}
+
+function toggleChecklist(id) {
+  state.checklist = state.checklist.map((item) => item.id === id ? { ...item, done: !item.done } : item);
+  refresh();
+}
+
+function advanceCall(id) {
+  const order = ["aberto", "em_rota", "resolvido"];
+  state.calls = state.calls.map((item) => {
+    if (item.id !== id) return item;
+    const next = order[Math.min(order.indexOf(item.status) + 1, order.length - 1)];
+    state.histories.calls.unshift({ id: uid(), text: item.title + " agora esta em " + next.replace("_", " "), when: "Agora" });
+    return { ...item, status: next };
+  });
+  refresh();
+}
+
+function removeCall(id) {
+  state.calls = state.calls.filter((item) => item.id !== id);
+  refresh();
+}
+
+function cycleSchool(id) {
+  const order = ["estavel", "atencao", "critico"];
+  state.schools = state.schools.map((item) => {
+    if (item.id !== id) return item;
+    const next = order[(order.indexOf(item.status) + 1) % order.length];
+    return { ...item, status: next };
+  });
+  refresh();
+}
+
+function createTaskFromSchool(id) {
+  const school = state.schools.find((item) => item.id === id);
+  if (!school) return;
+  state.tasks.unshift({
+    id: uid(),
+    title: "Acao na " + school.name,
+    time: "",
+    priority: school.status === "critico" ? "alta" : "media",
+    place: school.zone,
+    category: "Visita",
+    done: false
+  });
+  state.histories.visits.unshift({ id: uid(), text: "Tarefa criada para " + school.name, when: "Agora" });
+  refresh();
+  goToPage("agenda");
+}
+
+function cycleAsset(id) {
+  const order = ["ok", "manutencao", "defeito"];
+  state.assets = state.assets.map((item) => {
+    if (item.id !== id) return item;
+    const next = order[(order.indexOf(item.status) + 1) % order.length];
+    return { ...item, status: next };
+  });
+  refresh();
+}
+
+function removeAsset(id) {
+  state.assets = state.assets.filter((item) => item.id !== id);
+  refresh();
+}
+
+function removeNote(id) {
+  state.notes = state.notes.filter((item) => item.id !== id);
+  refresh();
+}
+
+function stampPonto(type) {
+  const value = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  state.ponto[type] = value;
+  refresh();
+}
+
+function exportJson() {
+  downloadFile("setec-hub-backup.json", JSON.stringify(state, null, 2), "application/json");
+}
+
+function exportSummary() {
+  const summary = [
+    "SETEC Hub | Resumo do dia",
+    "Responsavel: " + state.profile.name,
+    "Unidade: " + state.profile.unit,
+    "",
+    "Tarefas totais: " + state.tasks.length,
+    "Tarefas concluidas: " + state.tasks.filter((item) => item.done).length,
+    "Chamados abertos/em rota: " + state.calls.filter((item) => item.status !== "resolvido").length,
+    "Escolas em atencao/critico: " + state.schools.filter((item) => item.status !== "estavel").length,
+    "Ativos em manutencao/defeito: " + state.assets.filter((item) => item.status !== "ok").length,
+    "Ponto: " + (state.ponto.entrada || "--:--") + " ate " + (state.ponto.saida || "--:--")
+  ].join("\n");
+  downloadFile("resumo-setec.txt", summary, "text/plain");
+}
+
+function escapePowerShell(value) {
+  return String(value || "").replace(/'/g, "''");
+}
+
+function parseRedeFilename(filename, fallbackYearSuffix) {
+  const match = filename.match(/rede\s*n[ºo°]?\s*(\d+)(?:\s*\/\s*(\d{2,4}))?.*?data[:\s]*([0-3]\d\/[01]\d\/\d{4})/i);
+  if (!match) {
+    return {
+      originalName: filename,
+      valid: false,
+      reason: "Nome fora do padrao esperado."
+    };
+  }
+
+  const sequence = match[1];
+  const yearSuffix = match[2] || fallbackYearSuffix || "";
+  const date = match[3];
+  return {
+    originalName: filename,
+    valid: true,
+    sequence,
+    yearSuffix,
+    date,
+    networkNumber: yearSuffix ? `${sequence}/${yearSuffix}` : sequence,
+    renamedBase: sequence
+  };
+}
+
+function buildRedeCommand() {
+  const folderPath = state.redes.folderPath.trim();
+  if (!folderPath) {
+    return "Preencha o caminho da pasta para montar o comando do PowerShell.";
+  }
+
+  return [
+    "powershell -ExecutionPolicy Bypass -File .\\tools\\processar_redes.ps1",
+    `-SourceFolder '${escapePowerShell(folderPath)}'`,
+    `-YearSuffix '${escapePowerShell(state.redes.yearSuffix)}'`,
+    `-NumberPlaceholder '${escapePowerShell(state.redes.numberPlaceholder)}'`,
+    `-DatePlaceholder '${escapePowerShell(state.redes.datePlaceholder)}'`,
+    `-HeadingPlaceholder '${escapePowerShell(state.redes.headingPlaceholder)}'`,
+    `-AssuntoLabel '${escapePowerShell(state.redes.assuntoLabel)}'`
+  ].join(" ");
+}
+
+function renderRedePreview() {
+  const list = document.getElementById("redePreviewList");
+  if (!redePreview.length) {
+    list.innerHTML = `<div class="muted">Nenhuma pasta analisada ainda. Selecione uma pasta com arquivos Word para conferir o lote.</div>`;
+    return;
+  }
+
+  list.innerHTML = redePreview.map((item) => {
+    const tone = item.valid ? "status-ok" : "status-warn";
+    const headline = item.valid
+      ? `${item.renamedBase}${item.extension || ""} | Rede ${item.networkNumber} | ${item.date}`
+      : item.originalName;
+    const detail = item.valid
+      ? `Original: ${item.originalName}`
+      : item.reason;
+    return `
+      <div class="preview-item">
+        <strong><span class="status-dot ${tone}"></span>${headline}</strong>
+        <div class="subtle">${detail}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderRedeAutomation() {
+  document.getElementById("redeFolderPath").value = state.redes.folderPath;
+  document.getElementById("redeYearSuffix").value = state.redes.yearSuffix;
+  document.getElementById("redeNumberPlaceholder").value = state.redes.numberPlaceholder;
+  document.getElementById("redeDatePlaceholder").value = state.redes.datePlaceholder;
+  document.getElementById("redeHeadingPlaceholder").value = state.redes.headingPlaceholder;
+  document.getElementById("redeAssuntoLabel").value = state.redes.assuntoLabel;
+  document.getElementById("redeCommand").value = buildRedeCommand();
+  renderRedePreview();
+}
+
+function downloadFile(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function restoreState(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      state = mergeState(parsed);
+      saveState();
+      refresh();
+      alert("Backup importado com sucesso.");
+    } catch (error) {
+      alert("Nao foi possivel importar este arquivo.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function refresh() {
+  saveState();
+  updateIdentity();
+  renderMetrics();
+  renderWeekBadges();
+  renderTimeline();
+  renderChecklist();
+  renderPonto();
+  renderRoutes();
+  renderOfficialData();
+  renderTasks();
+  renderCalls();
+  renderCallHistory();
+  renderSchools();
+  renderAssets();
+  renderReports();
+  renderVisitHistory();
+  renderNotes();
+}
+
+document.getElementById("taskForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const title = document.getElementById("taskTitle").value.trim();
+  if (!title) return;
+  state.tasks.unshift({
+    id: uid(),
+    title,
+    time: document.getElementById("taskTime").value,
+    priority: document.getElementById("taskPriority").value,
+    place: document.getElementById("taskPlace").value.trim() || "Sem local definido",
+    category: document.getElementById("taskCategory").value,
+    done: false
+  });
+  event.target.reset();
+  refresh();
+});
+
+document.getElementById("callForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const title = document.getElementById("callTitle").value.trim();
+  const school = document.getElementById("callSchool").value.trim();
+  if (!title || !school) return;
+  state.calls.unshift({ id: uid(), title, school, status: "aberto" });
+  state.histories.calls.unshift({ id: uid(), text: "Novo chamado criado para " + school, when: "Agora" });
+  event.target.reset();
+  refresh();
+});
+
+document.getElementById("schoolForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = document.getElementById("schoolName").value.trim();
+  const zone = document.getElementById("schoolZone").value.trim();
+  if (!name || !zone) return;
+  state.schools.unshift({ id: uid(), name, zone, status: "atencao", notes: "Nova escola adicionada ao painel." });
+  event.target.reset();
+  refresh();
+});
+
+document.getElementById("assetForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = document.getElementById("assetName").value.trim();
+  const place = document.getElementById("assetPlace").value.trim();
+  if (!name || !place) return;
+  state.assets.unshift({ id: uid(), name, place, status: "ok" });
+  event.target.reset();
+  refresh();
+});
+
+document.getElementById("noteForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const title = document.getElementById("noteTitle").value.trim();
+  const body = document.getElementById("noteBody").value.trim();
+  if (!title || !body) return;
+  state.notes.unshift({ id: uid(), title, body });
+  event.target.reset();
+  refresh();
+});
+
+document.getElementById("redeAutomationForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  state.redes = {
+    folderPath: document.getElementById("redeFolderPath").value.trim(),
+    yearSuffix: document.getElementById("redeYearSuffix").value.trim() || "26",
+    numberPlaceholder: document.getElementById("redeNumberPlaceholder").value.trim() || "{{REDE_NUMERO}}",
+    datePlaceholder: document.getElementById("redeDatePlaceholder").value.trim() || "{{REDE_DATA}}",
+    headingPlaceholder: document.getElementById("redeHeadingPlaceholder").value.trim() || "{{REDE_CABECALHO}}",
+    assuntoLabel: document.getElementById("redeAssuntoLabel").value.trim() || "Assunto:"
+  };
+  saveState();
+  renderRedeAutomation();
+  alert("Configuracao de redes salva.");
+});
+
+document.getElementById("profileForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = document.getElementById("profileName").value.trim();
+  const unit = document.getElementById("profileUnit").value.trim();
+  const pin = document.getElementById("profilePin").value.trim();
+  if (!name || !unit || !pin) return;
+  state.profile = { name, unit, pin };
+  saveState();
+  refresh();
+  alert("Perfil atualizado.");
+});
+
+document.getElementById("loginForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = document.getElementById("loginName").value.trim();
+  const pin = document.getElementById("loginPin").value.trim();
+  if (name.toLowerCase() === state.profile.name.toLowerCase() && pin === state.profile.pin) {
+    sessionStorage.setItem(SESSION_KEY, "ok");
+    document.getElementById("loginScreen").classList.add("hidden");
+    return;
+  }
+  alert("Nome ou PIN invalido.");
+});
+
+document.getElementById("backupBtn").addEventListener("click", exportJson);
+document.getElementById("exportSummaryBtn").addEventListener("click", exportSummary);
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById("loginScreen").classList.remove("hidden");
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  state = structuredClone(defaults);
+  saveState();
+  refresh();
+});
+document.getElementById("restoreInput").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (file) restoreState(file);
+  event.target.value = "";
+});
+
+document.getElementById("copyRedeCommandBtn").addEventListener("click", async () => {
+  const command = buildRedeCommand();
+  try {
+    await navigator.clipboard.writeText(command);
+    alert("Comando copiado para a area de transferencia.");
+  } catch (error) {
+    alert("Nao foi possivel copiar automaticamente. O comando esta visivel no painel.");
+  }
+});
+
+document.getElementById("exportRedeBatchBtn").addEventListener("click", () => {
+  const batch = {
+    generatedAt: new Date().toISOString(),
+    config: state.redes,
+    preview: redePreview
+  };
+  downloadFile("setec-redes-lote.json", JSON.stringify(batch, null, 2), "application/json");
+});
+
+document.getElementById("redeFolderInput").addEventListener("change", (event) => {
+  const files = Array.from(event.target.files || []);
+  redePreview = files
+    .filter((file) => /\.(doc|docx)$/i.test(file.name))
+    .map((file) => {
+      const parsed = parseRedeFilename(file.name, state.redes.yearSuffix);
+      return {
+        ...parsed,
+        extension: file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : "",
+        relativePath: file.webkitRelativePath || file.name
+      };
+    })
+    .sort((a, b) => {
+      if (!a.valid && !b.valid) return a.originalName.localeCompare(b.originalName);
+      if (!a.valid) return 1;
+      if (!b.valid) return -1;
+      return Number(a.sequence) - Number(b.sequence);
+    });
+  renderRedePreview();
+  event.target.value = "";
+});
+
+document.querySelectorAll(".nav-btn, #mobileNav button").forEach((button) => {
+  button.addEventListener("click", () => goToPage(button.dataset.page));
+});
+
+document.querySelectorAll("[data-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.target) goToPage(button.dataset.target);
+  });
+});
+
+setClock();
+setInterval(setClock, 1000);
+refresh();
+
+if (sessionStorage.getItem(SESSION_KEY) === "ok") {
+  document.getElementById("loginScreen").classList.add("hidden");
+}
+</script>
+</body>
+</html>

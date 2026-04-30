@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" id="themeColorMeta" content="#08090d">
+<title>SETECHUB</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./setechub.css">
+</head>
+<body>
+<div id="setup" class="setup-screen">
+  <div class="setup-box setup-shell">
+    <section class="setup-story">
+      <div class="setup-head">
+        <div class="setup-copy-block">
+          <div class="setup-badge">Operacao tecnica organizada</div>
+          <div class="slogo"><span style="color:var(--ac)">setec</span><span style="color:var(--tx);font-weight:700">hub</span></div>
+          <div class="stag">Tudo o que aparece no seu dia de trabalho concentrado numa central local e pronta para crescer.</div>
+          <h1 class="setup-title">Seu fluxo tecnico com a cara do Finanza e foco total em SETEC.</h1>
+          <p class="setup-copy">Agenda, chamados, escolas, ativos, relatorios e automacao de redes em uma base unica. Os dados ficam salvos neste navegador e a estrutura ja nasce preparada para evoluir.</p>
+          <div class="setup-inline-preview">
+            <div class="setup-inline-head">
+              <strong>O que entra no seu fluxo</strong>
+              <span>Rotina operacional</span>
+            </div>
+            <div class="setup-inline-grid">
+              <div class="setup-inline-card">
+                <span>Hoje</span>
+                <strong id="setupTaskCount">0 tarefas</strong>
+                <small>prioridades e rota do dia</small>
+              </div>
+              <div class="setup-inline-card">
+                <span>Chamados</span>
+                <strong id="setupCallCount">0 em aberto</strong>
+                <small>fila de atendimento tecnico</small>
+              </div>
+              <div class="setup-inline-card">
+                <span>Atencao</span>
+                <strong id="setupSchoolCount">0 escolas</strong>
+                <small>visitas, ativos e alertas</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="setup-preview">
+          <div class="setup-preview-head">
+            <span class="setup-dot"></span><span class="setup-dot"></span><span class="setup-dot"></span>
+            <strong>Painel do dia</strong>
+          </div>
+          <div class="setup-kpis">
+            <div class="setup-kpi"><span>Checklist</span><strong id="setupChecklistCount">0 itens</strong></div>
+            <div class="setup-kpi"><span>Ativos</span><strong id="setupAssetCount">0 em observacao</strong></div>
+            <div class="setup-kpi"><span>Banco de horas</span><strong id="setupHours">0h</strong></div>
+          </div>
+          <div class="setup-rail">
+            <div class="setup-rail-card">
+              <div class="setup-rail-title">Fluxo principal</div>
+              <div class="setup-rail-line"><span>Organizar</span><strong>agenda e rota</strong></div>
+              <div class="setup-rail-line"><span>Atender</span><strong>chamados e escolas</strong></div>
+              <div class="setup-rail-line"><span>Fechar</span><strong>relatorio e backup</strong></div>
+            </div>
+            <div class="setup-rail-card accent">
+              <div class="setup-rail-title">Automacao</div>
+              <div class="setup-flow"><span>Receber</span><span>Padronizar</span><span>Exportar</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="setup-feature-grid">
+        <article class="setup-feature-card">
+          <strong>Painel operacional</strong>
+          <p>Visao do dia, metricas e foco atual sem espalhar informacao em varias planilhas.</p>
+        </article>
+        <article class="setup-feature-card">
+          <strong>Automacao de redes</strong>
+          <p>Configuracao, lote, pre-visualizacao e comando pronto para o PowerShell.</p>
+        </article>
+        <article class="setup-feature-card">
+          <strong>Base local pronta</strong>
+          <p>Salvamento no navegador, exportacao JSON e base organizada para evoluir depois.</p>
+        </article>
+      </div>
+    </section>
+    <aside class="setup-auth">
+      <div class="setup-auth-panel">
+        <div class="setup-auth-badge">Acesso local</div>
+        <div class="auth-title">Entrar no SETECHUB</div>
+        <div class="setup-auth-intro">Seu acesso fica salvo apenas neste navegador. Depois voce pode mudar nome, unidade e PIN na area de conta.</div>
+        <form id="loginForm">
+          <label class="slbl">Nome</label>
+          <input type="text" class="sinp" id="loginName" value="Jefferson" placeholder="Seu nome">
+          <label class="slbl">PIN</label>
+          <input type="password" class="sinp" id="loginPin" value="1234" placeholder="PIN local">
+          <div id="loginError" class="serr"></div>
+          <button class="sbtn" type="submit">Entrar no painel</button>
+        </form>
+        <div class="setup-auth-note">Primeiro acesso padrao: Jefferson / 1234.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<nav class="fnav" id="fnav">
+  <div class="fn-item active" data-page="dashboard"><span class="fni">📊</span>Inicio</div>
+  <div class="fn-item" data-page="schools"><span class="fni">🏫</span>Escolas</div>
+  <div class="fn-item" data-page="assets"><span class="fni">💻</span>Invent.</div>
+  <div class="fn-item acc-n" data-page="calls"><span class="fni">🔧</span>Cham.</div>
+</nav>
+
+<aside class="sidebar">
+  <div class="logo">
+    <span class="brand-word"><span style="color:var(--ac)">setec</span><span style="color:var(--tx)">hub</span></span>
+    <div class="logo-actions">
+      <button class="theme-btn" id="privBtn" onclick="togglePrivacy()" title="Ocultar metricas">PV</button>
+      <button class="theme-btn" id="thmBtn" onclick="toggleTheme()" title="Trocar tema">DK</button>
+    </div>
+  </div>
+  <div class="sb-search">
+    <span>🔍</span>
+    <input id="sidebarSearch" placeholder="Buscar tarefas, escolas, ativos..." oninput="handleSearch(this.value)">
+  </div>
+  <div class="nav-lbl">Menu</div>
+  <nav>
+    <div class="nav-item active" data-page="dashboard"><span class="ico">📊</span>Painel</div>
+    <div class="nav-item" data-page="schools"><span class="ico">🏫</span>Escolas</div>
+    <div class="nav-item" data-page="assets"><span class="ico">💻</span>Ativos</div>
+    <div class="nav-item an" data-page="calls"><span class="ico">🔧</span>Atendimentos</div>
+    <div class="nav-item" data-page="agenda"><span class="ico">🗓️</span>Agenda</div>
+    <div class="nav-item fn" data-page="reports"><span class="ico">📌</span>Relatorios</div>
+    <div class="nav-item sl-n" data-page="settings"><span class="ico">⚙️</span>Conta</div>
+  </nav>
+  <div class="sidebar-utility">
+    <div class="sidebar-card">
+      <div class="sidebar-card-head">
+        <div class="sidebar-card-kicker">Acesso rapido</div>
+      </div>
+      <div class="sidebar-icon-shortcuts">
+        <button class="sidebar-icon-btn" onclick="showPage('agenda')" title="Nova tarefa">📝</button>
+        <button class="sidebar-icon-btn" onclick="showPage('calls')" title="Novo chamado">📞</button>
+        <button class="sidebar-icon-btn" onclick="showPage('reports')" title="Automacao">🤖</button>
+      </div>
+    </div>
+    <div class="sidebar-mini-actions">
+      <button class="sidebar-mini-btn primary" onclick="focusFirstInput('taskTitle')">+ Tarefa</button>
+      <button class="sidebar-mini-btn" onclick="focusFirstInput('callTitle')">+ Chamado</button>
+    </div>
+  </div>
+  <div class="sb-bottom">
+    <div class="conn-wrap"></div>
+    <div class="made-by">base visual inspirada no <span>finanza</span></div>
+    <div class="acct-area">
+      <div class="acct-btn" onclick="showPage('settings')">
+        <div class="uavatar" id="uAvatar">JE</div>
+        <div style="flex:1;min-width:0;">
+          <div class="uname" id="uName">Jefferson</div>
+          <div class="urole" id="uRole">Operacao SETEC</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page active" id="page-dashboard">
+    <div class="ph">
+      <div>
+        <div class="pt">Painel Operacional</div>
+        <div class="ps">Centro do dia para organizar rota, chamados, escolas e fechamento.</div>
+      </div>
+      <div class="page-actions">
+        <div class="mnav"><button onclick="shiftFocusCard(-1)">‹</button><span class="mname" id="todayLabel">Hoje</span><button onclick="shiftFocusCard(1)">›</button></div>
+        <button class="btn btn-g btn-sm" onclick="showPage('settings')">Conta</button>
+        <button class="btn btn-p" onclick="showPage('agenda')">+ Nova tarefa</button>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-l">Pendentes</div>
+        <div class="insight-v private" id="metricPending">0</div>
+        <div class="sync-meta">tarefas abertas no dia</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Chamados ativos</div>
+        <div class="insight-v private" id="metricCalls">0</div>
+        <div class="sync-meta">abertos ou em rota</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Escolas em atencao</div>
+        <div class="insight-v private" id="metricSchools">0</div>
+        <div class="sync-meta">precisam de visita ou acao</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Banco de horas</div>
+        <div class="insight-v private" id="metricHours">0h</div>
+        <div class="sync-meta">saldo calculado do ponto</div>
+      </div>
+    </div>
+
+    <div class="setechub-command-grid dashboard-access-grid">
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Acesso por categoria</div><div class="cs">Tudo que importa no dia para cair direto na area certa.</div></div>
+        </div>
+        <div id="dashboardCategoryGrid" class="dashboard-category-grid"></div>
+      </section>
+      <section class="box dashboard-quick-box">
+        <div class="bh">
+          <div><div class="ct">Aberturas rapidas</div><div class="cs">Itens vivos para abrir escola, inventario, chamados e importacoes sem navegar.</div></div>
+        </div>
+        <div id="dashboardQuickLinks" class="stack-list"></div>
+      </section>
+    </div>
+
+    <div class="dash-widgets setechub-grid">
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Foco do dia</div><div class="cs">O item mais importante aparece aqui.</div></div>
+          <span class="diag-pill" id="focusBadge">Organizar</span>
+        </div>
+        <div class="hero-focus">
+          <div class="hero-title" id="focusTitle">Abrir o dia com rota e prioridades.</div>
+          <p class="hero-copy" id="focusText">Comece pelas escolas em atencao e pelo chamado que esta travando sua fila.</p>
+        </div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Escolas em atencao</div><div class="cs">Locais que pedem visita ou acompanhamento.</div></div>
+          <button class="btn btn-g btn-sm" onclick="openSchoolCategory('com_alerta')">Abrir escolas</button>
+        </div>
+        <div id="routeList" class="stack-list"></div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Inventario em alerta</div><div class="cs">Atalhos para o parque que precisa de acao agora.</div></div>
+          <button class="btn btn-g btn-sm" onclick="openInventoryCategory('alerta')">Abrir inventario</button>
+        </div>
+        <div id="dashboardInventoryAlerts" class="stack-list"></div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Chamados ativos</div><div class="cs">Fila viva para abrir direto no atendimento certo.</div></div>
+          <button class="btn btn-g btn-sm" onclick="openCallCategory('todos')">Abrir chamados</button>
+        </div>
+        <div id="dashboardCallQueue" class="stack-list"></div>
+      </section>
+    </div>
+
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Atalhos por recorte</div><div class="cs">Subcategorias clicaveis para chegar direto no filtro certo.</div></div>
+      </div>
+      <div id="dashboardDrilldownGrid" class="dashboard-drilldown-grid"></div>
+    </div>
+
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Fila de pendencias</div><div class="cs">O que ainda precisa ser revisado, confirmado ou preenchido na base.</div></div>
+      </div>
+      <div id="pendingQueueList" class="stack-list"></div>
+    </div>
+
+    <div class="setechub-command-grid">
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Saude da operacao</div><div class="cs">Leitura rapida da base, cobertura e fila viva.</div></div>
+        </div>
+        <div id="opsHealthPanel" class="stack-list"></div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Cobertura da base</div><div class="cs">Mostra onde o app ja esta rico em dados e onde ainda falta preencher.</div></div>
+        </div>
+        <div id="coverageGrid" class="setechub-monitor-grid"></div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Acoes sugeridas</div><div class="cs">Prioridades automaticas com base no que ja foi importado.</div></div>
+        </div>
+        <div id="opsSuggestionList" class="stack-list"></div>
+      </section>
+    </div>
+
+    <div class="dash-widgets setechub-grid">
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Linha do dia</div><div class="cs">Tarefas, chamados e movimento principal em ordem de ataque.</div></div>
+          <button class="btn btn-g btn-sm" onclick="showPage('agenda')">Abrir agenda</button>
+        </div>
+        <div id="timelineList" class="stack-list"></div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Checklist de abertura</div><div class="cs">Rotina curta para nao comecar no improviso.</div></div>
+        </div>
+        <div id="checklistList" class="stack-list"></div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Ponto do dia</div><div class="cs">Controle simples da jornada.</div></div>
+        </div>
+        <div class="setechub-split">
+          <div class="mini-stat"><span class="ms-l">Entrada</span><strong class="ms-val private" id="entryTime">--:--</strong></div>
+          <div class="mini-stat"><span class="ms-l">Saida</span><strong class="ms-val private" id="exitTime">--:--</strong></div>
+          <div class="mini-stat"><span class="ms-l">Total</span><strong class="ms-val private" id="workedToday">0h00</strong></div>
+        </div>
+        <div class="setechub-action-row">
+          <button class="btn btn-p" onclick="stampPonto('entrada')">Registrar entrada</button>
+          <button class="btn btn-g" onclick="stampPonto('saida')">Registrar saida</button>
+        </div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Importacoes recentes</div><div class="cs">Ultimas cargas para cair direto na escola e conferir os dados.</div></div>
+          <button class="btn btn-g btn-sm" onclick="openImportCategory('todos')">Abrir importacoes</button>
+        </div>
+        <div id="dashboardRecentImports" class="stack-list"></div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Cobertura regional</div><div class="cs">Municipios e distribuicao atual da base oficial.</div></div>
+        </div>
+        <div id="municipalityList" class="stack-list"></div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Base oficial</div><div class="cs">Links e referencias que voce usa no dia.</div></div>
+        </div>
+        <div id="officialList" class="stack-list"></div>
+      </section>
+
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Semana</div><div class="cs">Marcadores rapidos para orientar sua rotina.</div></div>
+        </div>
+        <div id="weekBadges" class="setechub-chip-row"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="page" id="page-agenda">
+    <div class="ph">
+      <div>
+        <div class="pt">Agenda e Prioridades</div>
+        <div class="ps">Planeje rota, visitas e tarefas criticas sem perder o contexto.</div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Nova tarefa</div><div class="cs">Crie uma prioridade ligada a local, horario e categoria.</div></div>
+      </div>
+      <form id="taskForm" class="setechub-form setechub-form-wide">
+        <input class="fi" id="taskTitle" placeholder="Tarefa ou acao">
+        <input class="fi" id="taskTime" type="time">
+        <select class="fi" id="taskPriority">
+          <option value="alta">Alta</option>
+          <option value="media" selected>Media</option>
+          <option value="baixa">Baixa</option>
+        </select>
+        <input class="fi" id="taskPlace" list="officialSchoolOptions" placeholder="Local ou escola">
+        <select class="fi" id="taskCategory">
+          <option value="Visita">Visita</option>
+          <option value="Suporte">Suporte</option>
+          <option value="Relatorio">Relatorio</option>
+          <option value="Administrativo">Administrativo</option>
+        </select>
+        <button class="btn btn-p" type="submit">Salvar tarefa</button>
+      </form>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Fila de tarefas</div><div class="cs">As tarefas ficam ordenadas por horario.</div></div>
+      </div>
+      <div class="setechub-toolbar" id="taskFilterBar">
+        <button class="btn btn-g btn-sm active-filter" data-task-filter="todas" type="button">Todas</button>
+        <button class="btn btn-g btn-sm" data-task-filter="abertas" type="button">Abertas</button>
+        <button class="btn btn-g btn-sm" data-task-filter="alta" type="button">Alta</button>
+        <button class="btn btn-g btn-sm" data-task-filter="visita" type="button">Visita</button>
+      </div>
+      <div id="taskList" class="stack-list"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-calls">
+    <div class="ph">
+      <div>
+        <div class="pt">Fluxo de Atendimentos</div>
+        <div class="ps">Abrir, mover e concluir chamados sem soltar o historico.</div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Novo chamado</div><div class="cs">Abra um atendimento e ja ligue a uma escola.</div></div>
+      </div>
+      <form id="callForm" class="setechub-form">
+        <input class="fi" id="callTitle" placeholder="Problema ou demanda">
+        <input class="fi" id="callSchool" list="officialSchoolOptions" placeholder="Escola ou local">
+        <button class="btn btn-p" type="submit">Criar chamado</button>
+      </form>
+    </div>
+    <div class="setechub-two-col">
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Quadro de fluxo</div><div class="cs">Abertos, em rota e resolvidos.</div></div>
+        </div>
+        <div class="setechub-toolbar" id="callFilterBar">
+          <button class="btn btn-g btn-sm active-filter" data-call-filter="todos" type="button">Todos</button>
+          <button class="btn btn-g btn-sm" data-call-filter="aberto" type="button">Abertos</button>
+          <button class="btn btn-g btn-sm" data-call-filter="em_rota" type="button">Em rota</button>
+          <button class="btn btn-g btn-sm" data-call-filter="resolvido" type="button">Resolvidos</button>
+        </div>
+        <div id="callColumns" class="call-columns"></div>
+      </div>
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Historico</div><div class="cs">Ultimas movimentacoes dos chamados.</div></div>
+        </div>
+        <div id="callHistoryList" class="stack-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-schools">
+    <div class="ph">
+      <div>
+        <div class="pt">Base de Escolas</div>
+        <div class="ps">Base principal por escola, com CIE, inventario, alertas e atalhos diretos para a ficha.</div>
+      </div>
+    </div>
+    <div class="setechub-command-grid school-command-grid">
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Escola em foco</div><div class="cs">Resumo mestre com CIE, parque, fila e rede.</div></div>
+        </div>
+        <div id="schoolFocusPanel" class="stack-list"></div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Filtros da base</div><div class="cs">Navegue pela escola e chegue na ficha mais rapido.</div></div>
+        </div>
+        <div class="setechub-action-col">
+          <input class="fi" id="schoolMasterSearch" placeholder="Buscar escola, CIE, municipio ou observacao...">
+          <select class="fi" id="schoolSortSelect">
+            <option value="prioridade">Ordenar por importancia</option>
+            <option value="alertas">Mais alertas primeiro</option>
+            <option value="inventario">Maior inventario primeiro</option>
+            <option value="dados">Base mais completa primeiro</option>
+            <option value="municipio">Municipio e escola</option>
+            <option value="nome">Nome da escola</option>
+          </select>
+          <div class="setechub-toolbar" id="schoolFilterBar">
+            <button class="btn btn-g btn-sm active-filter" data-school-filter="todas" type="button">Todas</button>
+            <button class="btn btn-g btn-sm" data-school-filter="critico" type="button">Criticas</button>
+            <button class="btn btn-g btn-sm" data-school-filter="atencao" type="button">Atencao</button>
+            <button class="btn btn-g btn-sm" data-school-filter="oficiais" type="button">Oficiais</button>
+            <button class="btn btn-g btn-sm" data-school-filter="com_dados" type="button">Com dados</button>
+            <button class="btn btn-g btn-sm" data-school-filter="com_importacao" type="button">Com importacao</button>
+            <button class="btn btn-g btn-sm" data-school-filter="com_chamado" type="button">Com chamado</button>
+            <button class="btn btn-g btn-sm" data-school-filter="com_alerta" type="button">Com alerta</button>
+            <button class="btn btn-g btn-sm" data-school-filter="sem_inventario" type="button">Sem inventario</button>
+            <button class="btn btn-g btn-sm" data-school-filter="sem_rede" type="button">Sem rede</button>
+            <button class="btn btn-g btn-sm" data-school-filter="sem_ficha" type="button">Sem ficha</button>
+            <select class="fi fi-inline" id="schoolZoneFilterSelect">
+              <option value="todas">Todos os municipios</option>
+            </select>
+          </div>
+        </div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Qualidade da base</div><div class="cs">Mostra o quanto a escola ja esta rica em dados operacionais.</div></div>
+        </div>
+        <div id="schoolCoverageGrid" class="setechub-monitor-grid compact-grid"></div>
+      </section>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Visao geral por escola</div><div class="cs">Cartoes por unidade com importancia, cobertura de dados e atalhos para abrir a informacao certa.</div></div>
+      </div>
+      <div id="schoolOverviewMatrix" class="school-overview-matrix"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Tabela mestre das escolas</div><div class="cs">A escola virou a entidade principal. Clique em qualquer linha para abrir a ficha.</div></div>
+      </div>
+      <div id="schoolMasterTable" class="setechub-table-wrap"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Escolas monitoradas</div><div class="cs">Mude o status ou transforme uma escola em tarefa.</div></div>
+      </div>
+      <div id="schoolList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Nova escola</div><div class="cs">Registre uma escola para acompanhar sua operacao.</div></div>
+      </div>
+      <form id="schoolForm" class="setechub-form setechub-form-school">
+        <input class="fi" id="schoolName" list="officialSchoolOptions" placeholder="Nome da escola">
+        <input class="fi" id="schoolCie" placeholder="Codigo CIE">
+        <input class="fi" id="schoolZone" placeholder="Zona ou municipio">
+        <input class="fi" id="schoolNotes" placeholder="Observacao inicial">
+        <button class="btn btn-p" type="submit">Adicionar escola</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="page" id="page-school-record">
+    <div class="ph">
+      <div>
+        <div class="pt" id="schoolRecordTitle">Pagina da escola</div>
+        <div class="ps" id="schoolRecordSubtitle">Base completa da unidade com inventario, rede, contatos e importacoes.</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-g btn-sm" type="button" onclick="showPage('schools')">Voltar para escolas</button>
+        <button class="btn btn-g btn-sm" id="openSchoolMapsBtn" type="button">Abrir mapa</button>
+        <button class="btn btn-g btn-sm" id="copySchoolSummaryBtn" type="button">Copiar resumo</button>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Selecionar escola</div><div class="cs">Cada unidade agora tem a propria pagina dentro do sistema.</div></div>
+      </div>
+      <div class="setechub-form setechub-form-school-detail">
+        <select class="fi" id="schoolDetailSelect"></select>
+        <button class="btn btn-p" type="button" onclick="setInventorySchool(currentSchoolDetail)">Abrir inventario</button>
+        <button class="btn btn-g" type="button" onclick="openSchoolCalls(currentSchoolDetail)">Abrir chamados</button>
+      </div>
+      <div class="school-record-nav">
+        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolDetailExecutive')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Resumo</button>
+        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolDetailInventory')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Inventario</button>
+        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolDetailNetwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Rede</button>
+        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolDetailContacts')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Contatos</button>
+        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolImportList')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Arquivos</button>
+        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolEventHistory')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Historico</button>
+      </div>
+      <div id="schoolDetailHeader" class="stack-list"></div>
+      <div class="setechub-two-col setechub-monitor-layout">
+        <div class="setechub-table-card">
+          <div class="ct">Resumo executivo</div>
+          <div class="sync-meta">O que importa primeiro para agir na escola.</div>
+          <div id="schoolDetailExecutive" class="stack-list"></div>
+        </div>
+        <div class="setechub-table-card">
+          <div class="ct">Proximas acoes</div>
+          <div class="sync-meta">Atalhos e pendencias imediatas da unidade.</div>
+          <div id="schoolDetailActions" class="stack-list"></div>
+        </div>
+      </div>
+      <div class="setechub-monitor-grid" id="schoolDetailMetrics"></div>
+      <div class="setechub-two-col setechub-monitor-layout">
+        <div class="setechub-table-card">
+          <div class="ct">Inventario e importacoes</div>
+          <div class="sync-meta">Visao principal da unidade com parque, quantidades, criticidade e arquivos.</div>
+          <div id="schoolDetailInventory" class="stack-list"></div>
+        </div>
+        <div class="setechub-table-card school-network-card">
+          <div class="ct">Rede, DVR e acesso</div>
+          <div class="sync-meta">IPs, gateways, DNS, banda, espelhamento e credenciais importadas do CSV.</div>
+          <div id="schoolDetailNetwork" class="stack-list"></div>
+        </div>
+      </div>
+      <div class="setechub-two-col setechub-monitor-layout">
+        <div class="setechub-table-card">
+          <div class="ct">Contatos e gestao</div>
+          <div class="sync-meta">Tudo clicavel para consulta e acao rapida.</div>
+          <div id="schoolDetailContacts" class="stack-list"></div>
+        </div>
+        <div class="setechub-table-card">
+          <div class="ct">Atualizacao da ficha</div>
+          <div class="sync-meta">Direcao, contato e observacoes da unidade.</div>
+          <form id="schoolProfileForm" class="setechub-form setechub-form-school-profile">
+            <input class="fi" id="schoolProfileDirector" placeholder="Diretor(a)">
+            <input class="fi" id="schoolProfileViceDirector" placeholder="Vice-diretor(a)">
+            <input class="fi" id="schoolProfileProati" placeholder="PROATI">
+            <input class="fi" id="schoolProfileGoe" placeholder="GOE / apoio">
+            <input class="fi" id="schoolProfilePhone" placeholder="Telefone">
+            <input class="fi" id="schoolProfileMobile" placeholder="Celular / WhatsApp">
+            <input class="fi" id="schoolProfileEmail" placeholder="E-mail">
+            <input class="fi" id="schoolProfileAddress" placeholder="Endereco">
+            <input class="fi" id="schoolProfileNotes" placeholder="Observacoes da unidade">
+            <button class="btn btn-p" type="submit">Salvar ficha</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Importacao por escola</div><div class="cs">Arquivos e previews ligados diretamente a esta unidade.</div></div>
+      </div>
+      <form id="schoolImportForm" class="setechub-form setechub-form-import">
+        <select class="fi" id="importSchoolSelect"></select>
+        <select class="fi" id="importSourceType">
+          <option value="excel">Excel / CSV</option>
+          <option value="image">Foto com OCR</option>
+          <option value="text">TXT / texto</option>
+        </select>
+        <input class="fi" id="importLabel" placeholder="Rotulo do material">
+        <label class="btn btn-g" for="schoolImportFile">Selecionar arquivo</label>
+        <input id="schoolImportFile" type="file" accept=".csv,.tsv,.xls,.xlsx,.txt,.png,.jpg,.jpeg,.webp,.bmp,.pdf" hidden>
+        <button class="btn btn-p" type="submit">Importar para a escola</button>
+      </form>
+      <div class="sync-meta" id="schoolImportStatus">Nenhum arquivo processado nesta sessao.</div>
+      <div class="setechub-toolbar" id="schoolImportFilterBar">
+        <button class="btn btn-g btn-sm active-filter" data-import-filter="todos" type="button">Todas</button>
+        <button class="btn btn-g btn-sm" data-import-filter="documentos" type="button">Documentos</button>
+        <button class="btn btn-g btn-sm" data-import-filter="planilhas" type="button">Planilhas</button>
+        <button class="btn btn-g btn-sm" data-import-filter="imagens" type="button">Imagens</button>
+        <button class="btn btn-g btn-sm" data-import-filter="com_preview" type="button">Com preview</button>
+      </div>
+      <div id="schoolImportList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Historico da escola</div><div class="cs">Alteracoes, confirmacoes e movimentos relevantes desta unidade.</div></div>
+      </div>
+      <div id="schoolEventHistory" class="stack-list"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-assets">
+    <div class="ph">
+      <div>
+        <div class="pt">Inventario de Ativos</div>
+        <div class="ps">Equipamentos, quantidades reais e alertas por escola, com leitura mais forte do inventario.</div>
+      </div>
+    </div>
+    <div class="setechub-command-grid inventory-command-grid">
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Foco do inventario</div><div class="cs">Escolha uma escola e leia o parque dela de forma consolidada.</div></div>
+        </div>
+        <div id="inventoryFocusPanel" class="stack-list"></div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Filtros do inventario</div><div class="cs">Corte por escola, status e categoria sem perder o volume real.</div></div>
+        </div>
+        <div class="setechub-action-col">
+          <input class="fi" id="inventorySearchInput" placeholder="Buscar escola, equipamento, observacao...">
+          <select class="fi" id="inventorySchoolSelect">
+            <option value="todas">Todas as escolas</option>
+          </select>
+          <select class="fi" id="inventoryCategorySelect">
+            <option value="todas">Todas as categorias</option>
+          </select>
+          <div class="setechub-toolbar">
+            <button class="btn btn-g btn-sm active-filter" data-inventory-status="todos" type="button">Todos</button>
+            <button class="btn btn-g btn-sm" data-inventory-status="alerta" type="button">Alertas</button>
+            <button class="btn btn-g btn-sm" data-inventory-status="criticos" type="button">Criticos</button>
+            <button class="btn btn-g btn-sm" data-inventory-status="ok" type="button">Ok</button>
+          </div>
+        </div>
+      </section>
+      <section class="box">
+        <div class="bh">
+          <div><div class="ct">Escolas com maior carga</div><div class="cs">Ranking por quantidade e alerta para chegar mais rapido no que importa.</div></div>
+        </div>
+        <div id="inventorySchoolRanking" class="stack-list"></div>
+      </section>
+    </div>
+    <div class="setechub-two-col">
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Detalhe do inventario</div><div class="cs">Tabela principal da escola em foco com totais e alertas por equipamento.</div></div>
+        </div>
+        <div id="inventoryDetailTable" class="setechub-table-wrap"></div>
+      </div>
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Categorias da escola</div><div class="cs">Distribuicao do parque por notebooks, tablets, desktops, rede e afins.</div></div>
+        </div>
+        <div id="inventoryCategoryTable" class="setechub-table-wrap"></div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Qualidade do inventario</div><div class="cs">Mostra o quanto a base esta consolidada e onde o dado ainda esta fraco.</div></div>
+      </div>
+      <div id="inventoryQualityGrid" class="setechub-monitor-grid"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Inconsistencias da escola em foco</div><div class="cs">Mostra familias com nome ruim, status misto, defeitos ou muitas variacoes.</div></div>
+      </div>
+      <div id="inventoryIssuesList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Novo ativo</div><div class="cs">Cadastre um ativo com local e status inicial.</div></div>
+      </div>
+      <form id="assetForm" class="setechub-form setechub-form-asset">
+        <input class="fi" id="assetName" placeholder="Ativo ou equipamento">
+        <input class="fi" id="assetPlace" placeholder="Local">
+        <select class="fi" id="assetStatus">
+          <option value="ok">Ok</option>
+          <option value="manutencao">Manutencao</option>
+          <option value="defeito">Defeito</option>
+        </select>
+        <button class="btn btn-p" type="submit">Adicionar ativo</button>
+      </form>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Ativos monitorados</div><div class="cs">Cicle entre ok, manutencao e defeito.</div></div>
+      </div>
+      <div class="setechub-toolbar" id="assetFilterBar">
+        <button class="btn btn-g btn-sm active-filter" data-asset-filter="todos" type="button">Todos</button>
+        <button class="btn btn-g btn-sm" data-asset-filter="alerta" type="button">Alertas</button>
+        <button class="btn btn-g btn-sm" data-asset-filter="criticos" type="button">Criticos</button>
+        <button class="btn btn-g btn-sm" data-asset-filter="infra" type="button">Infra de rede</button>
+      </div>
+      <div id="assetList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Equipamentos por escola</div><div class="cs">Agora o inventario aparece consolidado por tipo, quantidade e criticidade.</div></div>
+      </div>
+      <form id="schoolAssetForm" class="setechub-form setechub-form-school-asset">
+        <select class="fi" id="schoolAssetSchool"></select>
+        <input class="fi" id="schoolAssetName" placeholder="Equipamento ou item">
+        <input class="fi" id="schoolAssetQuantity" type="number" min="1" step="1" value="1" placeholder="Qtd">
+        <select class="fi" id="schoolAssetStatus">
+          <option value="ok">Ok</option>
+          <option value="manutencao">Manutencao</option>
+          <option value="defeito">Defeito</option>
+        </select>
+        <input class="fi" id="schoolAssetNotes" placeholder="Observacao do equipamento">
+        <button class="btn btn-p" type="submit">Adicionar equipamento</button>
+      </form>
+      <form id="schoolAssetBulkForm" class="setechub-form setechub-note-form">
+        <select class="fi" id="schoolAssetBulkSchool"></select>
+        <textarea class="fi" id="schoolAssetBulkText" placeholder="Lote rapido: uma linha por item. Exemplo: Notebook Positivo;12;ok;lab 1&#10;Tablet Positivo;8;manutencao;2 com tela trincada"></textarea>
+        <button class="btn btn-g" type="submit">Importar lote rapido</button>
+      </form>
+      <div class="sync-meta" id="schoolAssetBulkStatus">Use `nome;qtd;status;observacao` ou apenas `nome` por linha.</div>
+      <div id="schoolAssetList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Monitoramento visual</div><div class="cs">Leitura consolidada do parque, alertas e comparativos entre escolas.</div></div>
+      </div>
+      <div class="setechub-monitor-grid" id="assetMonitorCards"></div>
+      <div class="setechub-two-col setechub-monitor-layout">
+        <div class="setechub-table-card">
+          <div class="ct">Comparativo por escola</div>
+          <div class="sync-meta">Totais, alertas e peso do inventario em cada unidade.</div>
+          <div id="assetComparisonTable" class="setechub-table-wrap"></div>
+        </div>
+        <div class="setechub-table-card">
+          <div class="ct">Tipos de equipamento</div>
+          <div class="sync-meta">Visao geral por categoria consolidada.</div>
+          <div id="assetTypeTable" class="setechub-table-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-reports">
+    <div class="ph">
+      <div>
+        <div class="pt">Relatorios e Automacao</div>
+        <div class="ps">Fechamento do dia, notas operacionais e lote de redes.</div>
+      </div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-l">Tarefas totais</div>
+        <div class="insight-v private" id="reportTasks">0</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Chamados abertos</div>
+        <div class="insight-v private" id="reportCalls">0</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Escolas criticas</div>
+        <div class="insight-v private" id="reportCriticalSchools">0</div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-l">Ativos em alerta</div>
+        <div class="insight-v private" id="reportAssets">0</div>
+      </div>
+    </div>
+    <div class="setechub-two-col">
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Resumo e historico</div><div class="cs">Relatorios, visitas e notas operacionais.</div></div>
+        </div>
+        <div class="setechub-progress"><span id="taskProgressBar"></span></div>
+        <div class="setechub-summary-card">
+          <div class="ct">Leitura rapida do dia</div>
+          <div class="sync-meta" id="reportSummaryPreview"></div>
+        </div>
+        <div class="stack-list" id="visitHistoryList"></div>
+        <form id="noteForm" class="setechub-form setechub-note-form">
+          <input class="fi" id="noteTitle" placeholder="Titulo da nota">
+          <textarea class="fi" id="noteBody" placeholder="Observacao, pendencia, contexto..."></textarea>
+          <button class="btn btn-p" type="submit">Salvar nota</button>
+        </form>
+        <div id="noteList" class="stack-list"></div>
+      </div>
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Automacao de redes</div><div class="cs">Comando pronto e lote validado antes do PowerShell.</div></div>
+        </div>
+        <form id="redeAutomationForm" class="setechub-form setechub-note-form">
+          <input class="fi" id="redeFolderPath" placeholder="Caminho da pasta com as redes">
+          <div class="setechub-two-mini">
+            <input class="fi" id="redeYearSuffix" placeholder="Ano" value="26">
+            <input class="fi" id="redeAssuntoLabel" placeholder="Rotulo do assunto" value="Assunto:">
+          </div>
+          <input class="fi" id="redeNumberPlaceholder" placeholder="Placeholder numero" value="{{REDE_NUMERO}}">
+          <input class="fi" id="redeDatePlaceholder" placeholder="Placeholder data" value="{{REDE_DATA}}">
+          <input class="fi" id="redeHeadingPlaceholder" placeholder="Placeholder cabecalho" value="{{REDE_CABECALHO}}">
+          <button class="btn btn-p" type="submit">Salvar configuracao</button>
+        </form>
+        <div class="setechub-action-row">
+          <button class="btn btn-g btn-sm" id="copyRedeCommandBtn" type="button">Copiar comando</button>
+          <button class="btn btn-g btn-sm" id="exportRedeBatchBtn" type="button">Exportar lote</button>
+        </div>
+        <textarea class="fi code-field" id="redeCommand" readonly></textarea>
+        <label class="btn btn-g" for="redeFolderInput">Selecionar pasta de documentos</label>
+        <input id="redeFolderInput" type="file" webkitdirectory directory multiple hidden>
+        <div id="redePreviewList" class="stack-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-settings">
+    <div class="ph">
+      <div>
+        <div class="pt">Conta, Backup e Publicacao</div>
+        <div class="ps">Sua identidade local, exportacao e referencias oficiais.</div>
+      </div>
+    </div>
+    <div class="setechub-two-col">
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Conta e identidade</div><div class="cs">Ajuste nome, unidade e PIN local.</div></div>
+        </div>
+        <form id="profileForm" class="setechub-form setechub-note-form">
+          <input class="fi" id="profileName" placeholder="Nome">
+          <input class="fi" id="profileUnit" placeholder="Unidade">
+          <input class="fi" id="profilePin" placeholder="PIN local">
+          <button class="btn btn-p" type="submit">Salvar perfil</button>
+        </form>
+      </div>
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Banco local</div><div class="cs">Exporte, importe ou redefina o estado do app.</div></div>
+        </div>
+        <div class="setechub-action-col">
+          <button class="btn btn-p" id="backupBtn" type="button">Exportar backup JSON</button>
+          <button class="btn btn-g" id="exportSummaryBtn" type="button">Exportar resumo TXT</button>
+          <label class="btn btn-g" for="restoreInput">Importar backup</label>
+          <input id="restoreInput" type="file" accept=".json" hidden>
+          <button class="btn btn-g" id="logoutBtn" type="button">Bloquear painel</button>
+          <button class="btn btn-d" id="resetBtn" type="button">Redefinir base local</button>
+        </div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Servidor local</div><div class="cs">Salve e carregue o estado por uma API local quando o app estiver rodando pelo Node.</div></div>
+      </div>
+      <div class="setechub-action-col">
+        <button class="btn btn-p" id="saveServerBtn" type="button">Salvar no servidor local</button>
+        <button class="btn btn-g" id="loadServerBtn" type="button">Carregar do servidor local</button>
+        <button class="btn btn-g" id="refreshSnapshotsBtn" type="button">Atualizar snapshots</button>
+        <div class="sync-meta" id="serverHealthMeta">Servidor local nao verificado.</div>
+      </div>
+      <div id="snapshotList" class="stack-list"></div>
+    </div>
+    <div class="setechub-two-col">
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Migracao do prototipo</div><div class="cs">Puxe os dados do setec_daily_app para a base nova em um clique.</div></div>
+        </div>
+        <div class="setechub-action-col">
+          <button class="btn btn-p" id="importLegacyBtn" type="button">Importar dados do prototipo antigo</button>
+          <div class="sync-meta" id="legacyStateMeta">Nenhuma verificacao feita ainda.</div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Diagnostico local</div><div class="cs">Leitura rapida do estado salvo neste navegador.</div></div>
+        </div>
+        <div id="diagnosticList" class="stack-list"></div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Links oficiais</div><div class="cs">Atalhos fixos para sua rotina de trabalho.</div></div>
+      </div>
+      <form id="officialForm" class="setechub-form setechub-note-form">
+        <input class="fi" id="officeContactInput" placeholder="Contato oficial ou observacao da diretoria">
+        <div class="setechub-form setechub-form-links">
+          <input class="fi" id="officialLabel" placeholder="Nome do link oficial">
+          <input class="fi" id="officialUrl" placeholder="https://...">
+          <button class="btn btn-p" type="submit">Adicionar link</button>
+        </div>
+      </form>
+      <div id="officialLinksList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Setores oficiais da URE</div><div class="cs">Base editavel de setores, responsaveis e contatos principais.</div></div>
+      </div>
+      <form id="sectorForm" class="setechub-form setechub-form-sector">
+        <input class="fi" id="sectorCode" placeholder="Sigla">
+        <input class="fi" id="sectorName" placeholder="Nome do setor">
+        <input class="fi" id="sectorLead" placeholder="Responsavel">
+        <input class="fi" id="sectorPhone" placeholder="Telefone">
+        <input class="fi" id="sectorEmail" placeholder="E-mail">
+        <input class="fi" id="sectorSummary" placeholder="Resumo rapido do setor">
+        <button class="btn btn-p" type="submit">Salvar setor</button>
+      </form>
+      <div id="sectorDirectoryList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Ramais e contatos reais</div><div class="cs">Lista importada da URE Itapeva para consulta rapida.</div></div>
+      </div>
+      <div class="setechub-toolbar" id="directoryFilterBar">
+        <button class="btn btn-g btn-sm active-filter" data-directory-filter="todos" type="button">Todos</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisao</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="tecnologia" type="button">Tecnologia</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestao</button>
+      </div>
+      <div id="directoryContactsList" class="stack-list"></div>
+    </div>
+  </div>
+</main>
+
+<datalist id="officialSchoolOptions"></datalist>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="./school-data.js"></script>
+<script src="./storage.js"></script>
+<script src="./app.js"></script>
+<script src="./render.js"></script>
+<script src="./api.js"></script>
+<script src="./actions.js"></script>
+<script src="./bootstrap.js"></script>
+</body>
+</html>
