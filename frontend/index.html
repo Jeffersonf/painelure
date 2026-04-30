@@ -13,8 +13,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260430-ctc-agenda">
-<link rel="stylesheet" href="./setechub.css?v=20260430-ctc-agenda">
+<link rel="stylesheet" href="./styles.css?v=20260430-ctc-sidebar">
+<link rel="stylesheet" href="./setechub.css?v=20260430-ctc-sidebar">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
@@ -67,6 +67,7 @@
     <div class="nav-item" data-page="schools"><span class="ico">&#127979;</span>Escolas</div>
     <div class="nav-item" data-page="supervisors"><span class="ico">&#128101;</span>Supervisores</div>
     <div class="nav-item" data-page="pecs"><span class="ico">&#127891;</span>PECs</div>
+    <div class="nav-item" onclick="openCtcAgenda()"><span class="ico">&#128736;</span>CTC</div>
     <div class="nav-item" data-page="assets"><span class="ico">&#128187;</span>Ativos</div>
     <div class="nav-item an" data-page="calls"><span class="ico">&#128295;</span>Atendimentos</div>
     <div class="nav-item" data-page="agenda"><span class="ico">&#128467;</span>Agenda</div>
@@ -149,12 +150,6 @@
           <div><div class="ct">Acesso por categoria</div><div class="cs">Tudo que importa no dia para cair direto na area certa.</div></div>
         </div>
         <div id="dashboardCategoryGrid" class="dashboard-category-grid"></div>
-      </section>
-      <section class="box dashboard-quick-box" id="dashboardQuickBox">
-        <div class="bh">
-          <div><div class="ct">Aberturas rapidas</div><div class="cs">Itens vivos para abrir escola, inventario, chamados e importacoes sem navegar.</div></div>
-        </div>
-        <div id="dashboardQuickLinks" class="stack-list"></div>
       </section>
     </div>
 
@@ -949,12 +944,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="./school-data.js?v=20260430-ctc-agenda"></script>
-<script src="./storage.js?v=20260430-ctc-agenda"></script>
-<script src="./app.js?v=20260430-ctc-agenda"></script>
-<script src="./render.js?v=20260430-ctc-agenda"></script>
-<script src="./api.js?v=20260430-ctc-agenda"></script>
-<script src="./actions.js?v=20260430-ctc-agenda"></script>
-<script src="./bootstrap.js?v=20260430-ctc-agenda"></script>
+<script src="./school-data.js?v=20260430-ctc-sidebar"></script>
+<script src="./storage.js?v=20260430-ctc-sidebar"></script>
+<script src="./app.js?v=20260430-ctc-sidebar"></script>
+<script src="./render.js?v=20260430-ctc-sidebar"></script>
+<script src="./api.js?v=20260430-ctc-sidebar"></script>
+<script src="./actions.js?v=20260430-ctc-sidebar"></script>
+<script src="./bootstrap.js?v=20260430-ctc-sidebar"></script>
 </body>
 </html>
