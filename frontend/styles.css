@@ -236,7 +236,7 @@ body::before {
   font-family: var(--font-ui);
 }
 .fn-item .fni {
-  font-size: 24px;
+  font-size: 19px;
   line-height: 1;
   transition: transform .18s cubic-bezier(.34,1.3,.64,1);
   display: block;
@@ -253,7 +253,7 @@ body::before {
   transition: transform .18s cubic-bezier(.34,1.4,.64,1);
 }
 .fn-item.active { color: var(--ac); }
-.fn-item.active .fni { transform: scale(1.15) translateY(-2px); }
+.fn-item.active .fni { transform: translateY(-1px); }
 .fn-item.active::after { transform: translateX(-50%) scale(1); }
 .fn-item.fut-n.active { color: var(--fut); }
 .fn-item.fut-n.active::after { background: var(--fut); }
@@ -406,7 +406,20 @@ body::before {
   transform:none;
   box-shadow:none;
 }
-.nav-item .ico { font-size: 22px; width: 30px; line-height: 1; text-align: center; }
+.nav-item .ico {
+  width: 25px;
+  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 25px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.035);
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  filter: saturate(.78);
+}
 .sidebar-utility{
   display:flex;
   flex-direction:column;

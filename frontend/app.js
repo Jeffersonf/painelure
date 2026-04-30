@@ -387,7 +387,7 @@ function filteredTasks() {
   if (currentTaskFilter === 'abertas') return state.tasks.filter((item) => !item.done);
   if (currentTaskFilter === 'alta') return state.tasks.filter((item) => item.priority === 'alta');
   if (currentTaskFilter === 'visita') return state.tasks.filter((item) => item.category.toLowerCase() === 'visita');
-  if (currentTaskFilter === 'ctc') return state.tasks.filter((item) => normalizeKey(item.category) === 'ctc');
+  if (currentTaskFilter === 'ctc') return state.tasks.filter((item) => normalizeKey(item.category).includes('ctc'));
   return state.tasks;
 }
 

@@ -126,7 +126,7 @@ function renderDashboardAccess() {
   const networkCount = state.schoolNetworks.length;
   const cameraSchoolCount = state.schoolNetworks.filter((item) => Number(item.cameraInstalled || 0) > 0 || item.cameraInstalledLabel).length;
   const ctcUsers = (state.users || []).filter((item) => item.role === 'ctc' && item.active !== false);
-  const ctcTasks = (state.tasks || []).filter((item) => normalizeKey(item.category) === 'ctc' && !item.done).length;
+  const ctcTasks = (state.tasks || []).filter((item) => normalizeKey(item.category).includes('ctc') && !item.done).length;
   const criticalSchools = schools.filter((item) => item.status === 'critico').length;
   const noProfileSchools = schools.filter((item) => schoolProfileCompletion(item.name) < 35).length;
   const noNetworkSchools = schools.filter((item) => !schoolNetworkRecord(item.name)).length;
@@ -139,13 +139,13 @@ function renderDashboardAccess() {
     { icon: '&#128187;', title: 'Inventario', meta: `${state.schoolAssets.length} linhas | ${inventoryAlertCount} alertas`, action: `showPage('assets')`, page: 'assets', tone: 'teal', priority: 'primary' },
     { icon: '&#127760;', title: 'Redes', meta: `${networkCount} escolas com dados`, action: `openSchoolCategory('sem_rede')`, page: 'schools', tone: 'amber', priority: 'primary' },
     { icon: '&#128247;', title: 'Cameras', meta: `${cameraSchoolCount} escolas com cameras`, action: `showPage('schools')`, page: 'schools', tone: 'blue', priority: 'secondary' },
-    { icon: '&#128736;', title: 'CTC', meta: `${ctcUsers.length} usuarios | ${ctcTasks} tarefa(s) abertas`, action: `openCtcAgenda()`, page: 'agenda', tone: 'teal', priority: 'secondary' },
+    { icon: '&#128736;', title: 'CTC', meta: `${ctcUsers.length} usuarios | ${ctcTasks} visita(s) programada(s)`, action: `openCtcAgenda()`, page: 'agenda', tone: 'teal', priority: 'secondary', alwaysVisible: true },
     { icon: '&#127891;', title: 'PECs', meta: `${pecCount} acessos | equipe curricular`, action: `showPage('pecs')`, page: 'pecs', tone: 'blue', priority: 'secondary' },
     { icon: '&#128229;', title: 'Importacoes', meta: `${importCount} registros`, action: `showPage('schools')`, page: 'schools', tone: 'blue', priority: 'secondary' },
     { icon: '&#128222;', title: 'Atendimentos', meta: 'pausado por enquanto', page: 'calls', tone: 'red', priority: 'secondary', inactive: true },
     { icon: '&#9201;', title: 'Ponto', meta: 'pausado por enquanto', page: 'agenda', tone: 'slate', priority: 'secondary', inactive: true },
     { icon: '&#128221;', title: 'Relatorios', meta: `resumo, notas e redes`, action: `showPage('reports')`, page: 'reports', tone: 'slate', priority: 'secondary' }
-  ].filter((item) => item.inactive || canAccessPage(item.page));
+  ].filter((item) => item.inactive || item.alwaysVisible || canAccessPage(item.page));
   const categoryBox = document.getElementById('dashboardCategoryBox');
   if (categoryBox) categoryBox.hidden = !categories.length;
   if (categoryNode) {
