@@ -36,6 +36,7 @@ async function refreshServerHealth() {
 }
 
 async function saveStateToServer() {
+  if (!canManageUsers()) return;
   if (!canUseLocalApi()) {
     alert('Abra o SETECHUB pelo servidor local para salvar estado na API.');
     return;
@@ -54,6 +55,7 @@ async function saveStateToServer() {
 }
 
 async function loadStateFromServer() {
+  if (!canManageUsers()) return;
   if (!canUseLocalApi()) {
     alert('Abra o SETECHUB pelo servidor local para carregar estado da API.');
     return;
@@ -71,6 +73,11 @@ async function loadStateFromServer() {
 }
 
 async function loadServerSnapshots() {
+  if (!canManageUsers()) {
+    serverSnapshots = [];
+    renderDiagnostics();
+    return serverSnapshots;
+  }
   if (!canUseLocalApi()) {
     serverSnapshots = [];
     renderDiagnostics();
@@ -87,6 +94,7 @@ async function loadServerSnapshots() {
 }
 
 async function restoreServerSnapshot(id) {
+  if (!canManageUsers()) return;
   if (!canUseLocalApi()) {
     alert('Abra o SETECHUB pelo servidor local para restaurar snapshots.');
     return;
@@ -164,6 +172,7 @@ async function supabaseRequest(path, options = {}) {
 }
 
 async function checkSupabaseConnection() {
+  if (!canManageUsers()) return;
   try {
     await supabaseRequest('app_state?select=id,updated_at&id=eq.setechub_state&limit=1');
     updateSupabaseStatus('Supabase conectado. Tabela app_state acessivel.', true);
@@ -173,6 +182,7 @@ async function checkSupabaseConnection() {
 }
 
 async function saveStateToSupabase() {
+  if (!canManageUsers()) return;
   try {
     await supabaseRequest('app_state?on_conflict=id', {
       method: 'POST',
@@ -186,6 +196,7 @@ async function saveStateToSupabase() {
 }
 
 async function loadStateFromSupabase() {
+  if (!canManageUsers()) return;
   try {
     const rows = await supabaseRequest('app_state?select=state,updated_at&id=eq.setechub_state&limit=1');
     const remoteState = rows?.[0]?.state;

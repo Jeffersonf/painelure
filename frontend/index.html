@@ -115,6 +115,8 @@
   <div class="fn-item" data-page="pecs"><span class="fni">🎓</span>PECs</div>
   <div class="fn-item" data-page="assets"><span class="fni">💻</span>Invent.</div>
   <div class="fn-item acc-n" data-page="calls"><span class="fni">🔧</span>Cham.</div>
+  <div class="fn-item sl-n" data-page="info"><span class="fni">ℹ️</span>Info</div>
+  <div class="fn-item sl-n" data-page="admin"><span class="fni">🛡️</span>Admin</div>
   <div class="fn-item sl-n" data-page="settings"><span class="fni">⚙️</span>Conta</div>
   <button class="fn-item fn-logout logout-action" type="button"><span class="fni">↩</span>Sair</button>
 </nav>
@@ -141,6 +143,8 @@
     <div class="nav-item an" data-page="calls"><span class="ico">🔧</span>Atendimentos</div>
     <div class="nav-item" data-page="agenda"><span class="ico">🗓️</span>Agenda</div>
     <div class="nav-item fn" data-page="reports"><span class="ico">📌</span>Relatorios</div>
+    <div class="nav-item sl-n" data-page="info"><span class="ico">ℹ️</span>Informacoes</div>
+    <div class="nav-item sl-n" data-page="admin"><span class="ico">🛡️</span>Admin</div>
     <div class="nav-item sl-n" data-page="settings"><span class="ico">⚙️</span>Conta</div>
   </nav>
   <div class="sidebar-utility">
@@ -188,7 +192,7 @@
       </div>
       <div class="page-actions">
         <div class="mnav"><button onclick="shiftFocusCard(-1)">‹</button><span class="mname" id="todayLabel">Hoje</span><button onclick="shiftFocusCard(1)">›</button></div>
-        <button class="btn btn-g btn-sm" onclick="showPage('settings')">Conta</button>
+        <button class="btn btn-g btn-sm" onclick="showPage('info')">Informacoes</button>
         <button class="btn btn-p" data-edit-scope onclick="showPage('agenda')">+ Nova tarefa</button>
       </div>
     </div>
@@ -835,8 +839,96 @@
   <div class="page" id="page-settings">
     <div class="ph">
       <div>
-        <div class="pt">Conta, Backup e Publicacao</div>
-        <div class="ps">Sua identidade local, exportacao e referencias oficiais.</div>
+        <div class="pt">Configuracoes gerais</div>
+        <div class="ps">Opcoes pessoais disponiveis para todos os usuarios.</div>
+      </div>
+    </div>
+    <div class="setechub-two-col">
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Conta e identidade</div><div class="cs">Ajuste nome, unidade e PIN local.</div></div>
+        </div>
+        <form id="profileForm" class="setechub-form setechub-note-form">
+          <input class="fi" id="profileName" placeholder="Nome">
+          <input class="fi" id="profileUnit" placeholder="Unidade">
+          <input class="fi" id="profilePin" placeholder="PIN local">
+          <button class="btn btn-p" type="submit">Salvar perfil</button>
+        </form>
+      </div>
+      <div class="box" id="pecAccountBox">
+        <div class="bh">
+          <div><div class="ct">Dados PEC</div><div class="cs">Contatos liberados para seu perfil.</div></div>
+        </div>
+        <div id="pecAccountList" class="stack-list"></div>
+      </div>
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Sessao e exportacao</div><div class="cs">Baixe um resumo ou bloqueie o painel neste navegador.</div></div>
+        </div>
+        <div class="setechub-action-col">
+          <button class="btn btn-g" id="exportSummaryBtn" type="button">Exportar resumo TXT</button>
+          <button class="btn btn-g" id="logoutBtn" type="button">Bloquear painel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-info">
+    <div class="ph">
+      <div>
+        <div class="pt">Informacoes</div>
+        <div class="ps">Nomes, organograma, links oficiais, ramais e contatos da URE.</div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Links oficiais</div><div class="cs">Atalhos fixos para consulta da rotina de trabalho.</div></div>
+      </div>
+      <form id="officialForm" class="setechub-form setechub-note-form" data-admin-only>
+        <input class="fi" id="officeContactInput" placeholder="Contato oficial ou observacao da diretoria">
+        <div class="setechub-form setechub-form-links">
+          <input class="fi" id="officialLabel" placeholder="Nome do link oficial">
+          <input class="fi" id="officialUrl" placeholder="https://...">
+          <button class="btn btn-p" type="submit">Adicionar link</button>
+        </div>
+      </form>
+      <div id="officialLinksList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Organograma e setores</div><div class="cs">Setores, responsaveis e contatos principais.</div></div>
+      </div>
+      <form id="sectorForm" class="setechub-form setechub-form-sector" data-admin-only>
+        <input class="fi" id="sectorCode" placeholder="Sigla">
+        <input class="fi" id="sectorName" placeholder="Nome do setor">
+        <input class="fi" id="sectorLead" placeholder="Responsavel">
+        <input class="fi" id="sectorPhone" placeholder="Telefone">
+        <input class="fi" id="sectorEmail" placeholder="E-mail">
+        <input class="fi" id="sectorSummary" placeholder="Resumo rapido do setor">
+        <button class="btn btn-p" type="submit">Salvar setor</button>
+      </form>
+      <div id="sectorDirectoryList" class="stack-list"></div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Ramais e contatos</div><div class="cs">Lista importada da URE Itapeva para consulta rapida.</div></div>
+      </div>
+      <div class="setechub-toolbar" id="directoryFilterBar">
+        <button class="btn btn-g btn-sm active-filter" data-directory-filter="todos" type="button">Todos</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisao</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="pecs" type="button">PECs</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="tecnologia" type="button">Tecnologia</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestao</button>
+      </div>
+      <div id="directoryContactsList" class="stack-list"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-admin">
+    <div class="ph">
+      <div>
+        <div class="pt">Painel admin</div>
+        <div class="ps">Area restrita ao administrador Jefferson.</div>
       </div>
     </div>
     <div class="box" data-admin-only>
@@ -861,36 +953,15 @@
       <div class="admin-panel-note">Supervisor enxerga Supervisores e Escolas do proprio vinculo. PEC e Dirigente visualizam a base. SEINTEC, CTC e administrador podem editar dados.</div>
       <div id="userList" class="stack-list"></div>
     </div>
-    <div class="setechub-two-col">
-      <div class="box">
-        <div class="bh">
-          <div><div class="ct">Conta e identidade</div><div class="cs">Ajuste nome, unidade e PIN local.</div></div>
-        </div>
-        <form id="profileForm" class="setechub-form setechub-note-form">
-          <input class="fi" id="profileName" placeholder="Nome">
-          <input class="fi" id="profileUnit" placeholder="Unidade">
-          <input class="fi" id="profilePin" placeholder="PIN local">
-          <button class="btn btn-p" type="submit">Salvar perfil</button>
-        </form>
+    <div class="box" data-admin-only>
+      <div class="bh">
+        <div><div class="ct">Banco local</div><div class="cs">Exporte, importe ou redefina o estado completo do app.</div></div>
       </div>
-      <div class="box" id="pecAccountBox">
-        <div class="bh">
-          <div><div class="ct">Dados PEC</div><div class="cs">Contatos liberados para seu perfil.</div></div>
-        </div>
-        <div id="pecAccountList" class="stack-list"></div>
-      </div>
-      <div class="box">
-        <div class="bh">
-          <div><div class="ct">Banco local</div><div class="cs">Exporte, importe ou redefina o estado do app.</div></div>
-        </div>
-        <div class="setechub-action-col">
-          <button class="btn btn-p" id="backupBtn" type="button">Exportar backup JSON</button>
-          <button class="btn btn-g" id="exportSummaryBtn" type="button">Exportar resumo TXT</button>
-          <label class="btn btn-g" for="restoreInput">Importar backup</label>
-          <input id="restoreInput" type="file" accept=".json" hidden>
-          <button class="btn btn-g" id="logoutBtn" type="button">Bloquear painel</button>
-          <button class="btn btn-d" id="resetBtn" type="button">Redefinir base local</button>
-        </div>
+      <div class="setechub-action-col">
+        <button class="btn btn-p" id="backupBtn" type="button">Exportar backup JSON</button>
+        <label class="btn btn-g" for="restoreInput">Importar backup</label>
+        <input id="restoreInput" type="file" accept=".json" hidden>
+        <button class="btn btn-d" id="resetBtn" type="button">Redefinir base local</button>
       </div>
     </div>
     <div class="box">
@@ -941,48 +1012,6 @@
         </div>
         <div id="diagnosticList" class="stack-list"></div>
       </div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Links oficiais</div><div class="cs">Atalhos fixos para sua rotina de trabalho.</div></div>
-      </div>
-      <form id="officialForm" class="setechub-form setechub-note-form">
-        <input class="fi" id="officeContactInput" placeholder="Contato oficial ou observacao da diretoria">
-        <div class="setechub-form setechub-form-links">
-          <input class="fi" id="officialLabel" placeholder="Nome do link oficial">
-          <input class="fi" id="officialUrl" placeholder="https://...">
-          <button class="btn btn-p" type="submit">Adicionar link</button>
-        </div>
-      </form>
-      <div id="officialLinksList" class="stack-list"></div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Setores oficiais da URE</div><div class="cs">Base editavel de setores, responsaveis e contatos principais.</div></div>
-      </div>
-      <form id="sectorForm" class="setechub-form setechub-form-sector">
-        <input class="fi" id="sectorCode" placeholder="Sigla">
-        <input class="fi" id="sectorName" placeholder="Nome do setor">
-        <input class="fi" id="sectorLead" placeholder="Responsavel">
-        <input class="fi" id="sectorPhone" placeholder="Telefone">
-        <input class="fi" id="sectorEmail" placeholder="E-mail">
-        <input class="fi" id="sectorSummary" placeholder="Resumo rapido do setor">
-        <button class="btn btn-p" type="submit">Salvar setor</button>
-      </form>
-      <div id="sectorDirectoryList" class="stack-list"></div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Ramais e contatos reais</div><div class="cs">Lista importada da URE Itapeva para consulta rapida.</div></div>
-      </div>
-      <div class="setechub-toolbar" id="directoryFilterBar">
-        <button class="btn btn-g btn-sm active-filter" data-directory-filter="todos" type="button">Todos</button>
-        <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisao</button>
-        <button class="btn btn-g btn-sm" data-directory-filter="pecs" type="button">PECs</button>
-        <button class="btn btn-g btn-sm" data-directory-filter="tecnologia" type="button">Tecnologia</button>
-        <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestao</button>
-      </div>
-      <div id="directoryContactsList" class="stack-list"></div>
     </div>
   </div>
 

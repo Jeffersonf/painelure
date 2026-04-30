@@ -625,6 +625,7 @@ function renderMunicipalities() {
 function renderSectors() {
   const preview = document.getElementById('sectorList');
   const directory = document.getElementById('sectorDirectoryList');
+  const adminActions = canManageUsers();
   const html = state.sectors.map((item) => `
     <div class="setechub-item">
       <div class="setechub-head">
@@ -634,7 +635,7 @@ function renderSectors() {
         </div>
         <div class="setechub-badges">
           <a class="btn btn-g btn-sm" href="mailto:${esc(item.email)}">Email</a>
-          <button class="btn btn-d btn-sm" onclick="removeSector(${item.id})">Remover</button>
+          ${adminActions ? `<button class="btn btn-d btn-sm" onclick="removeSector(${item.id})">Remover</button>` : ''}
         </div>
       </div>
       <div class="sync-meta">${esc(item.summary || '')}</div>
@@ -655,7 +656,7 @@ function renderSectors() {
 function renderDirectoryContacts() {
   const list = document.getElementById('directoryContactsList');
   if (!list) return;
-  const contacts = filteredDirectoryContacts()
+  const contacts = filteredDirectoryContacts(false)
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
   list.innerHTML = contacts.map((item) => `
@@ -675,7 +676,10 @@ function renderDirectoryContacts() {
     `).join('') || '<div class="sync-empty">Nenhum contato oficial importado.</div>';
   const pecList = document.getElementById('pecAccountList');
   if (pecList) {
-    pecList.innerHTML = contacts.map((item) => `
+    const pecAccountContacts = filteredDirectoryContacts(true)
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+    pecList.innerHTML = pecAccountContacts.map((item) => `
       <div class="setechub-item">
         <div class="setechub-head">
           <div>
@@ -1568,6 +1572,7 @@ function renderSupervisorRecord() {
 
 function renderOfficialData() {
   const list = document.getElementById('officialList');
+  const adminActions = canManageUsers();
   list.innerHTML = state.officialLinks.slice(0, 6).map((item) => `
     <div class="setechub-item">
       <div class="setechub-head">
@@ -1583,7 +1588,7 @@ function renderOfficialData() {
           <strong>${esc(item.label)}</strong>
           <div class="sync-meta"><a href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.url)}</a></div>
         </div>
-        <button class="btn btn-d btn-sm" onclick="removeOfficialLink(${item.id})">Remover</button>
+        ${adminActions ? `<button class="btn btn-d btn-sm" onclick="removeOfficialLink(${item.id})">Remover</button>` : ''}
       </div>
     </div>
   `).join('');
