@@ -275,13 +275,24 @@ function sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor) {
   return names.filter(Boolean).some((name) => normalizeKey(name) === normalizeKey(rowSupervisor));
 }
 
+function googleSheetCsvUrl(url) {
+  const text = String(url || '').trim();
+  if (!text) return '';
+  if (/output=csv|format=csv/i.test(text)) return text;
+  const match = text.match(/docs\.google\.com\/spreadsheets\/d\/([^/]+)/i);
+  if (!match) return text;
+  const gidMatch = text.match(/[?&#]gid=(\d+)/i);
+  const gid = gidMatch ? gidMatch[1] : '0';
+  return `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv&gid=${gid}`;
+}
+
 function mergeSupervisorVisitSourceRows(source, rows) {
   const supervisor = supervisorVisitSourceFor(source);
   if (!supervisor) return 0;
   const importedAt = new Date().toISOString();
   const incoming = rows
     .map((row) => {
-      const rowSupervisor = csvValue(row, ['Nome do Supervisor', 'Supervisor']);
+      const rowSupervisor = csvValue(row, ['Nome do Supervisor', 'Supervisor']) || source.supervisor;
       const school = canonicalSchoolName(csvValue(row, ['Escola Visitada', 'Escola']));
       const date = parseBrazilianDate(csvValue(row, ['Data Da Visita', 'Data da Visita', 'Data']));
       if (!rowSupervisor || !school || !date || !sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor)) return null;
@@ -334,21 +345,61 @@ function mergeSupervisorVisitSourceRows(source, rows) {
   return incoming.length;
 }
 
+async function syncSupervisorVisitSource(source) {
+  const response = await fetch(googleSheetCsvUrl(source.url), { cache: 'no-store' });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const rows = parseCsvRows(await response.text());
+  const [headers, ...dataRows] = rows;
+  if (!headers?.length) return 0;
+  const records = dataRows.map((row) => Object.fromEntries(headers.map((header, index) => [normalizeCsvHeader(header), row[index] || ''])));
+  return mergeSupervisorVisitSourceRows(source, records);
+}
+
 async function syncSupervisorVisitSources() {
   if (!Array.isArray(SUPERVISOR_VISIT_SOURCES) || !SUPERVISOR_VISIT_SOURCES.length) return;
   let importedCount = 0;
   for (const source of SUPERVISOR_VISIT_SOURCES) {
     try {
-      const response = await fetch(source.url, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const rows = parseCsvRows(await response.text());
-      const [headers, ...dataRows] = rows;
-      if (!headers?.length) continue;
-      const records = dataRows.map((row) => Object.fromEntries(headers.map((header, index) => [normalizeCsvHeader(header), row[index] || ''])));
-      importedCount += mergeSupervisorVisitSourceRows(source, records);
+      importedCount += await syncSupervisorVisitSource(source);
     } catch (error) {
       console.warn(`Nao foi possivel sincronizar ${source.label}:`, error);
     }
   }
   if (importedCount) refreshAll();
+}
+
+async function syncCurrentSupervisorVisitSource() {
+  const supervisor = supervisorByName(currentSupervisorDetail);
+  if (!supervisor?.visitSourceUrl) {
+    alert('Este supervisor ainda nao tem link de planilha Google cadastrado.');
+    return;
+  }
+  const button = document.getElementById('refreshSupervisorSheetBtn');
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Atualizando...';
+  }
+  try {
+    const source = {
+      id: supervisor.visitSourceId || `supervisor-google-${normalizeKey(supervisor.name).replace(/[^a-z0-9]+/g, '-')}`,
+      supervisor: supervisor.name,
+      aliases: supervisor.sourceAliases || [],
+      url: supervisor.visitSourceUrl,
+      label: supervisor.visitSourceLabel || 'Planilha Google',
+      primary: supervisor.visitSourcePrimary ?? true
+    };
+    const importedCount = await syncSupervisorVisitSource(source);
+    refreshAll();
+    showPage('supervisor-record');
+    alert(importedCount
+      ? `${importedCount} visita(s) atualizada(s) pela planilha Google.`
+      : 'Planilha lida, mas nenhuma visita nova foi encontrada.');
+  } catch (error) {
+    alert(`Nao foi possivel atualizar pela planilha Google: ${error.message}`);
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Atualizar planilha';
+    }
+  }
 }

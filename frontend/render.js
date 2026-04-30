@@ -1425,6 +1425,12 @@ function renderSupervisorRecord() {
   const subtitle = document.getElementById('supervisorRecordSubtitle');
   if (title) title.textContent = supervisor.name;
   if (subtitle) subtitle.textContent = `${selectedStat.assignedSchools.length} escola(s) | ${monthlyVisitCount}/${monthlyGoal} visita(s) no mes | ${goalMet ? 'meta cumprida' : 'meta pendente'}.`;
+  const refreshButton = document.getElementById('refreshSupervisorSheetBtn');
+  if (refreshButton) {
+    refreshButton.hidden = !supervisor.visitSourceUrl;
+    refreshButton.disabled = false;
+    refreshButton.textContent = 'Atualizar planilha';
+  }
 
   profileHost.innerHTML = `
     <div class="setechub-item">
@@ -1437,7 +1443,7 @@ function renderSupervisorRecord() {
         </div>
         <span class="diag-pill ${goalMet ? 'pill-ok' : 'pill-warn'}">${goalMet ? 'Meta cumprida' : 'Meta pendente'}</span>
       </div>
-      ${supervisor.visitSourceUrl ? `<div class="mini-actions"><a class="btn btn-g btn-sm" href="${esc(supervisor.visitSourceUrl)}" target="_blank" rel="noreferrer">Abrir planilha principal</a></div>` : ''}
+      ${supervisor.visitSourceUrl ? `<div class="mini-actions"><a class="btn btn-g btn-sm" href="${esc(supervisor.visitSourceUrl)}" target="_blank" rel="noreferrer">Abrir planilha principal</a><button class="btn btn-p btn-sm" type="button" onclick="syncCurrentSupervisorVisitSource()">Atualizar planilha</button></div>` : ''}
     </div>
   `;
 

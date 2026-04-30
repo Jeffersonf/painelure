@@ -322,8 +322,6 @@ function applyAccessControl() {
     const node = document.getElementById(id);
     if (node) node.hidden = !canEditData();
   });
-  const pecAccountBox = document.getElementById('pecAccountBox');
-  if (pecAccountBox) pecAccountBox.hidden = !isPecUser();
   const directoryBox = document.getElementById('directoryContactsBox');
   if (directoryBox) directoryBox.hidden = isPecUser();
 }
