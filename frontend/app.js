@@ -94,6 +94,51 @@ function todayLabel() {
   return new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
 }
 
+function toastIcon(type) {
+  if (type === 'success') return 'OK';
+  if (type === 'error') return '!';
+  if (type === 'syncing') return '<span class="conn-spin"></span>';
+  return 'i';
+}
+
+function ensureToastWrap() {
+  let wrap = document.querySelector('.twrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.className = 'twrap';
+    document.body.appendChild(wrap);
+  }
+  return wrap;
+}
+
+function showToast(message, type = 'info', options = {}) {
+  const wrap = ensureToastWrap();
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-ico">${toastIcon(type)}</span><span>${esc(message)}</span>`;
+  wrap.appendChild(toast);
+
+  let timer = null;
+  const close = () => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(14px)';
+    setTimeout(() => toast.remove(), 180);
+  };
+  const schedule = (delay = options.duration ?? 2600) => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(close, delay);
+  };
+  const update = (nextMessage, nextType = type, nextOptions = {}) => {
+    if (timer) clearTimeout(timer);
+    toast.className = `toast ${nextType}`;
+    toast.innerHTML = `<span class="toast-ico">${toastIcon(nextType)}</span><span>${esc(nextMessage)}</span>`;
+    if (!nextOptions.persist) schedule(nextOptions.duration ?? 2600);
+  };
+
+  if (!options.persist) schedule();
+  return { close, update, node: toast };
+}
+
 function workedDuration() {
   const start = state.ponto.entrada;
   const end = state.ponto.saida;

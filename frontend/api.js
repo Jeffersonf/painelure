@@ -444,10 +444,11 @@ async function syncSupervisorVisitSources() {
 async function syncCurrentSupervisorVisitSource() {
   const supervisor = supervisorByName(currentSupervisorDetail);
   if (!supervisor?.visitSourceUrl) {
-    alert('Este supervisor ainda nao tem link de planilha Google cadastrado.');
+    showToast('Supervisor sem planilha vinculada.', 'error');
     return;
   }
   const button = document.getElementById('refreshSupervisorSheetBtn');
+  const toast = showToast('Atualizando planilha...', 'syncing', { persist: true });
   if (button) {
     button.disabled = true;
     button.textContent = 'Atualizando...';
@@ -462,14 +463,13 @@ async function syncCurrentSupervisorVisitSource() {
       primary: supervisor.visitSourcePrimary ?? true,
       tabNames: supervisorSheetTabNames(supervisor.name)
     };
-    const importedCount = await syncSupervisorVisitSource(source);
+    await syncSupervisorVisitSource(source);
     refreshAll();
     showPage('supervisor-record');
-    alert(importedCount
-      ? `${importedCount} visita(s) atualizada(s) pela planilha Google.`
-      : 'Planilha lida, mas nenhuma visita nova foi encontrada.');
+    toast.update('Planilha atualizada.', 'success');
   } catch (error) {
-    alert(`Nao foi possivel atualizar pela planilha Google: ${error.message}`);
+    toast.update('Nao foi possivel atualizar a planilha.', 'error', { duration: 3600 });
+    console.warn('Nao foi possivel atualizar pela planilha Google:', error);
   } finally {
     if (button) {
       button.disabled = false;
