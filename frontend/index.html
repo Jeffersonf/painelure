@@ -850,12 +850,13 @@
           <option value="dirigente">Dirigente</option>
           <option value="seintec">SEINTEC</option>
           <option value="ctc">CTC</option>
+          <option value="pec">PEC</option>
           <option value="admin">Administrador</option>
         </select>
         <select class="fi" id="userSupervisorName"></select>
         <button class="btn btn-p" type="submit">Criar usuario</button>
       </form>
-      <div class="admin-panel-note">Supervisor enxerga somente Supervisores e Escolas, limitado ao proprio nome e as escolas vinculadas. Dirigente visualiza tudo. SEINTEC, CTC e administrador podem editar dados.</div>
+      <div class="admin-panel-note">Supervisor enxerga Supervisores e Escolas do proprio vinculo. PEC e Dirigente visualizam a base. SEINTEC, CTC e administrador podem editar dados.</div>
       <div id="userList" class="stack-list"></div>
     </div>
     <div class="setechub-two-col">
@@ -969,6 +970,7 @@
       <div class="setechub-toolbar" id="directoryFilterBar">
         <button class="btn btn-g btn-sm active-filter" data-directory-filter="todos" type="button">Todos</button>
         <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisao</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="pecs" type="button">PECs</button>
         <button class="btn btn-g btn-sm" data-directory-filter="tecnologia" type="button">Tecnologia</button>
         <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestao</button>
       </div>

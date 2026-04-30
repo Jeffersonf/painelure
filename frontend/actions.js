@@ -78,7 +78,7 @@ function findLoginUser(name, pin) {
 
 function loginCandidates(user) {
   const values = [user.login, user.name, user.supervisorName];
-  if (user.role && user.role !== 'supervisor') {
+  if (user.role && !['supervisor', 'pec'].includes(user.role)) {
     values.push(user.role, ROLE_LABELS[user.role]);
   }
   return values.filter(Boolean);

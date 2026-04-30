@@ -168,7 +168,17 @@ function defaultSupervisorVisits(supervisors) {
   );
 }
 
-function defaultUsers(supervisors) {
+function defaultPecs() {
+  return [
+    { id: 'pec-eline-batagin', name: 'Eline Fernanda Teobaldo Batagin', login: 'eline.batagin', role: 'PEC - Quimica', phone: '(15) 3526-6212', email: 'deitvnpe@educacao.sp.gov.br' },
+    { id: 'pec-elysane-maciel', name: 'Elysane Rodrigues Cardoso Maciel', login: 'elysane.maciel', role: 'PEC - Historia', phone: '(15) 3526-6218', email: 'deitvnpe@educacao.sp.gov.br' },
+    { id: 'pec-jaqueline-borelli', name: 'Jaqueline de Oliveira Cunha Borelli', login: 'jaqueline.borelli', role: 'PEC - Arte', phone: '(15) 3526-6212', email: 'deitvnpe@educacao.sp.gov.br' },
+    { id: 'pec-tatiane-graciliano', name: 'Tatiane Ryden de Mello Graciliano', login: 'tatiane.graciliano', role: 'PEC - Educacao Inclusiva', phone: '(15) 3526-6218', email: 'deitvnpe@educacao.sp.gov.br' },
+    { id: 'pec-jose-netto', name: 'Jose do Amaral Netto', login: 'jose.netto', role: 'PEC - Projetos Especiais', phone: '(15) 3526-6212', email: 'deitvnpe@educacao.sp.gov.br' }
+  ];
+}
+
+function defaultUsers(supervisors, pecs = defaultPecs()) {
   const supervisorUsers = supervisors.map((supervisor, index) => ({
     id: `user-supervisor-${index + 1}`,
     name: supervisor.name,
@@ -176,6 +186,15 @@ function defaultUsers(supervisors) {
     pin: '1234',
     role: 'supervisor',
     supervisorName: supervisor.name,
+    active: true
+  }));
+  const pecUsers = pecs.map((pec) => ({
+    id: `user-${pec.id}`,
+    name: pec.name,
+    login: pec.login,
+    pin: '1234',
+    role: 'pec',
+    area: pec.role,
     active: true
   }));
   return [
@@ -211,6 +230,7 @@ function defaultUsers(supervisors) {
       role: 'ctc',
       active: true
     },
+    ...pecUsers,
     ...supervisorUsers
   ];
 }
@@ -245,6 +265,7 @@ function saveSupabaseConfig(config) {
 function createDefaults() {
   const schools = SCHOOL_MASTER.map((school) => ({ id: uid(), ...school }));
   const supervisors = defaultSupervisors(schools);
+  const pecs = defaultPecs();
   return {
     stateVersion: STATE_VERSION,
     lastUpdatedAt: new Date().toISOString(),
@@ -253,7 +274,7 @@ function createDefaults() {
       unit: 'URE Itapeva',
       pin: '1234'
     },
-    users: defaultUsers(supervisors),
+    users: defaultUsers(supervisors, pecs),
     officialContacts: {
       office: 'Unidade Regional de Ensino de Itapeva - URE | Rua Torquato Raimundo, 96 - Jardim Ferrari - Itapeva/SP | Tel. (15) 3526-6200 | deitv@educacao.sp.gov.br',
       officeName: 'Unidade Regional de Ensino de Itapeva - URE',
@@ -272,6 +293,15 @@ function createDefaults() {
       { id: uid(), name: 'Taquarivai', schoolCount: 1, notes: 'Unidade oficial Celia Vasques Ferrari Duch.' }
     ],
     sectors: [
+      {
+        id: uid(),
+        code: 'PECs',
+        name: 'Equipe de Especialistas em Curriculo',
+        lead: 'Equipe de Especialistas em Curriculo da URE Itapeva',
+        phone: '(15) 3526-6201',
+        email: 'deitv@educacao.sp.gov.br',
+        summary: 'Especialistas por area curricular para apoio pedagogico, orientacoes tecnicas, recomposicao e acompanhamento de acoes formativas.'
+      },
       {
         id: uid(),
         code: 'DIRETORIA',
@@ -370,7 +400,14 @@ function createDefaults() {
       { id: uid(), name: 'Magda Gisele Silva de Oliveira', role: 'Supervisor Educacional', phone: '(15) 3526-6232', email: 'magda.oliveira@educacao.sp.gov.br' },
       { id: uid(), name: 'Marcio Nunes da Cruz', role: 'Supervisor Educacional', phone: '(15) 3526-6208', email: 'marcio.cruz@educacao.sp.gov.br' },
       { id: uid(), name: 'Maria Luiza Brizolla de Queiroz', role: 'Supervisor Educacional', phone: '(15) 3526-6216', email: 'maria.queiroz14@educacao.sp.gov.br' },
-      { id: uid(), name: 'Adilson Fogaca', role: 'Supervisor Educacional', phone: '(15) 3526-6224', email: 'adilson.fogaca@educacao.sp.gov.br' }
+      { id: uid(), name: 'Adilson Fogaca', role: 'Supervisor Educacional', phone: '(15) 3526-6224', email: 'adilson.fogaca@educacao.sp.gov.br' },
+      ...pecs.map((pec) => ({
+        id: uid(),
+        name: pec.name,
+        role: pec.role,
+        phone: pec.phone,
+        email: pec.email
+      }))
     ],
     officialLinks: [
       { id: uid(), label: 'Portal da Diretoria de Ensino de Itapeva', url: 'https://deitapeva.educacao.sp.gov.br/' },

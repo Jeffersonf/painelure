@@ -37,6 +37,7 @@ const ROLE_LABELS = {
   dirigente: 'Dirigente',
   seintec: 'SEINTEC',
   ctc: 'CTC',
+  pec: 'PEC',
   supervisor: 'Supervisor'
 };
 
@@ -346,6 +347,9 @@ function filteredDirectoryContacts() {
   }
   if (currentDirectoryFilter === 'gestao') {
     return state.directoryContacts.filter((item) => /chefe|diretor|executiva|assistente/i.test(item.role));
+  }
+  if (currentDirectoryFilter === 'pecs') {
+    return state.directoryContacts.filter((item) => /pec|curriculo|currículo|especialista/i.test(`${item.role} ${item.name}`));
   }
   return state.directoryContacts;
 }
