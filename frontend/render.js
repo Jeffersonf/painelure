@@ -1,5 +1,59 @@
 'use strict';
 
+function renderDashboardHero() {
+  const title = document.getElementById('dashboardHeroTitle');
+  const text = document.getElementById('dashboardHeroText');
+  const actions = document.getElementById('dashboardHeroActions');
+  const scoreNode = document.getElementById('dashboardHeroScore');
+  const statsNode = document.getElementById('dashboardHeroStats');
+  if (!title || !text || !actions || !scoreNode || !statsNode) return;
+
+  const health = dashboardHealth();
+  const coverage = operationalCoverage();
+  const focus = nextFocusTask();
+  const openCalls = state.calls.filter((item) => item.status !== 'resolvido').length;
+  const attentionSchools = visibleSchools().filter((item) => item.status !== 'estavel').length;
+  const alertAssets = state.assets.filter((item) => item.status !== 'ok').length + state.schoolAssets.filter((item) => item.status !== 'ok').length;
+  const pendingItems = pendingQueueItems(99).length;
+
+  title.textContent = focus ? focus.title : 'Painel inicial pronto para abrir a rotina.';
+  text.textContent = focus
+    ? `${focus.place || 'Sem local definido'} | ${focus.category || 'Rotina'} | ${focus.time || 'sem horario definido'}`
+    : buildSummaryPreview();
+
+  const actionItems = [
+    { label: 'Abrir chamados', action: `openCallCategory('todos')`, page: 'calls', tone: 'primary' },
+    { label: 'Ver escolas', action: `showPage('schools')`, page: 'schools', tone: '' },
+    { label: 'Inventario', action: `openInventoryCategory('alerta')`, page: 'assets', tone: '' },
+    { label: 'Nova tarefa', action: `showPage('agenda')`, page: 'agenda', tone: 'edit' }
+  ].filter((item) => canAccessPage(item.page) && (item.tone !== 'edit' || canEditData()));
+
+  actions.innerHTML = actionItems.map((item) => `
+    <button class="btn ${item.tone === 'primary' ? 'btn-p' : 'btn-g'} btn-sm" type="button" onclick="${item.action}">${esc(item.label)}</button>
+  `).join('');
+
+  scoreNode.innerHTML = `
+    <div class="sync-meta">Saude da operacao</div>
+    <strong>${esc(String(health.score))}%</strong>
+    <span class="diag-pill ${health.tone}">${esc(health.label)}</span>
+  `;
+
+  statsNode.innerHTML = [
+    { label: 'Chamados', value: String(openCalls), tone: openCalls ? 'pill-warn' : 'pill-ok' },
+    { label: 'Escolas', value: String(attentionSchools), tone: attentionSchools ? 'pill-warn' : 'pill-ok' },
+    { label: 'Ativos', value: String(alertAssets), tone: alertAssets ? 'pill-danger' : 'pill-ok' },
+    { label: 'Pendencias', value: String(pendingItems), tone: pendingItems ? 'pill-info' : 'pill-ok' },
+    { label: 'Cobertura', value: `${coverage.profileCoverage}%`, tone: coverage.profileCoverage >= 65 ? 'pill-ok' : 'pill-warn' },
+    { label: 'Horas', value: bankHours(), tone: '' }
+  ].map((item) => `
+    <div class="dashboard-hero-stat">
+      <span>${esc(item.label)}</span>
+      <strong>${esc(item.value)}</strong>
+      <i class="diag-pill ${item.tone}"></i>
+    </div>
+  `).join('');
+}
+
 function renderOperationsCenter() {
   const health = dashboardHealth();
   const coverage = operationalCoverage();

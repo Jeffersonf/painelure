@@ -1252,6 +1252,7 @@ function refreshAll() {
   syncFilterButtons('school');
   syncFilterButtons('directory');
   renderSetupStats();
+  renderDashboardHero();
   renderDashboardAccess();
   renderDashboardOperationalLists();
   renderPendingQueue();
