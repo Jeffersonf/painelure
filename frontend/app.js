@@ -31,6 +31,7 @@ let searchTimer = null;
 const PAGE_KEY = 'setechub_page';
 const CONTEXT_KEY = 'setechub_context';
 const ACTIVE_USER_KEY = 'setechub_active_user';
+const PAUSED_NAV_PAGES = new Set(['calls', 'agenda']);
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -314,7 +315,7 @@ function applyAccessControl() {
   document.querySelectorAll('.nav-item, .fn-item').forEach((node) => {
     if (node.dataset.page) {
       const allowed = canAccessPage(node.dataset.page);
-      node.hidden = isRestrictedCtcUser() && !allowed;
+      node.hidden = PAUSED_NAV_PAGES.has(node.dataset.page) || (isRestrictedCtcUser() && !allowed);
       node.classList.toggle('nav-disabled', !allowed);
       node.setAttribute('aria-disabled', allowed ? 'false' : 'true');
       node.tabIndex = allowed ? 0 : -1;
