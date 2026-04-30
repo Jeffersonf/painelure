@@ -7,6 +7,156 @@
   backdrop-filter: blur(20px);
 }
 
+/* Visual polish */
+.main {
+  max-width: 1480px;
+}
+
+.sidebar {
+  border-right-color: color-mix(in srgb, var(--bd) 76%, transparent);
+}
+
+.nav-item,
+.sidebar-mini-btn,
+.sidebar-icon-btn,
+.acct-btn,
+.acct-pop,
+.box,
+.insight-card,
+.mini-stat,
+.setechub-item,
+.setechub-summary-card,
+.dashboard-category-card,
+.dashboard-drill-card,
+.school-overview-card,
+.supervisor-card,
+.supervisor-selector-btn {
+  border-radius: 8px;
+}
+
+.box,
+.insight-card,
+.mini-stat,
+.setechub-item,
+.setechub-summary-card {
+  border-color: color-mix(in srgb, var(--bd) 82%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.014)),
+    color-mix(in srgb, var(--sf) 86%, transparent);
+}
+
+.box {
+  padding: 18px;
+}
+
+.ph {
+  margin-bottom: 18px;
+}
+
+.pt {
+  letter-spacing: 0;
+}
+
+.ps,
+.cs,
+.sync-meta,
+.sync-empty {
+  max-width: 72ch;
+}
+
+.nav-item {
+  min-height: 42px;
+  padding-inline: 11px;
+}
+
+.nav-item.active,
+.nav-item.fn.active,
+.nav-item.an.active,
+.nav-item.sl-n.active {
+  background: color-mix(in srgb, var(--ac) 12%, transparent);
+  border-color: color-mix(in srgb, var(--ac) 26%, transparent);
+  color: var(--tx);
+}
+
+.nav-item.active .ico,
+.nav-item.fn.active .ico,
+.nav-item.an.active .ico,
+.nav-item.sl-n.active .ico {
+  color: var(--ac);
+}
+
+.page-actions .btn,
+.setechub-action-row .btn,
+.setechub-toolbar .btn,
+.sidebar-mini-btn,
+.sbtn,
+.btn {
+  border-radius: 8px;
+}
+
+.acct-pop {
+  padding: 6px;
+  background: var(--sf-solid);
+}
+
+.pop-item {
+  min-height: 38px;
+  font-weight: 700;
+}
+
+.pop-item.danger {
+  color: var(--dan);
+  background: rgba(245,112,90,.06);
+}
+
+.setup-shell,
+.setup-story,
+.setup-auth,
+.setup-preview,
+.setup-inline-preview,
+.setup-feature-card,
+.setup-kpi,
+.setup-rail-card,
+.sinp,
+.serr {
+  border-radius: 8px;
+}
+
+.setup-shell {
+  box-shadow: 0 22px 64px rgba(0,0,0,.28);
+}
+
+.setup-title {
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.setup-auth {
+  border-color: color-mix(in srgb, var(--ac) 24%, var(--bd));
+}
+
+.sinp {
+  min-height: 44px;
+}
+
+.sbtn {
+  min-height: 46px;
+}
+
+@media (max-width: 960px) {
+  .box {
+    padding: 15px;
+  }
+
+  .fnav {
+    gap: 2px;
+  }
+
+  .fn-item {
+    border-radius: 8px;
+  }
+}
+
 .page-actions {
   display: flex;
   gap: 8px;
