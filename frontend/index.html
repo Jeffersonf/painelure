@@ -671,31 +671,51 @@
     <div class="setechub-command-grid supervisor-command-grid">
       <section class="box">
         <div class="bh">
-          <div><div class="ct">Filtro do BI</div><div class="cs">Escolha um supervisor para ver escolas e visitas.</div></div>
+          <div><div class="ct">Selecionar supervisor</div><div class="cs">Clique em um nome para abrir o painel individual.</div></div>
         </div>
         <div class="setechub-action-col">
           <select class="fi" id="supervisorFilterSelect">
-            <option value="todos">Todos os supervisores</option>
+            <option value="">Selecione um supervisor</option>
           </select>
-          <div class="sync-meta">Quando o CSV oficial chegar, esta tela passa a usar a distribuicao real.</div>
+          <div id="supervisorSelectorList" class="supervisor-selector-list"></div>
         </div>
       </section>
       <section class="box">
         <div class="bh">
-          <div><div class="ct">Ranking de visitas</div><div class="cs">Comparativo quantitativo por supervisor.</div></div>
+          <div><div class="ct">Supervisor selecionado</div><div class="cs">Resumo da responsabilidade, meta e situacao no mes.</div></div>
         </div>
-        <div id="supervisorRankingList" class="stack-list"></div>
+        <div id="supervisorProfilePanel" class="stack-list"></div>
       </section>
       <section class="box">
         <div class="bh">
-          <div><div class="ct">Escolas sem visita</div><div class="cs">Onde ainda nao ha registro no recorte atual.</div></div>
+          <div><div class="ct">Meta de visitas</div><div class="cs">Acompanhamento mensal do quantitativo esperado.</div></div>
         </div>
-        <div id="supervisorGapList" class="stack-list"></div>
+        <div id="supervisorGoalPanel" class="stack-list"></div>
       </section>
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Supervisores e escolas</div><div class="cs">Lista por supervisor com escolas atribuidas, alertas e atalhos para abrir a ficha.</div></div>
+        <div><div class="ct">Calendario de visitas</div><div class="cs">Dias com visita registrada para o supervisor selecionado.</div></div>
+      </div>
+      <div id="supervisorCalendarGrid" class="supervisor-calendar-grid"></div>
+    </div>
+    <div class="setechub-two-col">
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Escolas visitadas</div><div class="cs">Unidades com visita registrada no recorte atual.</div></div>
+        </div>
+        <div id="supervisorVisitedSchools" class="stack-list"></div>
+      </div>
+      <div class="box">
+        <div class="bh">
+          <div><div class="ct">Faltam visitas</div><div class="cs">Unidades vinculadas que ainda nao receberam visita no recorte.</div></div>
+        </div>
+        <div id="supervisorPendingSchools" class="stack-list"></div>
+      </div>
+    </div>
+    <div class="box">
+      <div class="bh">
+        <div><div class="ct">Escolas do supervisor</div><div class="cs">Todas as escolas vinculadas, com atalho para abrir a ficha da unidade.</div></div>
       </div>
       <div id="supervisorSchoolMatrix" class="supervisor-school-matrix"></div>
     </div>

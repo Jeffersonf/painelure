@@ -149,6 +149,7 @@ function defaultSupervisors(schools) {
     schools: schools
       .filter((_, schoolIndex) => schoolIndex % supervisorContacts.length === index)
       .map((school) => school.name),
+    monthlyGoal: Math.max(1, schools.filter((_, schoolIndex) => schoolIndex % supervisorContacts.length === index).length),
     source: 'teste'
   }));
 }

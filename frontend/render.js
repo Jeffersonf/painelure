@@ -1028,9 +1028,11 @@ function renderSupervisors() {
   const metricCount = document.getElementById('supervisorMetricCount');
   if (!metricCount) return;
   const stats = supervisorStats();
-  const filteredStats = currentSupervisorFilter === 'todos'
-    ? stats
-    : stats.filter((item) => normalizeKey(item.supervisor.name) === currentSupervisorFilter);
+  if ((!currentSupervisorFilter || currentSupervisorFilter === 'todos') && stats[0]) {
+    currentSupervisorFilter = normalizeKey(stats[0].supervisor.name);
+  }
+  const selectedStat = stats.find((item) => normalizeKey(item.supervisor.name) === currentSupervisorFilter) || stats[0] || null;
+  const filteredStats = selectedStat ? [selectedStat] : [];
   const visits = supervisorVisitRows();
   const assignedSchoolCount = new Set(filteredStats.flatMap((item) => item.assignedSchools)).size;
   const averageCoverage = filteredStats.length
@@ -1045,16 +1047,14 @@ function renderSupervisors() {
   const filterSelect = document.getElementById('supervisorFilterSelect');
   const visitSupervisorSelect = document.getElementById('visitSupervisorSelect');
   const visitSchoolSelect = document.getElementById('visitSchoolSelect');
-  const supervisorOptions = [
-    '<option value="todos">Todos os supervisores</option>',
-    ...stats.map(({ supervisor }) => `<option value="${esc(normalizeKey(supervisor.name))}">${esc(supervisor.name)}</option>`)
-  ].join('');
+  const supervisorOptions = stats.map(({ supervisor }) => `<option value="${esc(normalizeKey(supervisor.name))}">${esc(supervisor.name)}</option>`).join('');
   if (filterSelect) {
     filterSelect.innerHTML = supervisorOptions;
     filterSelect.value = currentSupervisorFilter;
   }
   if (visitSupervisorSelect) {
     visitSupervisorSelect.innerHTML = stats.map(({ supervisor }) => `<option value="${esc(supervisor.name)}">${esc(supervisor.name)}</option>`).join('');
+    if (selectedStat) visitSupervisorSelect.value = selectedStat.supervisor.name;
   }
   if (visitSchoolSelect) {
     const selectedSupervisor = visitSupervisorSelect?.value || stats[0]?.supervisor.name || '';
@@ -1066,42 +1066,134 @@ function renderSupervisors() {
   const visitDate = document.getElementById('visitDate');
   if (visitDate && !visitDate.value) visitDate.value = new Date().toISOString().slice(0, 10);
 
-  const ranking = document.getElementById('supervisorRankingList');
-  if (ranking) {
-    const maxVisits = Math.max(...stats.map((item) => item.visits), 1);
-    ranking.innerHTML = stats
-      .slice()
-      .sort((a, b) => b.visits - a.visits || b.coverage - a.coverage || a.supervisor.name.localeCompare(b.supervisor.name))
-      .map((item) => `
-        <div class="setechub-item">
-          <div class="setechub-head">
-            <div>
-              <strong>${esc(item.supervisor.name)}</strong>
-              <div class="sync-meta">${esc(String(item.visits))} visita(s) | ${esc(String(item.assignedSchools.length))} escola(s) | cobertura ${esc(String(item.coverage))}%</div>
-            </div>
-            <span class="diag-pill ${item.alerts ? 'pill-warn' : 'pill-ok'}">${esc(String(item.alerts))} alertas</span>
-          </div>
-          <div class="setechub-bar"><span style="width:${Math.max(4, Math.round((item.visits / maxVisits) * 100))}%"></span></div>
-        </div>
-      `).join('') || '<div class="sync-empty">Nenhum supervisor cadastrado.</div>';
+  const selectorList = document.getElementById('supervisorSelectorList');
+  if (selectorList) {
+    selectorList.innerHTML = stats.map((item) => `
+      <button class="supervisor-selector-btn ${normalizeKey(item.supervisor.name) === currentSupervisorFilter ? 'active' : ''}" type="button" onclick="selectSupervisor('${esc(item.supervisor.name)}')">
+        <span>${esc(item.supervisor.name)}</span>
+        <strong>${esc(String(item.visits))} visita(s)</strong>
+      </button>
+    `).join('') || '<div class="sync-empty">Nenhum supervisor cadastrado.</div>';
   }
 
-  const gapList = document.getElementById('supervisorGapList');
-  if (gapList) {
-    const gaps = filteredStats.flatMap((item) => {
-      const visited = new Set((state.supervisorVisits || [])
-        .filter((visit) => visit.supervisor === item.supervisor.name)
-        .map((visit) => visit.school));
-      return item.assignedSchools
-        .filter((school) => !visited.has(school))
-        .map((school) => ({ supervisor: item.supervisor.name, school }));
-    }).slice(0, 12);
-    gapList.innerHTML = gaps.map((item) => `
-      <div class="setechub-item setechub-clickable" onclick="openSchoolRecord('${esc(item.school)}')">
-        <strong>${esc(item.school)}</strong>
-        <div class="sync-meta">${esc(item.supervisor)} | sem visita registrada no teste atual</div>
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const selectedAllVisits = selectedStat
+    ? (state.supervisorVisits || []).filter((visit) => visit.supervisor === selectedStat.supervisor.name)
+    : [];
+  const selectedVisits = selectedAllVisits.filter((visit) => {
+    const date = new Date(`${visit.date}T00:00:00`);
+    return date.getFullYear() === year && date.getMonth() === month;
+  });
+  const visitedSchoolSet = new Set(selectedVisits.map((visit) => visit.school));
+  const pendingSchools = selectedStat
+    ? selectedStat.assignedSchools.filter((school) => !visitedSchoolSet.has(school))
+    : [];
+  const monthlyGoal = selectedStat ? Number(selectedStat.supervisor.monthlyGoal || selectedStat.assignedSchools.length || 1) : 1;
+  const monthlyVisitCount = selectedVisits.length;
+  const goalPct = selectedStat ? Math.min(100, Math.round((monthlyVisitCount / monthlyGoal) * 100)) : 0;
+  const goalMet = selectedStat && monthlyVisitCount >= monthlyGoal;
+
+  const profilePanel = document.getElementById('supervisorProfilePanel');
+  if (profilePanel) {
+    profilePanel.innerHTML = selectedStat ? `
+      <div class="setechub-item">
+        <div class="setechub-head">
+          <div>
+            <strong>${esc(selectedStat.supervisor.name)}</strong>
+            <div class="sync-meta">${esc(selectedStat.supervisor.email || '')} | ${esc(selectedStat.supervisor.phone || '')}</div>
+          </div>
+          <span class="diag-pill ${goalMet ? 'pill-ok' : 'pill-warn'}">${goalMet ? 'Meta cumprida' : 'Meta pendente'}</span>
+        </div>
       </div>
-    `).join('') || '<div class="sync-empty">Todas as escolas do recorte possuem ao menos uma visita.</div>';
+      <div class="school-overview-kpis">
+        <div><span>Escolas</span><strong>${esc(String(selectedStat.assignedSchools.length))}</strong></div>
+        <div><span>Mes</span><strong>${esc(String(monthlyVisitCount))}</strong></div>
+        <div><span>Visitadas</span><strong>${esc(String(visitedSchoolSet.size))}</strong></div>
+        <div><span>Faltam</span><strong>${esc(String(pendingSchools.length))}</strong></div>
+      </div>
+    ` : '<div class="sync-empty">Selecione um supervisor para abrir o painel.</div>';
+  }
+
+  const goalPanel = document.getElementById('supervisorGoalPanel');
+  if (goalPanel) {
+    goalPanel.innerHTML = selectedStat ? `
+      <div class="setechub-command-score supervisor-goal-score">
+        <div>
+          <div class="sync-meta">Meta mensal</div>
+          <strong>${esc(String(monthlyVisitCount))}/${esc(String(monthlyGoal))}</strong>
+        </div>
+        <span class="diag-pill ${goalMet ? 'pill-ok' : 'pill-warn'}">${esc(String(goalPct))}%</span>
+      </div>
+      <div class="setechub-bar"><span style="width:${esc(String(Math.max(4, goalPct)))}%"></span></div>
+      <div class="sync-meta">${goalMet ? 'Supervisor ja atingiu a meta de visitas no mes atual.' : `Faltam ${esc(String(Math.max(0, monthlyGoal - monthlyVisitCount)))} visita(s) para cumprir a meta do mes.`}</div>
+    ` : '<div class="sync-empty">Sem meta calculada.</div>';
+  }
+
+  const calendar = document.getElementById('supervisorCalendarGrid');
+  if (calendar) {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const visitsByDay = selectedVisits.reduce((acc, visit) => {
+      const date = new Date(`${visit.date}T00:00:00`);
+      if (date.getFullYear() !== year || date.getMonth() !== month) return acc;
+      const day = date.getDate();
+      if (!acc[day]) acc[day] = [];
+      acc[day].push(visit);
+      return acc;
+    }, {});
+    const blanks = Array.from({ length: firstWeekday }, () => '<div class="supervisor-calendar-day empty"></div>');
+    const days = Array.from({ length: daysInMonth }, (_, index) => {
+      const day = index + 1;
+      const dayVisits = visitsByDay[day] || [];
+      return `
+        <div class="supervisor-calendar-day ${dayVisits.length ? 'has-visit' : ''}">
+          <strong>${esc(String(day))}</strong>
+          <span>${dayVisits.length ? `${esc(String(dayVisits.length))} visita(s)` : ''}</span>
+        </div>
+      `;
+    });
+    calendar.innerHTML = [
+      '<div class="supervisor-calendar-week">Dom</div><div class="supervisor-calendar-week">Seg</div><div class="supervisor-calendar-week">Ter</div><div class="supervisor-calendar-week">Qua</div><div class="supervisor-calendar-week">Qui</div><div class="supervisor-calendar-week">Sex</div><div class="supervisor-calendar-week">Sab</div>',
+      ...blanks,
+      ...days
+    ].join('');
+  }
+
+  const visitedNode = document.getElementById('supervisorVisitedSchools');
+  if (visitedNode) {
+    const visited = selectedStat ? selectedStat.assignedSchools.filter((school) => visitedSchoolSet.has(school)) : [];
+    visitedNode.innerHTML = visited.map((school) => {
+      const schoolVisits = selectedVisits.filter((visit) => visit.school === school);
+      const lastVisit = schoolVisits.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+      return `
+        <div class="setechub-item setechub-clickable" onclick="openSchoolRecord('${esc(school)}')">
+          <div class="setechub-head">
+            <div>
+              <strong>${esc(school)}</strong>
+              <div class="sync-meta">${esc(String(schoolVisits.length))} visita(s) | ultima em ${esc(lastVisit?.date || '--')}</div>
+            </div>
+            <span class="diag-pill pill-ok">Visitada</span>
+          </div>
+        </div>
+      `;
+    }).join('') || '<div class="sync-empty">Nenhuma escola visitada neste recorte.</div>';
+  }
+
+  const pendingNode = document.getElementById('supervisorPendingSchools');
+  if (pendingNode) {
+    pendingNode.innerHTML = pendingSchools.map((school) => `
+      <div class="setechub-item setechub-clickable" onclick="openSchoolRecord('${esc(school)}')">
+        <div class="setechub-head">
+          <div>
+            <strong>${esc(school)}</strong>
+            <div class="sync-meta">Sem visita registrada para ${esc(selectedStat?.supervisor.name || 'o supervisor')}.</div>
+          </div>
+          <span class="diag-pill pill-warn">Pendente</span>
+        </div>
+      </div>
+    `).join('') || '<div class="sync-empty">Todas as escolas vinculadas possuem visita registrada.</div>';
   }
 
   const matrix = document.getElementById('supervisorSchoolMatrix');
@@ -1124,10 +1216,11 @@ function renderSupervisors() {
         <div class="supervisor-school-list">
           ${item.assignedSchools.map((schoolName) => {
             const signal = schoolByName(schoolName) ? schoolOperationalSnapshot(schoolByName(schoolName)) : null;
+            const wasVisited = visitedSchoolSet.has(schoolName);
             return `
               <button class="supervisor-school-row" type="button" onclick="openSchoolRecord('${esc(schoolName)}')">
                 <span>${esc(schoolName)}</span>
-                <strong>${esc(String(signal?.alertUnits || 0))} alertas</strong>
+                <strong>${wasVisited ? 'visitada' : `${esc(String(signal?.alertUnits || 0))} alertas`}</strong>
               </button>
             `;
           }).join('')}

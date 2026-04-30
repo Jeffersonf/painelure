@@ -194,6 +194,12 @@ function addSupervisorTestVisits() {
   refreshAll();
 }
 
+function selectSupervisor(name) {
+  currentSupervisorFilter = normalizeKey(name);
+  renderSupervisors();
+  saveUiContext();
+}
+
 function removeSchoolImport(id) {
   const target = state.schoolImports.find((item) => item.id === id);
   if (target) logSchoolEvent(target.school, 'import', `Importacao removida: ${target.label || target.filename || 'arquivo'}.`);
