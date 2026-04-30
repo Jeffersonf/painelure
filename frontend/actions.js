@@ -267,7 +267,8 @@ function showSchoolDetail(name) {
   renderSchoolDetail();
   renderAssets();
   renderSchoolImports();
-  document.getElementById('schoolDetailSelect').value = name;
+  const schoolDetailSelect = document.getElementById('schoolDetailSelect');
+  if (schoolDetailSelect) schoolDetailSelect.value = name;
   const inventorySelect = document.getElementById('inventorySchoolSelect');
   if (inventorySelect) inventorySelect.value = name;
 }
@@ -536,7 +537,7 @@ function setupEventListeners() {
     refreshAll();
   });
 
-  document.getElementById('schoolDetailSelect').addEventListener('change', (event) => {
+  document.getElementById('schoolDetailSelect')?.addEventListener('change', (event) => {
     currentSchoolDetail = event.target.value;
     renderSchoolDetail();
   });
@@ -569,7 +570,7 @@ function setupEventListeners() {
     alert('Ficha da escola atualizada.');
   });
 
-  document.getElementById('assetForm').addEventListener('submit', (event) => {
+  document.getElementById('assetForm')?.addEventListener('submit', (event) => {
     event.preventDefault();
     const name = document.getElementById('assetName').value.trim();
     const place = document.getElementById('assetPlace').value.trim();

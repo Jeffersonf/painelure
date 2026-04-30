@@ -717,14 +717,15 @@ function renderSchoolImports() {
 
 function renderSchoolDetail() {
   const select = document.getElementById('schoolDetailSelect');
-  if (!select) return;
   const sortedSchools = state.schools.slice().sort((a, b) => a.name.localeCompare(b.name));
   const schoolNames = sortedSchools.map((item) => item.name);
   if (!currentSchoolDetail || !schoolNames.includes(currentSchoolDetail)) {
     currentSchoolDetail = schoolNames[0] || '';
   }
-  select.innerHTML = sortedSchools.map((item) => `<option value="${esc(item.name)}">${esc(item.name)} | CIE ${esc(item.cie || '--')}</option>`).join('');
-  select.value = currentSchoolDetail;
+  if (select) {
+    select.innerHTML = sortedSchools.map((item) => `<option value="${esc(item.name)}">${esc(item.name)} | CIE ${esc(item.cie || '--')}</option>`).join('');
+    select.value = currentSchoolDetail;
+  }
 
   const school = state.schools.find((item) => item.name === currentSchoolDetail);
   const profile = currentSchoolProfile();
@@ -1028,18 +1029,13 @@ function renderSupervisors() {
   const metricCount = document.getElementById('supervisorMetricCount');
   if (!metricCount) return;
   const stats = supervisorStats();
-  if ((!currentSupervisorFilter || currentSupervisorFilter === 'todos') && stats[0]) {
-    currentSupervisorFilter = normalizeKey(stats[0].supervisor.name);
-  }
-  const selectedStat = stats.find((item) => normalizeKey(item.supervisor.name) === currentSupervisorFilter) || stats[0] || null;
-  const filteredStats = selectedStat ? [selectedStat] : [];
-  const visits = supervisorVisitRows();
-  const assignedSchoolCount = new Set(filteredStats.flatMap((item) => item.assignedSchools)).size;
-  const averageCoverage = filteredStats.length
-    ? Math.round(filteredStats.reduce((sum, item) => sum + item.coverage, 0) / filteredStats.length)
+  const visits = state.supervisorVisits || [];
+  const assignedSchoolCount = new Set(stats.flatMap((item) => item.assignedSchools)).size;
+  const averageCoverage = stats.length
+    ? Math.round(stats.reduce((sum, item) => sum + item.coverage, 0) / stats.length)
     : 0;
 
-  metricCount.textContent = String(filteredStats.length);
+  metricCount.textContent = String(stats.length);
   document.getElementById('supervisorMetricSchools').textContent = String(assignedSchoolCount);
   document.getElementById('supervisorMetricVisits').textContent = String(visits.length);
   document.getElementById('supervisorMetricCoverage').textContent = `${averageCoverage}%`;
@@ -1069,12 +1065,71 @@ function renderSupervisors() {
   const selectorList = document.getElementById('supervisorSelectorList');
   if (selectorList) {
     selectorList.innerHTML = stats.map((item) => `
-      <button class="supervisor-selector-btn ${normalizeKey(item.supervisor.name) === currentSupervisorFilter ? 'active' : ''}" type="button" onclick="openSupervisorRecord('${esc(item.supervisor.name)}')">
+      <button class="supervisor-selector-btn" type="button" onclick="openSupervisorRecord('${esc(item.supervisor.name)}')">
         <span>${esc(item.supervisor.name)}</span>
         <strong>${esc(String(item.visits))} visita(s)</strong>
       </button>
     `).join('') || '<div class="sync-empty">Nenhum supervisor cadastrado.</div>';
   }
+
+  const overviewPanel = document.getElementById('supervisorOverviewPanel');
+  if (overviewPanel) {
+    const totalGoal = stats.reduce((sum, item) => sum + Number(item.supervisor.monthlyGoal || item.assignedSchools.length || 0), 0);
+    const metGoals = stats.filter((item) => item.visits >= Number(item.supervisor.monthlyGoal || item.assignedSchools.length || 1)).length;
+    overviewPanel.innerHTML = `
+      <div class="school-overview-kpis">
+        <div><span>Meta total</span><strong>${esc(String(totalGoal))}</strong></div>
+        <div><span>Cumpriram</span><strong>${esc(String(metGoals))}</strong></div>
+        <div><span>Pendentes</span><strong>${esc(String(Math.max(0, stats.length - metGoals)))}</strong></div>
+        <div><span>Cobertura</span><strong>${esc(String(averageCoverage))}%</strong></div>
+      </div>
+    `;
+  }
+
+  const attentionList = document.getElementById('supervisorAttentionList');
+  if (attentionList) {
+    attentionList.innerHTML = stats
+      .filter((item) => item.visits < Number(item.supervisor.monthlyGoal || item.assignedSchools.length || 1))
+      .slice(0, 6)
+      .map((item) => `
+        <div class="setechub-item setechub-clickable" onclick="openSupervisorRecord('${esc(item.supervisor.name)}')">
+          <div class="setechub-head">
+            <div>
+              <strong>${esc(item.supervisor.name)}</strong>
+              <div class="sync-meta">${esc(String(item.visits))}/${esc(String(item.supervisor.monthlyGoal || item.assignedSchools.length || 1))} visita(s) no periodo de teste</div>
+            </div>
+            <span class="diag-pill pill-warn">Meta pendente</span>
+          </div>
+        </div>
+      `).join('') || '<div class="sync-empty">Nenhuma pendencia geral de supervisao.</div>';
+  }
+
+  const summaryTable = document.getElementById('supervisorVisitTable');
+  if (summaryTable) {
+    summaryTable.innerHTML = visits.length ? `
+      <table class="setechub-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Supervisor</th>
+            <th>Escola</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${visits.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 12).map((visit) => `
+            <tr>
+              <td>${esc(visit.date || '--')}</td>
+              <td><button class="link-button" type="button" onclick="openSupervisorRecord('${esc(visit.supervisor)}')">${esc(visit.supervisor)}</button></td>
+              <td><button class="link-button" type="button" onclick="openSchoolRecord('${esc(visit.school)}')">${esc(visit.school)}</button></td>
+              <td><span class="diag-pill">${esc(visit.type || 'Visita')}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    ` : '<div class="sync-empty">Nenhuma visita registrada ainda.</div>';
+  }
+  return;
 
   const now = new Date();
   const year = now.getFullYear();
@@ -1259,11 +1314,12 @@ function renderSupervisors() {
 }
 
 function renderSupervisorRecord() {
+  const profileHost = document.getElementById('supervisorRecordProfile');
+  if (!profileHost) return;
   const select = document.getElementById('supervisorRecordSelect');
-  if (!select) return;
   const stats = supervisorStats();
   if (!stats.length) {
-    document.getElementById('supervisorRecordProfile').innerHTML = '<div class="sync-empty">Nenhum supervisor cadastrado.</div>';
+    profileHost.innerHTML = '<div class="sync-empty">Nenhum supervisor cadastrado.</div>';
     return;
   }
   if (!currentSupervisorDetail || !stats.some((item) => item.supervisor.name === currentSupervisorDetail)) {
@@ -1287,15 +1343,17 @@ function renderSupervisorRecord() {
   const goalPct = Math.min(100, Math.round((monthlyVisitCount / monthlyGoal) * 100));
   const goalMet = monthlyVisitCount >= monthlyGoal;
 
-  select.innerHTML = stats.map((item) => `<option value="${esc(item.supervisor.name)}">${esc(item.supervisor.name)}</option>`).join('');
-  select.value = supervisor.name;
+  if (select) {
+    select.innerHTML = stats.map((item) => `<option value="${esc(item.supervisor.name)}">${esc(item.supervisor.name)}</option>`).join('');
+    select.value = supervisor.name;
+  }
 
   const title = document.getElementById('supervisorRecordTitle');
   const subtitle = document.getElementById('supervisorRecordSubtitle');
   if (title) title.textContent = supervisor.name;
   if (subtitle) subtitle.textContent = `${selectedStat.assignedSchools.length} escola(s) | ${monthlyVisitCount}/${monthlyGoal} visita(s) no mes | ${goalMet ? 'meta cumprida' : 'meta pendente'}.`;
 
-  document.getElementById('supervisorRecordProfile').innerHTML = `
+  profileHost.innerHTML = `
     <div class="setechub-item">
       <div class="setechub-head">
         <div>
@@ -1561,7 +1619,8 @@ function renderSchools() {
     acc[school.zone].push(school);
     return acc;
   }, {});
-  document.getElementById('schoolList').innerHTML = Object.keys(groups).length ? Object.entries(groups).map(([zone, items]) => `
+  const schoolList = document.getElementById('schoolList');
+  if (schoolList) schoolList.innerHTML = Object.keys(groups).length ? Object.entries(groups).map(([zone, items]) => `
     <div class="setechub-group">
       <div class="setechub-group-head">
         <strong>${esc(zone)}</strong>
@@ -1611,24 +1670,27 @@ function renderSchools() {
 
 function renderAssets() {
   renderInventoryWorkspace();
-  document.getElementById('assetList').innerHTML = filteredAssets()
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name) || a.status.localeCompare(b.status))
-    .map((asset) => `
-    <div class="setechub-item">
-      <div class="setechub-head">
-        <div>
-          <strong>${esc(asset.name)}</strong>
-          <div class="sync-meta">${esc(asset.place)}</div>
+  const assetList = document.getElementById('assetList');
+  if (assetList) {
+    assetList.innerHTML = filteredAssets()
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name) || a.status.localeCompare(b.status))
+      .map((asset) => `
+      <div class="setechub-item">
+        <div class="setechub-head">
+          <div>
+            <strong>${esc(asset.name)}</strong>
+            <div class="sync-meta">${esc(asset.place)}</div>
+          </div>
+          <span class="diag-pill ${toneByAsset(asset.status)}">${esc(badgeText(asset.status))}</span>
         </div>
-        <span class="diag-pill ${toneByAsset(asset.status)}">${esc(badgeText(asset.status))}</span>
+        <div class="setechub-action-row left">
+          <button class="btn btn-g btn-sm" onclick="cycleAsset(${asset.id})">Atualizar status</button>
+          <button class="btn btn-d btn-sm" onclick="removeAsset(${asset.id})">Remover</button>
+        </div>
       </div>
-      <div class="setechub-action-row left">
-        <button class="btn btn-g btn-sm" onclick="cycleAsset(${asset.id})">Atualizar status</button>
-        <button class="btn btn-d btn-sm" onclick="removeAsset(${asset.id})">Remover</button>
-      </div>
-    </div>
-  `).join('') || '<div class="sync-empty">Nenhum ativo geral encontrado neste filtro.</div>';
+    `).join('') || '<div class="sync-empty">Nenhum ativo geral encontrado neste filtro.</div>';
+  }
   const schoolSelect = document.getElementById('schoolAssetSchool');
   const bulkSchoolSelect = document.getElementById('schoolAssetBulkSchool');
   if (schoolSelect) {

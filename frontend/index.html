@@ -499,18 +499,6 @@
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Tabela mestre das escolas</div><div class="cs">A escola virou a entidade principal. Clique em qualquer linha para abrir a ficha.</div></div>
-      </div>
-      <div id="schoolMasterTable" class="setechub-table-wrap"></div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Escolas monitoradas</div><div class="cs">Mude o status ou transforme uma escola em tarefa.</div></div>
-      </div>
-      <div id="schoolList" class="stack-list"></div>
-    </div>
-    <div class="box">
-      <div class="bh">
         <div><div class="ct">Nova escola</div><div class="cs">Registre uma escola para acompanhar sua operacao.</div></div>
       </div>
       <form id="schoolForm" class="setechub-form setechub-form-school">
@@ -536,14 +524,6 @@
       </div>
     </div>
     <div class="box">
-      <div class="bh">
-        <div><div class="ct">Selecionar escola</div><div class="cs">Cada unidade agora tem a propria pagina dentro do sistema.</div></div>
-      </div>
-      <div class="setechub-form setechub-form-school-detail">
-        <select class="fi" id="schoolDetailSelect"></select>
-        <button class="btn btn-p" type="button" onclick="setInventorySchool(currentSchoolDetail)">Abrir inventario</button>
-        <button class="btn btn-g" type="button" onclick="openSchoolCalls(currentSchoolDetail)">Abrir chamados</button>
-      </div>
       <div class="school-record-nav">
         <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolDetailExecutive')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Resumo</button>
         <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('schoolDetailInventory')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Inventario</button>
@@ -607,7 +587,7 @@
         <div><div class="ct">Importacao por escola</div><div class="cs">Arquivos e previews ligados diretamente a esta unidade.</div></div>
       </div>
       <form id="schoolImportForm" class="setechub-form setechub-form-import">
-        <select class="fi" id="importSchoolSelect"></select>
+        <input id="importSchoolSelect" type="hidden">
         <select class="fi" id="importSourceType">
           <option value="excel">Excel / CSV</option>
           <option value="image">Foto com OCR</option>
@@ -674,50 +654,21 @@
           <div><div class="ct">Selecionar supervisor</div><div class="cs">Clique em um nome para abrir o painel individual.</div></div>
         </div>
         <div class="setechub-action-col">
-          <select class="fi" id="supervisorFilterSelect">
-            <option value="">Selecione um supervisor</option>
-          </select>
           <div id="supervisorSelectorList" class="supervisor-selector-list"></div>
         </div>
       </section>
       <section class="box">
         <div class="bh">
-          <div><div class="ct">Supervisor selecionado</div><div class="cs">Resumo da responsabilidade, meta e situacao no mes.</div></div>
+          <div><div class="ct">Resumo geral</div><div class="cs">Leitura consolidada da supervisao sem entrar em detalhes repetidos.</div></div>
         </div>
-        <div id="supervisorProfilePanel" class="stack-list"></div>
+        <div id="supervisorOverviewPanel" class="stack-list"></div>
       </section>
       <section class="box">
         <div class="bh">
-          <div><div class="ct">Meta de visitas</div><div class="cs">Acompanhamento mensal do quantitativo esperado.</div></div>
+          <div><div class="ct">Atencao</div><div class="cs">Supervisores que ainda precisam de visita no mes.</div></div>
         </div>
-        <div id="supervisorGoalPanel" class="stack-list"></div>
+        <div id="supervisorAttentionList" class="stack-list"></div>
       </section>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Calendario de visitas</div><div class="cs">Dias com visita registrada para o supervisor selecionado.</div></div>
-      </div>
-      <div id="supervisorCalendarGrid" class="supervisor-calendar-grid"></div>
-    </div>
-    <div class="setechub-two-col">
-      <div class="box">
-        <div class="bh">
-          <div><div class="ct">Escolas visitadas</div><div class="cs">Unidades com visita registrada no recorte atual.</div></div>
-        </div>
-        <div id="supervisorVisitedSchools" class="stack-list"></div>
-      </div>
-      <div class="box">
-        <div class="bh">
-          <div><div class="ct">Faltam visitas</div><div class="cs">Unidades vinculadas que ainda nao receberam visita no recorte.</div></div>
-        </div>
-        <div id="supervisorPendingSchools" class="stack-list"></div>
-      </div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Escolas do supervisor</div><div class="cs">Todas as escolas vinculadas, com atalho para abrir a ficha da unidade.</div></div>
-      </div>
-      <div id="supervisorSchoolMatrix" class="supervisor-school-matrix"></div>
     </div>
     <div class="box">
       <div class="bh">
@@ -740,7 +691,7 @@
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Base de visitas</div><div class="cs">Tabela quantitativa inicial para conferencia e importacao futura.</div></div>
+        <div><div class="ct">Ultimas visitas</div><div class="cs">Amostra geral. O historico completo fica na pagina de cada supervisor.</div></div>
       </div>
       <div id="supervisorVisitTable" class="setechub-table-wrap"></div>
     </div>
@@ -758,13 +709,6 @@
       </div>
     </div>
     <div class="box">
-      <div class="bh">
-        <div><div class="ct">Selecionar supervisor</div><div class="cs">Cada supervisor tem uma pagina propria de acompanhamento.</div></div>
-      </div>
-      <div class="setechub-form setechub-form-school-detail">
-        <select class="fi" id="supervisorRecordSelect"></select>
-        <button class="btn btn-p" type="button" id="openSupervisorSelectedBtn">Abrir supervisor</button>
-      </div>
       <div class="school-record-nav">
         <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordProfile')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Resumo</button>
         <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordCalendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Calendario</button>
@@ -909,33 +853,6 @@
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Novo ativo</div><div class="cs">Cadastre um ativo com local e status inicial.</div></div>
-      </div>
-      <form id="assetForm" class="setechub-form setechub-form-asset">
-        <input class="fi" id="assetName" placeholder="Ativo ou equipamento">
-        <input class="fi" id="assetPlace" placeholder="Local">
-        <select class="fi" id="assetStatus">
-          <option value="ok">Ok</option>
-          <option value="manutencao">Manutencao</option>
-          <option value="defeito">Defeito</option>
-        </select>
-        <button class="btn btn-p" type="submit">Adicionar ativo</button>
-      </form>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Ativos monitorados</div><div class="cs">Cicle entre ok, manutencao e defeito.</div></div>
-      </div>
-      <div class="setechub-toolbar" id="assetFilterBar">
-        <button class="btn btn-g btn-sm active-filter" data-asset-filter="todos" type="button">Todos</button>
-        <button class="btn btn-g btn-sm" data-asset-filter="alerta" type="button">Alertas</button>
-        <button class="btn btn-g btn-sm" data-asset-filter="criticos" type="button">Criticos</button>
-        <button class="btn btn-g btn-sm" data-asset-filter="infra" type="button">Infra de rede</button>
-      </div>
-      <div id="assetList" class="stack-list"></div>
-    </div>
-    <div class="box">
-      <div class="bh">
         <div><div class="ct">Equipamentos por escola</div><div class="cs">Agora o inventario aparece consolidado por tipo, quantidade e criticidade.</div></div>
       </div>
       <form id="schoolAssetForm" class="setechub-form setechub-form-school-asset">
@@ -957,24 +874,6 @@
       </form>
       <div class="sync-meta" id="schoolAssetBulkStatus">Use `nome;qtd;status;observacao` ou apenas `nome` por linha.</div>
       <div id="schoolAssetList" class="stack-list"></div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Monitoramento visual</div><div class="cs">Leitura consolidada do parque, alertas e comparativos entre escolas.</div></div>
-      </div>
-      <div class="setechub-monitor-grid" id="assetMonitorCards"></div>
-      <div class="setechub-two-col setechub-monitor-layout">
-        <div class="setechub-table-card">
-          <div class="ct">Comparativo por escola</div>
-          <div class="sync-meta">Totais, alertas e peso do inventario em cada unidade.</div>
-          <div id="assetComparisonTable" class="setechub-table-wrap"></div>
-        </div>
-        <div class="setechub-table-card">
-          <div class="ct">Tipos de equipamento</div>
-          <div class="sync-meta">Visao geral por categoria consolidada.</div>
-          <div id="assetTypeTable" class="setechub-table-wrap"></div>
-        </div>
-      </div>
     </div>
   </div>
 
