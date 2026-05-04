@@ -1967,25 +1967,30 @@ function renderSupervisorRecord() {
 function renderOfficialData() {
   const list = document.getElementById('officialList');
   const adminActions = canManageUsers();
-  list.innerHTML = state.officialLinks.slice(0, 6).map((item) => `
-    <div class="setechub-item">
-      <div class="setechub-head">
-        <strong>${esc(item.label)}</strong>
-      </div>
-      <div class="sync-meta"><a href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.url)}</a></div>
-    </div>
-  `).join('');
-  document.getElementById('officialLinksList').innerHTML = state.officialLinks.map((item) => `
-    <div class="setechub-item">
-      <div class="setechub-head">
-        <div>
+  if (list) {
+    list.innerHTML = state.officialLinks.slice(0, 6).map((item) => `
+      <div class="setechub-item">
+        <div class="setechub-head">
           <strong>${esc(item.label)}</strong>
-          <div class="sync-meta"><a href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.url)}</a></div>
         </div>
-        ${adminActions ? `<button class="btn btn-d btn-sm" onclick="removeOfficialLink(${item.id})">Remover</button>` : ''}
+        <div class="sync-meta"><a href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.url)}</a></div>
       </div>
-    </div>
-  `).join('');
+    `).join('');
+  }
+  const linksList = document.getElementById('officialLinksList');
+  if (linksList) {
+    linksList.innerHTML = state.officialLinks.map((item) => `
+      <div class="setechub-item">
+        <div class="setechub-head">
+          <div>
+            <strong>${esc(item.label)}</strong>
+            <div class="sync-meta"><a href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.url)}</a></div>
+          </div>
+          ${adminActions ? `<button class="btn btn-d btn-sm" onclick="removeOfficialLink(${item.id})">Remover</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
   const office = document.getElementById('officeContact');
   if (office) {
     office.innerHTML = `
