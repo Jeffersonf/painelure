@@ -53,6 +53,21 @@ function mergeUniqueBy(baseItems, savedItems, keyFn) {
   return Array.from(map.values());
 }
 
+function localIsoDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function keepImportedFleetTask(item, date = new Date()) {
+  if (!normalizeKey(item?.source || '').startsWith('frota excel')) return true;
+  if (!item?.date) return false;
+  const today = localIsoDate(date);
+  const monthEnd = localIsoDate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
+  return item.date >= today && item.date <= monthEnd;
+}
+
 function inferImportReviewStatus(item) {
   if (item?.reviewStatus) return item.reviewStatus;
   const id = String(item?.id || '');
@@ -680,6 +695,7 @@ function createDefaults() {
     supervisorVisits: defaultSupervisorVisits(supervisors),
     schoolProfiles: defaultSchoolProfiles(schools),
     schoolImports: GENERATED_SCHOOL_DATA.schoolImports || [],
+    inventoryReplacementSchools: [],
     schoolAssets: GENERATED_SCHOOL_DATA.schoolAssets || [],
     schoolNetworks: GENERATED_SCHOOL_DATA.schoolNetworks || [],
     assets: GENERATED_SCHOOL_DATA.generalAssets || [],
@@ -699,7 +715,15 @@ function createDefaults() {
       numberPlaceholder: '{{REDE_NUMERO}}',
       datePlaceholder: '{{REDE_DATA}}',
       headingPlaceholder: '{{REDE_CABECALHO}}',
-      assuntoLabel: 'Assunto:'
+      assuntoLabel: 'Assunto:',
+      draftNumber: '',
+      draftDate: '',
+      draftHeading: 'Diretoria de Ensino - Região de Itapeva',
+      draftSubject: '',
+      draftDestination: '',
+      draftBody: '',
+      processStartNumber: '',
+      processDate: ''
     }
   };
 }
@@ -725,6 +749,13 @@ function mergeState(saved) {
   const savedSchoolAssets = Array.isArray(repaired.schoolAssets)
     ? repaired.schoolAssets.map((item) => ({ ...item, school: canonicalSchoolName(item.school) }))
     : [];
+  const inventoryReplacementSchools = Array.isArray(repaired.inventoryReplacementSchools)
+    ? Array.from(new Set(repaired.inventoryReplacementSchools.map((school) => canonicalSchoolName(school)).filter(Boolean)))
+    : [];
+  const replacementKeys = new Set(inventoryReplacementSchools.map((school) => normalizeKey(school)));
+  const baseSchoolAssets = replacementKeys.size
+    ? base.schoolAssets.filter((item) => !replacementKeys.has(normalizeKey(item.school)))
+    : base.schoolAssets;
   const savedSchoolNetworks = Array.isArray(repaired.schoolNetworks)
     ? repaired.schoolNetworks.map((item) => ({ ...item, school: canonicalSchoolName(item.school) }))
     : [];
@@ -735,7 +766,7 @@ function mergeState(saved) {
       scope: item.scope || (item.category === 'Carro oficial' ? 'carro' : item.category === 'Evento URE' || item.category === 'CTC' ? 'ure' : 'pessoal'),
       owner: item.owner || item.createdBy || repaired.profile?.name || base.profile.name,
       createdBy: item.createdBy || repaired.profile?.name || base.profile.name
-    }))
+    })).filter((item) => keepImportedFleetTask(item))
     : base.tasks;
   const savedCalls = Array.isArray(repaired.calls)
     ? repaired.calls.map((item) => ({ ...item, school: canonicalSchoolName(item.school) || item.school }))
@@ -795,8 +826,9 @@ function mergeState(saved) {
       ...item,
       reviewStatus: inferImportReviewStatus(item)
     })),
+    inventoryReplacementSchools,
     schoolAssets: mergeUniqueBy(
-      base.schoolAssets,
+      baseSchoolAssets,
       savedSchoolAssets,
       (item) => normalizeKey(`${item.school}|${item.name}|${item.notes || ''}`)
     ),

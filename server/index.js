@@ -4,6 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
+const { spawn } = require('child_process');
 
 const PORT = Number(process.env.PORT || 4173);
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -177,6 +178,57 @@ function readSnapshot(id) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+function runRedeProcessor(config = {}) {
+  return new Promise((resolve, reject) => {
+    const sourceFolder = String(config.folderPath || '').trim();
+    if (!sourceFolder) {
+      reject(new Error('Informe o caminho da pasta com as redes.'));
+      return;
+    }
+    const resolvedFolder = path.resolve(sourceFolder);
+    if (!fs.existsSync(resolvedFolder) || !fs.statSync(resolvedFolder).isDirectory()) {
+      reject(new Error(`Pasta nao encontrada: ${resolvedFolder}`));
+      return;
+    }
+    const scriptPath = path.join(ROOT_DIR, 'tools', 'processar_redes.ps1');
+    const args = [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
+      scriptPath,
+      '-SourceFolder',
+      resolvedFolder,
+      '-YearSuffix',
+      String(config.yearSuffix || '26'),
+      '-NumberPlaceholder',
+      String(config.numberPlaceholder || '{{REDE_NUMERO}}'),
+      '-DatePlaceholder',
+      String(config.datePlaceholder || '{{REDE_DATA}}'),
+      '-HeadingPlaceholder',
+      String(config.headingPlaceholder || '{{REDE_CABECALHO}}'),
+      '-AssuntoLabel',
+      String(config.assuntoLabel || 'Assunto:')
+    ];
+    const child = spawn('powershell.exe', args, {
+      cwd: ROOT_DIR,
+      windowsHide: true
+    });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
+    child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
+    child.on('error', reject);
+    child.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(stderr || stdout || `PowerShell saiu com codigo ${code}`));
+        return;
+      }
+      resolve({ stdout, stderr });
+    });
+  });
+}
+
 const server = http.createServer(async (req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
@@ -241,6 +293,18 @@ const server = http.createServer(async (req, res) => {
       restoredFrom: id,
       state: snapshot.state || snapshot
     });
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/redes/process' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const parsed = JSON.parse(body || '{}');
+      const result = await runRedeProcessor(parsed.config || parsed);
+      sendJson(res, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
     return;
   }
 

@@ -111,6 +111,30 @@ async function restoreServerSnapshot(id) {
   }
 }
 
+async function processRedesOnServer() {
+  if (!canUseLocalApi()) {
+    alert('Abra o PainelURE pelo servidor local para processar as redes direto pelo site.');
+    return;
+  }
+  const button = document.getElementById('processRedeBtn');
+  const status = document.getElementById('redeProcessStatus');
+  try {
+    if (button) button.disabled = true;
+    if (status) status.textContent = 'Processando DOCX no Word e gerando PDFs...';
+    const payload = await apiRequest('/api/redes/process', {
+      method: 'POST',
+      body: JSON.stringify({ config: state.redes })
+    });
+    if (status) status.textContent = payload.stdout || 'Redes processadas. PDFs gerados na mesma pasta.';
+    alert('Redes processadas. PDFs gerados na mesma pasta.');
+  } catch (error) {
+    if (status) status.textContent = `Falha ao processar: ${error.message}`;
+    alert(`Nao foi possivel processar as redes: ${error.message}`);
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
 async function syncFromServerIfUseful() {
   if (!canUseLocalApi()) return;
   const hasLocalState = !!localStorage.getItem(STORAGE_KEY);

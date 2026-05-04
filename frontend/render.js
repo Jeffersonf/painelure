@@ -16,10 +16,10 @@ function renderDashboardHero() {
   const alertAssets = state.assets.filter((item) => item.status !== 'ok').length + state.schoolAssets.filter((item) => item.status !== 'ok').length;
   const pendingItems = pendingQueueItems(99).length;
 
-  title.textContent = focus ? focus.title : 'Operacao pronta para o proximo movimento.';
+  title.textContent = focus ? focus.title : 'Mesa de operacao pronta para o proximo movimento.';
   text.textContent = focus
     ? `${focus.place || 'Sem local definido'} | ${focus.category || 'Rotina'} | ${focus.time || 'sem horario definido'}`
-    : buildSummaryPreview();
+    : `${buildSummaryPreview()} | cobertura ${coverage.profileCoverage}%`;
 
   const actionItems = [
     { label: 'Abrir CTC', action: `openCtcAgenda()`, page: 'ctc', tone: 'primary', role: 'ctc' },
@@ -35,19 +35,17 @@ function renderDashboardHero() {
 
   scoreNode.innerHTML = `
     <div>
-      <div class="sync-meta">Resumo da base</div>
+      <div class="sync-meta">Saude operacional</div>
       <strong>${esc(String(health.score))}%</strong>
     </div>
     <span class="diag-pill ${health.tone}">${esc(health.label)}</span>
   `;
 
   statsNode.innerHTML = [
-    { label: 'Escolas', value: String(attentionSchools), tone: attentionSchools ? 'pill-warn' : 'pill-ok' },
-    { label: 'Redes', value: String(state.schoolNetworks.length), tone: state.schoolNetworks.length ? 'pill-info' : 'pill-warn' },
-    { label: 'Cameras', value: String(state.schoolNetworks.filter((item) => Number(item.cameraInstalled || 0) > 0).length), tone: 'pill-info' },
-    { label: 'Manut./defeito', value: String(alertAssets), tone: alertAssets ? 'pill-danger' : 'pill-ok' },
+    { label: 'Escolas em atencao', value: String(attentionSchools), tone: attentionSchools ? 'pill-warn' : 'pill-ok' },
+    { label: 'Inventario alerta', value: String(alertAssets), tone: alertAssets ? 'pill-danger' : 'pill-ok' },
     { label: 'Pendencias', value: String(pendingItems), tone: pendingItems ? 'pill-info' : 'pill-ok' },
-    { label: 'Cobertura', value: `${coverage.profileCoverage}%`, tone: coverage.profileCoverage >= 65 ? 'pill-ok' : 'pill-warn' }
+    { label: 'Cobertura fichas', value: `${coverage.profileCoverage}%`, tone: coverage.profileCoverage >= 65 ? 'pill-ok' : 'pill-warn' }
   ].map((item) => `
     <div class="dashboard-hero-stat">
       <span>${esc(item.label)}</span>
@@ -214,8 +212,82 @@ function renderDashboardAccess() {
 function renderDashboardOperationalLists() {
   const inventoryNode = document.getElementById('dashboardInventoryAlerts');
   const callsNode = document.getElementById('dashboardCallQueue');
+  const sharedAgendaNode = document.getElementById('dashboardSharedAgenda');
+  const personalAgendaNode = document.getElementById('dashboardPersonalAgenda');
+  const sharedAgendaListNode = document.getElementById('dashboardSharedAgendaList');
+  const personalAgendaListNode = document.getElementById('dashboardPersonalAgendaList');
   const inventoryRows = topInventoryAlerts(5);
   const callRows = topOpenCalls(5);
+  const renderAgendaRows = (rows, emptyText) => rows.slice(0, 6).map((task) => `
+    <div class="setechub-item setechub-clickable" onclick="showPage('agenda')">
+      <div class="setechub-head">
+        <div>
+          <strong>${esc(task.scope === 'carro' ? `${task.vehicle || 'Carro oficial'} - ${task.owner || 'Frota'}` : task.title)}</strong>
+          <div class="sync-meta">${esc(task.date)} | ${esc(task.time || 'Sem horario')} | ${esc(task.place || 'Sem local')}</div>
+        </div>
+        <span class="diag-pill ${task.scope === 'carro' ? 'pill-info' : task.scope === 'ure' ? 'pill-ok' : 'pill-warn'}">${esc(task.scope === 'carro' ? 'Carro' : task.scope === 'ure' ? 'URE' : 'Pessoal')}</span>
+      </div>
+    </div>
+  `).join('') || `<div class="sync-empty">${esc(emptyText)}</div>`;
+  const renderMiniCalendar = (rows, emptyText) => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const days = new Date(year, month + 1, 0).getDate();
+    const byDay = new Map();
+    rows.forEach((task) => {
+      const date = new Date(`${task.date}T00:00:00`);
+      if (date.getFullYear() !== year || date.getMonth() !== month) return;
+      const day = date.getDate();
+      byDay.set(day, [...(byDay.get(day) || []), task]);
+    });
+    const blanks = Array.from({ length: firstWeekday }, () => '<div class="dashboard-mini-day empty"></div>');
+    const cells = Array.from({ length: days }, (_, index) => {
+      const day = index + 1;
+      const items = byDay.get(day) || [];
+      const first = items[0];
+      const label = first
+        ? first.scope === 'carro'
+          ? `${first.vehicle || 'Carro'} - ${first.owner || 'Frota'}`
+          : `${first.title} - ${first.owner || 'URE'}`
+        : '';
+      return `
+        <button class="dashboard-mini-day ${items.length ? 'has-event' : ''}" type="button" onclick="showPage('agenda')">
+          <strong>${esc(String(day))}</strong>
+          ${items.length ? `<span>${esc(label)}</span>` : ''}
+          ${items.length > 1 ? `<em>+${esc(String(items.length - 1))}</em>` : ''}
+        </button>
+      `;
+    });
+    const body = [
+      '<div class="dashboard-mini-week">D</div><div class="dashboard-mini-week">S</div><div class="dashboard-mini-week">T</div><div class="dashboard-mini-week">Q</div><div class="dashboard-mini-week">Q</div><div class="dashboard-mini-week">S</div><div class="dashboard-mini-week">S</div>',
+      ...blanks,
+      ...cells
+    ].join('');
+    const count = rows.filter((task) => task.date?.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length;
+    return `
+      <div class="dashboard-mini-calendar-head">
+        <strong>${esc(today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }))}</strong>
+        <span>${count ? `${esc(String(count))} registro(s)` : esc(emptyText)}</span>
+      </div>
+      <div class="dashboard-mini-calendar-grid">${body}</div>
+    `;
+  };
+  if (sharedAgendaNode || personalAgendaNode) {
+    const today = new Date();
+    const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    const monthRows = (state.tasks || [])
+      .filter((task) => !task.done && task.date && task.date.startsWith(monthKey))
+      .sort((a, b) => `${a.date || '9999-99-99'} ${a.time || '99:99'}`.localeCompare(`${b.date || '9999-99-99'} ${b.time || '99:99'}`));
+    const userName = normalizeKey(currentUser()?.name || state.profile?.name || '');
+    const sharedRows = monthRows.filter((task) => task.scope === 'carro' || task.scope === 'ure');
+    const personalRows = monthRows.filter((task) => task.scope === 'pessoal' && normalizeKey(task.owner || task.createdBy) === userName);
+    if (sharedAgendaNode) sharedAgendaNode.innerHTML = renderMiniCalendar(sharedRows, 'Sem compartilhados');
+    if (personalAgendaNode) personalAgendaNode.innerHTML = renderMiniCalendar(personalRows, 'Sem pessoais');
+    if (sharedAgendaListNode) sharedAgendaListNode.innerHTML = renderAgendaRows(sharedRows, 'Nada na agenda compartilhada deste mes.');
+    if (personalAgendaListNode) personalAgendaListNode.innerHTML = renderAgendaRows(personalRows, 'Nada na sua agenda pessoal deste mes.');
+  }
   if (inventoryNode) {
     inventoryNode.innerHTML = inventoryRows.map((item) => `
       <div class="setechub-item setechub-clickable" onclick="setInventorySchool('${esc(item.school)}')">
@@ -2052,6 +2124,39 @@ function renderTasks(filtered) {
   const list = document.getElementById('taskList');
   const source = filtered || filteredTasks();
   const sorted = source.slice().sort((a, b) => `${a.date || '9999-99-99'} ${a.time || '99:99'}`.localeCompare(`${b.date || '9999-99-99'} ${b.time || '99:99'}`));
+  const calendar = document.getElementById('agendaCalendarGrid');
+  if (calendar) {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const days = new Date(year, month + 1, 0).getDate();
+    const byDay = new Map();
+    sorted.forEach((task) => {
+      if (!task.date) return;
+      const taskDate = new Date(`${task.date}T00:00:00`);
+      if (taskDate.getFullYear() !== year || taskDate.getMonth() !== month) return;
+      const key = taskDate.getDate();
+      byDay.set(key, [...(byDay.get(key) || []), task]);
+    });
+    const blanks = Array.from({ length: firstWeekday }, () => '<div class="supervisor-calendar-day empty"></div>');
+    const dayCells = Array.from({ length: days }, (_, index) => {
+      const day = index + 1;
+      const items = (byDay.get(day) || []).slice(0, 3);
+      return `
+        <div class="supervisor-calendar-day ${items.length ? 'has-visit' : ''}">
+          <strong>${esc(String(day))}</strong>
+          ${items.map((task) => `<span>${esc(task.scope === 'carro' ? `${task.vehicle || 'Carro'} - ${task.owner || 'Frota'}` : `${task.title} - ${task.owner || 'Agenda'}`)}</span>`).join('')}
+          ${(byDay.get(day) || []).length > 3 ? `<span>+${esc(String((byDay.get(day) || []).length - 3))}</span>` : ''}
+        </div>
+      `;
+    });
+    calendar.innerHTML = [
+      '<div class="supervisor-calendar-week">Dom</div><div class="supervisor-calendar-week">Seg</div><div class="supervisor-calendar-week">Ter</div><div class="supervisor-calendar-week">Qua</div><div class="supervisor-calendar-week">Qui</div><div class="supervisor-calendar-week">Sex</div><div class="supervisor-calendar-week">Sab</div>',
+      ...blanks,
+      ...dayCells
+    ].join('');
+  }
   const ownerSelect = document.getElementById('taskOwner');
   if (ownerSelect) {
     const selected = ownerSelect.value || currentUser()?.name || '';
@@ -2069,7 +2174,7 @@ function renderTasks(filtered) {
           <div class="sync-meta">${esc(task.date || task.rawDate || 'Sem data')} | ${esc(task.time || 'Sem horario')} | ${esc(task.place)} | ${esc(task.category)}</div>
           <div class="setechub-inline-meta">
             <span class="diag-pill">${esc(task.owner || task.createdBy || 'Sem responsavel')}</span>
-            <span class="diag-pill">${esc(task.scope === 'carro' ? 'Carro oficial' : task.scope === 'ure' ? 'Evento URE' : 'Agenda pessoal')}</span>
+            <span class="diag-pill">${esc(task.scope === 'carro' ? 'Carro oficial' : task.scope === 'ure' ? 'Evento URE' : 'Pessoal')}</span>
             ${task.vehicle ? `<span class="diag-pill pill-info">${esc(task.vehicle)}</span>` : ''}
             ${task.driver ? `<span class="diag-pill">Condutor: ${esc(task.driver)}</span>` : ''}
             ${task.authorization ? `<span class="diag-pill ${/cancelado/i.test(task.authorization) ? 'pill-danger' : 'pill-ok'}">${esc(task.authorization)}</span>` : ''}
@@ -2641,6 +2746,20 @@ function escapePowerShell(value) {
 }
 
 function parseRedeFilename(filename, fallbackYearSuffix) {
+  const numericName = String(filename || '').match(/^\s*(\d+)\.(docx?|pdf)$/i);
+  if (numericName) {
+    const sequence = numericName[1];
+    const yearSuffix = fallbackYearSuffix || '';
+    return {
+      originalName: filename,
+      valid: true,
+      sequence,
+      yearSuffix,
+      date: 'data do dia',
+      networkNumber: yearSuffix ? `${sequence}/${yearSuffix}` : sequence,
+      renamedBase: sequence
+    };
+  }
   const match = filename.match(/rede\s*n[oº°]?\s*(\d+)(?:\s*\/\s*(\d{2,4}))?.*?data[:\s]*([0-3]\d\/[01]\d\/\d{4})/i);
   if (!match) {
     return {
@@ -2677,6 +2796,38 @@ function buildRedeCommand() {
   ].join(' ');
 }
 
+function redeDraftDataFromState() {
+  return {
+    number: state.redes.draftNumber || '',
+    date: state.redes.draftDate || '',
+    heading: state.redes.draftHeading || 'Diretoria de Ensino - Região de Itapeva',
+    destination: state.redes.draftDestination || '',
+    subject: state.redes.draftSubject || '',
+    body: state.redes.draftBody || ''
+  };
+}
+
+function formatRedeDate(value) {
+  if (!value) return '';
+  const [year, month, day] = String(value).split('-');
+  if (!year || !month || !day) return value;
+  return `${day}/${month}/${year}`;
+}
+
+function buildRedeDraftHtml(data = redeDraftDataFromState()) {
+  const body = esc(data.body || '').replace(/\r?\n/g, '<br>');
+  return `
+    <div class="rede-doc">
+      <div class="rede-doc-heading">${esc(data.heading || 'Diretoria de Ensino - Região de Itapeva')}</div>
+      <div class="rede-doc-line"><strong>REDE Nº:</strong> ${esc(data.number || '--')}</div>
+      <div class="rede-doc-line"><strong>Data:</strong> ${esc(formatRedeDate(data.date) || '--')}</div>
+      ${data.destination ? `<div class="rede-doc-line"><strong>Destino:</strong> ${esc(data.destination)}</div>` : ''}
+      <div class="rede-doc-subject"><strong>${esc(state.redes.assuntoLabel || 'Assunto:')}</strong> ${esc(data.subject || '--')}</div>
+      <div class="rede-doc-body">${body || 'Digite o corpo da REDE.'}</div>
+    </div>
+  `;
+}
+
 function renderRedePreview() {
   const list = document.getElementById('redePreviewList');
   list.innerHTML = redePreview.map((item) => `
@@ -2691,12 +2842,26 @@ function renderRedePreview() {
 }
 
 function renderRedeAutomation() {
-  document.getElementById('redeFolderPath').value = state.redes.folderPath;
-  document.getElementById('redeYearSuffix').value = state.redes.yearSuffix;
-  document.getElementById('redeNumberPlaceholder').value = state.redes.numberPlaceholder;
-  document.getElementById('redeDatePlaceholder').value = state.redes.datePlaceholder;
-  document.getElementById('redeHeadingPlaceholder').value = state.redes.headingPlaceholder;
-  document.getElementById('redeAssuntoLabel').value = state.redes.assuntoLabel;
-  document.getElementById('redeCommand').value = buildRedeCommand();
+  const folderInput = document.getElementById('redeFolderPath');
+  const yearInput = document.getElementById('redeYearSuffix');
+  const commandInput = document.getElementById('redeCommand');
+  if (folderInput) folderInput.value = state.redes.folderPath;
+  if (yearInput) yearInput.value = state.redes.yearSuffix;
+  if (commandInput) commandInput.value = buildRedeCommand();
+  const draft = redeDraftDataFromState();
+  const numberInput = document.getElementById('redeDraftNumber');
+  const dateInput = document.getElementById('redeDraftDate');
+  const headingInput = document.getElementById('redeDraftHeading');
+  const destinationInput = document.getElementById('redeDraftDestination');
+  const subjectInput = document.getElementById('redeDraftSubject');
+  const bodyInput = document.getElementById('redeDraftBody');
+  if (numberInput) numberInput.value = draft.number;
+  if (dateInput) dateInput.value = draft.date;
+  if (headingInput) headingInput.value = draft.heading;
+  if (destinationInput) destinationInput.value = draft.destination;
+  if (subjectInput) subjectInput.value = draft.subject;
+  if (bodyInput) bodyInput.value = draft.body;
+  const preview = document.getElementById('redeDraftPreview');
+  if (preview) preview.innerHTML = buildRedeDraftHtml(draft);
   renderRedePreview();
 }

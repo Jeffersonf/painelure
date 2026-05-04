@@ -912,6 +912,9 @@
 
 .dashboard-card-section {
   margin-bottom: 14px;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .dashboard-section-head {
@@ -1811,6 +1814,10 @@
   line-height: 1.25;
 }
 
+.agenda-calendar-grid {
+  margin: 14px 0;
+}
+
 .link-button {
   border: 0;
   background: transparent;
@@ -2114,6 +2121,287 @@
 .dashboard-drill-card.blue { border-color: rgba(120,180,255,.16); background: rgba(120,180,255,.05); }
 .dashboard-drill-card.amber { border-color: rgba(245,200,90,.16); background: rgba(245,200,90,.05); }
 .dashboard-drill-card.slate { border-color: rgba(180,190,220,.16); background: rgba(180,190,220,.05); }
+
+.dashboard-redesign-hero {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 10px;
+}
+
+.dashboard-redesign-hero .dashboard-command-main,
+.dashboard-redesign-hero .dashboard-command-side,
+.dashboard-profile-panel,
+.dashboard-focus-box {
+  border-radius: 8px;
+}
+
+.dashboard-redesign-hero .dashboard-command-main {
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 18px;
+  background: color-mix(in srgb, var(--sf) 88%, #0d1117);
+}
+
+.dashboard-redesign-hero .dashboard-command-main h1 {
+  max-width: 680px;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1;
+}
+
+.dashboard-redesign-hero .dashboard-command-main p {
+  max-width: 760px;
+  font-size: 13px;
+}
+
+.dashboard-redesign-hero .dashboard-command-side {
+  background: color-mix(in srgb, var(--sf) 92%, #111827);
+}
+
+.dashboard-redesign-hero .dashboard-score-card,
+.dashboard-redesign-hero .dashboard-hero-stat,
+.dashboard-profile-card,
+.dashboard-role-card,
+.dashboard-drill-card {
+  border-radius: 8px;
+}
+
+.dashboard-redesign-hero .dashboard-score-card {
+  border-color: color-mix(in srgb, var(--ac) 18%, var(--bd));
+  background: rgba(255,255,255,.025);
+}
+
+.dashboard-redesign-hero .dashboard-score-card strong {
+  font-size: 40px;
+}
+
+.dashboard-redesign-hero .dashboard-hero-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-redesign-hero .dashboard-hero-stat {
+  min-height: 82px;
+  background: rgba(255,255,255,.022);
+}
+
+.dashboard-profile-panel {
+  margin-bottom: 12px;
+}
+
+.dashboard-profile-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dashboard-profile-card {
+  min-height: 98px;
+  border-color: var(--bd);
+  background: rgba(255,255,255,.022);
+}
+
+.dashboard-role-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  width: 100%;
+  max-width: 100%;
+}
+
+.dashboard-role-card {
+  box-sizing: border-box;
+  min-height: 112px;
+  background: rgba(255,255,255,.024);
+}
+
+.dashboard-role-card::before {
+  left: 10px;
+  right: 10px;
+  top: auto;
+  bottom: 10px;
+  width: auto;
+  height: 3px;
+  border-radius: 999px;
+}
+
+.dashboard-role-card strong {
+  font-size: 30px;
+}
+
+.dashboard-finanza-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, .82fr);
+  gap: 12px;
+  margin-top: 12px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.dashboard-finanza-grid-wide {
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+}
+
+.dashboard-agenda-stack {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-focus-box .bh {
+  gap: 10px;
+}
+
+.dashboard-focus-box {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dashboard-focus-box .stack-list {
+  gap: 8px;
+}
+
+.dashboard-mini-calendar {
+  min-width: 0;
+}
+
+.dashboard-mini-calendar-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dashboard-mini-calendar-head strong {
+  color: var(--tx);
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.dashboard-mini-calendar-head span {
+  color: var(--mt);
+  font-size: 11px;
+}
+
+.dashboard-mini-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dashboard-mini-week {
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.dashboard-mini-day {
+  font: inherit;
+  position: relative;
+  min-width: 0;
+  min-height: 64px;
+  padding: 7px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: rgba(255,255,255,.018);
+  color: var(--tx);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.dashboard-mini-day.empty {
+  visibility: hidden;
+}
+
+.dashboard-mini-day.has-event {
+  border-color: color-mix(in srgb, var(--ac2) 28%, var(--bd));
+  background: rgba(90,245,200,.07);
+}
+
+.dashboard-mini-day strong {
+  display: block;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.dashboard-mini-day span {
+  display: block;
+  margin-top: 6px;
+  color: var(--tx2);
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.dashboard-mini-day em {
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  color: var(--ac);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.dashboard-agenda-list {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--bd);
+}
+
+.setechub-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: var(--bd);
+}
+
+.rede-draft-preview {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+}
+
+.rede-doc {
+  color: var(--tx);
+  line-height: 1.5;
+}
+
+.rede-doc-heading {
+  margin-bottom: 16px;
+  color: var(--tx);
+  font-weight: 800;
+  text-align: center;
+}
+
+.rede-doc-line,
+.rede-doc-subject {
+  margin-top: 8px;
+  color: var(--tx2);
+}
+
+.rede-doc-body {
+  margin-top: 16px;
+  color: var(--tx);
+  white-space: normal;
+}
+
+.dashboard-attention-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-attention-grid .dashboard-role-card {
+  min-height: 98px;
+}
+
+.dashboard-drilldown-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 8px;
+}
+
+.dashboard-drill-card {
+  min-height: 82px;
+  padding: 12px;
+  background: rgba(255,255,255,.022);
+}
 
 .compact-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2838,6 +3126,9 @@ a {
   .setechub-monitor-grid,
   .dashboard-category-grid,
   .dashboard-drilldown-grid,
+  .dashboard-finanza-grid,
+  .dashboard-role-card-grid,
+  .dashboard-attention-grid,
   .compact-grid,
   .setechub-grid,
   .setechub-two-col,
@@ -2851,6 +3142,10 @@ a {
   .setechub-form-links,
   .setechub-form-sector,
   #ctcVisitForm {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-agenda-stack {
     grid-template-columns: 1fr;
   }
 

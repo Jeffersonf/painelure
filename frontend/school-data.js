@@ -1188,17 +1188,6 @@ window.SETECHUB_SCHOOL_DATA = {
       "notes": "Netbooks Cinza: 30 unidades (\"30 net cinza\")"
     },
     {
-      "id": "seed-asset-pei-ee-idalicio-mendes-lima-notebooks-cinza",
-      "school": "PEI EE Idalicio Mendes Lima",
-      "name": "Notebook",
-      "canonicalName": "Notebook",
-      "brand": "",
-      "model": "",
-      "sourceName": "Notebooks Cinza",
-      "status": "ok",
-      "notes": "Notebooks Cinza: 58 unidades (37 + 21)."
-    },
-    {
       "id": "seed-asset-pei-ee-professora-francelina-franco-estacoes-de-carregamento",
       "school": "PEI EE Professora Francelina Franco",
       "name": "Recarga de dispositivos",
@@ -1760,28 +1749,6 @@ window.SETECHUB_SCHOOL_DATA = {
       "notes": "11 unidade(s) | status original: Funcionando | BlueMonitor: 11"
     },
     {
-      "id": "seed-csv-pei-ee-idalicio-mendes-lima-equipamento-adquirido-pela-escola-funcionando",
-      "school": "PEI EE Idalicio Mendes Lima",
-      "name": "Monitor",
-      "canonicalName": "Monitor",
-      "brand": "",
-      "model": "",
-      "sourceName": "Equipamento adquirido pela escola",
-      "status": "ok",
-      "notes": "1 unidade(s) | status original: Funcionando | BlueMonitor: 0"
-    },
-    {
-      "id": "seed-csv-pei-ee-idalicio-mendes-lima-equipamento-adquirido-pela-escola-manutencao",
-      "school": "PEI EE Idalicio Mendes Lima",
-      "name": "Monitor",
-      "canonicalName": "Monitor",
-      "brand": "",
-      "model": "",
-      "sourceName": "Equipamento adquirido pela escola",
-      "status": "manutencao",
-      "notes": "1 unidade(s) | status original: Manutenção | BlueMonitor: 0"
-    },
-    {
       "id": "seed-csv-pei-ee-idalicio-mendes-lima-netbook-positivo-1110-baixa",
       "school": "PEI EE Idalicio Mendes Lima",
       "name": "Netbook Positivo 1110",
@@ -1790,7 +1757,7 @@ window.SETECHUB_SCHOOL_DATA = {
       "model": "1110",
       "sourceName": "Netbook Positivo 1110",
       "status": "defeito",
-      "notes": "3 unidade(s) | status original: Baixa | BlueMonitor: 0"
+      "notes": "4 unidade(s) | status original: Baixa/0 | BlueMonitor: 0"
     },
     {
       "id": "seed-csv-pei-ee-idalicio-mendes-lima-netbook-positivo-1110-funcionando",
@@ -1801,7 +1768,7 @@ window.SETECHUB_SCHOOL_DATA = {
       "model": "1110",
       "sourceName": "Netbook Positivo 1110",
       "status": "ok",
-      "notes": "57 unidade(s) | status original: Funcionando | BlueMonitor: 57"
+      "notes": "56 unidade(s) | status original: Funcionando | BlueMonitor: 56"
     },
     {
       "id": "seed-csv-pei-ee-idalicio-mendes-lima-netbook-positivo-1110-garantia",

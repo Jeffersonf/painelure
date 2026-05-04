@@ -426,6 +426,19 @@ function openCtcAgenda() {
   renderCtcAgenda();
 }
 
+function openAgendaWithScope(scope = 'ure') {
+  showPage('agenda');
+  const scopeInput = document.getElementById('taskScope');
+  const categoryInput = document.getElementById('taskCategory');
+  const titleInput = document.getElementById('taskTitle');
+  if (scopeInput) scopeInput.value = scope;
+  if (categoryInput) categoryInput.value = scope === 'carro' ? 'Carro oficial' : scope === 'ure' ? 'Evento URE' : 'Evento URE';
+  currentTaskFilter = scope === 'pessoal' ? 'minhas' : scope === 'carro' ? 'carro' : 'ure';
+  syncFilterButtons('task');
+  renderTasks();
+  titleInput?.focus();
+}
+
 function filteredCalls() {
   return state.calls.filter((item) => {
     if (currentCallSchoolContext && item.school !== currentCallSchoolContext) return false;
@@ -508,17 +521,15 @@ function simplifiedEquipmentName(item) {
   if (/smartphone|celular|celulares/.test(text)) return 'smartphone';
   if (/tablet/.test(text)) return 'tablet';
   if (/netbook/.test(text)) {
-    if (/1220|1210|preto|pretos|novo|novos/.test(text)) return 'Netbook 1220';
-    return 'Netbook 1120';
+    if (/1210|preto|pretos|novo|novos/.test(text)) return 'Netbook 1210';
+    return 'Netbook 1110';
   }
   if (/notebook|chromebook/.test(text)) return 'notebook';
   return 'outros';
 }
 
 function normalizeEquipmentText(value) {
-  return String(value || '')
-    .replace(/\b1110\b/g, '1120')
-    .replace(/\b1210\b/g, '1220');
+  return String(value || '');
 }
 
 function equipmentTypeLabel(value) {
@@ -539,8 +550,8 @@ function simplifiedEquipmentOrder(name) {
   return ({
     'PC adm': 0,
     'PC pedagogico': 1,
-    'Netbook 1120': 2,
-    'Netbook 1220': 3,
+    'Netbook 1110': 2,
+    'Netbook 1210': 3,
     tablet: 4,
     smartphone: 5,
     notebook: 6,

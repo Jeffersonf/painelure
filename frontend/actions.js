@@ -9,6 +9,57 @@ function downloadFile(filename, content, type) {
   URL.revokeObjectURL(link.href);
 }
 
+function fileSafeName(value) {
+  return normalizeKey(value)
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || 'sem-assunto';
+}
+
+function collectRedeDraftForm() {
+  return {
+    draftNumber: document.getElementById('redeDraftNumber')?.value.trim() || '',
+    draftDate: document.getElementById('redeDraftDate')?.value || '',
+    draftHeading: document.getElementById('redeDraftHeading')?.value.trim() || 'Diretoria de Ensino - Região de Itapeva',
+    draftDestination: document.getElementById('redeDraftDestination')?.value.trim() || '',
+    draftSubject: document.getElementById('redeDraftSubject')?.value.trim() || '',
+    draftBody: document.getElementById('redeDraftBody')?.value.trim() || ''
+  };
+}
+
+function saveRedeDraftForm() {
+  state.redes = {
+    ...state.redes,
+    ...collectRedeDraftForm()
+  };
+  const preview = document.getElementById('redeDraftPreview');
+  if (preview) preview.innerHTML = buildRedeDraftHtml(redeDraftDataFromState());
+}
+
+function downloadRedeDraft() {
+  saveRedeDraftForm();
+  const draft = redeDraftDataFromState();
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; color: #111; line-height: 1.45; margin: 48px; }
+        .rede-doc-heading { text-align: center; font-weight: 700; font-size: 16pt; margin-bottom: 28px; }
+        .rede-doc-line { margin: 8px 0; }
+        .rede-doc-subject { margin: 22px 0; font-weight: 400; }
+        .rede-doc-body { margin-top: 22px; white-space: normal; }
+      </style>
+    </head>
+    <body>${buildRedeDraftHtml(draft)}</body>
+    </html>
+  `;
+  const number = fileSafeName(draft.number || 'rede');
+  const subject = fileSafeName(draft.subject || 'assunto');
+  downloadFile(`REDE_${number}_${subject}.doc`, html, 'application/msword;charset=utf-8');
+}
+
 function logSchoolEvent(school, kind, text) {
   if (!school) return;
   state.histories.schoolEvents = state.histories.schoolEvents || [];
@@ -888,6 +939,34 @@ function fleetCellText(value) {
   return String(value ?? '').trim();
 }
 
+function localIsoDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function currentMonthBounds(date = new Date()) {
+  const start = localIsoDate(new Date(date.getFullYear(), date.getMonth(), 1));
+  const today = localIsoDate(date);
+  const end = localIsoDate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
+  return { start: today > start ? today : start, end };
+}
+
+function fleetEventInsideCurrentWindow(item, date = new Date()) {
+  if (!item?.date) return false;
+  const bounds = currentMonthBounds(date);
+  return item.date >= bounds.start && item.date <= bounds.end;
+}
+
+function isImportedFleetTask(item) {
+  return normalizeKey(item?.source || '').startsWith('frota excel');
+}
+
+function pruneImportedFleetTasks() {
+  state.tasks = (state.tasks || []).filter((task) => !isImportedFleetTask(task) || fleetEventInsideCurrentWindow(task));
+}
+
 function fleetVehicleFromRow(row, dataIndex) {
   const candidates = [
     { header: row[dataIndex - 2], mark: row[dataIndex - 2] },
@@ -953,7 +1032,7 @@ function parseFleetWorksheetRows(rows, sheetName) {
 
 async function importFleetSchedule(file) {
   const status = document.getElementById('fleetImportStatus');
-  if (status) status.textContent = 'Lendo planilha da frota...';
+  if (status) status.textContent = 'Lendo planilha da frota para montar o calendario...';
   try {
     await loadExternalScript('XLSX', 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
     const buffer = await readFileAsArrayBuffer(file);
@@ -962,8 +1041,10 @@ async function importFleetSchedule(file) {
       const rows = window.XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
       return parseFleetWorksheetRows(rows, sheetName);
     });
+    const inWindow = imported.filter((item) => fleetEventInsideCurrentWindow(item));
+    pruneImportedFleetTasks();
     const existingKeys = new Set((state.tasks || []).map((item) => normalizeKey(item.fleetKey || `${item.source || ''}|${item.date || item.rawDate || ''}|${item.time || ''}|${item.vehicle || ''}|${item.owner || ''}|${item.place || ''}|${item.title || ''}`)));
-    const nextEvents = imported
+    const nextEvents = inWindow
       .map((item) => ({
         ...item,
         fleetKey: normalizeKey(`${item.source}|${item.date || item.rawDate}|${item.time}|${item.vehicle}|${item.owner}|${item.place}|${item.title}`)
@@ -973,10 +1054,121 @@ async function importFleetSchedule(file) {
     currentTaskFilter = 'carro';
     refreshAll();
     showPage('agenda');
-    if (status) status.textContent = `${nextEvents.length} reserva(s) importada(s). ${imported.length - nextEvents.length} duplicada(s) ignorada(s).`;
+    if (status) status.textContent = `${nextEvents.length} reserva(s) do mes atual importada(s). ${imported.length - inWindow.length} linha(s) antigas/fora do mes ignorada(s).`;
   } catch (error) {
     console.error('Falha ao importar planilha da frota.', error);
     if (status) status.textContent = 'Nao foi possivel importar a planilha da frota.';
+  }
+}
+
+function normalizeExcelHeader(value) {
+  return normalizeKey(value).replace(/\s+/g, ' ');
+}
+
+function excelHeaderIndex(headers, patterns) {
+  return headers.findIndex((header) => patterns.some((pattern) => pattern.test(normalizeExcelHeader(header))));
+}
+
+function inventoryStatusFromExcel(value) {
+  const text = normalizeKey(value);
+  if (/funcionando|ativo|ok/.test(text)) return 'ok';
+  if (/manut|garantia/.test(text)) return 'manutencao';
+  return 'defeito';
+}
+
+function inventoryImportTargetSchool(fileName, rows, schoolIndex) {
+  const fromSheet = rows
+    .map((row) => schoolIndex >= 0 ? row[schoolIndex] : '')
+    .find((value) => String(value || '').trim());
+  const text = `${fromSheet || ''} ${fileName || ''}`;
+  if (/idalicio/i.test(text)) return 'PEI EE Idalicio Mendes Lima';
+  return canonicalSchoolName(fromSheet) || document.getElementById('schoolAssetBulkSchool')?.value || document.getElementById('schoolAssetSchool')?.value || '';
+}
+
+function parseInventoryExcelRows(workbook, fileName) {
+  const candidates = [];
+  workbook.SheetNames.forEach((sheetName) => {
+    const rows = window.XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
+    const headerIndex = rows.findIndex((row) => row.some((cell) => /equipamento/i.test(String(cell || ''))) && row.some((cell) => /status/i.test(String(cell || ''))));
+    if (headerIndex < 0) return;
+    const headers = rows[headerIndex];
+    const equipmentIndex = excelHeaderIndex(headers, [/^equipamento$/, /equipamento/]);
+    const statusIndex = excelHeaderIndex(headers, [/status/]);
+    if (equipmentIndex < 0 || statusIndex < 0) return;
+    const schoolIndex = excelHeaderIndex(headers, [/^escola$/, /unidade/]);
+    const serialIndex = excelHeaderIndex(headers, [/serie/, /serial/]);
+    const patrimonyIndex = excelHeaderIndex(headers, [/patrimonio/]);
+    const notesIndex = excelHeaderIndex(headers, [/observacao/, /informacao/]);
+    const school = inventoryImportTargetSchool(fileName, rows.slice(headerIndex + 1), schoolIndex);
+    rows.slice(headerIndex + 1).forEach((row) => {
+      const rawName = String(row[equipmentIndex] || '').trim();
+      if (!rawName) return;
+      candidates.push({
+        school,
+        rawName,
+        name: simplifiedEquipmentName({ name: rawName }),
+        status: inventoryStatusFromExcel(row[statusIndex]),
+        originalStatus: String(row[statusIndex] || '').trim() || 'Nao informado',
+        serial: serialIndex >= 0 ? String(row[serialIndex] || '').trim() : '',
+        patrimony: patrimonyIndex >= 0 ? String(row[patrimonyIndex] || '').trim() : '',
+        notes: notesIndex >= 0 ? String(row[notesIndex] || '').trim() : ''
+      });
+    });
+  });
+  return candidates.filter((item) => item.school && item.name && item.name !== 'outros');
+}
+
+async function importSchoolInventoryExcel(file) {
+  const statusNode = document.getElementById('schoolAssetBulkStatus');
+  if (statusNode) statusNode.textContent = 'Lendo inventario Excel e consolidando por tipo/status...';
+  try {
+    await loadExternalScript('XLSX', 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    const buffer = await readFileAsArrayBuffer(file);
+    const workbook = window.XLSX.read(buffer, { type: 'array' });
+    const rows = parseInventoryExcelRows(workbook, file?.name || '');
+    if (!rows.length) {
+      if (statusNode) statusNode.textContent = 'Nenhuma linha de inventario reconhecida no Excel.';
+      return;
+    }
+    const groups = new Map();
+    rows.forEach((row) => {
+      const key = normalizeKey(`${row.school}|${row.name}|${row.status}`);
+      const current = groups.get(key) || { ...row, quantity: 0, samples: [], statusCounts: new Map() };
+      current.quantity += 1;
+      if (current.samples.length < 6) current.samples.push([row.rawName, row.originalStatus, row.serial || row.patrimony].filter(Boolean).join(' | '));
+      current.statusCounts.set(row.originalStatus, (current.statusCounts.get(row.originalStatus) || 0) + 1);
+      groups.set(key, current);
+    });
+    const imported = Array.from(groups.values()).map((group) => {
+      const sourceSummary = Array.from(group.statusCounts.entries()).map(([label, count]) => `${label}: ${count}`).join(', ');
+      return {
+        id: `excel-inventory-${normalizeKey(group.school)}-${normalizeKey(group.name)}-${group.status}-${uid()}`,
+        school: group.school,
+        name: group.name,
+        status: group.status,
+        notes: formatSchoolAssetNotes(`Importado Excel | ${sourceSummary}${group.samples.length ? ` | Amostras: ${group.samples.join('; ')}` : ''}`, group.quantity)
+      };
+    });
+    const affectedSchools = new Set(imported.map((item) => normalizeKey(item.school)));
+    state.schoolAssets = (state.schoolAssets || []).filter((item) => {
+      if (!affectedSchools.has(normalizeKey(item.school))) return true;
+      return false;
+    });
+    state.inventoryReplacementSchools = Array.from(new Set([
+      ...(state.inventoryReplacementSchools || []),
+      ...imported.map((item) => item.school)
+    ]));
+    state.schoolAssets = [...imported, ...state.schoolAssets];
+    currentInventorySchool = imported[0]?.school || currentInventorySchool;
+    currentInventoryStatus = 'todos';
+    currentInventoryCategory = 'todas';
+    logSchoolEvent(imported[0].school, 'inventory', `Inventario Excel importado em ${imported.length} linha(s) consolidada(s).`);
+    refreshAll();
+    showPage('assets');
+    if (statusNode) statusNode.textContent = `${rows.length} item(ns) lidos e salvos em ${imported.length} linha(s) consolidadas.`;
+  } catch (error) {
+    console.error('Falha ao importar inventario Excel.', error);
+    if (statusNode) statusNode.textContent = 'Nao foi possivel importar o inventario Excel.';
   }
 }
 
@@ -997,6 +1189,8 @@ function setupEventListeners() {
     const user = currentUser();
     const owner = document.getElementById('taskOwner').value || user?.name || state.profile.name;
     const scope = document.getElementById('taskScope').value;
+    const selectedCategory = document.getElementById('taskCategory').value;
+    const category = scope === 'pessoal' ? 'Pessoal' : scope === 'carro' ? 'Carro oficial' : selectedCategory;
     state.tasks.unshift({
       id: uid(),
       title,
@@ -1004,7 +1198,7 @@ function setupEventListeners() {
       time: document.getElementById('taskTime').value,
       priority: document.getElementById('taskPriority').value,
       place: document.getElementById('taskPlace').value.trim() || 'Sem local definido',
-      category: document.getElementById('taskCategory').value,
+      category,
       scope,
       owner,
       createdBy: user?.name || state.profile.name,
@@ -1188,10 +1382,13 @@ function setupEventListeners() {
     state.redes = {
       folderPath: document.getElementById('redeFolderPath').value.trim(),
       yearSuffix: document.getElementById('redeYearSuffix').value.trim() || '26',
-      numberPlaceholder: document.getElementById('redeNumberPlaceholder').value.trim() || '{{REDE_NUMERO}}',
-      datePlaceholder: document.getElementById('redeDatePlaceholder').value.trim() || '{{REDE_DATA}}',
-      headingPlaceholder: document.getElementById('redeHeadingPlaceholder').value.trim() || '{{REDE_CABECALHO}}',
-      assuntoLabel: document.getElementById('redeAssuntoLabel').value.trim() || 'Assunto:'
+      numberPlaceholder: state.redes.numberPlaceholder || '{{REDE_NUMERO}}',
+      datePlaceholder: state.redes.datePlaceholder || '{{REDE_DATA}}',
+      headingPlaceholder: state.redes.headingPlaceholder || '{{REDE_CABECALHO}}',
+      assuntoLabel: state.redes.assuntoLabel || 'Assunto:',
+      processStartNumber: state.redes.processStartNumber || '',
+      processDate: state.redes.processDate || '',
+      ...collectRedeDraftForm()
     };
     refreshAll();
     alert('Configuracao de redes salva.');
@@ -1416,7 +1613,12 @@ function setupEventListeners() {
     if (file) importFleetSchedule(file);
     event.target.value = '';
   });
-  document.getElementById('copyRedeCommandBtn').addEventListener('click', async () => {
+  document.getElementById('schoolAssetExcelInput')?.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) importSchoolInventoryExcel(file);
+    event.target.value = '';
+  });
+  document.getElementById('copyRedeCommandBtn')?.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(buildRedeCommand());
       alert('Comando copiado para a area de transferencia.');
@@ -1424,13 +1626,22 @@ function setupEventListeners() {
       alert('Nao foi possivel copiar automaticamente.');
     }
   });
+  document.getElementById('processRedeBtn')?.addEventListener('click', processRedesOnServer);
   document.getElementById('importLegacyBtn').addEventListener('click', importLegacyState);
-  document.getElementById('exportRedeBatchBtn').addEventListener('click', () => {
+  document.getElementById('exportRedeBatchBtn')?.addEventListener('click', () => {
     downloadFile('setechub-redes-lote.json', JSON.stringify({
       generatedAt: new Date().toISOString(),
       config: state.redes,
       preview: redePreview
     }, null, 2), 'application/json');
+  });
+  document.getElementById('previewRedeDraftBtn')?.addEventListener('click', () => {
+    saveRedeDraftForm();
+    refreshAll();
+  });
+  document.getElementById('downloadRedeDraftBtn')?.addEventListener('click', downloadRedeDraft);
+  document.getElementById('redeDraftForm')?.addEventListener('input', () => {
+    saveRedeDraftForm();
   });
   document.getElementById('redeFolderInput').addEventListener('change', (event) => {
     const files = Array.from(event.target.files || []);
