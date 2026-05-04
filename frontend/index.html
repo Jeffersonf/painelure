@@ -221,7 +221,12 @@
     <div class="box">
       <div class="bh">
         <div><div class="ct">Agenda</div><div class="cs">Itens ordenados por data, horário e responsável.</div></div>
+        <div class="mini-actions">
+          <label class="btn btn-g btn-sm" for="fleetScheduleInput">Importar frota Excel</label>
+          <input id="fleetScheduleInput" type="file" accept=".xlsx,.xls" hidden>
+        </div>
       </div>
+      <div class="sync-meta" id="fleetImportStatus">Importe a planilha da frota para preencher reservas de carros oficiais.</div>
       <div class="setechub-toolbar" id="taskFilterBar">
         <button class="btn btn-g btn-sm active-filter" data-task-filter="todas" type="button">Todas</button>
         <button class="btn btn-g btn-sm" data-task-filter="minhas" type="button">Minha agenda</button>

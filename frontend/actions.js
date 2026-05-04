@@ -864,6 +864,122 @@ async function extractImportPreview(file, type) {
   };
 }
 
+function excelSerialDateToIso(value) {
+  const serial = Number(value);
+  if (!Number.isFinite(serial) || serial < 30000) return '';
+  const date = new Date(Date.UTC(1899, 11, 30) + Math.floor(serial) * 86400000);
+  return date.toISOString().slice(0, 10);
+}
+
+function excelTimeToLabel(value) {
+  if (value === null || value === undefined || value === '') return '';
+  if (typeof value === 'number') {
+    const fraction = value >= 1 ? value % 1 : value;
+    if (!fraction) return String(value);
+    const totalMinutes = Math.round(fraction * 24 * 60);
+    const hours = Math.floor(totalMinutes / 60) % 24;
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+  return String(value).trim();
+}
+
+function fleetCellText(value) {
+  return String(value ?? '').trim();
+}
+
+function fleetVehicleFromRow(row, dataIndex) {
+  const candidates = [
+    { header: row[dataIndex - 2], mark: row[dataIndex - 2] },
+    { header: row[dataIndex - 1], mark: row[dataIndex - 1] }
+  ];
+  const headerRow = row.__headerRow || [];
+  const marked = candidates.find((item, offset) => /x/i.test(fleetCellText(item.mark)) && headerRow[dataIndex - 2 + offset]);
+  if (marked) return fleetCellText(headerRow[dataIndex - 2 + candidates.indexOf(marked)]);
+  return [headerRow[dataIndex - 2], headerRow[dataIndex - 1]].map(fleetCellText).filter(Boolean).join(' / ') || 'Carro oficial';
+}
+
+function parseFleetWorksheetRows(rows, sheetName) {
+  const events = [];
+  let activeHeaders = [];
+  rows.forEach((row) => {
+    const normalized = row.map((cell) => normalizeKey(cell));
+    const dataIndexes = normalized
+      .map((cell, index) => cell === 'data' ? index : -1)
+      .filter((index) => index >= 0 && /horario|horário/.test(normalized[index + 1] || ''));
+    if (dataIndexes.length) {
+      activeHeaders = row;
+      return;
+    }
+    if (!activeHeaders.length) return;
+    const headerDataIndexes = activeHeaders
+      .map((cell, index) => normalizeKey(cell) === 'data' ? index : -1)
+      .filter((index) => index >= 0 && /horario|horário/.test(normalizeKey(activeHeaders[index + 1] || '')));
+    headerDataIndexes.forEach((dataIndex) => {
+      const dateRaw = row[dataIndex];
+      const requester = fleetCellText(row[dataIndex + 2]);
+      const driver = fleetCellText(row[dataIndex + 3]);
+      const authorization = fleetCellText(row[dataIndex + 4]);
+      const destination = fleetCellText(row[dataIndex + 5]);
+      const reason = fleetCellText(row[dataIndex + 6]);
+      if (!dateRaw && !requester && !destination && !reason) return;
+      const date = excelSerialDateToIso(dateRaw);
+      const rawDate = date ? '' : fleetCellText(dateRaw);
+      const rowWithHeader = [...row];
+      rowWithHeader.__headerRow = activeHeaders;
+      const vehicle = fleetVehicleFromRow(rowWithHeader, dataIndex);
+      events.push({
+        id: `fleet-${sheetName}-${dataIndex}-${fleetCellText(dateRaw)}-${requester}-${destination}`.toLowerCase(),
+        title: reason || `Reserva de ${vehicle}`,
+        date,
+        rawDate,
+        time: excelTimeToLabel(row[dataIndex + 1]),
+        priority: 'media',
+        place: destination || 'Destino nao informado',
+        category: 'Carro oficial',
+        scope: 'carro',
+        owner: requester || driver || 'Frota URE',
+        createdBy: 'Importacao frota',
+        vehicle,
+        driver,
+        authorization,
+        done: /cancelado/i.test(authorization),
+        source: `Frota Excel - ${sheetName}`
+      });
+    });
+  });
+  return events;
+}
+
+async function importFleetSchedule(file) {
+  const status = document.getElementById('fleetImportStatus');
+  if (status) status.textContent = 'Lendo planilha da frota...';
+  try {
+    await loadExternalScript('XLSX', 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    const buffer = await readFileAsArrayBuffer(file);
+    const workbook = window.XLSX.read(buffer, { type: 'array' });
+    const imported = workbook.SheetNames.flatMap((sheetName) => {
+      const rows = window.XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
+      return parseFleetWorksheetRows(rows, sheetName);
+    });
+    const existingKeys = new Set((state.tasks || []).map((item) => normalizeKey(item.fleetKey || `${item.source || ''}|${item.date || item.rawDate || ''}|${item.time || ''}|${item.vehicle || ''}|${item.owner || ''}|${item.place || ''}|${item.title || ''}`)));
+    const nextEvents = imported
+      .map((item) => ({
+        ...item,
+        fleetKey: normalizeKey(`${item.source}|${item.date || item.rawDate}|${item.time}|${item.vehicle}|${item.owner}|${item.place}|${item.title}`)
+      }))
+      .filter((item) => !existingKeys.has(item.fleetKey));
+    state.tasks = [...nextEvents, ...(state.tasks || [])];
+    currentTaskFilter = 'carro';
+    refreshAll();
+    showPage('agenda');
+    if (status) status.textContent = `${nextEvents.length} reserva(s) importada(s). ${imported.length - nextEvents.length} duplicada(s) ignorada(s).`;
+  } catch (error) {
+    console.error('Falha ao importar planilha da frota.', error);
+    if (status) status.textContent = 'Nao foi possivel importar a planilha da frota.';
+  }
+}
+
 function setupEventListeners() {
   document.addEventListener('submit', (event) => {
     if (event.target.closest('#setup')) return;
@@ -1293,6 +1409,11 @@ function setupEventListeners() {
   document.getElementById('restoreInput').addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) restoreState(file);
+    event.target.value = '';
+  });
+  document.getElementById('fleetScheduleInput')?.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) importFleetSchedule(file);
     event.target.value = '';
   });
   document.getElementById('copyRedeCommandBtn').addEventListener('click', async () => {

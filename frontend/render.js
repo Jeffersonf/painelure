@@ -2066,11 +2066,13 @@ function renderTasks(filtered) {
       <div class="setechub-head">
         <div>
           <strong class="${task.done ? 'is-done' : ''}">${esc(task.title)}</strong>
-          <div class="sync-meta">${esc(task.date || 'Sem data')} | ${esc(task.time || 'Sem horario')} | ${esc(task.place)} | ${esc(task.category)}</div>
+          <div class="sync-meta">${esc(task.date || task.rawDate || 'Sem data')} | ${esc(task.time || 'Sem horario')} | ${esc(task.place)} | ${esc(task.category)}</div>
           <div class="setechub-inline-meta">
             <span class="diag-pill">${esc(task.owner || task.createdBy || 'Sem responsavel')}</span>
             <span class="diag-pill">${esc(task.scope === 'carro' ? 'Carro oficial' : task.scope === 'ure' ? 'Evento URE' : 'Agenda pessoal')}</span>
             ${task.vehicle ? `<span class="diag-pill pill-info">${esc(task.vehicle)}</span>` : ''}
+            ${task.driver ? `<span class="diag-pill">Condutor: ${esc(task.driver)}</span>` : ''}
+            ${task.authorization ? `<span class="diag-pill ${/cancelado/i.test(task.authorization) ? 'pill-danger' : 'pill-ok'}">${esc(task.authorization)}</span>` : ''}
           </div>
         </div>
         <div class="setechub-badges">
