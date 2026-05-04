@@ -24,12 +24,12 @@
         <div class="slogo"><span style="color:var(--ac)">painel</span> <span style="color:var(--tx);font-weight:700">ure</span></div>
         <div class="setup-auth-badge">Login</div>
         <div class="auth-title" id="loginTitle">Entrar no PainelURE</div>
-        <div class="setup-auth-intro">Use seu nome de acesso e PIN. A base online vai substituir o armazenamento local nas proximas etapas.</div>
+        <div class="setup-auth-intro">Use seu nome de acesso e PIN. A base online vai substituir o armazenamento local nas próximas etapas.</div>
         <form id="loginForm">
           <label class="slbl">Nome</label>
-          <input type="text" class="sinp" id="loginName" placeholder="Seu nome" autocomplete="username" required>
+          <input type="text" class="sinp" id="loginName" placeholder="Seu nome" autocomplete="username" aria-label="Nome de acesso" required>
           <label class="slbl">PIN</label>
-          <input type="password" class="sinp" id="loginPin" placeholder="PIN local" autocomplete="current-password" inputmode="numeric" required>
+          <input type="password" class="sinp" id="loginPin" placeholder="PIN local" autocomplete="current-password" inputmode="numeric" aria-label="PIN local" required>
           <div id="loginError" class="serr"></div>
           <button class="sbtn" type="submit">Entrar no painel</button>
         </form>
@@ -39,14 +39,15 @@
   </div>
 </div>
 
-<nav class="fnav" id="fnav">
-  <div class="fn-item active" data-page="dashboard"><span class="fni">&#128202;</span>Inicio</div>
-  <div class="fn-item" data-page="schools"><span class="fni">&#127979;</span>Escolas</div>
-  <div class="fn-item" data-page="supervisors"><span class="fni">&#128101;</span>Superv.</div>
-  <div class="fn-item dormant-page nav-disabled" data-page="pecs"><span class="fni">&#127891;</span>PECs</div>
-  <div class="fn-item" data-page="assets"><span class="fni">&#128187;</span>Invent.</div>
-  <div class="fn-item acc-n" data-page="calls"><span class="fni">&#128295;</span>Cham.</div>
-  <div class="fn-item sl-n" data-page="info"><span class="fni">&#8505;</span>Info</div>
+<nav class="fnav" id="fnav" aria-label="Navegação principal móvel">
+  <button class="fn-item active" type="button" data-page="dashboard" aria-current="page"><span class="fni">&#128202;</span>Início</button>
+  <button class="fn-item" type="button" data-page="schools"><span class="fni">&#127979;</span>Escolas</button>
+  <button class="fn-item" type="button" data-page="supervisors"><span class="fni">&#128101;</span>Superv.</button>
+  <button class="fn-item" type="button" data-page="agenda"><span class="fni">&#128467;</span>Agenda</button>
+  <button class="fn-item dormant-page nav-disabled" type="button" data-page="pecs" aria-disabled="true" title="Página pausada"><span class="fni">&#127891;</span>PECs</button>
+  <button class="fn-item" type="button" data-page="assets"><span class="fni">&#128187;</span>Invent.</button>
+  <button class="fn-item acc-n" type="button" data-page="calls"><span class="fni">&#128295;</span>Cham.</button>
+  <button class="fn-item sl-n" type="button" data-page="info"><span class="fni">&#8505;</span>Info</button>
   <button class="fn-item fn-logout logout-action" type="button"><span class="fni">&#8617;</span>Sair</button>
 </nav>
 
@@ -59,20 +60,20 @@
   </div>
   <div class="sb-search">
     <span>&#128269;</span>
-    <input id="sidebarSearch" placeholder="Buscar tarefas, escolas, ativos..." oninput="handleSearch(this.value)">
+    <input id="sidebarSearch" placeholder="Buscar tarefas, escolas, ativos..." aria-label="Buscar tarefas, escolas e ativos">
   </div>
   <div class="nav-lbl">Menu</div>
-  <nav>
-    <div class="nav-item active" data-page="dashboard"><span class="ico">&#128202;</span>Painel</div>
-    <div class="nav-item" data-page="schools"><span class="ico">&#127979;</span>Escolas</div>
-    <div class="nav-item" data-page="supervisors"><span class="ico">&#128101;</span>Supervisores</div>
-    <div class="nav-item dormant-page nav-disabled" data-page="pecs"><span class="ico">&#127891;</span>PECs</div>
-    <div class="nav-item" data-page="ctc"><span class="ico">&#128736;</span>CTC</div>
-    <div class="nav-item" data-page="assets"><span class="ico">&#128187;</span>Inventario</div>
-    <div class="nav-item an" data-page="calls"><span class="ico">&#128295;</span>Atendimentos</div>
-    <div class="nav-item" data-page="agenda"><span class="ico">&#128467;</span>Agenda</div>
-    <div class="nav-item fn" data-page="reports"><span class="ico">&#128204;</span>Relatorios</div>
-    <div class="nav-item sl-n" data-page="info"><span class="ico">&#8505;</span>Informacoes</div>
+  <nav aria-label="Navegação principal">
+    <button class="nav-item active" type="button" data-page="dashboard" aria-current="page"><span class="ico">&#128202;</span>Painel</button>
+    <button class="nav-item" type="button" data-page="schools"><span class="ico">&#127979;</span>Escolas</button>
+    <button class="nav-item" type="button" data-page="supervisors"><span class="ico">&#128101;</span>Supervisores</button>
+    <button class="nav-item dormant-page nav-disabled" type="button" data-page="pecs" aria-disabled="true" title="Página pausada"><span class="ico">&#127891;</span>PECs</button>
+    <button class="nav-item" type="button" data-page="ctc"><span class="ico">&#128736;</span>CTC</button>
+    <button class="nav-item" type="button" data-page="assets"><span class="ico">&#128187;</span>Inventário</button>
+    <button class="nav-item an" type="button" data-page="calls"><span class="ico">&#128295;</span>Atendimentos</button>
+    <button class="nav-item" type="button" data-page="agenda"><span class="ico">&#128467;</span>Agenda</button>
+    <button class="nav-item fn" type="button" data-page="reports"><span class="ico">&#128204;</span>Relatórios</button>
+    <button class="nav-item sl-n" type="button" data-page="info"><span class="ico">&#8505;</span>Informações</button>
   </nav>
   <div class="sb-bottom">
     <div class="conn-wrap"></div>
@@ -98,13 +99,13 @@
   <div class="page active" id="page-dashboard">
     <div class="ph">
       <div>
-        <div class="pt">Painel de operacao</div>
-        <div class="ps">Visao executiva para decidir o proximo passo, acompanhar riscos e abrir as areas certas.</div>
+        <div class="pt">Painel de operação</div>
+        <div class="ps">Visão executiva para decidir o próximo passo, acompanhar pendências registradas e abrir as áreas certas.</div>
       </div>
       <div class="page-actions">
-        <div class="mnav"><button onclick="shiftFocusCard(-1)">&#8249;</button><span class="mname" id="todayLabel">Hoje</span><button onclick="shiftFocusCard(1)">&#8250;</button></div>
-        <button class="btn btn-g btn-sm" onclick="showPage('info')">Informacoes</button>
-        <button class="btn btn-g nav-disabled" type="button" disabled>Agenda pausada</button>
+        <div class="mnav"><button type="button" data-focus-shift="-1">&#8249;</button><span class="mname" id="todayLabel">Hoje</span><button type="button" data-focus-shift="1">&#8250;</button></div>
+        <button class="btn btn-g btn-sm" type="button" data-open-page="info">Informações</button>
+        <button class="btn btn-g btn-sm" type="button" data-open-page="agenda">Agenda</button>
       </div>
     </div>
 
@@ -112,7 +113,7 @@
       <div class="dashboard-command-main">
         <div class="dashboard-command-kicker">Comando do dia</div>
         <h1 id="dashboardHeroTitle">Painel inicial pronto para abrir a rotina.</h1>
-        <p id="dashboardHeroText">Priorize chamados, escolas em atencao e pendencias da base sem trocar de tela.</p>
+        <p id="dashboardHeroText">Priorize chamados, escolas em atenção e pendências da base sem trocar de tela.</p>
         <div class="dashboard-command-actions" id="dashboardHeroActions"></div>
       </div>
       <div class="dashboard-command-side">
@@ -149,14 +150,14 @@
         <div><div class="ct">Nova visita CTC</div><div class="cs">Agende uma visita para Bruno ou Danilo.</div></div>
       </div>
       <form id="ctcVisitForm" class="setechub-form setechub-form-wide">
-        <select class="fi" id="ctcVisitOwner">
+        <select class="fi" id="ctcVisitOwner" aria-label="Responsável pela visita CTC">
           <option value="Bruno">Bruno</option>
           <option value="Danilo">Danilo</option>
         </select>
         <input class="fi" id="ctcVisitDate" type="date">
         <input class="fi" id="ctcVisitTime" type="time">
-        <input class="fi" id="ctcVisitPlace" list="officialSchoolOptions" placeholder="Escola ou local">
-        <input class="fi" id="ctcVisitNotes" placeholder="Objetivo da visita">
+        <input class="fi" id="ctcVisitPlace" list="officialSchoolOptions" placeholder="Escola ou local" aria-label="Escola ou local">
+        <input class="fi" id="ctcVisitNotes" placeholder="Objetivo da visita" aria-label="Objetivo da visita">
         <button class="btn btn-p" type="submit">Agendar</button>
       </form>
     </div>
@@ -179,39 +180,53 @@
   <div class="page" id="page-agenda">
     <div class="ph">
       <div>
-        <div class="pt">Agenda e Prioridades</div>
-        <div class="ps">Planeje rota, visitas e tarefas criticas sem perder o contexto.</div>
+        <div class="pt">Agenda URE</div>
+        <div class="ps">Agenda pessoal, carros oficiais e eventos globais em um lugar só.</div>
       </div>
     </div>
     <div class="box" id="directoryContactsBox">
       <div class="bh">
-        <div><div class="ct">Nova tarefa</div><div class="cs">Crie uma prioridade ligada a local, horario e categoria.</div></div>
+        <div><div class="ct">Novo agendamento</div><div class="cs">Crie agenda pessoal, evento da URE ou reserva de carro.</div></div>
       </div>
       <form id="taskForm" class="setechub-form setechub-form-wide">
-        <input class="fi" id="taskTitle" placeholder="Tarefa ou acao">
+        <input class="fi" id="taskTitle" placeholder="Título" aria-label="Título do agendamento">
+        <input class="fi" id="taskDate" type="date" aria-label="Data do agendamento">
         <input class="fi" id="taskTime" type="time">
-        <select class="fi" id="taskPriority">
+        <select class="fi" id="taskOwner" aria-label="Responsável pelo agendamento"></select>
+        <select class="fi" id="taskScope" aria-label="Escopo do agendamento">
+          <option value="pessoal">Agenda pessoal</option>
+          <option value="ure">Evento da URE</option>
+          <option value="carro">Carro oficial</option>
+        </select>
+        <select class="fi" id="taskPriority" aria-label="Prioridade da tarefa">
           <option value="alta">Alta</option>
           <option value="media" selected>Media</option>
           <option value="baixa">Baixa</option>
         </select>
-        <input class="fi" id="taskPlace" list="officialSchoolOptions" placeholder="Local ou escola">
-        <select class="fi" id="taskCategory">
+        <input class="fi" id="taskPlace" list="officialSchoolOptions" placeholder="Local, escola ou destino" aria-label="Local, escola ou destino">
+        <select class="fi" id="taskCategory" aria-label="Categoria da tarefa">
+          <option value="Agenda pessoal">Agenda pessoal</option>
+          <option value="Evento URE">Evento URE</option>
+          <option value="Carro oficial">Carro oficial</option>
           <option value="Visita">Visita</option>
           <option value="Suporte">Suporte</option>
           <option value="CTC">CTC - visita programada</option>
           <option value="Relatorio">Relatorio</option>
           <option value="Administrativo">Administrativo</option>
         </select>
-        <button class="btn btn-p" type="submit">Salvar tarefa</button>
+        <input class="fi" id="taskVehicle" placeholder="Carro / motorista / placa" aria-label="Carro, motorista ou placa">
+        <button class="btn btn-p" type="submit">Salvar agendamento</button>
       </form>
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Fila de tarefas</div><div class="cs">As tarefas ficam ordenadas por horario.</div></div>
+        <div><div class="ct">Agenda</div><div class="cs">Itens ordenados por data, horário e responsável.</div></div>
       </div>
       <div class="setechub-toolbar" id="taskFilterBar">
         <button class="btn btn-g btn-sm active-filter" data-task-filter="todas" type="button">Todas</button>
+        <button class="btn btn-g btn-sm" data-task-filter="minhas" type="button">Minha agenda</button>
+        <button class="btn btn-g btn-sm" data-task-filter="ure" type="button">Eventos URE</button>
+        <button class="btn btn-g btn-sm" data-task-filter="carro" type="button">Carros</button>
         <button class="btn btn-g btn-sm" data-task-filter="abertas" type="button">Abertas</button>
         <button class="btn btn-g btn-sm" data-task-filter="alta" type="button">Alta</button>
         <button class="btn btn-g btn-sm" data-task-filter="visita" type="button">Visita</button>
@@ -233,8 +248,8 @@
         <div><div class="ct">Novo chamado</div><div class="cs">Abra um atendimento e ja ligue a uma escola.</div></div>
       </div>
       <form id="callForm" class="setechub-form">
-        <input class="fi" id="callTitle" placeholder="Problema ou demanda">
-        <input class="fi" id="callSchool" list="officialSchoolOptions" placeholder="Escola ou local">
+        <input class="fi" id="callTitle" placeholder="Problema ou demanda" aria-label="Problema ou demanda">
+        <input class="fi" id="callSchool" list="officialSchoolOptions" placeholder="Escola ou local" aria-label="Escola ou local">
         <button class="btn btn-p" type="submit">Criar chamado</button>
       </form>
     </div>
@@ -253,7 +268,7 @@
       </div>
       <div class="box">
         <div class="bh">
-          <div><div class="ct">Historico</div><div class="cs">Ultimas movimentacoes dos chamados.</div></div>
+          <div><div class="ct">Histórico</div><div class="cs">Últimas movimentações dos chamados.</div></div>
         </div>
         <div id="callHistoryList" class="stack-list"></div>
       </div>
@@ -269,16 +284,16 @@
     </div>
     <div class="box school-directory-shell">
       <div class="school-directory-filters">
-        <input class="fi" id="schoolMasterSearch" placeholder="Buscar por escola, CIE ou municipio">
-        <select class="fi" id="schoolZoneFilterSelect">
+        <input class="fi" id="schoolMasterSearch" placeholder="Buscar por escola, CIE ou município" aria-label="Buscar por escola, CIE ou município">
+        <select class="fi" id="schoolZoneFilterSelect" aria-label="Filtrar por município">
           <option value="todas">Todos os municipios</option>
         </select>
-        <select class="fi" id="schoolSortSelect">
+        <select class="fi" id="schoolSortSelect" aria-label="Ordenar escolas">
           <option value="nome">Nome</option>
-          <option value="municipio">Municipio</option>
-          <option value="prioridade">Prioridade</option>
-          <option value="inventario">Inventario</option>
-          <option value="alertas">Alertas</option>
+          <option value="municipio">Município</option>
+          <option value="prioridade">Pendências registradas</option>
+          <option value="inventario">Inventário</option>
+          <option value="alertas">Manutenção/defeito</option>
           <option value="dados">Dados</option>
         </select>
       </div>
@@ -296,7 +311,7 @@
   <div class="page" id="page-school-record">
     <div class="ph">
       <div class="record-title-row">
-        <button class="record-back-btn" type="button" onclick="showPage('schools')" aria-label="Voltar para escolas" title="Voltar para escolas">&#8249;</button>
+        <button class="record-back-btn" type="button" data-open-page="schools" aria-label="Voltar para escolas" title="Voltar para escolas">&#8249;</button>
         <div>
           <div class="pt" id="schoolRecordTitle">Dados da escola</div>
           <div class="ps" id="schoolRecordSubtitle">Dados principais da unidade, com resumos do inventario, rede e historico.</div>
@@ -318,7 +333,7 @@
         </div>
         <div id="schoolDetailExecutive" class="stack-list"></div>
         <form id="schoolSupervisorForm" class="school-supervisor-form" data-admin-only>
-          <select class="fi" id="schoolSupervisorSelect"></select>
+          <select class="fi" id="schoolSupervisorSelect" aria-label="Supervisor da escola"></select>
           <button class="btn btn-p btn-sm" type="submit">Trocar supervisor</button>
         </form>
       </section>
@@ -338,7 +353,7 @@
       </section>
       <section class="box school-record-action-card">
         <div class="bh">
-          <div><div class="ct">Resumo tecnico</div><div class="cs">Inventario e rede resumidos. O detalhe fica em suas abas.</div></div>
+          <div><div class="ct">Resumo técnico</div><div class="cs">Inventário e rede resumidos. O detalhe fica em suas abas.</div></div>
         </div>
         <div class="school-record-mini-grid">
           <div id="schoolDetailInventory" class="stack-list"></div>
@@ -351,21 +366,21 @@
         <div><div class="ct">Atualizacao da ficha</div><div class="cs">Direcao, contato e observacoes da unidade.</div></div>
       </div>
       <form id="schoolProfileForm" class="setechub-form setechub-form-school-profile">
-        <input class="fi" id="schoolProfileDirector" placeholder="Diretor(a)">
-        <input class="fi" id="schoolProfileViceDirector" placeholder="Vice-diretor(a)">
-        <input class="fi" id="schoolProfileProati" placeholder="PROATI">
-        <input class="fi" id="schoolProfileGoe" placeholder="GOE / apoio">
-        <input class="fi" id="schoolProfilePhone" placeholder="Telefone">
-        <input class="fi" id="schoolProfileMobile" placeholder="Celular / WhatsApp">
-        <input class="fi" id="schoolProfileEmail" placeholder="E-mail">
-        <input class="fi" id="schoolProfileAddress" placeholder="Endereco">
-        <input class="fi" id="schoolProfileNotes" placeholder="Observacoes da unidade">
+        <input class="fi" id="schoolProfileDirector" placeholder="Diretor(a)" aria-label="Diretor ou diretora">
+        <input class="fi" id="schoolProfileViceDirector" placeholder="Vice-diretor(a)" aria-label="Vice-diretor ou vice-diretora">
+        <input class="fi" id="schoolProfileProati" placeholder="PROATI" aria-label="PROATI">
+        <input class="fi" id="schoolProfileGoe" placeholder="GOE / apoio" aria-label="GOE ou apoio">
+        <input class="fi" id="schoolProfilePhone" placeholder="Telefone" aria-label="Telefone">
+        <input class="fi" id="schoolProfileMobile" placeholder="Celular / WhatsApp" aria-label="Celular ou WhatsApp">
+        <input class="fi" id="schoolProfileEmail" placeholder="E-mail" aria-label="E-mail">
+        <input class="fi" id="schoolProfileAddress" placeholder="Endereço" aria-label="Endereço">
+        <input class="fi" id="schoolProfileNotes" placeholder="Observações da unidade" aria-label="Observações da unidade">
         <button class="btn btn-p" type="submit">Salvar ficha</button>
       </form>
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Historico da escola</div><div class="cs">Alteracoes, confirmacoes e movimentos relevantes desta unidade.</div></div>
+        <div><div class="ct">Histórico da escola</div><div class="cs">Alterações, confirmações e movimentos relevantes desta unidade.</div></div>
       </div>
       <div id="schoolEventHistory" class="stack-list"></div>
     </div>
@@ -383,8 +398,8 @@
         <div><div class="ct">Painel de supervisores</div><div class="cs">Resumo mensal das visitas, metas e indicadores da planilha oficial.</div></div>
         <div class="mini-actions">
           <a class="btn btn-g btn-sm" href="https://docs.google.com/spreadsheets/d/1AaHF-kDf-3RVd4euAACBCMVB7AsrsVwMkLnDhpg-LnM/edit?gid=1507846737#gid=1507846737" target="_blank" rel="noreferrer">Abrir planilha</a>
-          <button class="btn btn-p btn-sm" type="button" onclick="syncSupervisorVisitSources()">Atualizar planilha</button>
-          <button class="btn btn-g btn-sm" id="supervisorFullscreenBtn" type="button" onclick="toggleSupervisorPanelFullscreen()">Tela cheia</button>
+          <button class="btn btn-p btn-sm" id="syncSupervisorSourcesBtn" type="button">Atualizar planilha</button>
+          <button class="btn btn-g btn-sm" id="supervisorFullscreenBtn" type="button">Tela cheia</button>
         </div>
       </div>
       <div id="supervisorPanelGrid" class="supervisor-sheet-panel"></div>
@@ -400,57 +415,57 @@
   <div class="page" id="page-supervisor-record">
     <div class="ph">
       <div class="record-title-row">
-        <button class="record-back-btn" type="button" onclick="showPage('supervisors')" aria-label="Voltar para supervisores" title="Voltar para supervisores">&#8249;</button>
+        <button class="record-back-btn" type="button" data-open-page="supervisors" aria-label="Voltar para supervisores" title="Voltar para supervisores">&#8249;</button>
         <div>
           <div class="pt" id="supervisorRecordTitle">Pagina do supervisor</div>
           <div class="ps" id="supervisorRecordSubtitle">Meta, calendario, visitas e escolas vinculadas.</div>
         </div>
       </div>
       <div class="page-actions">
-        <button class="btn btn-p btn-sm" id="refreshSupervisorSheetBtn" type="button" onclick="syncCurrentSupervisorVisitSource()" hidden>Atualizar planilha</button>
-        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordVisitForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Registrar visita</button>
+        <button class="btn btn-p btn-sm" id="refreshSupervisorSheetBtn" type="button" hidden>Atualizar planilha</button>
+        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisitForm">Registrar visita</button>
       </div>
     </div>
     <div class="box">
       <div class="school-record-nav">
-        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordProfile')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Resumo</button>
-        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordCalendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Calendario</button>
-        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordVisited')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Visitadas</button>
-        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordPending')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Faltantes</button>
-        <button class="btn btn-g btn-sm" type="button" onclick="document.getElementById('supervisorRecordVisitTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' })">Registros</button>
+        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordProfile">Resumo</button>
+        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordCalendar">Calendário</button>
+        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisited">Visitadas</button>
+        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordPending">Faltantes</button>
+        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisitTable">Registros</button>
       </div>
       <div id="supervisorRecordProfile" class="stack-list"></div>
     </div>
     <div class="setechub-two-col">
       <div class="box">
         <div class="bh">
-          <div><div class="ct">Meta mensal</div><div class="cs">Se cumpriu a meta de visitas do mes atual.</div></div>
+          <div><div class="ct">Meta mensal</div><div class="cs">Se cumpriu a meta de visitas do mês atual.</div></div>
         </div>
         <div id="supervisorRecordGoal" class="stack-list"></div>
       </div>
       <div class="box">
         <div class="bh">
-          <div><div class="ct">Indicadores do supervisor</div><div class="cs">Responsabilidade, cobertura, chamados e alertas.</div></div>
+          <div><div class="ct">Indicadores do supervisor</div><div class="cs">Responsabilidade, cobertura, chamados e itens com manutenção ou defeito.</div></div>
         </div>
         <div id="supervisorRecordMetrics" class="setechub-monitor-grid compact-grid"></div>
       </div>
     </div>
     <div class="box" id="supervisorRecordCalendar">
       <div class="bh">
-        <div><div class="ct">Calendario de visitas</div><div class="cs">Dias com registro de visita para este supervisor.</div></div>
+        <div><div class="ct">Calendário de visitas</div><div class="cs">Dias com registro de visita para este supervisor.</div></div>
       </div>
       <div id="supervisorRecordCalendarGrid" class="supervisor-calendar-grid"></div>
     </div>
     <div class="setechub-two-col">
       <div class="box" id="supervisorRecordVisited">
         <div class="bh">
-          <div><div class="ct">Escolas visitadas</div><div class="cs">Unidades vinculadas com visita no mes atual.</div></div>
+          <div><div class="ct">Escolas visitadas</div><div class="cs">Unidades vinculadas com visita no mês atual.</div></div>
         </div>
         <div id="supervisorRecordVisitedSchools" class="stack-list"></div>
       </div>
       <div class="box" id="supervisorRecordPending">
         <div class="bh">
-          <div><div class="ct">Faltam visitas</div><div class="cs">Unidades vinculadas sem visita registrada no mes.</div></div>
+          <div><div class="ct">Faltam visitas</div><div class="cs">Unidades vinculadas sem visita registrada no mês.</div></div>
         </div>
         <div id="supervisorRecordPendingSchools" class="stack-list"></div>
       </div>
@@ -463,25 +478,25 @@
     </div>
     <div class="box" id="supervisorRecordVisitForm">
       <div class="bh">
-        <div><div class="ct">Registrar visita</div><div class="cs">Registro rapido ja preso ao supervisor desta pagina.</div></div>
+        <div><div class="ct">Registrar visita</div><div class="cs">Registro rápido já preso ao supervisor desta página.</div></div>
       </div>
       <form id="supervisorRecordVisitFormElement" class="setechub-form setechub-form-wide">
-        <select class="fi" id="recordVisitSchoolSelect"></select>
+        <select class="fi" id="recordVisitSchoolSelect" aria-label="Escola da visita"></select>
         <input class="fi" id="recordVisitDate" type="date">
-        <select class="fi" id="recordVisitType">
+        <select class="fi" id="recordVisitType" aria-label="Tipo de visita">
           <option value="Rotina">Rotina</option>
           <option value="Acompanhamento">Acompanhamento</option>
           <option value="Busca ativa">Busca ativa</option>
           <option value="Formacao">Formacao</option>
           <option value="Emergencial">Emergencial</option>
         </select>
-        <input class="fi" id="recordVisitNotes" placeholder="Observacao da visita">
+        <input class="fi" id="recordVisitNotes" placeholder="Observação da visita" aria-label="Observação da visita">
         <button class="btn btn-p" type="submit">Salvar visita</button>
       </form>
     </div>
     <div class="box" id="supervisorRecordVisitTable">
       <div class="bh">
-        <div><div class="ct">Historico de visitas</div><div class="cs">Registros deste supervisor em ordem de data.</div></div>
+        <div><div class="ct">Histórico de visitas</div><div class="cs">Registros deste supervisor em ordem de data.</div></div>
       </div>
       <div id="supervisorRecordVisitsTable" class="setechub-table-wrap"></div>
     </div>
@@ -490,21 +505,21 @@
   <div class="page" id="page-assets">
     <div class="ph">
       <div>
-        <div class="pt">Inventario</div>
-        <div class="ps">Equipamentos por escola. Regional primeiro, unidade especifica quando voce seleciona uma escola.</div>
+        <div class="pt">Inventário</div>
+        <div class="ps">Equipamentos por escola. Regional primeiro, unidade específica quando você seleciona uma escola.</div>
       </div>
     </div>
 
     <section class="inventory-hero">
       <div class="inventory-hero-main">
-        <div class="inventory-kicker">Inventario</div>
-        <h1 id="inventoryHeroTitle">Inventario regional</h1>
+        <div class="inventory-kicker">Inventário</div>
+        <h1 id="inventoryHeroTitle">Inventário regional</h1>
         <p id="inventoryHeroText">Selecione uma escola para ver somente os equipamentos dela.</p>
         <div id="inventoryHeroStats" class="inventory-hero-stats"></div>
       </div>
       <div class="inventory-hero-side">
         <div id="inventoryHeroScore" class="inventory-risk-card"></div>
-        <div id="inventoryFamilyStrip" class="inventory-family-strip"></div>
+        <div id="inventoryTypeStrip" class="inventory-type-strip"></div>
       </div>
     </section>
 
@@ -516,17 +531,17 @@
         </div>
         <div class="setechub-toolbar inventory-status-toolbar">
           <button class="btn btn-g btn-sm active-filter" data-inventory-status="todos" type="button">Todos</button>
-          <button class="btn btn-g btn-sm" data-inventory-status="alerta" type="button">Alertas</button>
-          <button class="btn btn-g btn-sm" data-inventory-status="criticos" type="button">Criticos</button>
+          <button class="btn btn-g btn-sm" data-inventory-status="alerta" type="button">Manutenção/defeito</button>
+          <button class="btn btn-g btn-sm" data-inventory-status="criticos" type="button">Defeito</button>
           <button class="btn btn-g btn-sm" data-inventory-status="ok" type="button">Ok</button>
         </div>
       </div>
       <div class="inventory-filter-grid">
-        <input class="fi" id="inventorySearchInput" placeholder="Buscar escola, equipamento ou observacao">
-        <select class="fi" id="inventorySchoolSelect">
+        <input class="fi" id="inventorySearchInput" placeholder="Buscar escola, equipamento ou observação" aria-label="Buscar escola, equipamento ou observação">
+        <select class="fi" id="inventorySchoolSelect" aria-label="Escola do inventário">
           <option value="todas">Todas as escolas</option>
         </select>
-        <select class="fi" id="inventoryCategorySelect">
+        <select class="fi" id="inventoryCategorySelect" aria-label="Tipo de equipamento">
           <option value="todas">Todas as categorias</option>
         </select>
       </div>
@@ -545,19 +560,19 @@
         </div>
         <div class="box inventory-category-card">
           <div class="bh">
-            <div><div class="ct">Categorias</div><div class="cs">Resumo do recorte atual por familia de equipamento.</div></div>
+            <div><div class="ct">Tipos</div><div class="cs">Resumo consolidado por tipo de equipamento.</div></div>
           </div>
           <div id="inventoryCategoryTable" class="inventory-category-strip"></div>
         </div>
         <div class="box inventory-detail-card">
           <div class="bh">
-            <div><div class="ct">Equipamentos</div><div class="cs">Totais consolidados, alertas e observacoes do recorte selecionado.</div></div>
+            <div><div class="ct">Equipamentos</div><div class="cs">Totais consolidados, manutenção, defeitos e observações do recorte selecionado.</div></div>
           </div>
           <div id="inventoryDetailTable" class="setechub-table-wrap"></div>
         </div>
         <div class="box inventory-issues-card">
           <div class="bh">
-            <div><div class="ct">Alertas do recorte</div><div class="cs">Defeitos, manutencao e dados que pedem revisao.</div></div>
+          <div><div class="ct">Manutenção e defeitos</div><div class="cs">Somente situações registradas na base do inventário.</div></div>
           </div>
           <div id="inventoryIssuesList" class="stack-list"></div>
         </div>
@@ -566,24 +581,24 @@
 
     <div class="box inventory-manage-card">
       <div class="bh">
-        <div><div class="ct">Manutencao do inventario</div><div class="cs">Adicione um item ou importe um lote rapido para a escola selecionada.</div></div>
+        <div><div class="ct">Manutenção do inventário</div><div class="cs">Adicione um item ou importe um lote rápido para a escola selecionada.</div></div>
       </div>
       <form id="schoolAssetForm" class="setechub-form setechub-form-school-asset">
-        <select class="fi" id="schoolAssetSchool"></select>
-        <input class="fi" id="schoolAssetName" placeholder="Equipamento ou item">
-        <input class="fi" id="schoolAssetQuantity" type="number" min="1" step="1" value="1" placeholder="Qtd">
-        <select class="fi" id="schoolAssetStatus">
+        <select class="fi" id="schoolAssetSchool" aria-label="Escola do equipamento"></select>
+        <input class="fi" id="schoolAssetName" placeholder="Equipamento ou item" aria-label="Equipamento ou item">
+        <input class="fi" id="schoolAssetQuantity" type="number" min="1" step="1" value="1" placeholder="Qtd" aria-label="Quantidade">
+        <select class="fi" id="schoolAssetStatus" aria-label="Status do equipamento">
           <option value="ok">Ok</option>
-          <option value="manutencao">Manutencao</option>
+          <option value="manutencao">Manutenção</option>
           <option value="defeito">Defeito</option>
         </select>
-        <input class="fi" id="schoolAssetNotes" placeholder="Observacao do equipamento">
+        <input class="fi" id="schoolAssetNotes" placeholder="Observação do equipamento" aria-label="Observação do equipamento">
         <button class="btn btn-p" type="submit">Adicionar equipamento</button>
       </form>
       <form id="schoolAssetBulkForm" class="setechub-form setechub-note-form">
-        <select class="fi" id="schoolAssetBulkSchool"></select>
-        <textarea class="fi" id="schoolAssetBulkText" placeholder="Lote rapido: uma linha por item. Exemplo: Notebook Positivo;12;ok;lab 1&#10;Tablet Positivo;8;manutencao;2 com tela trincada"></textarea>
-        <button class="btn btn-g" type="submit">Importar lote rapido</button>
+        <select class="fi" id="schoolAssetBulkSchool" aria-label="Escola do lote de equipamentos"></select>
+        <textarea class="fi" id="schoolAssetBulkText" placeholder="Lote rápido: uma linha por item. Exemplo: PC adm;7;ok;secretaria&#10;tablet;8;defeito;2 com tela trincada" aria-label="Lote rápido de equipamentos"></textarea>
+        <button class="btn btn-g" type="submit">Importar lote rápido</button>
       </form>
       <div class="sync-meta" id="schoolAssetBulkStatus">Use `nome;qtd;status;observacao` ou apenas `nome` por linha.</div>
       <div id="schoolAssetList" class="stack-list"></div>
@@ -593,7 +608,7 @@
   <div class="page" id="page-reports">
     <div class="ph">
       <div>
-        <div class="pt">Relatorios e Automacao</div>
+        <div class="pt">Relatórios e Automação</div>
         <div class="ps">Fechamento do dia, notas operacionais e lote de redes.</div>
       </div>
     </div>
@@ -607,45 +622,45 @@
         <div class="insight-v private" id="reportCalls">0</div>
       </div>
       <div class="insight-card">
-        <div class="insight-l">Escolas criticas</div>
+        <div class="insight-l">Escolas em atenção</div>
         <div class="insight-v private" id="reportCriticalSchools">0</div>
       </div>
       <div class="insight-card">
-        <div class="insight-l">Ativos em alerta</div>
+        <div class="insight-l">Ativos em manutenção/defeito</div>
         <div class="insight-v private" id="reportAssets">0</div>
       </div>
     </div>
     <div class="setechub-two-col">
       <div class="box">
         <div class="bh">
-          <div><div class="ct">Resumo e historico</div><div class="cs">Relatorios, visitas e notas operacionais.</div></div>
+          <div><div class="ct">Resumo e histórico</div><div class="cs">Relatórios, visitas e notas operacionais.</div></div>
         </div>
         <div class="setechub-progress"><span id="taskProgressBar"></span></div>
         <div class="setechub-summary-card">
-          <div class="ct">Leitura rapida do dia</div>
+          <div class="ct">Leitura rápida do dia</div>
           <div class="sync-meta" id="reportSummaryPreview"></div>
         </div>
         <div class="stack-list" id="visitHistoryList"></div>
         <form id="noteForm" class="setechub-form setechub-note-form">
-          <input class="fi" id="noteTitle" placeholder="Titulo da nota">
-          <textarea class="fi" id="noteBody" placeholder="Observacao, pendencia, contexto..."></textarea>
+          <input class="fi" id="noteTitle" placeholder="Título da nota" aria-label="Título da nota">
+          <textarea class="fi" id="noteBody" placeholder="Observação, pendência, contexto..." aria-label="Observação, pendência ou contexto"></textarea>
           <button class="btn btn-p" type="submit">Salvar nota</button>
         </form>
         <div id="noteList" class="stack-list"></div>
       </div>
       <div class="box">
         <div class="bh">
-          <div><div class="ct">Automacao de redes</div><div class="cs">Comando pronto e lote validado antes do PowerShell.</div></div>
+          <div><div class="ct">Automação de redes</div><div class="cs">Comando pronto e lote validado antes do PowerShell.</div></div>
         </div>
         <form id="redeAutomationForm" class="setechub-form setechub-note-form">
-          <input class="fi" id="redeFolderPath" placeholder="Caminho da pasta com as redes">
+          <input class="fi" id="redeFolderPath" placeholder="Caminho da pasta com as redes" aria-label="Caminho da pasta com as redes">
           <div class="setechub-two-mini">
-            <input class="fi" id="redeYearSuffix" placeholder="Ano" value="26">
-            <input class="fi" id="redeAssuntoLabel" placeholder="Rotulo do assunto" value="Assunto:">
+            <input class="fi" id="redeYearSuffix" placeholder="Ano" value="26" aria-label="Ano">
+            <input class="fi" id="redeAssuntoLabel" placeholder="Rótulo do assunto" value="Assunto:" aria-label="Rótulo do assunto">
           </div>
-          <input class="fi" id="redeNumberPlaceholder" placeholder="Placeholder numero" value="{{REDE_NUMERO}}">
-          <input class="fi" id="redeDatePlaceholder" placeholder="Placeholder data" value="{{REDE_DATA}}">
-          <input class="fi" id="redeHeadingPlaceholder" placeholder="Placeholder cabecalho" value="{{REDE_CABECALHO}}">
+          <input class="fi" id="redeNumberPlaceholder" placeholder="Placeholder número" value="{{REDE_NUMERO}}" aria-label="Placeholder número">
+          <input class="fi" id="redeDatePlaceholder" placeholder="Placeholder data" value="{{REDE_DATA}}" aria-label="Placeholder data">
+          <input class="fi" id="redeHeadingPlaceholder" placeholder="Placeholder cabeçalho" value="{{REDE_CABECALHO}}" aria-label="Placeholder cabeçalho">
           <button class="btn btn-p" type="submit">Salvar configuracao</button>
         </form>
         <div class="setechub-action-row">
@@ -663,8 +678,8 @@
   <div class="page" id="page-settings">
     <div class="ph">
       <div>
-        <div class="pt">Configuracoes gerais</div>
-        <div class="ps">Opcoes pessoais disponiveis para todos os usuarios.</div>
+        <div class="pt">Configurações gerais</div>
+        <div class="ps">Opções pessoais disponíveis para todos os usuários.</div>
       </div>
     </div>
     <div class="settings-simple-grid">
@@ -673,8 +688,8 @@
           <div><div class="ct">Minha conta</div><div class="cs">Atualize apenas seu nome de exibicao e PIN local.</div></div>
         </div>
         <form id="profileForm" class="setechub-form setechub-note-form">
-          <input class="fi" id="profileName" placeholder="Nome">
-          <input class="fi" id="profilePin" placeholder="PIN local">
+          <input class="fi" id="profileName" placeholder="Nome" aria-label="Nome">
+          <input class="fi" id="profilePin" placeholder="PIN local" aria-label="PIN local">
           <div class="settings-actions-row">
             <button class="btn btn-p" type="submit">Salvar conta</button>
             <button class="btn btn-g" id="logoutBtn" type="button">Bloquear painel</button>
@@ -687,7 +702,7 @@
   <div class="page" id="page-info">
     <div class="ph">
       <div>
-        <div class="pt">Informacoes</div>
+        <div class="pt">Informações</div>
         <div class="ps">Nomes, organograma, links oficiais, ramais e contatos da URE.</div>
       </div>
     </div>
@@ -696,10 +711,10 @@
         <div><div class="ct">Links oficiais</div><div class="cs">Atalhos fixos para consulta da rotina de trabalho.</div></div>
       </div>
       <form id="officialForm" class="setechub-form setechub-note-form" data-admin-only>
-        <input class="fi" id="officeContactInput" placeholder="Contato oficial ou observacao da diretoria">
+        <input class="fi" id="officeContactInput" placeholder="Contato oficial ou observação da diretoria" aria-label="Contato oficial ou observação da diretoria">
         <div class="setechub-form setechub-form-links">
-          <input class="fi" id="officialLabel" placeholder="Nome do link oficial">
-          <input class="fi" id="officialUrl" placeholder="https://...">
+          <input class="fi" id="officialLabel" placeholder="Nome do link oficial" aria-label="Nome do link oficial">
+          <input class="fi" id="officialUrl" placeholder="https://..." aria-label="URL do link oficial">
           <button class="btn btn-p" type="submit">Adicionar link</button>
         </div>
       </form>
@@ -707,29 +722,29 @@
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Organograma e setores</div><div class="cs">Setores, responsaveis e contatos principais.</div></div>
+        <div><div class="ct">Organograma e setores</div><div class="cs">Setores, responsáveis e contatos principais.</div></div>
       </div>
       <form id="sectorForm" class="setechub-form setechub-form-sector" data-admin-only>
-        <input class="fi" id="sectorCode" placeholder="Sigla">
-        <input class="fi" id="sectorName" placeholder="Nome do setor">
-        <input class="fi" id="sectorLead" placeholder="Responsavel">
-        <input class="fi" id="sectorPhone" placeholder="Telefone">
-        <input class="fi" id="sectorEmail" placeholder="E-mail">
-        <input class="fi" id="sectorSummary" placeholder="Resumo rapido do setor">
+        <input class="fi" id="sectorCode" placeholder="Sigla" aria-label="Sigla">
+        <input class="fi" id="sectorName" placeholder="Nome do setor" aria-label="Nome do setor">
+        <input class="fi" id="sectorLead" placeholder="Responsável" aria-label="Responsável">
+        <input class="fi" id="sectorPhone" placeholder="Telefone" aria-label="Telefone">
+        <input class="fi" id="sectorEmail" placeholder="E-mail" aria-label="E-mail">
+        <input class="fi" id="sectorSummary" placeholder="Resumo rápido do setor" aria-label="Resumo rápido do setor">
         <button class="btn btn-p" type="submit">Salvar setor</button>
       </form>
       <div id="sectorDirectoryList" class="stack-list"></div>
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Ramais e contatos</div><div class="cs">Lista importada da URE Itapeva para consulta rapida.</div></div>
+        <div><div class="ct">Ramais e contatos</div><div class="cs">Lista importada da URE Itapeva para consulta rápida.</div></div>
       </div>
       <div class="setechub-toolbar" id="directoryFilterBar">
         <button class="btn btn-g btn-sm active-filter" data-directory-filter="todos" type="button">Todos</button>
-        <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisao</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisão</button>
         <button class="btn btn-g btn-sm dormant-page nav-disabled" data-directory-filter="pecs" type="button" disabled>PECs</button>
         <button class="btn btn-g btn-sm" data-directory-filter="tecnologia" type="button">Tecnologia</button>
-        <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestao</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestão</button>
       </div>
       <div id="directoryContactsList" class="stack-list"></div>
     </div>
@@ -739,31 +754,31 @@
     <div class="ph">
       <div>
         <div class="pt">Painel admin</div>
-        <div class="ps">Area restrita ao administrador Jefferson.</div>
+        <div class="ps">Área restrita ao administrador Jefferson.</div>
       </div>
     </div>
     <section class="admin-hero" data-admin-only>
       <div>
-        <div class="admin-kicker">Gestao do PainelURE</div>
-        <strong>Controle separado das configuracoes gerais.</strong>
-        <span>Usuarios, backup, publicacao e diagnostico ficam concentrados aqui.</span>
+        <div class="admin-kicker">Gestão do PainelURE</div>
+        <strong>Controle separado das configurações gerais.</strong>
+        <span>Usuários, backup, publicação e diagnóstico ficam concentrados aqui.</span>
       </div>
       <div class="admin-hero-actions">
-        <button class="btn btn-p btn-sm" type="button" onclick="document.getElementById('userName')?.focus()">Novo usuario</button>
+        <button class="btn btn-p btn-sm" type="button" data-focus-target="userName">Novo usuário</button>
         <button class="btn btn-g btn-sm" id="refreshSnapshotsBtn" type="button">Atualizar snapshots</button>
       </div>
     </section>
     <div class="admin-module-grid">
     <div class="box admin-module" data-admin-only>
       <div class="bh">
-        <div><div class="ct">Usuarios e permissoes</div><div class="cs">Crie acessos locais por perfil. No Supabase, estes perfis viram regras de acesso.</div></div>
+        <div><div class="ct">Usuários e permissões</div><div class="cs">Crie acessos locais por perfil. No Supabase, estes perfis viram regras de acesso.</div></div>
       </div>
       <form id="userForm" class="admin-user-form">
         <input id="editingUserId" type="hidden">
-        <input class="fi" id="userName" placeholder="Nome exibido">
-        <input class="fi" id="userLogin" placeholder="Login">
-        <input class="fi" id="userPin" placeholder="PIN">
-        <select class="fi" id="userRole">
+        <input class="fi" id="userName" placeholder="Nome exibido" aria-label="Nome exibido">
+        <input class="fi" id="userLogin" placeholder="Login" aria-label="Login">
+        <input class="fi" id="userPin" placeholder="PIN" aria-label="PIN">
+        <select class="fi" id="userRole" aria-label="Perfil do usuário">
           <option value="supervisor">Supervisor</option>
           <option value="dirigente">Dirigente</option>
           <option value="seintec">SEINTEC</option>
@@ -772,38 +787,38 @@
           <option value="pec">PEC</option>
           <option value="admin">Administrador</option>
         </select>
-        <select class="fi" id="userSupervisorName"></select>
-        <button class="btn btn-g" id="randomUserPinBtn" type="button">PIN aleatorio</button>
-        <button class="btn btn-p" id="userSubmitBtn" type="submit">Criar usuario</button>
-        <button class="btn btn-g" id="cancelUserEditBtn" type="button" hidden>Cancelar edicao</button>
+        <select class="fi" id="userSupervisorName" aria-label="Supervisor vinculado ao usuário"></select>
+        <button class="btn btn-g" id="randomUserPinBtn" type="button">PIN aleatório</button>
+        <button class="btn btn-p" id="userSubmitBtn" type="submit">Criar usuário</button>
+        <button class="btn btn-g" id="cancelUserEditBtn" type="button" hidden>Cancelar edição</button>
       </form>
-      <div class="admin-panel-note">Supervisor enxerga Supervisores e Escolas do proprio vinculo. SEOM consulta Escolas e Inventario. PEC e Dirigente visualizam a base. SEINTEC, CTC e administrador podem editar dados.</div>
+      <div class="admin-panel-note">Supervisor enxerga Supervisores e Escolas do próprio vínculo. SEOM consulta Escolas e Inventário. PEC e Dirigente visualizam a base. SEINTEC, CTC e administrador podem editar dados.</div>
       <div id="userList" class="stack-list"></div>
     </div>
     <div class="box admin-module" data-admin-only>
       <div class="bh">
-        <div><div class="ct">Escolas e vinculos</div><div class="cs">Edite escolas, responsaveis e resolva duplicidades sem abrir o codigo.</div></div>
+        <div><div class="ct">Escolas e vínculos</div><div class="cs">Edite escolas, responsáveis e resolva duplicidades sem abrir o código.</div></div>
       </div>
       <form id="adminSchoolForm" class="admin-school-form">
         <input id="adminSchoolId" type="hidden">
-        <select class="fi" id="adminSchoolPicker">
+        <select class="fi" id="adminSchoolPicker" aria-label="Selecionar escola para editar">
           <option value="">Selecionar escola para editar</option>
         </select>
-        <input class="fi" id="adminSchoolName" placeholder="Nome da escola">
-        <input class="fi" id="adminSchoolCie" placeholder="CIE">
-        <input class="fi" id="adminSchoolZone" placeholder="Municipio">
-        <select class="fi" id="adminSchoolStatus">
+        <input class="fi" id="adminSchoolName" placeholder="Nome da escola" aria-label="Nome da escola">
+        <input class="fi" id="adminSchoolCie" placeholder="CIE" aria-label="CIE">
+        <input class="fi" id="adminSchoolZone" placeholder="Município" aria-label="Município">
+        <select class="fi" id="adminSchoolStatus" aria-label="Status da escola">
           <option value="estavel">Estavel</option>
-          <option value="atencao">Atencao</option>
-          <option value="critico">Critico</option>
+          <option value="atencao">Atenção</option>
+          <option value="critico">Crítico</option>
         </select>
-        <select class="fi" id="adminSchoolSupervisorName"></select>
+        <select class="fi" id="adminSchoolSupervisorName" aria-label="Supervisor da escola"></select>
         <button class="btn btn-p" type="submit">Salvar escola</button>
         <button class="btn btn-g" id="clearAdminSchoolBtn" type="button">Nova escola</button>
       </form>
       <div class="admin-merge-row">
-        <select class="fi" id="adminMergePrimary"></select>
-        <select class="fi" id="adminMergeDuplicate"></select>
+        <select class="fi" id="adminMergePrimary" aria-label="Escola principal da unificação"></select>
+        <select class="fi" id="adminMergeDuplicate" aria-label="Escola duplicada da unificação"></select>
         <button class="btn btn-d" id="mergeSchoolsBtn" type="button">Unificar duplicada</button>
       </div>
       <div id="adminSchoolList" class="stack-list"></div>
@@ -826,28 +841,28 @@
       <div class="setechub-action-col">
         <button class="btn btn-p" id="saveServerBtn" type="button">Salvar no servidor local</button>
         <button class="btn btn-g" id="loadServerBtn" type="button">Carregar do servidor local</button>
-        <div class="sync-meta" id="serverHealthMeta">Servidor local nao verificado.</div>
+        <div class="sync-meta" id="serverHealthMeta">Servidor local não verificado.</div>
       </div>
       <div id="snapshotList" class="stack-list"></div>
     </div>
       <div class="box admin-module">
         <div class="bh">
-          <div><div class="ct">Migracao do prototipo</div><div class="cs">Puxe os dados do setec_daily_app para a base nova em um clique.</div></div>
+          <div><div class="ct">Migração do protótipo</div><div class="cs">Puxe os dados do setec_daily_app para a base nova em um clique.</div></div>
         </div>
         <div class="setechub-action-col">
-          <button class="btn btn-p" id="importLegacyBtn" type="button">Importar dados do prototipo antigo</button>
-          <div class="sync-meta" id="legacyStateMeta">Nenhuma verificacao feita ainda.</div>
+          <button class="btn btn-p" id="importLegacyBtn" type="button">Importar dados do protótipo antigo</button>
+          <div class="sync-meta" id="legacyStateMeta">Nenhuma verificação feita ainda.</div>
         </div>
       </div>
       <div class="box admin-module">
         <div class="bh">
-          <div><div class="ct">Diagnostico local</div><div class="cs">Leitura rapida do estado salvo neste navegador.</div></div>
+          <div><div class="ct">Diagnóstico local</div><div class="cs">Leitura rápida do estado salvo neste navegador.</div></div>
         </div>
         <div id="diagnosticList" class="stack-list"></div>
       </div>
       <div class="box admin-module">
         <div class="bh">
-          <div><div class="ct">Importacoes da base</div><div class="cs">Resumo informativo para administracao. Fora do fluxo operacional.</div></div>
+          <div><div class="ct">Importações da base</div><div class="cs">Resumo informativo para administração. Fora do fluxo operacional.</div></div>
         </div>
         <div id="adminImportInfo" class="stack-list"></div>
       </div>
@@ -858,12 +873,12 @@
     <div class="ph">
       <div>
         <div class="pt">PECs</div>
-        <div class="ps">Equipe de especialistas em curriculo e dados liberados para este acesso.</div>
+        <div class="ps">Equipe de especialistas em currículo e dados liberados para este acesso.</div>
       </div>
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">Especialistas em curriculo</div><div class="cs">A visualizacao respeita o perfil logado.</div></div>
+        <div><div class="ct">Especialistas em currículo</div><div class="cs">A visualização respeita o perfil logado.</div></div>
       </div>
       <div id="pecsPageList" class="stack-list"></div>
     </div>
@@ -872,8 +887,6 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="./school-data.js?v=20260504-seom-user"></script>
 <script src="./storage.js?v=20260504-seom-user"></script>
 <script src="./app.js?v=20260504-seom-user"></script>

@@ -138,9 +138,9 @@ function canonicalSchoolName(value) {
 
 const SCHOOL_MASTER = [
   { name: 'PEI EE Idalicio Mendes Lima', cie: '905227', zone: 'Itapeva', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
-  { name: 'EE Doutor Antonio Deffune', cie: '49323', zone: 'Itapeva', status: 'critico', notes: 'Prioridade de suporte para conectividade e laboratorio.', fixedName: true },
+  { name: 'EE Doutor Antonio Deffune', cie: '49323', zone: 'Itapeva', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'PEI EE Professora Celia Vasques Ferrari Duch', cie: '39731', zone: 'Taquarivai', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
-  { name: 'PEI EE Professora Cinira Daniel da Silva', cie: '35348', zone: 'Itapeva', status: 'atencao', notes: 'Fila tecnica acompanhada pela base do SEINTEC.', fixedName: true },
+  { name: 'PEI EE Professora Cinira Daniel da Silva', cie: '35348', zone: 'Itapeva', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'EE Bairro Ferreira dos Matos', cie: '915087', zone: 'Ribeirao Grande', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'PEI EE Professora Francelina Franco', cie: '15568', zone: 'Buri', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'EE Professor Gerson de Barros Margarido', cie: '43412', zone: 'Itapeva', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
@@ -152,7 +152,7 @@ const SCHOOL_MASTER = [
   { name: 'PEI EE Oscar Kurtz Camargo', cie: '15076', zone: 'Ribeirao Grande', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'PEI EE Otavio Ferrari', cie: '15404', zone: 'Itapeva', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'PEI EE Padre Arlindo Vieira', cie: '15118', zone: 'Capao Bonito', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
-  { name: 'EE Doutor Raul Venturelli', cie: '15222', zone: 'Capao Bonito', status: 'atencao', notes: 'Monitorar infraestrutura e fila tecnica local.', fixedName: true },
+  { name: 'EE Doutor Raul Venturelli', cie: '15222', zone: 'Capao Bonito', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'PEI EE Ricardo Campolim de Almeida Neto', cie: '915117', zone: 'Nova Campina', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'EE Professor Silverio Monteiro', cie: '35336', zone: 'Itapeva', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
   { name: 'PEI EE Simpliciano Campolim de Almeida', cie: '15428', zone: 'Nova Campina', status: 'estavel', notes: 'Unidade oficial da URE Itapeva.', fixedName: true },
@@ -163,20 +163,28 @@ const SCHOOL_MASTER = [
 function mergeSchools(baseSchools, savedSchools) {
   const baseMap = new Map(baseSchools.map((item) => [normalizeKey(item.name), item]));
   const mergedMap = new Map();
+  const unsupportedSeedStatuses = new Map([
+    [normalizeKey('EE Doutor Antonio Deffune'), 'Prioridade de suporte para conectividade e laboratorio.'],
+    [normalizeKey('PEI EE Professora Cinira Daniel da Silva'), 'Fila tecnica acompanhada pela base do SEINTEC.'],
+    [normalizeKey('EE Doutor Raul Venturelli'), 'Monitorar infraestrutura e fila tecnica local.']
+  ]);
   savedSchools.forEach((item) => {
     const canonicalName = canonicalSchoolName(item.name);
     const key = normalizeKey(canonicalName);
+    const normalizedItem = unsupportedSeedStatuses.has(key) && item.notes === unsupportedSeedStatuses.get(key)
+      ? { ...item, status: 'estavel', notes: 'Unidade oficial da URE Itapeva.' }
+      : item;
     if (baseMap.has(key)) {
       const official = baseMap.get(key);
       const existing = mergedMap.get(key) || {};
       mergedMap.set(key, {
         ...existing,
-        ...item,
+        ...normalizedItem,
         name: official.name,
-        cie: existing.cie || item.cie || official.cie || '',
-        zone: existing.zone || item.zone || official.zone,
-        status: existing.status || item.status || official.status,
-        notes: existing.notes || item.notes || official.notes,
+        cie: existing.cie || normalizedItem.cie || official.cie || '',
+        zone: existing.zone || normalizedItem.zone || official.zone,
+        status: existing.status || normalizedItem.status || official.status,
+        notes: existing.notes || normalizedItem.notes || official.notes,
         fixedName: true
       });
       baseMap.delete(key);
@@ -184,7 +192,7 @@ function mergeSchools(baseSchools, savedSchools) {
     }
     mergedMap.set(key, {
       ...(mergedMap.get(key) || {}),
-      ...item,
+      ...normalizedItem,
       name: canonicalName
     });
   });
@@ -721,7 +729,13 @@ function mergeState(saved) {
     ? repaired.schoolNetworks.map((item) => ({ ...item, school: canonicalSchoolName(item.school) }))
     : [];
   const savedTasks = Array.isArray(repaired.tasks)
-    ? repaired.tasks.map((item) => ({ ...item, place: canonicalSchoolName(item.place) || item.place }))
+    ? repaired.tasks.map((item) => ({
+      ...item,
+      place: canonicalSchoolName(item.place) || item.place,
+      scope: item.scope || (item.category === 'Carro oficial' ? 'carro' : item.category === 'Evento URE' || item.category === 'CTC' ? 'ure' : 'pessoal'),
+      owner: item.owner || item.createdBy || repaired.profile?.name || base.profile.name,
+      createdBy: item.createdBy || repaired.profile?.name || base.profile.name
+    }))
     : base.tasks;
   const savedCalls = Array.isArray(repaired.calls)
     ? repaired.calls.map((item) => ({ ...item, school: canonicalSchoolName(item.school) || item.school }))

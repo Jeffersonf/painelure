@@ -43,7 +43,7 @@ function exportSummary() {
     `Tarefas concluidas: ${state.tasks.filter((item) => item.done).length}`,
     `Chamados ativos: ${state.calls.filter((item) => item.status !== 'resolvido').length}`,
     `Escolas em atencao: ${state.schools.filter((item) => item.status !== 'estavel').length}`,
-    `Ativos em alerta: ${state.assets.filter((item) => item.status !== 'ok').length}`,
+    `Ativos em manutencao/defeito: ${state.assets.filter((item) => item.status !== 'ok').length}`,
     `Ponto: ${state.ponto.entrada || '--:--'} ate ${state.ponto.saida || '--:--'}`
   ].join('\n');
   downloadFile('setechub-resumo.txt', summary, 'text/plain');
@@ -317,15 +317,19 @@ function createTaskFromSchool(id) {
   if (!requireEditAccess()) return;
   const school = state.schools.find((item) => item.id === id);
   if (!school) return;
-  state.tasks.unshift({
-    id: uid(),
-    title: `Acao na ${school.name}`,
-    time: '',
-    priority: school.status === 'critico' ? 'alta' : 'media',
-    place: school.name,
-    category: 'Visita',
-    done: false
-  });
+    state.tasks.unshift({
+      id: uid(),
+      title: `Acao na ${school.name}`,
+      time: '',
+      date: new Date().toISOString().slice(0, 10),
+      priority: school.status === 'critico' ? 'alta' : 'media',
+      place: school.name,
+      category: 'Visita',
+      scope: 'pessoal',
+      owner: currentUser()?.name || state.profile.name,
+      createdBy: currentUser()?.name || state.profile.name,
+      done: false
+    });
   state.histories.visits.unshift({ id: uid(), text: `Tarefa criada para ${school.name}`, when: timestampLabel() });
   refreshAll();
   showPage('agenda');
@@ -783,6 +787,23 @@ function readFileAsArrayBuffer(file) {
   });
 }
 
+const externalScriptPromises = {};
+
+function loadExternalScript(globalName, src) {
+  if (window[globalName]) return Promise.resolve(window[globalName]);
+  if (!externalScriptPromises[globalName]) {
+    externalScriptPromises[globalName] = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = () => resolve(window[globalName]);
+      script.onerror = () => reject(new Error(`Falha ao carregar ${globalName}.`));
+      document.head.appendChild(script);
+    });
+  }
+  return externalScriptPromises[globalName];
+}
+
 async function extractImportPreview(file, type) {
   if (type === 'text') {
     const text = await readFileAsText(file);
@@ -800,7 +821,8 @@ async function extractImportPreview(file, type) {
         summary: `${rows.length} linhas`
       };
     }
-    if (window.XLSX) {
+    try {
+      await loadExternalScript('XLSX', 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
       const buffer = await readFileAsArrayBuffer(file);
       const workbook = window.XLSX.read(buffer, { type: 'array' });
       const firstSheet = workbook.SheetNames[0];
@@ -810,6 +832,8 @@ async function extractImportPreview(file, type) {
         preview: rows.slice(0, 12).join('\n'),
         summary: `${workbook.SheetNames.length} aba(s) | ${rows.length} linhas`
       };
+    } catch (error) {
+      console.warn('Falha ao carregar leitor de planilhas.', error);
     }
     const text = await readFileAsText(file);
     return {
@@ -818,13 +842,16 @@ async function extractImportPreview(file, type) {
     };
   }
   if (type === 'image') {
-    if (window.Tesseract) {
+    try {
+      await loadExternalScript('Tesseract', 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
       const result = await window.Tesseract.recognize(file, 'por');
       const text = result?.data?.text || '';
       return {
         preview: text.slice(0, 1800),
         summary: text.trim() ? 'OCR concluido' : 'Imagem sem texto reconhecido'
       };
+    } catch (error) {
+      console.warn('Falha ao carregar OCR.', error);
     }
     return {
       preview: 'OCR indisponivel neste navegador no momento.',
@@ -851,13 +878,21 @@ function setupEventListeners() {
     event.preventDefault();
     const title = document.getElementById('taskTitle').value.trim();
     if (!title) return;
+    const user = currentUser();
+    const owner = document.getElementById('taskOwner').value || user?.name || state.profile.name;
+    const scope = document.getElementById('taskScope').value;
     state.tasks.unshift({
       id: uid(),
       title,
+      date: document.getElementById('taskDate').value,
       time: document.getElementById('taskTime').value,
       priority: document.getElementById('taskPriority').value,
       place: document.getElementById('taskPlace').value.trim() || 'Sem local definido',
       category: document.getElementById('taskCategory').value,
+      scope,
+      owner,
+      createdBy: user?.name || state.profile.name,
+      vehicle: document.getElementById('taskVehicle').value.trim(),
       done: false
     });
     event.target.reset();
@@ -880,6 +915,9 @@ function setupEventListeners() {
       priority: 'media',
       place,
       category: 'CTC',
+      scope: 'ure',
+      owner,
+      createdBy: currentUser()?.name || state.profile.name,
       ctcOwner: owner,
       done: false
     });
@@ -1213,6 +1251,33 @@ function setupEventListeners() {
     closeAccountMenu();
     showPage('admin');
   });
+  document.getElementById('sidebarSearch')?.addEventListener('input', (event) => {
+    handleSearch(event.target.value);
+  });
+  document.addEventListener('click', (event) => {
+    const pageButton = event.target.closest('[data-open-page]');
+    if (!pageButton) return;
+    event.preventDefault();
+    showPage(pageButton.dataset.openPage);
+  });
+  document.addEventListener('click', (event) => {
+    const shiftButton = event.target.closest('[data-focus-shift]');
+    if (!shiftButton) return;
+    event.preventDefault();
+    shiftFocusCard(Number(shiftButton.dataset.focusShift || 0));
+  });
+  document.addEventListener('click', (event) => {
+    const scrollButton = event.target.closest('[data-scroll-target]');
+    if (!scrollButton) return;
+    event.preventDefault();
+    document.getElementById(scrollButton.dataset.scrollTarget)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.addEventListener('click', (event) => {
+    const focusButton = event.target.closest('[data-focus-target]');
+    if (!focusButton) return;
+    event.preventDefault();
+    document.getElementById(focusButton.dataset.focusTarget)?.focus();
+  });
   document.addEventListener('click', (event) => {
     if (!event.target.closest('.acct-area')) closeAccountMenu();
   });
@@ -1272,6 +1337,9 @@ function setupEventListeners() {
   document.getElementById('loadSupabaseBtn')?.addEventListener('click', loadStateFromSupabase);
   document.getElementById('checkSupabaseBtn')?.addEventListener('click', checkSupabaseConnection);
   document.getElementById('seedSupervisorVisitsBtn')?.addEventListener('click', addSupervisorTestVisits);
+  document.getElementById('syncSupervisorSourcesBtn')?.addEventListener('click', syncSupervisorVisitSources);
+  document.getElementById('supervisorFullscreenBtn')?.addEventListener('click', toggleSupervisorPanelFullscreen);
+  document.getElementById('refreshSupervisorSheetBtn')?.addEventListener('click', syncCurrentSupervisorVisitSource);
   document.getElementById('randomUserPinBtn')?.addEventListener('click', fillRandomUserPin);
   document.getElementById('cancelUserEditBtn')?.addEventListener('click', cancelUserEdit);
   document.getElementById('adminSchoolPicker')?.addEventListener('change', (event) => {
@@ -1334,17 +1402,6 @@ function setupEventListeners() {
     window.open(`https://www.google.com/maps/search/${encodeURIComponent(query)}`, '_blank', 'noopener');
   });
 
-  document.querySelectorAll('.nav-item, .fn-item').forEach((button) => {
-    if (button.dataset.page) {
-      button.addEventListener('click', (event) => {
-        if (button.classList.contains('nav-disabled')) {
-          event.preventDefault();
-          return;
-        }
-        openMainNavigationPage(button.dataset.page);
-      });
-    }
-  });
   document.addEventListener('click', (event) => {
     const navButton = event.target.closest('.nav-item[data-page], .fn-item[data-page]');
     if (!navButton) return;

@@ -31,7 +31,7 @@ let searchTimer = null;
 const PAGE_KEY = 'setechub_page';
 const CONTEXT_KEY = 'setechub_context';
 const ACTIVE_USER_KEY = 'setechub_active_user';
-const PAUSED_NAV_PAGES = new Set(['calls', 'agenda']);
+const PAUSED_NAV_PAGES = new Set(['calls']);
 const DORMANT_NAV_PAGES = new Set(['pecs']);
 
 const ROLE_LABELS = {
@@ -199,7 +199,12 @@ function showPage(page) {
   document.querySelectorAll('.page').forEach((node) => node.classList.toggle('active', node.id === `page-${page}`));
   document.querySelectorAll('.nav-item, .fn-item').forEach((node) => {
     const targetPage = page === 'school-record' ? 'schools' : page === 'supervisor-record' ? 'supervisors' : page;
-    node.classList.toggle('active', node.dataset.page === targetPage);
+    const isActive = node.dataset.page === targetPage;
+    node.classList.toggle('active', isActive);
+    if (node.dataset.page) {
+      if (isActive) node.setAttribute('aria-current', 'page');
+      else node.removeAttribute('aria-current');
+    }
   });
   const hash = page === 'school-record' && currentSchoolDetail
     ? `school/${schoolSlug(currentSchoolDetail)}`
@@ -256,18 +261,18 @@ function visibleNavigationPages() {
   const pages = isPecUser()
     ? new Set(['info', 'settings'])
     : isSupervisorUser()
-      ? new Set(['dashboard', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'info', 'settings'])
+      ? new Set(['dashboard', 'agenda', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'info', 'settings'])
       : currentUserRole() === 'seom'
-        ? new Set(['dashboard', 'schools', 'school-record', 'assets', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'schools', 'school-record', 'assets', 'info', 'settings'])
       : currentUserRole() === 'ctc'
-        ? new Set(['dashboard', 'ctc', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'ctc', 'info', 'settings'])
       : currentUserRole() === 'dirigente'
-        ? new Set(['dashboard', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
       : isRestrictedCtcUser()
-        ? new Set(['dashboard', 'ctc', 'schools', 'school-record', 'assets', 'reports', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'ctc', 'schools', 'school-record', 'assets', 'reports', 'info', 'settings'])
       : canEditData()
-      ? new Set(['dashboard', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
-        : new Set(['dashboard', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings']);
+      ? new Set(['dashboard', 'agenda', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
+        : new Set(['dashboard', 'agenda', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings']);
   DORMANT_NAV_PAGES.forEach((page) => pages.delete(page));
   if (canManageUsers()) pages.add('admin');
   return pages;
@@ -326,7 +331,8 @@ function applyAccessControl() {
       node.hidden = PAUSED_NAV_PAGES.has(node.dataset.page) || (isRestrictedCtcUser() && !allowed);
       node.classList.toggle('nav-disabled', !allowed);
       node.setAttribute('aria-disabled', allowed ? 'false' : 'true');
-      node.tabIndex = allowed ? 0 : -1;
+      node.disabled = !allowed;
+      node.title = allowed ? '' : 'Página indisponível para este perfil';
     }
   });
   document.querySelectorAll('.sidebar-icon-btn, .sidebar-mini-btn').forEach((node) => {
@@ -401,6 +407,13 @@ function updateIdentity() {
 
 function filteredTasks() {
   if (currentTaskFilter === 'todas') return state.tasks;
+  if (currentTaskFilter === 'minhas') {
+    const user = currentUser();
+    const userKey = normalizeKey(user?.name || user?.login || '');
+    return state.tasks.filter((item) => normalizeKey(item.owner || item.createdBy || '') === userKey);
+  }
+  if (currentTaskFilter === 'ure') return state.tasks.filter((item) => item.scope === 'ure' || item.category === 'Evento URE');
+  if (currentTaskFilter === 'carro') return state.tasks.filter((item) => item.scope === 'carro' || item.category === 'Carro oficial');
   if (currentTaskFilter === 'abertas') return state.tasks.filter((item) => !item.done);
   if (currentTaskFilter === 'alta') return state.tasks.filter((item) => item.priority === 'alta');
   if (currentTaskFilter === 'visita') return state.tasks.filter((item) => item.category.toLowerCase() === 'visita');
@@ -475,27 +488,83 @@ function filteredAssets() {
 
 function inventoryCategory(name) {
   const text = normalizeKey(name);
+  if (/pc adm|pcs adm|administrativo|administracao|desktop adm|computador adm/.test(text)) return 'pc_adm';
+  if (/pc peda|pedagogico|pedagogica|sala acessa|laboratorio|lab/.test(text)) return 'pc_pedagogico';
+  if (/desktop|pc|computador|lenovo|positivo|multilaser|semp toshiba|itautec/.test(text)) return 'pc_pedagogico';
+  if (/smartphone|celular|celulares/.test(text)) return 'smartphone';
   if (/tablet/.test(text)) return 'tablets';
   if (/netbook/.test(text)) return 'netbooks';
   if (/notebook/.test(text)) return 'notebooks';
-  if (/desktop|pc|computador/.test(text)) return 'desktops';
   if (/switch|rack|modem|roteador|wifi|antena|firewall|dvr/.test(text)) return 'infra';
   if (/recarga|carreg/.test(text)) return 'energia';
   return 'outros';
 }
 
-function inventoryFamily(name) {
-  if (typeof name === 'object' && name?.canonicalName) return name.canonicalName;
-  const text = normalizeKey(name);
-  if (/netbook positivo 1110/.test(text)) return 'Netbook Positivo 1110';
-  if (/netbook positivo 1210/.test(text)) return 'Netbook Positivo 1210';
-  if (/tablet positivo/.test(text)) return 'Tablet Positivo';
-  if (/notebook multilaser ultra/.test(text)) return 'Notebook Multilaser Ultra';
-  if (/desktop lenovo/.test(text)) return 'Desktop Lenovo';
-  if (/desktop legado positivo/.test(text)) return 'Desktop Legado Positivo';
-  if (/equipamento adquirido pela escola/.test(text)) return 'Equipamento adquirido pela escola';
-  if (/equipamento nao informado/.test(text)) return 'Equipamento nao informado';
-  return String(name || 'Item sem nome').trim();
+function simplifiedEquipmentName(item) {
+  const text = normalizeKey(`${item?.name || ''} ${item?.sourceName || ''} ${item?.canonicalName || ''} ${item?.model || ''} ${item?.notes || ''}`);
+  if (/pc adm|pcs adm|administrativo|administracao|desktop adm|computador adm/.test(text)) return 'PC adm';
+  if (/pc peda|pedagogico|pedagogica|sala acessa|laboratorio|lab/.test(text)) return 'PC pedagogico';
+  if (/desktop|pc|computador|lenovo|positivo|multilaser|semp toshiba|itautec/.test(text) && !/netbook|notebook|tablet/.test(text)) return 'PC pedagogico';
+  if (/smartphone|celular|celulares/.test(text)) return 'smartphone';
+  if (/tablet/.test(text)) return 'tablet';
+  if (/netbook/.test(text)) {
+    if (/1220|1210|preto|pretos|novo|novos/.test(text)) return 'Netbook 1220';
+    return 'Netbook 1120';
+  }
+  if (/notebook|chromebook/.test(text)) return 'notebook';
+  return 'outros';
+}
+
+function normalizeEquipmentText(value) {
+  return String(value || '')
+    .replace(/\b1110\b/g, '1120')
+    .replace(/\b1210\b/g, '1220');
+}
+
+function equipmentTypeLabel(value) {
+  return ({
+    pc_adm: 'PC adm',
+    pc_pedagogico: 'PC pedagogico',
+    netbooks: 'Netbooks',
+    notebooks: 'Notebooks',
+    tablets: 'Tablets',
+    smartphone: 'Smartphone',
+    infra: 'Infra / rede',
+    energia: 'Recarga / energia',
+    outros: 'Outros'
+  }[value]) || badgeText(value);
+}
+
+function simplifiedEquipmentOrder(name) {
+  return ({
+    'PC adm': 0,
+    'PC pedagogico': 1,
+    'Netbook 1120': 2,
+    'Netbook 1220': 3,
+    tablet: 4,
+    smartphone: 5,
+    notebook: 6,
+    outros: 99
+  }[name]) ?? 50;
+}
+
+function inventorySourceDetails(item) {
+  const rows = Array.isArray(item.sourceItems) ? item.sourceItems : [];
+  if (!rows.length) return '';
+  return `
+    <details class="inventory-source-details">
+      <summary>Ver lista (${esc(String(rows.length))})</summary>
+      <div class="inventory-source-list">
+        ${rows.map((source) => `
+          <div class="inventory-source-row">
+            <strong>${esc(normalizeEquipmentText(source.name))}</strong>
+            <span>${esc(String(source.units))} unid. | ${esc(badgeText(source.status))}</span>
+            ${source.notes ? `<small>${esc(normalizeEquipmentText(source.notes))}</small>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </details>
+  `;
 }
 
 function inventoryBrand(name, notes = '') {
@@ -616,7 +685,7 @@ function pendingQueueItems(limit = 20) {
       items.push({ school: school.name, type: 'rede', tone: 'pill-danger', text: `${networkGap} camera(s) abaixo da cobertura esperada.` });
     }
     if (alerts > 0) {
-      items.push({ school: school.name, type: 'inventario', tone: 'pill-danger', text: `${alerts} unidade(s) em alerta no inventario.` });
+      items.push({ school: school.name, type: 'inventario', tone: 'pill-danger', text: `${alerts} unidade(s) em manutenção/defeito no inventário.` });
     }
   });
   const priority = { inventario: 0, rede: 1, ficha: 2 };
@@ -643,13 +712,13 @@ function filteredSchoolAssets() {
 function aggregateInventoryItems(items) {
   const groups = new Map();
   items.forEach((item) => {
-    const family = inventoryFamily(item.name);
-    const key = `${item.school}|${normalizeKey(family)}`;
+    const itemName = simplifiedEquipmentName(item);
+    const key = `${item.school}|${normalizeKey(itemName)}`;
     const current = groups.get(key) || {
       school: item.school,
-      name: family,
+      name: itemName,
       rawNames: new Set(),
-      category: inventoryCategory(item.name),
+      category: inventoryCategory(itemName),
       brand: item.brand || inventoryBrand(item.name, item.notes || ''),
       model: item.model || inventoryModel(item.name, item.notes || ''),
       quality: inventoryDataQuality(item.name, item.notes || ''),
@@ -661,7 +730,8 @@ function aggregateInventoryItems(items) {
       originalStatuses: new Set(),
       blueMonitorUnits: 0,
       statuses: new Set(),
-      notes: []
+      notes: [],
+      sourceItems: []
     };
     const units = schoolAssetUnits(item);
     current.lines += 1;
@@ -669,6 +739,12 @@ function aggregateInventoryItems(items) {
     current.rawNames.add(item.sourceName || item.name);
     current.statuses.add(item.status);
     current.notes.push(item.notes || '');
+    current.sourceItems.push({
+      name: item.sourceName || item.name || itemName,
+      status: item.status,
+      units,
+      notes: item.notes || ''
+    });
     const originalStatus = inventoryOriginalStatus(item.notes || '');
     if (originalStatus) current.originalStatuses.add(originalStatus);
     current.blueMonitorUnits += inventoryBlueMonitorCount(item.notes || '');
@@ -690,7 +766,7 @@ function aggregateInventoryItems(items) {
 
 function schoolInventoryRows(schoolName) {
   return aggregateInventoryItems(state.schoolAssets.filter((item) => item.school === schoolName))
-    .sort((a, b) => b.units - a.units || b.alertUnits - a.alertUnits || a.name.localeCompare(b.name));
+    .sort((a, b) => simplifiedEquipmentOrder(a.name) - simplifiedEquipmentOrder(b.name) || b.units - a.units || a.name.localeCompare(b.name));
 }
 
 function schoolInventoryCategorySummary(schoolName) {
@@ -735,7 +811,7 @@ function inventoryQualitySummary() {
     families: rows.length,
     lowQuality: rows.filter((item) => item.quality === 'fraco').length,
     mergedFamilies: rows.filter((item) => item.rawNameCount > 1).length,
-    criticalFamilies: rows.filter((item) => item.defectUnits > 0).length,
+    defectiveTypes: rows.filter((item) => item.defectUnits > 0).length,
     mixedStatuses: rows.filter((item) => item.originalStatusCount > 1).length
   };
 }
@@ -947,11 +1023,6 @@ function schoolOperationalSnapshot(school) {
   const openCalls = state.calls.filter((item) => item.school === school.name && item.status !== 'resolvido').length;
   const pendingTasks = state.tasks.filter((item) => !item.done && (item.place === school.name || item.title.includes(school.name))).length;
   const network = schoolNetworkRecord(school.name);
-  const networkRisk = network
-    ? (network.status === 'defeito' ? 8 : network.status === 'manutencao' ? 4 : 0) +
-      Math.max(0, Number(network.cameraInstalled || 0) - Number(network.cameraWorking || 0))
-    : 0;
-  const riskScore = alertUnits * 2 + openCalls * 4 + pendingTasks * 2 + networkRisk + (school.status === 'critico' ? 10 : school.status === 'atencao' ? 5 : 0);
   return {
     imports,
     assetLines: assetTotals.lines,
@@ -961,8 +1032,7 @@ function schoolOperationalSnapshot(school) {
     openCalls,
     pendingTasks,
     networkStatus: network?.status || '',
-    networkGap: network ? Math.max(0, Number(network.cameraInstalled || 0) - Number(network.cameraWorking || 0)) : 0,
-    riskScore
+    networkGap: network ? Math.max(0, Number(network.cameraInstalled || 0) - Number(network.cameraWorking || 0)) : 0
   };
 }
 
@@ -981,9 +1051,9 @@ function sortSchoolsByCurrentView(schools) {
     if (currentSchoolSort === 'nome') return a.name.localeCompare(b.name);
     if (currentSchoolSort === 'municipio') return a.zone.localeCompare(b.zone) || a.name.localeCompare(b.name);
     if (currentSchoolSort === 'inventario') return signalB.assetUnits - signalA.assetUnits || a.name.localeCompare(b.name);
-    if (currentSchoolSort === 'alertas') return signalB.alertUnits - signalA.alertUnits || signalB.riskScore - signalA.riskScore || a.name.localeCompare(b.name);
+    if (currentSchoolSort === 'alertas') return signalB.alertUnits - signalA.alertUnits || a.name.localeCompare(b.name);
     if (currentSchoolSort === 'dados') return schoolDataScore(b.name) - schoolDataScore(a.name) || a.name.localeCompare(b.name);
-    return signalB.riskScore - signalA.riskScore || signalB.alertUnits - signalA.alertUnits || a.name.localeCompare(b.name);
+    return signalB.alertUnits - signalA.alertUnits || signalB.openCalls - signalA.openCalls || a.name.localeCompare(b.name);
   });
 }
 
@@ -1091,7 +1161,7 @@ function dashboardHealth() {
 function topSchoolSignals(limit = 5) {
   return visibleSchools()
     .map((school) => ({ school, signal: schoolOperationalSnapshot(school) }))
-    .sort((a, b) => b.signal.riskScore - a.signal.riskScore || a.school.name.localeCompare(b.school.name))
+    .sort((a, b) => b.signal.alertUnits - a.signal.alertUnits || b.signal.openCalls - a.signal.openCalls || a.school.name.localeCompare(b.school.name))
     .slice(0, limit);
 }
 
@@ -1110,7 +1180,7 @@ function operationalSuggestions() {
     suggestions.push(`So ${coverage.profileCoverage}% das escolas tem ficha minimamente preenchida. Priorize telefone, email e endereco.`);
   }
   if (coverage.activeAlerts > 0) {
-    suggestions.push(`${coverage.activeAlerts} alerta(s) de ativo estao visiveis. Use a tela de ativos para separar manutencao de defeito.`);
+    suggestions.push(`${coverage.activeAlerts} item(ns) em manutenção/defeito estão visíveis. Use a tela de ativos para separar manutenção de defeito.`);
   }
   weakestProfile.forEach((item) => {
     suggestions.push(`${item.school.name} esta com ficha em ${item.completion}%: faltam ${schoolMissingProfileFields(item.school.name).slice(0, 3).join(', ')}.`);
@@ -1121,15 +1191,15 @@ function operationalSuggestions() {
 function buildSummaryPreview() {
   const done = state.tasks.filter((item) => item.done).length;
   const openCalls = state.calls.filter((item) => item.status !== 'resolvido').length;
-  const criticalSchools = visibleSchools().filter((item) => item.status !== 'estavel').length;
+  const attentionSchools = visibleSchools().filter((item) => item.status !== 'estavel').length;
   const alertAssets = state.assets.filter((item) => item.status !== 'ok').length + state.schoolAssets.filter((item) => item.status !== 'ok').length;
   const focus = nextFocusTask();
   return [
     `${done}/${state.tasks.length} tarefas concluidas`,
     `${openCalls} chamados ativos`,
-    `${criticalSchools} escolas em atencao`,
-    `${alertAssets} ativos em alerta`,
-    focus ? `proximo foco: ${focus.title}` : 'sem tarefa critica aberta'
+    `${attentionSchools} escolas em atencao`,
+    `${alertAssets} ativos em manutenção/defeito`,
+    focus ? `proximo foco: ${focus.title}` : 'sem tarefa aberta'
   ].join(' | ');
 }
 

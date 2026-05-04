@@ -256,7 +256,7 @@
 
 .inventory-hero-stat,
 .inventory-risk-card,
-.inventory-family-chip,
+.inventory-type-chip,
 .inventory-focus-metrics > div,
 .inventory-school-row,
 .inventory-issue-row {
@@ -334,12 +334,12 @@
   flex-wrap: wrap;
 }
 
-.inventory-family-strip {
+.inventory-type-strip {
   display: grid;
   gap: 8px;
 }
 
-.inventory-family-chip {
+.inventory-type-chip {
   min-height: 58px;
   padding: 10px 12px;
   color: var(--tx);
@@ -351,22 +351,22 @@
   text-align: left;
 }
 
-.inventory-family-chip:hover {
+.inventory-type-chip:hover {
   border-color: color-mix(in srgb, var(--ac2) 42%, var(--bd));
   background: rgba(90,245,200,.08);
 }
 
-.inventory-family-chip span {
+.inventory-type-chip span {
   font-size: 12px;
   font-weight: 800;
 }
 
-.inventory-family-chip strong {
+.inventory-type-chip strong {
   font-size: 20px;
   line-height: 1;
 }
 
-.inventory-family-chip small {
+.inventory-type-chip small {
   grid-column: 1 / -1;
   color: var(--mt);
   font-size: 11px;
@@ -614,6 +614,38 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: none;
+}
+
+.inventory-source-details {
+  min-width: 180px;
+}
+
+.inventory-source-details summary {
+  cursor: pointer;
+  color: var(--ac);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inventory-source-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.inventory-source-row {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: rgba(255,255,255,.035);
+}
+
+.inventory-source-row span,
+.inventory-source-row small {
+  color: var(--mt);
+  font-size: 11px;
 }
 
 .dashboard-access-grid {

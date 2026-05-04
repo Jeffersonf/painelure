@@ -229,6 +229,9 @@ body::before {
   position: relative;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  border: 0;
+  background: transparent;
+  font: inherit;
 }
 .fn-item.fn-logout {
   border: 0;
@@ -369,6 +372,10 @@ body::before {
   transition: all .18s; margin-bottom: 2px;
   user-select: none;
   border: 1px solid transparent;
+  width: 100%;
+  background: transparent;
+  font-family: var(--font-ui);
+  text-align: left;
 }
 .nav-item:hover {
   background: linear-gradient(135deg, rgba(200,245,90,.12), rgba(90,245,200,.06));
