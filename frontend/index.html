@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260505-hide-pecs">
-<link rel="stylesheet" href="./setechub.css?v=20260505-hide-pecs">
+<link rel="stylesheet" href="./styles.css?v=20260505-font-nav">
+<link rel="stylesheet" href="./setechub.css?v=20260505-font-nav">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
@@ -45,7 +45,6 @@
   <button class="fn-item" type="button" data-page="schools"><span class="fni">&#127979;</span>Escolas</button>
   <button class="fn-item" type="button" data-page="supervisors"><span class="fni">&#128101;</span>Superv.</button>
   <button class="fn-item" type="button" data-page="assets"><span class="fni">&#128187;</span>Invent.</button>
-  <button class="fn-item acc-n" type="button" data-page="calls"><span class="fni">&#128295;</span>Cham.</button>
   <button class="fn-item sl-n" type="button" data-page="info"><span class="fni">&#8505;</span>Info</button>
   <button class="fn-item fn-logout logout-action" type="button"><span class="fni">&#8617;</span>Sair</button>
 </nav>
@@ -68,7 +67,6 @@
     <button class="nav-item" type="button" data-page="supervisors"><span class="ico">&#128101;</span>Supervisores</button>
     <button class="nav-item" type="button" data-page="ctc"><span class="ico">&#128736;</span>CTC</button>
     <button class="nav-item" type="button" data-page="assets"><span class="ico">&#128187;</span>Inventário</button>
-    <button class="nav-item an" type="button" data-page="calls"><span class="ico">&#128295;</span>Atendimentos</button>
     <button class="nav-item fn" type="button" data-page="reports"><span class="ico">&#128204;</span>Relatórios</button>
     <button class="nav-item sl-n" type="button" data-page="info"><span class="ico">&#8505;</span>Informações</button>
   </nav>
@@ -761,6 +759,31 @@
     <div class="admin-module-grid">
     <div class="box admin-module" data-admin-only>
       <div class="bh">
+        <div><div class="ct">Categorias ocultas</div><div class="cs">Itens guardados para atualização futura, fora do menu operacional.</div></div>
+      </div>
+      <div class="setechub-action-col">
+        <div class="setechub-item">
+          <div class="setechub-head">
+            <div>
+              <strong>PECs</strong>
+              <div class="sync-meta">Página preservada, sem entrada no menu principal.</div>
+            </div>
+            <span class="diag-pill pill-warn">Oculta</span>
+          </div>
+        </div>
+        <div class="setechub-item">
+          <div class="setechub-head">
+            <div>
+              <strong>Atendimentos</strong>
+              <div class="sync-meta">Fluxo mantido no código, sem atalho na navegação.</div>
+            </div>
+            <span class="diag-pill pill-warn">Oculta</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="box admin-module" data-admin-only>
+      <div class="bh">
         <div><div class="ct">Usuários e permissões</div><div class="cs">Crie acessos locais por perfil. No Supabase, estes perfis viram regras de acesso.</div></div>
       </div>
       <form id="userForm" class="admin-user-form">
@@ -877,12 +900,12 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="./school-data.js?v=20260505-hide-pecs"></script>
-<script src="./storage.js?v=20260505-hide-pecs"></script>
-<script src="./app.js?v=20260505-hide-pecs"></script>
-<script src="./render.js?v=20260505-hide-pecs"></script>
-<script src="./api.js?v=20260505-hide-pecs"></script>
-<script src="./actions.js?v=20260505-hide-pecs"></script>
-<script src="./bootstrap.js?v=20260505-hide-pecs"></script>
+<script src="./school-data.js?v=20260505-font-nav"></script>
+<script src="./storage.js?v=20260505-font-nav"></script>
+<script src="./app.js?v=20260505-font-nav"></script>
+<script src="./render.js?v=20260505-font-nav"></script>
+<script src="./api.js?v=20260505-font-nav"></script>
+<script src="./actions.js?v=20260505-font-nav"></script>
+<script src="./bootstrap.js?v=20260505-font-nav"></script>
 </body>
 </html>

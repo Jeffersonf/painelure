@@ -8,6 +8,15 @@
 }
 
 /* Visual polish */
+html {
+  font-size: 16px;
+}
+
+body {
+  font-size: 15.5px;
+  line-height: 1.62;
+}
+
 .main {
   max-width: none;
   min-width: 0;
@@ -55,7 +64,9 @@
 }
 
 .pt {
+  font-size: clamp(28px, 3vw, 34px);
   letter-spacing: 0;
+  line-height: 1.08;
 }
 
 .ps,
@@ -65,9 +76,46 @@
   max-width: 72ch;
 }
 
+.ps {
+  font-size: 14px;
+}
+
+.ct {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.cs,
+.sync-meta,
+.sync-empty {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .nav-item {
   min-height: 42px;
   padding-inline: 11px;
+  font-size: 14px;
+}
+
+.fn-item {
+  font-size: 11px;
+}
+
+.btn {
+  font-size: 14px;
+}
+
+.btn-sm {
+  font-size: 13px;
+}
+
+.fi,
+.ta,
+input,
+select,
+textarea {
+  font-size: 14px;
 }
 
 .nav-item.active,
