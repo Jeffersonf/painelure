@@ -824,6 +824,7 @@ function createDefaults() {
   return {
     stateVersion: STATE_VERSION,
     lastUpdatedAt: new Date().toISOString(),
+    inventoryUpdatedAt: new Date().toISOString(),
     profile: {
       name: 'Jefferson',
       unit: 'URE Itapeva',
@@ -1018,6 +1019,7 @@ function mergeState(saved) {
   const repaired = deepRepairStrings(saved);
   const savedVersion = Number(repaired.stateVersion || 1);
   const lastUpdatedAt = repaired.lastUpdatedAt || new Date().toISOString();
+  const inventoryUpdatedAt = repaired.inventoryUpdatedAt || lastUpdatedAt;
   const savedMunicipalities = Array.isArray(repaired.municipalities) ? repaired.municipalities.filter((item) => normalizeKey(item.name) !== normalizeKey('Nao definido')) : [];
   const savedSectors = Array.isArray(repaired.sectors) ? repaired.sectors : [];
   const savedDirectoryContacts = Array.isArray(repaired.directoryContacts) ? repaired.directoryContacts : [];
@@ -1068,6 +1070,7 @@ function mergeState(saved) {
     ...base,
     stateVersion: Math.max(STATE_VERSION, savedVersion),
     lastUpdatedAt,
+    inventoryUpdatedAt,
     profile: { ...base.profile, ...(repaired.profile || {}) },
     users: normalizeDefaultUserNames(mergeUniqueBy(
       base.users,

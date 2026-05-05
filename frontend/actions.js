@@ -447,6 +447,7 @@ function removeSchool(id) {
     return;
   }
   purgeSchoolReferences(target?.name || '');
+  touchInventoryUpdatedAt();
   state.schools = state.schools.filter((item) => item.id !== id);
   if (currentSchoolDetail === target?.name) currentSchoolDetail = '';
   if (currentInventorySchool === target?.name) currentInventorySchool = 'todas';
@@ -477,6 +478,10 @@ function createTaskFromSchool(id) {
   showPage('agenda');
 }
 
+function touchInventoryUpdatedAt() {
+  state.inventoryUpdatedAt = new Date().toISOString();
+}
+
 function cycleAsset(id) {
   if (!requireEditAccess()) return;
   const order = ['ok', 'manutencao', 'defeito'];
@@ -484,11 +489,13 @@ function cycleAsset(id) {
     if (item.id !== id) return item;
     return { ...item, status: order[(order.indexOf(item.status) + 1) % order.length] };
   });
+  touchInventoryUpdatedAt();
   refreshAll();
 }
 
 function removeAsset(id) {
   state.assets = state.assets.filter((item) => item.id !== id);
+  touchInventoryUpdatedAt();
   refreshAll();
 }
 
@@ -575,9 +582,11 @@ function rejectSchoolImport(id) {
   state.schoolImports = state.schoolImports.filter((item) => item.id !== id);
   if (importId.startsWith('seed-import-csv-') || /excel|csv|xlsx|xls|tsv/i.test(sourceType)) {
     state.schoolAssets = state.schoolAssets.filter((item) => !(normalizeKey(item.school) === key && String(item.id || '').startsWith('seed-csv-')));
+    touchInventoryUpdatedAt();
   }
   if (importId.startsWith('seed-import-') && !importId.startsWith('seed-import-csv-')) {
     state.schoolAssets = state.schoolAssets.filter((item) => !(normalizeKey(item.school) === key && String(item.id || '').startsWith('seed-asset-')));
+    touchInventoryUpdatedAt();
   }
   if (/rede adm|cameras instaladas|dvr|firewall/i.test(`${target.preview || ''} ${target.summary || ''}`)) {
     state.schoolNetworks = state.schoolNetworks.filter((item) => normalizeKey(item.school) !== key);
@@ -593,12 +602,14 @@ function cycleSchoolAsset(id) {
     if (item.id !== id) return item;
     return { ...item, status: order[(order.indexOf(item.status) + 1) % order.length] };
   });
+  touchInventoryUpdatedAt();
   refreshAll();
 }
 
 function removeSchoolAsset(id) {
   if (!requireEditAccess()) return;
   state.schoolAssets = state.schoolAssets.filter((item) => item.id !== id);
+  touchInventoryUpdatedAt();
   refreshAll();
 }
 
@@ -1253,6 +1264,7 @@ async function importSchoolInventoryExcel(file) {
       ...imported.map((item) => item.school)
     ]));
     state.schoolAssets = [...imported, ...state.schoolAssets];
+    touchInventoryUpdatedAt();
     currentInventorySchool = imported[0]?.school || currentInventorySchool;
     currentInventoryStatus = 'todos';
     currentInventoryCategory = 'todas';
@@ -1413,6 +1425,7 @@ function setupEventListeners() {
     const status = document.getElementById('assetStatus').value;
     if (!name || !place) return;
     state.assets.unshift({ id: uid(), name, place, status });
+    touchInventoryUpdatedAt();
     event.target.reset();
     refreshAll();
   });
@@ -1426,6 +1439,7 @@ function setupEventListeners() {
     const notes = document.getElementById('schoolAssetNotes').value.trim();
     if (!school || !name) return;
     state.schoolAssets.unshift({ id: uid(), school, name, status, notes: formatSchoolAssetNotes(notes, quantity) });
+    touchInventoryUpdatedAt();
     logSchoolEvent(school, 'inventory', `Equipamento adicionado manualmente: ${name}.`);
     event.target.reset();
     document.getElementById('schoolAssetQuantity').value = '1';
@@ -1455,6 +1469,7 @@ function setupEventListeners() {
         notes: row.notes
       });
     });
+    touchInventoryUpdatedAt();
     logSchoolEvent(school, 'inventory', `Lote rapido importado com ${rows.length} item(ns).`);
     event.target.reset();
     statusNode.textContent = `${rows.length} item(ns) adicionados ao inventario da escola.`;

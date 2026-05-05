@@ -724,6 +724,10 @@ function renderInventoryWorkspace() {
   const totalSchools = visibleSchools().length || 1;
   const coveragePct = Math.round((coveredSchools / totalSchools) * 100);
   const issuePct = totalUnits ? Math.round((alertUnits / totalUnits) * 100) : 0;
+  const updatedAtNode = document.getElementById('inventoryUpdatedAtMeta');
+  if (updatedAtNode) {
+    updatedAtNode.textContent = `Ultima atualizacao do inventario: ${state.inventoryUpdatedAt ? timestampLabel(new Date(state.inventoryUpdatedAt)) : 'nao registrada'}`;
+  }
   const schoolListAssets = state.schoolAssets.filter((item) => {
     if (!canViewSchool(item.school)) return false;
     if (currentInventoryStatus === 'alerta' && item.status === 'ok') return false;
