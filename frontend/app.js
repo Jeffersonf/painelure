@@ -23,6 +23,7 @@ let currentSchoolSearch = '';
 let currentSchoolDetail = '';
 let currentSupervisorDetail = '';
 let currentSearchQuery = '';
+let currentViewDate = new Date();
 let serverStatus = { available: false, message: 'Servidor local nao verificado.' };
 let serverSnapshots = [];
 let supabaseStatus = { configured: false, message: 'Supabase nao configurado.' };
@@ -94,7 +95,18 @@ function timestampLabel(date = new Date()) {
 }
 
 function todayLabel() {
-  return new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+  return currentViewDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
+
+function viewMonthValue(date = currentViewDate) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function setViewMonth(value) {
+  const [year, month] = String(value || '').split('-').map(Number);
+  if (!year || !month) return;
+  currentViewDate = new Date(year, month - 1, 1);
+  refreshAll();
 }
 
 function toastIcon(type) {
@@ -397,11 +409,13 @@ function updateIdentity() {
   const user = currentUser() || state.users?.[0] || { name: state.profile.name, role: 'admin', pin: state.profile.pin };
   const roleLabel = ROLE_LABELS[user.role] || badgeText(user.role || 'operacao');
   document.getElementById('uName').textContent = user.name;
-  document.getElementById('uRole').textContent = roleLabel;
+  document.getElementById('uRole').textContent = `👤 ${roleLabel}`;
   document.getElementById('uAvatar').textContent = user.name.slice(0, 2).toUpperCase();
   document.getElementById('profileName').value = user.name;
   document.getElementById('profilePin').value = user.pin || '';
   document.getElementById('todayLabel').textContent = todayLabel();
+  const monthInput = document.getElementById('viewMonthInput');
+  if (monthInput && monthInput.value !== viewMonthValue()) monthInput.value = viewMonthValue();
   applyAccessControl();
 }
 
@@ -1340,11 +1354,8 @@ function handleSearch(query) {
 }
 
 function shiftFocusCard(direction) {
-  const pages = ['dashboard', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'calls', 'agenda', 'reports', 'info', 'settings', 'admin']
-    .filter((page) => canAccessPage(page));
-  const currentIndex = pages.indexOf(currentPage);
-  const nextIndex = currentIndex < 0 ? 0 : (currentIndex + direction + pages.length) % pages.length;
-  showPage(pages[nextIndex] || defaultPageForUser());
+  currentViewDate = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + direction, 1);
+  refreshAll();
 }
 
 function applyPrivacy() {
@@ -1477,7 +1488,7 @@ const SYSTEM_TITLE_ICONS = {
 };
 
 function applySystemIcons() {
-  document.querySelectorAll('.pt, .ct, .inventory-kicker, #inventoryHeroTitle').forEach((node) => {
+  document.querySelectorAll('.pt, .ct, #inventoryHeroTitle').forEach((node) => {
     const raw = String(node.textContent || '').replace(/^[^\p{L}\p{N}]+/u, '').trim();
     const icon = SYSTEM_TITLE_ICONS[raw];
     if (!icon || String(node.textContent || '').trim().startsWith(icon)) return;

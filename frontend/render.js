@@ -230,7 +230,7 @@ function renderDashboardOperationalLists() {
     </div>
   `).join('') || `<div class="sync-empty">${esc(emptyText)}</div>`;
   const renderMiniCalendar = (rows, emptyText) => {
-    const today = new Date();
+    const today = currentViewDate;
     const year = today.getFullYear();
     const month = today.getMonth();
     const firstWeekday = new Date(year, month, 1).getDay();
@@ -275,7 +275,7 @@ function renderDashboardOperationalLists() {
     `;
   };
   if (sharedAgendaNode || personalAgendaNode) {
-    const today = new Date();
+    const today = currentViewDate;
     const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     const monthRows = (state.tasks || [])
       .filter((task) => !task.done && task.date && task.date.startsWith(monthKey))
@@ -1530,7 +1530,7 @@ function renderSupervisors() {
 
   const panelGrid = document.getElementById('supervisorPanelGrid');
   if (panelGrid) {
-    const now = new Date();
+    const now = currentViewDate;
     const monthVisits = visits.filter((visit) => {
       const date = new Date(`${visit.date}T00:00:00`);
       return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
@@ -1692,7 +1692,7 @@ function renderSupervisors() {
   }
   return;
 
-  const now = new Date();
+  const now = currentViewDate;
   const year = now.getFullYear();
   const month = now.getMonth();
   const selectedAllVisits = selectedStat
@@ -1891,7 +1891,7 @@ function renderSupervisorRecord() {
   currentSupervisorFilter = normalizeKey(currentSupervisorDetail);
   const selectedStat = stats.find((item) => item.supervisor.name === currentSupervisorDetail) || stats[0];
   const supervisor = selectedStat.supervisor;
-  const now = new Date();
+  const now = currentViewDate;
   const year = now.getFullYear();
   const month = now.getMonth();
   const allVisits = (state.supervisorVisits || []).filter((visit) => visit.supervisor === supervisor.name);
@@ -2126,7 +2126,7 @@ function renderTasks(filtered) {
   const sorted = source.slice().sort((a, b) => `${a.date || '9999-99-99'} ${a.time || '99:99'}`.localeCompare(`${b.date || '9999-99-99'} ${b.time || '99:99'}`));
   const calendar = document.getElementById('agendaCalendarGrid');
   if (calendar) {
-    const today = new Date();
+    const today = currentViewDate;
     const year = today.getFullYear();
     const month = today.getMonth();
     const firstWeekday = new Date(year, month, 1).getDay();

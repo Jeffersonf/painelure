@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260505-system-icons">
-<link rel="stylesheet" href="./setechub.css?v=20260505-system-icons">
+<link rel="stylesheet" href="./styles.css?v=20260505-month-picker">
+<link rel="stylesheet" href="./setechub.css?v=20260505-month-picker">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
@@ -89,10 +89,10 @@
         </div>
       </button>
       <div class="acct-pop" id="accountMenu">
-        <button class="pop-item" id="accountOpenBtn" type="button">Conta</button>
-        <button class="pop-item" id="accountAdminBtn" type="button" data-admin-only>Admin</button>
+        <button class="pop-item" id="accountOpenBtn" type="button">👤 Conta</button>
+        <button class="pop-item" id="accountAdminBtn" type="button" data-admin-only>🔐 Admin</button>
         <div class="pop-div"></div>
-        <button class="pop-item danger logout-action" type="button">Sair da conta</button>
+        <button class="pop-item danger logout-action" type="button">🚪 Sair da conta</button>
       </div>
     </div>
   </div>
@@ -106,7 +106,13 @@
         <div class="ps">Calendários compartilhado e pessoal para acompanhar os compromissos do mês.</div>
       </div>
       <div class="page-actions">
-        <div class="mnav"><button type="button" data-focus-shift="-1">&#8249;</button><span class="mname" id="todayLabel">Hoje</span><button type="button" data-focus-shift="1">&#8250;</button></div>
+        <div class="month-view-control">
+          <button type="button" data-focus-shift="-1" aria-label="Mês anterior">&#8249;</button>
+          <label for="viewMonthInput">Mês</label>
+          <input id="viewMonthInput" type="month" aria-label="Mês de visualização">
+          <span class="mname" id="todayLabel">Hoje</span>
+          <button type="button" data-focus-shift="1" aria-label="Próximo mês">&#8250;</button>
+        </div>
         <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('ure')">Novo compartilhado</button>
         <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('pessoal')">Novo pessoal</button>
       </div>
@@ -908,12 +914,12 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="./school-data.js?v=20260505-system-icons"></script>
-<script src="./storage.js?v=20260505-system-icons"></script>
-<script src="./app.js?v=20260505-system-icons"></script>
-<script src="./render.js?v=20260505-system-icons"></script>
-<script src="./api.js?v=20260505-system-icons"></script>
-<script src="./actions.js?v=20260505-system-icons"></script>
-<script src="./bootstrap.js?v=20260505-system-icons"></script>
+<script src="./school-data.js?v=20260505-month-picker"></script>
+<script src="./storage.js?v=20260505-month-picker"></script>
+<script src="./app.js?v=20260505-month-picker"></script>
+<script src="./render.js?v=20260505-month-picker"></script>
+<script src="./api.js?v=20260505-month-picker"></script>
+<script src="./actions.js?v=20260505-month-picker"></script>
+<script src="./bootstrap.js?v=20260505-month-picker"></script>
 </body>
 </html>

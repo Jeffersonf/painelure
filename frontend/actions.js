@@ -1655,6 +1655,9 @@ function setupEventListeners() {
   document.getElementById('sidebarSearch')?.addEventListener('input', (event) => {
     handleSearch(event.target.value);
   });
+  document.getElementById('viewMonthInput')?.addEventListener('change', (event) => {
+    setViewMonth(event.target.value);
+  });
   document.addEventListener('click', (event) => {
     const pageButton = event.target.closest('[data-open-page]');
     if (!pageButton) return;
