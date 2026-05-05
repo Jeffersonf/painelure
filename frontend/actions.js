@@ -16,6 +16,42 @@ function fileSafeName(value) {
     .slice(0, 80) || 'sem-assunto';
 }
 
+function applyProfilePhotoPreview(photo) {
+  const preview = document.getElementById('profilePhotoPreview');
+  const user = currentUser();
+  if (!preview || !user) return;
+  setAvatarNode(preview, { ...user, photo });
+}
+
+function readProfilePhoto(file) {
+  return new Promise((resolve, reject) => {
+    if (!file?.type?.startsWith('image/')) {
+      reject(new Error('Selecione um arquivo de imagem.'));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Nao foi possivel ler a imagem.'));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error('Nao foi possivel carregar a imagem.'));
+      image.onload = () => {
+        const maxSide = 360;
+        const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#10141f';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.84));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function collectRedeDraftForm() {
   return {
     draftNumber: document.getElementById('redeDraftNumber')?.value.trim() || '',
@@ -1453,12 +1489,13 @@ function setupEventListeners() {
     event.preventDefault();
     const name = document.getElementById('profileName').value.trim();
     const pin = document.getElementById('profilePin').value.trim();
+    const photo = document.getElementById('profilePhotoPreview')?.dataset.photo || '';
     const user = currentUser();
     if (!name || !pin || !user) return;
     state.users = (state.users || []).map((item) =>
-      item.id === user.id ? { ...item, name, login: item.login || name, pin } : item
+      item.id === user.id ? { ...item, name, login: item.login || name, pin, photo } : item
     );
-    if (user.role === 'admin') state.profile = { ...state.profile, name, pin };
+    if (user.role === 'admin') state.profile = { ...state.profile, name, pin, photo };
     refreshAll();
     alert('Perfil atualizado.');
   });
@@ -1657,6 +1694,22 @@ function setupEventListeners() {
   });
   document.getElementById('viewMonthInput')?.addEventListener('change', (event) => {
     setViewMonth(event.target.value);
+  });
+  document.getElementById('viewMonthSelect')?.addEventListener('change', setViewMonthFromSelects);
+  document.getElementById('viewYearSelect')?.addEventListener('change', setViewMonthFromSelects);
+  document.getElementById('profilePhotoInput')?.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      applyProfilePhotoPreview(await readProfilePhoto(file));
+    } catch (error) {
+      alert(error.message || 'Nao foi possivel carregar a foto.');
+    } finally {
+      event.target.value = '';
+    }
+  });
+  document.getElementById('removeProfilePhotoBtn')?.addEventListener('click', () => {
+    applyProfilePhotoPreview('');
   });
   document.addEventListener('click', (event) => {
     const pageButton = event.target.closest('[data-open-page]');

@@ -102,11 +102,57 @@ function viewMonthValue(date = currentViewDate) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
+function setAvatarNode(node, user) {
+  if (!node || !user) return;
+  const initials = String(user.name || user.login || 'U').slice(0, 2).toUpperCase();
+  const photo = user.photo || user.avatar || '';
+  node.dataset.photo = photo;
+  if (photo) {
+    node.textContent = '';
+    node.style.backgroundImage = `url("${photo}")`;
+    node.classList.add('has-photo');
+    return;
+  }
+  node.textContent = initials;
+  node.style.backgroundImage = '';
+  node.classList.remove('has-photo');
+}
+
 function setViewMonth(value) {
   const [year, month] = String(value || '').split('-').map(Number);
   if (!year || !month) return;
   currentViewDate = new Date(year, month - 1, 1);
   refreshAll();
+}
+
+function syncMonthControls() {
+  const monthInput = document.getElementById('viewMonthInput');
+  const monthSelect = document.getElementById('viewMonthSelect');
+  const yearSelect = document.getElementById('viewYearSelect');
+  const currentYear = currentViewDate.getFullYear();
+  if (yearSelect && !yearSelect.options.length) {
+    for (let year = currentYear - 3; year <= currentYear + 3; year += 1) {
+      yearSelect.append(new Option(String(year), String(year)));
+    }
+  }
+  if (yearSelect && ![...yearSelect.options].some((option) => Number(option.value) === currentYear)) {
+    yearSelect.append(new Option(String(currentYear), String(currentYear)));
+    [...yearSelect.options]
+      .sort((a, b) => Number(a.value) - Number(b.value))
+      .forEach((option) => yearSelect.append(option));
+  }
+  if (monthInput && monthInput.value !== viewMonthValue()) monthInput.value = viewMonthValue();
+  if (monthSelect && monthSelect.value !== String(currentViewDate.getMonth())) monthSelect.value = String(currentViewDate.getMonth());
+  if (yearSelect && yearSelect.value !== String(currentYear)) yearSelect.value = String(currentYear);
+}
+
+function setViewMonthFromSelects() {
+  const monthSelect = document.getElementById('viewMonthSelect');
+  const yearSelect = document.getElementById('viewYearSelect');
+  const month = Number(monthSelect?.value);
+  const year = Number(yearSelect?.value);
+  if (!Number.isInteger(month) || !year) return;
+  setViewMonth(`${year}-${String(month + 1).padStart(2, '0')}`);
 }
 
 function toastIcon(type) {
@@ -416,12 +462,12 @@ function updateIdentity() {
   const roleLabel = ROLE_LABELS[user.role] || badgeText(user.role || 'operacao');
   document.getElementById('uName').textContent = user.name;
   document.getElementById('uRole').textContent = `👤 ${roleLabel}`;
-  document.getElementById('uAvatar').textContent = user.name.slice(0, 2).toUpperCase();
+  setAvatarNode(document.getElementById('uAvatar'), user);
+  setAvatarNode(document.getElementById('profilePhotoPreview'), user);
   document.getElementById('profileName').value = user.name;
   document.getElementById('profilePin').value = user.pin || '';
   document.getElementById('todayLabel').textContent = todayLabel();
-  const monthInput = document.getElementById('viewMonthInput');
-  if (monthInput && monthInput.value !== viewMonthValue()) monthInput.value = viewMonthValue();
+  syncMonthControls();
   applyAccessControl();
 }
 

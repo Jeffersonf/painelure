@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260505-month-picker">
-<link rel="stylesheet" href="./setechub.css?v=20260505-month-picker">
+<link rel="stylesheet" href="./styles.css?v=20260505-profile-photo">
+<link rel="stylesheet" href="./setechub.css?v=20260505-profile-photo">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
@@ -107,11 +107,27 @@
       </div>
       <div class="page-actions">
         <div class="month-view-control">
-          <button type="button" data-focus-shift="-1" aria-label="Mês anterior">&#8249;</button>
-          <label for="viewMonthInput">Mês</label>
-          <input id="viewMonthInput" type="month" aria-label="Mês de visualização">
+          <button class="month-arrow" type="button" data-focus-shift="-1" aria-label="Mês anterior">&#8249;</button>
+          <input id="viewMonthInput" type="month" aria-label="Mês de visualização" hidden>
+          <label class="sr-only" for="viewMonthSelect">Mês de visualização</label>
+          <select id="viewMonthSelect" class="month-select" aria-label="Mês de visualização">
+            <option value="0">Janeiro</option>
+            <option value="1">Fevereiro</option>
+            <option value="2">Março</option>
+            <option value="3">Abril</option>
+            <option value="4">Maio</option>
+            <option value="5">Junho</option>
+            <option value="6">Julho</option>
+            <option value="7">Agosto</option>
+            <option value="8">Setembro</option>
+            <option value="9">Outubro</option>
+            <option value="10">Novembro</option>
+            <option value="11">Dezembro</option>
+          </select>
+          <label class="sr-only" for="viewYearSelect">Ano de visualização</label>
+          <select id="viewYearSelect" class="year-select" aria-label="Ano de visualização"></select>
           <span class="mname" id="todayLabel">Hoje</span>
-          <button type="button" data-focus-shift="1" aria-label="Próximo mês">&#8250;</button>
+          <button class="month-arrow" type="button" data-focus-shift="1" aria-label="Próximo mês">&#8250;</button>
         </div>
         <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('ure')">Novo compartilhado</button>
         <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('pessoal')">Novo pessoal</button>
@@ -691,6 +707,18 @@
           <div><div class="ct">Minha conta</div><div class="cs">Atualize apenas seu nome de exibicao e PIN local.</div></div>
         </div>
         <form id="profileForm" class="setechub-form setechub-note-form">
+          <div class="profile-photo-editor">
+            <div class="profile-photo-preview" id="profilePhotoPreview">JE</div>
+            <div class="profile-photo-copy">
+              <strong>Foto de perfil</strong>
+              <span>Use uma imagem quadrada ou de rosto para aparecer no menu lateral.</span>
+            </div>
+            <div class="profile-photo-actions">
+              <label class="btn btn-g" for="profilePhotoInput">Escolher foto</label>
+              <input id="profilePhotoInput" type="file" accept="image/*" hidden>
+              <button class="btn btn-g" id="removeProfilePhotoBtn" type="button">Remover</button>
+            </div>
+          </div>
           <input class="fi" id="profileName" placeholder="Nome" aria-label="Nome">
           <input class="fi" id="profilePin" placeholder="PIN local" aria-label="PIN local">
           <div class="settings-actions-row">
@@ -914,12 +942,12 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="./school-data.js?v=20260505-month-picker"></script>
-<script src="./storage.js?v=20260505-month-picker"></script>
-<script src="./app.js?v=20260505-month-picker"></script>
-<script src="./render.js?v=20260505-month-picker"></script>
-<script src="./api.js?v=20260505-month-picker"></script>
-<script src="./actions.js?v=20260505-month-picker"></script>
-<script src="./bootstrap.js?v=20260505-month-picker"></script>
+<script src="./school-data.js?v=20260505-profile-photo"></script>
+<script src="./storage.js?v=20260505-profile-photo"></script>
+<script src="./app.js?v=20260505-profile-photo"></script>
+<script src="./render.js?v=20260505-profile-photo"></script>
+<script src="./api.js?v=20260505-profile-photo"></script>
+<script src="./actions.js?v=20260505-profile-photo"></script>
+<script src="./bootstrap.js?v=20260505-profile-photo"></script>
 </body>
 </html>
