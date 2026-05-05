@@ -2299,7 +2299,7 @@ function renderOfficialData() {
             <div class="sync-meta">${esc(supervisorSheetMonthLabel(item.monthKey))}</div>
             <div class="sync-meta"><a href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.url)}</a></div>
           </div>
-          ${adminActions ? `<button class="btn btn-d btn-sm" onclick="removeOfficialLink(${item.id})">Remover</button>` : ''}
+          ${adminActions ? `<div class="mini-actions"><button class="btn btn-p btn-sm" onclick="syncSupervisorMonthlySheet(${item.id})">Atualizar dados</button><button class="btn btn-d btn-sm" onclick="removeOfficialLink(${item.id})">Remover</button></div>` : ''}
         </div>
       </div>
     `).join('') || '<div class="sync-empty">Nenhuma planilha mensal cadastrada ainda.</div>';

@@ -1530,12 +1530,13 @@ function setupEventListeners() {
     const existing = (state.officialLinks || []).find((item) =>
       item.category === 'supervisor-sheet' && item.monthKey === monthKey
     );
+    const panelGid = googleSheetGidFromUrl(url);
     if (existing) {
       state.officialLinks = state.officialLinks.map((item) =>
-        item.id === existing.id ? { ...item, label, url, category: 'supervisor-sheet', monthKey } : item
+        item.id === existing.id ? { ...item, label, url, category: 'supervisor-sheet', monthKey, panelGid } : item
       );
     } else {
-      state.officialLinks.unshift({ id: uid(), label, url, category: 'supervisor-sheet', monthKey });
+      state.officialLinks.unshift({ id: uid(), label, url, category: 'supervisor-sheet', monthKey, panelGid });
     }
     event.target.reset();
     refreshAll();
