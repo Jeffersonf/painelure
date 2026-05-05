@@ -627,6 +627,7 @@ function setInventorySchool(name) {
   currentInventorySearch = '';
   showPage('assets');
   renderAssets();
+  saveUiContext();
   const select = document.getElementById('inventorySchoolSelect');
   if (select) select.value = name;
 }
@@ -680,6 +681,8 @@ function openInventoryCategory(status = 'todos', category = 'todas', school = 't
 function openMainNavigationPage(page) {
   if (page === 'assets') {
     currentInventorySchool = 'todas';
+    currentInventoryZone = 'todas';
+    currentInventorySupervisor = 'todos';
     currentInventoryStatus = 'todos';
     currentInventoryCategory = 'todas';
     currentInventorySearch = '';
@@ -1692,11 +1695,6 @@ function setupEventListeners() {
   document.getElementById('sidebarSearch')?.addEventListener('input', (event) => {
     handleSearch(event.target.value);
   });
-  document.getElementById('viewMonthInput')?.addEventListener('change', (event) => {
-    setViewMonth(event.target.value);
-  });
-  document.getElementById('viewMonthSelect')?.addEventListener('change', setViewMonthFromSelects);
-  document.getElementById('viewYearSelect')?.addEventListener('change', setViewMonthFromSelects);
   document.getElementById('profilePhotoInput')?.addEventListener('change', async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -1985,11 +1983,27 @@ function setupEventListeners() {
   document.getElementById('inventorySchoolSelect')?.addEventListener('change', (event) => {
     currentInventorySchool = event.target.value;
     renderAssets();
+    saveUiContext();
+  });
+
+  document.getElementById('inventoryZoneSelect')?.addEventListener('change', (event) => {
+    currentInventoryZone = event.target.value;
+    currentInventorySchool = 'todas';
+    renderAssets();
+    saveUiContext();
+  });
+
+  document.getElementById('inventorySupervisorSelect')?.addEventListener('change', (event) => {
+    currentInventorySupervisor = event.target.value;
+    currentInventorySchool = 'todas';
+    renderAssets();
+    saveUiContext();
   });
 
   document.getElementById('inventoryCategorySelect')?.addEventListener('change', (event) => {
     currentInventoryCategory = event.target.value;
     renderAssets();
+    saveUiContext();
   });
 
   document.getElementById('inventorySearchInput')?.addEventListener('input', (event) => {

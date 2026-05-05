@@ -106,28 +106,10 @@
         <div class="ps">Calendários compartilhado e pessoal para acompanhar os compromissos do mês.</div>
       </div>
       <div class="page-actions">
-        <div class="month-view-control">
-          <button class="month-arrow" type="button" data-focus-shift="-1" aria-label="Mês anterior">&#8249;</button>
-          <input id="viewMonthInput" type="month" aria-label="Mês de visualização" hidden>
-          <label class="sr-only" for="viewMonthSelect">Mês de visualização</label>
-          <select id="viewMonthSelect" class="month-select" aria-label="Mês de visualização">
-            <option value="0">Janeiro</option>
-            <option value="1">Fevereiro</option>
-            <option value="2">Março</option>
-            <option value="3">Abril</option>
-            <option value="4">Maio</option>
-            <option value="5">Junho</option>
-            <option value="6">Julho</option>
-            <option value="7">Agosto</option>
-            <option value="8">Setembro</option>
-            <option value="9">Outubro</option>
-            <option value="10">Novembro</option>
-            <option value="11">Dezembro</option>
-          </select>
-          <label class="sr-only" for="viewYearSelect">Ano de visualização</label>
-          <select id="viewYearSelect" class="year-select" aria-label="Ano de visualização"></select>
-          <span class="mname" id="todayLabel">Hoje</span>
-          <button class="month-arrow" type="button" data-focus-shift="1" aria-label="Próximo mês">&#8250;</button>
+        <div class="month-view-control" data-month-view-control>
+          <button class="month-arrow" type="button" data-focus-shift="-1" aria-label="Mês anterior" title="Mês anterior">&#8249;</button>
+          <span class="month-current" data-month-current>Maio</span>
+          <button class="month-arrow" type="button" data-focus-shift="1" aria-label="Próximo mês" title="Próximo mês">&#8250;</button>
         </div>
         <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('ure')">Novo compartilhado</button>
         <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('pessoal')">Novo pessoal</button>
@@ -304,13 +286,12 @@
       <div class="ps">Lista direta das unidades. Clique em uma escola para abrir os dados principais dela.</div>
       </div>
     </div>
-    <div class="box school-directory-shell">
+    <div class="box school-directory-shell school-directory-simple">
       <div class="school-directory-filters">
-        <input class="fi" id="schoolMasterSearch" placeholder="Buscar por escola, CIE ou município" aria-label="Buscar por escola, CIE ou município">
         <select class="fi" id="schoolZoneFilterSelect" aria-label="Filtrar por município">
           <option value="todas">Todos os municipios</option>
         </select>
-        <select class="fi" id="schoolSortSelect" aria-label="Ordenar escolas">
+        <select class="fi" id="schoolSortSelect" aria-label="Ordenar escolas" hidden>
           <option value="nome">Nome</option>
           <option value="municipio">Município</option>
           <option value="prioridade">Pendências registradas</option>
@@ -319,14 +300,13 @@
           <option value="dados">Dados</option>
         </select>
       </div>
-      <div class="setechub-toolbar" id="schoolFilterBar">
+      <div class="setechub-toolbar" id="schoolFilterBar" hidden>
         <button class="btn btn-g btn-sm active-filter" data-school-filter="todas" type="button">Todas</button>
         <button class="btn btn-g btn-sm" data-school-filter="com_alerta" type="button">Com alerta</button>
         <button class="btn btn-g btn-sm" data-school-filter="sem_ficha" type="button">Sem ficha</button>
         <button class="btn btn-g btn-sm" data-school-filter="sem_rede" type="button">Sem rede</button>
         <button class="btn btn-g btn-sm" data-school-filter="sem_inventario" type="button">Sem inventario</button>
       </div>
-      <div id="schoolDirectoryStats" class="school-directory-stats"></div>
       <div id="schoolList" class="school-directory-list"></div>
     </div>
   </div>
@@ -533,7 +513,7 @@
       </div>
     </div>
 
-    <section class="inventory-hero">
+    <section class="inventory-hero" hidden>
       <div class="inventory-hero-main">
         <div class="inventory-kicker">Inventário</div>
         <h1 id="inventoryHeroTitle">Inventário regional</h1>
@@ -546,13 +526,13 @@
       </div>
     </section>
 
-    <section class="box inventory-filter-shell">
+    <section class="box inventory-filter-shell inventory-filter-simple">
       <div class="inventory-filter-head">
         <div>
-          <div class="ct">Recorte</div>
-          <div class="cs">Escola, status, categoria e busca direta no inventario.</div>
+          <div class="ct">Inventário</div>
+          <div class="cs">Escolha a escola e o tipo de equipamento.</div>
         </div>
-        <div class="setechub-toolbar inventory-status-toolbar">
+        <div class="setechub-toolbar inventory-status-toolbar" hidden>
           <button class="btn btn-g btn-sm active-filter" data-inventory-status="todos" type="button">Todos</button>
           <button class="btn btn-g btn-sm" data-inventory-status="alerta" type="button">Manutenção/defeito</button>
           <button class="btn btn-g btn-sm" data-inventory-status="criticos" type="button">Defeito</button>
@@ -560,9 +540,13 @@
         </div>
       </div>
       <div class="inventory-filter-grid">
-        <input class="fi" id="inventorySearchInput" placeholder="Buscar escola, equipamento ou observação" aria-label="Buscar escola, equipamento ou observação">
         <select class="fi" id="inventorySchoolSelect" aria-label="Escola do inventário">
-          <option value="todas">Todas as escolas</option>
+        </select>
+        <select class="fi" id="inventoryZoneSelect" aria-label="Cidade do inventário">
+          <option value="todas">Todas as cidades</option>
+        </select>
+        <select class="fi" id="inventorySupervisorSelect" aria-label="Supervisor do inventário">
+          <option value="todos">Todos os supervisores</option>
         </select>
         <select class="fi" id="inventoryCategorySelect" aria-label="Tipo de equipamento">
           <option value="todas">Todas as categorias</option>
@@ -570,18 +554,18 @@
       </div>
     </section>
 
-    <section class="inventory-board">
-      <aside class="box inventory-school-panel">
+    <section class="inventory-board inventory-board-simple">
+      <aside class="box inventory-school-panel" hidden>
         <div class="bh">
           <div><div class="ct">Escolas</div><div class="cs">Clique para abrir o inventario da unidade.</div></div>
         </div>
         <div id="inventorySchoolRanking" class="stack-list"></div>
       </aside>
       <div class="inventory-detail-stack">
-        <div class="box inventory-focus-card">
+        <div class="box inventory-focus-card" hidden>
           <div id="inventoryFocusPanel" class="stack-list"></div>
         </div>
-        <div class="box inventory-category-card">
+        <div class="box inventory-category-card" hidden>
           <div class="bh">
             <div><div class="ct">Tipos</div><div class="cs">Resumo consolidado por tipo de equipamento.</div></div>
           </div>
@@ -589,11 +573,11 @@
         </div>
         <div class="box inventory-detail-card">
           <div class="bh">
-            <div><div class="ct">Equipamentos</div><div class="cs">Totais consolidados, manutenção, defeitos e observações do recorte selecionado.</div></div>
+            <div><div class="ct">Equipamentos</div><div class="cs">Lista filtrada pelo recorte selecionado.</div></div>
           </div>
           <div id="inventoryDetailTable" class="setechub-table-wrap"></div>
         </div>
-        <div class="box inventory-issues-card">
+        <div class="box inventory-issues-card" hidden>
           <div class="bh">
           <div><div class="ct">Manutenção e defeitos</div><div class="cs">Somente situações registradas na base do inventário.</div></div>
           </div>
@@ -602,7 +586,7 @@
       </div>
     </section>
 
-    <div class="box inventory-manage-card">
+    <div class="box inventory-manage-card" hidden>
       <div class="bh">
         <div><div class="ct">Manutenção do inventário</div><div class="cs">Adicione um item ou importe um lote rápido para a escola selecionada.</div></div>
       </div>

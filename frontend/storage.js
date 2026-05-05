@@ -228,7 +228,267 @@ function defaultSchoolProfiles(schools) {
     email: '',
     address: '',
     notes: ''
-  }));
+  })).map(applyOfficialSchoolProfileDefaults);
+}
+
+const OFFICIAL_SCHOOL_PROFILE_DEFAULTS = {
+  [normalizeKey('PEI EE Idalicio Mendes Lima')]: {
+    address: 'Fazenda Pirituba, s/no - Itapeva/SP',
+    phone: '(15) 3624-7326',
+    email: 'e905227a@educacao.sp.gov.br',
+    viceDirector: 'Aparecida de Fatima Dom. Oliveira Almeida; Flaviane Cristiane Bispo; Silmara Regina Soares Conceicao',
+    goe: 'Jose Rubens Ortolan Gomes',
+    notes: [
+      'Horario de funcionamento: 12:00 as 23:00.',
+      'E-mail pedagogico: e905227p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Gerson Francisco de Moraes; Marcela Bosoki Carvalho de Oliveira; Marcia Cristina da Silva; Silvio Cesar Fernandes de Almeida.',
+      'Supervisor: Magda Gisele Silva Oliveira.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-pei-idalicio-mendes-lima/'
+    ].join(' ')
+  },
+  [normalizeKey('EE Doutor Antonio Deffune')]: {
+    phone: '(15) 3526-7271',
+    email: 'e049323a@educacao.sp.gov.br',
+    viceDirector: 'Maria Cristina Mendes de Melo',
+    notes: [
+      'Horario de funcionamento: 12:00 as 23:00.',
+      'E-mail pedagogico: e049323p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Graziela Leite; Josiani Aparecida de Oliveira Almeida; Decio Henrique Ribeiro Siqueira.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-antonio-deffune/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Professora Cinira Daniel da Silva')]: {
+    address: 'Rua Martinho Daniel da Silva, 50 - Distrito do Guarizinho - Itapeva/SP',
+    phone: '(15) 3523-1137',
+    email: 'e035348a@educacao.sp.gov.br',
+    director: 'Cassia Avila Bueno da Silva',
+    viceDirector: 'Elizangela Justina de Paula Oliveira Costa',
+    goe: 'Daiany Abreu Barros',
+    notes: [
+      'Horario de funcionamento: 12:00 as 23:00.',
+      'E-mail pedagogico: e035348p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Amanda de Oliveira Silva; Mateus Lopes de Paula; Genice da Silva Campos Lopes.',
+      'Supervisor: Adilson Manoel Fogaca.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-cinira-daniel-da-silva/'
+    ].join(' ')
+  },
+  [normalizeKey('EE Professor Gerson de Barros Margarido')]: {
+    phone: '(15) 3624-7011',
+    email: 'e043412a@educacao.sp.gov.br',
+    notes: [
+      'Horario de funcionamento: 12:00 as 23:00.',
+      'E-mail pedagogico: e043412p@educacao.sp.gov.br.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-gerson-de-barros-margarido/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Jeminiano David Muzel')]: {
+    phone: '(15) 3522-3829 / (15) 3522-2155',
+    email: 'e015477a@educacao.sp.gov.br',
+    director: 'Elaine Cristina Araujo Toledo',
+    viceDirector: 'Janaina Aparecida Pereira Ribeiro',
+    goe: 'Gizeli Duarte de Oliveira',
+    notes: [
+      'E-mail pedagogico: e015477p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Eliane Bersonetti de Jesus Carpes; Elaine Aparecida Kuntz Cavalcanti Souza; Irene Ribeiro Leite Fortes; Thiago Dias de Oliveira.',
+      'Supervisor: Adilson Manoel Fogaca.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-jeminiano-david-muzel/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Professor Jose Vasques Ferrari')]: {
+    address: 'Rua Professor Humberto Fascetti, no 120 - Parque Cimentolandia - Itapeva/SP',
+    phone: '(15) 3522-2866',
+    email: 'e015519a@educacao.sp.gov.br',
+    viceDirector: 'Vera Leticia Faria da Cruz',
+    goe: 'Ana Cristina Poglisch Santos',
+    notes: [
+      'Horario de funcionamento: 07:30 as 17:00.',
+      'E-mail pedagogico: e015519p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Luciana de Oliveira Lino; Patricia Paula da Silva Tavares; Paulo Roberto Gomes Alves.',
+      'Supervisor: Maria Luiza Brisolla de Queiroz.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-jose-vasques-ferrari/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Professora Nicota Soares')]: {
+    address: 'Rua Roselandia, s/no - Jardim Belvedere - Itapeva/SP',
+    phone: '(15) 3522-3077',
+    email: 'e015489a@educacao.sp.gov.br',
+    director: 'Myrna Weruska Pereira de Souza',
+    goe: 'Valquiria dos Santos Pereira Rosa',
+    notes: [
+      'Horario de funcionamento: 07:00 as 17:00.',
+      'E-mail pedagogico: e015489p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Ernesto Alves Filho; Maria Fernanda Garcia Chiarelli.',
+      'Supervisor: Daiane Aparecida de Oliveira Ribeiro.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-nicota-soares/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Otavio Ferrari')]: {
+    phone: '(15) 3522-0303 / (15) 3522-1691',
+    email: 'e015404a@educacao.sp.gov.br',
+    director: 'Fabiano Jose Santos Ferraz',
+    goe: 'Marcelo Jose Fonseca de Lima',
+    notes: [
+      'E-mail pedagogico: e015404p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Fabiana de Souza Roca.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-otavio-ferrari/'
+    ].join(' ')
+  },
+  [normalizeKey('EE Professor Silverio Monteiro')]: {
+    phone: '(15) 5704-3611',
+    email: 'e035336a@educacao.sp.gov.br',
+    notes: [
+      'Horario de funcionamento: 12:00 as 23:00.',
+      'E-mail pedagogico: e035336p@educacao.sp.gov.br.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-silverio-monteiro/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Professora Zulmira de Oliveira')]: {
+    phone: '(15) 3522-1655',
+    email: 'e015544a@educacao.sp.gov.br',
+    director: 'Maria Aparecida Miranda Melo',
+    goe: 'Pedro Henrique Pinheiro Barros',
+    notes: [
+      'Horario de funcionamento: 07:00 as 23:00.',
+      'E-mail pedagogico: e015544p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Karla Fernanda Diniz; Cristina Souza Lucio Martins de Oliveira Pontes; Geiza Ferreira de Oliveira; Joao Carlos Biazzon.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/zulmira-de-oliveira/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Padre Arlindo Vieira')]: {
+    phone: '(15) 3542-1530',
+    email: 'e015118a@educacao.sp.gov.br',
+    director: 'Edicleia Pontes de Jesus',
+    goe: 'Luana Aparecida da Cruz Prestes Queiroz',
+    notes: [
+      'Horario de funcionamento: 07:30 as 17:00.',
+      'E-mail pedagogico: e015118p@educacao.sp.gov.br.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-padre-arlindo-vieira/'
+    ].join(' ')
+  },
+  [normalizeKey('EE Bairro Turvo dos Almeidas')]: {
+    phone: '(15) 3379-7199',
+    email: 'e926036a@educacao.sp.gov.br',
+    notes: [
+      'Horario de funcionamento: 12:30 as 23:00.',
+      'E-mail pedagogico: e926036p@educacao.sp.gov.br.',
+      'Supervisor: Maria Luiza Brisolla de Queiroz.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-bairro-turvo-dos-almeidas/'
+    ].join(' ')
+  },
+  [normalizeKey('EE Doutor Raul Venturelli')]: {
+    address: 'Rua Yoiti Ikeda, 170 - Centro - Capao Bonito/SP',
+    phone: '(15) 3542-1131 / (15) 3542-1518',
+    email: 'e015222a@educacao.sp.gov.br',
+    director: 'Elisete de Fatima Siqueira',
+    viceDirector: 'Silvia Cristina de Oliveira Barros; Simone Paula dos Reis Rodrigues',
+    goe: 'Sergio de Proenca Ramos',
+    notes: [
+      'Horario de funcionamento: 07:00 as 23:00.',
+      'E-mail pedagogico: e015222p@educacao.sp.gov.br.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-raul-venturelli/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Professor Joao Baptista do Amaral Vasconcellos')]: {
+    phone: '(15) 3542-2370',
+    email: 'e910077a@educacao.sp.gov.br',
+    director: 'Alessandra Ap. Souto Martinho J. de Oliveira',
+    goe: 'Dalva Maria Garcia',
+    notes: [
+      'Horario de funcionamento: 07:00 as 23:00.',
+      'E-mail pedagogico: e910077p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Ana Caroline Domingues de Almeida Goes.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-joao-b-do-amaral-vasconcellos/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Oscar Kurtz Camargo')]: {
+    address: 'Rua Joaquim Amantino Ferreira, no 317 - Centro - Ribeirao Grande/SP',
+    phone: '(15) 3544-1194 / (15) 3544-1137',
+    email: 'e015076a@educacao.sp.gov.br',
+    director: 'Milena Ferreira de Almeida Chrischner Figueiredo',
+    goe: 'Amanda Caroline Ferreira Monticeli',
+    notes: [
+      'Horario de funcionamento: 07:00 as 23:00.',
+      'E-mail pedagogico: e015076p@educacao.sp.gov.br.',
+      'Supervisor: Magda Gisele Silva Oliveira.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-oscar-kurtz-camargo/'
+    ].join(' ')
+  },
+  [normalizeKey('EE Bairro Boa Vista Intervales')]: {
+    phone: '(15) 3444-6100',
+    email: 'e915075a@educacao.sp.gov.br',
+    notes: [
+      'Horario de funcionamento: 07:00 as 17:40.',
+      'E-mail pedagogico: e915075p@educacao.sp.gov.br.',
+      'Supervisor: Maria Luiza Brisolla de Queiroz.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/bairro-boa-vista-intervales/'
+    ].join(' ')
+  },
+  [normalizeKey('EE Bairro Ferreira dos Matos')]: {
+    phone: '(15) 3544-6226',
+    email: 'e915087a@educacao.sp.gov.br',
+    notes: [
+      'Horario de funcionamento: 12:30 as 23:00.',
+      'E-mail pedagogico: e915087p@educacao.sp.gov.br.',
+      'Supervisor: Daiane Aparecida de Oliveira Ribeiro.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-bairro-ferreira-dos-matos/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Simpliciano Campolim de Almeida')]: {
+    phone: '(15) 3535-1126',
+    email: 'e015428a@educacao.sp.gov.br',
+    director: 'Antonio dos Santos Junior',
+    goe: 'Donizeth Lopes de Camargo Junior',
+    notes: [
+      'Horario de funcionamento: 07:00 as 23:00.',
+      'E-mail pedagogico: e015428p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Leticia Goncalves Taura; Zenilton Ferreira de Oliveira.',
+      'Supervisor: Adilson Manoel Fogaca.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-simpliciano-campolim-de-almeida/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Ricardo Campolim de Almeida Neto')]: {
+    phone: '(15) 3535-0309 / (15) 3535-7373',
+    email: 'e915117a@educacao.sp.gov.br',
+    director: 'Rodrigo Manoel Ferreira Marques',
+    goe: 'Wilson Rodrigues Cordeiro',
+    notes: [
+      'Horario de funcionamento: 12:00 as 23:00.',
+      'E-mail pedagogico: e915117p@educacao.sp.gov.br.',
+      'Supervisor: Adilson Manoel Fogaca.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-ricardo-campolim-de-almeida-neto/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Professora Francelina Franco')]: {
+    phone: '(15) 3546-1242',
+    viceDirector: 'Elder Fogaca de Lara',
+    goe: 'Nelia Aparecida de Oliveira Alves',
+    notes: [
+      'Horario de funcionamento: 07:00 as 23:00.',
+      'Coordenadores de Gestao Pedagogica: Zelma de Campos Lucio Oliveira; Edilson Ponce de Camargo; Guadalupe Aparecida de Queiroz Antunes; Maria Andrea Bortotti.',
+      'Supervisor: Edilene Silva Almeida Oliveira.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-francelina-franco/'
+    ].join(' ')
+  },
+  [normalizeKey('PEI EE Professora Celia Vasques Ferrari Duch')]: {
+    phone: '(15) 3534-1192',
+    email: 'e039731a@educacao.sp.gov.br',
+    director: 'Paulo Sergio Vieira',
+    notes: [
+      'Horario de funcionamento: 12:40 as 23:00.',
+      'E-mail pedagogico: e039731p@educacao.sp.gov.br.',
+      'Coordenadores de Gestao Pedagogica: Roselaine Lucio Ribeiro.',
+      'Fonte: https://deitapeva.educacao.sp.gov.br/ee-celia-vasques-ferrari-duch/'
+    ].join(' ')
+  }
+};
+
+function applyOfficialSchoolProfileDefaults(profile) {
+  const official = OFFICIAL_SCHOOL_PROFILE_DEFAULTS[normalizeKey(profile?.school)];
+  if (!official) return profile;
+  return Object.fromEntries(Object.entries({ ...profile, ...official }).map(([key, value]) => [
+    key,
+    profile[key] ? profile[key] : value
+  ]));
 }
 
 function defaultSupervisors(schools) {
@@ -817,7 +1077,7 @@ function mergeState(saved) {
         school: school ? school.name : canonicalName,
         municipality: item.municipality || school?.zone || ''
       };
-    }),
+    }).map(applyOfficialSchoolProfileDefaults),
     schoolImports: mergeUniqueBy(
       base.schoolImports,
       savedSchoolImports,

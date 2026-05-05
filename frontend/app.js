@@ -16,6 +16,8 @@ let currentAssetFilter = 'todos';
 let currentImportFilter = 'todos';
 let currentImportSchoolContext = '';
 let currentInventorySchool = 'todas';
+let currentInventoryZone = 'todas';
+let currentInventorySupervisor = 'todos';
 let currentInventoryStatus = 'todos';
 let currentInventoryCategory = 'todas';
 let currentInventorySearch = '';
@@ -94,12 +96,40 @@ function timestampLabel(date = new Date()) {
   });
 }
 
-function todayLabel() {
-  return currentViewDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-}
-
 function viewMonthValue(date = currentViewDate) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function monthControlMarkup() {
+  return `
+    <div class="month-view-control" data-month-view-control>
+      <button class="month-arrow" type="button" data-focus-shift="-1" aria-label="Mes anterior" title="Mes anterior">&#8249;</button>
+      <span class="month-current" data-month-current>${esc(monthName())}</span>
+      <button class="month-arrow" type="button" data-focus-shift="1" aria-label="Proximo mes" title="Proximo mes">&#8250;</button>
+    </div>
+  `;
+}
+
+function ensureMonthControls() {
+  document.querySelectorAll('.page > .ph').forEach((header) => {
+    const existing = header.querySelector('.month-view-control');
+    if (existing) {
+      existing.dataset.monthViewControl = '';
+      existing.innerHTML = `
+        <button class="month-arrow" type="button" data-focus-shift="-1" aria-label="Mes anterior" title="Mes anterior">&#8249;</button>
+        <span class="month-current" data-month-current>${esc(monthName())}</span>
+        <button class="month-arrow" type="button" data-focus-shift="1" aria-label="Proximo mes" title="Proximo mes">&#8250;</button>
+      `;
+      return;
+    }
+    let actions = header.querySelector(':scope > .page-actions');
+    if (!actions) {
+      actions = document.createElement('div');
+      actions.className = 'page-actions';
+      header.appendChild(actions);
+    }
+    actions.insertAdjacentHTML('afterbegin', monthControlMarkup());
+  });
 }
 
 function setAvatarNode(node, user) {
@@ -125,34 +155,16 @@ function setViewMonth(value) {
   refreshAll();
 }
 
-function syncMonthControls() {
-  const monthInput = document.getElementById('viewMonthInput');
-  const monthSelect = document.getElementById('viewMonthSelect');
-  const yearSelect = document.getElementById('viewYearSelect');
-  const currentYear = currentViewDate.getFullYear();
-  if (yearSelect && !yearSelect.options.length) {
-    for (let year = currentYear - 3; year <= currentYear + 3; year += 1) {
-      yearSelect.append(new Option(String(year), String(year)));
-    }
-  }
-  if (yearSelect && ![...yearSelect.options].some((option) => Number(option.value) === currentYear)) {
-    yearSelect.append(new Option(String(currentYear), String(currentYear)));
-    [...yearSelect.options]
-      .sort((a, b) => Number(a.value) - Number(b.value))
-      .forEach((option) => yearSelect.append(option));
-  }
-  if (monthInput && monthInput.value !== viewMonthValue()) monthInput.value = viewMonthValue();
-  if (monthSelect && monthSelect.value !== String(currentViewDate.getMonth())) monthSelect.value = String(currentViewDate.getMonth());
-  if (yearSelect && yearSelect.value !== String(currentYear)) yearSelect.value = String(currentYear);
+function monthName() {
+  return currentViewDate.toLocaleDateString('pt-BR', { month: 'long' });
 }
 
-function setViewMonthFromSelects() {
-  const monthSelect = document.getElementById('viewMonthSelect');
-  const yearSelect = document.getElementById('viewYearSelect');
-  const month = Number(monthSelect?.value);
-  const year = Number(yearSelect?.value);
-  if (!Number.isInteger(month) || !year) return;
-  setViewMonth(`${year}-${String(month + 1).padStart(2, '0')}`);
+function syncMonthControls() {
+  ensureMonthControls();
+  document.querySelectorAll('[data-month-view-control]').forEach((control) => {
+    const current = control.querySelector('[data-month-current]');
+    if (current) current.textContent = monthName();
+  });
 }
 
 function toastIcon(type) {
@@ -466,7 +478,6 @@ function updateIdentity() {
   setAvatarNode(document.getElementById('profilePhotoPreview'), user);
   document.getElementById('profileName').value = user.name;
   document.getElementById('profilePin').value = user.pin || '';
-  document.getElementById('todayLabel').textContent = todayLabel();
   syncMonthControls();
   applyAccessControl();
 }
@@ -932,6 +943,8 @@ function saveUiContext() {
       importFilter: currentImportFilter,
       importSchoolContext: currentImportSchoolContext,
       inventorySchool: currentInventorySchool,
+      inventoryZone: currentInventoryZone,
+      inventorySupervisor: currentInventorySupervisor,
       inventoryStatus: currentInventoryStatus,
       inventoryCategory: currentInventoryCategory,
       inventorySearch: currentInventorySearch,
@@ -963,6 +976,8 @@ function restoreUiContext() {
     currentImportFilter = context.importFilter || currentImportFilter;
     currentImportSchoolContext = context.importSchoolContext || '';
     currentInventorySchool = context.inventorySchool || currentInventorySchool;
+    currentInventoryZone = context.inventoryZone || currentInventoryZone;
+    currentInventorySupervisor = context.inventorySupervisor || currentInventorySupervisor;
     currentInventoryStatus = context.inventoryStatus || currentInventoryStatus;
     currentInventoryCategory = context.inventoryCategory || currentInventoryCategory;
     currentInventorySearch = context.inventorySearch || '';
