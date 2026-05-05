@@ -1503,7 +1503,7 @@ function setupEventListeners() {
     alert('Perfil atualizado.');
   });
 
-  document.getElementById('officialForm').addEventListener('submit', (event) => {
+  document.getElementById('officialForm')?.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!canManageUsers()) return;
     const office = document.getElementById('officeContactInput').value.trim();
@@ -1516,7 +1516,7 @@ function setupEventListeners() {
     refreshAll();
   });
 
-  document.getElementById('sectorForm').addEventListener('submit', (event) => {
+  document.getElementById('sectorForm')?.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!canManageUsers()) return;
     const code = document.getElementById('sectorCode').value.trim().toUpperCase();
@@ -1636,6 +1636,13 @@ function setupEventListeners() {
       ? 'PIN incorreto para este usuario.'
       : 'Usuario nao encontrado. Confira o login ou nome cadastrado.';
     error.classList.add('show');
+  });
+  document.querySelectorAll('#loginForm .sinp').forEach((input) => {
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
+    });
   });
 
   document.getElementById('forcePinForm')?.addEventListener('submit', (event) => {
@@ -1942,12 +1949,12 @@ function setupEventListeners() {
     openSupervisorRecord(event.target.value);
   });
 
-  document.querySelectorAll('[data-directory-filter]').forEach((button) => {
-    button.addEventListener('click', () => {
-      currentDirectoryFilter = button.dataset.directoryFilter;
-      syncFilterButtons('directory');
-      renderDirectoryContacts();
-    });
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-directory-filter]');
+    if (!button) return;
+    currentDirectoryFilter = button.dataset.directoryFilter;
+    syncFilterButtons('directory');
+    renderDirectoryContacts();
   });
 
   document.querySelectorAll('[data-asset-filter]').forEach((button) => {

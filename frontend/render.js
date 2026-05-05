@@ -465,8 +465,8 @@ function renderRoleDashboard(profileNode, roleCardsNode, attentionNode) {
       action: `showPage('reports')`
     },
     {
-      title: 'Informacoes',
-      meta: 'contatos, setores e links',
+      title: 'Contatos',
+      meta: 'ramais e contatos',
       value: String(state.directoryContacts.length),
       tone: 'amber',
       page: 'info',
@@ -1167,11 +1167,58 @@ function contactInitials(name) {
     .toUpperCase() || '?';
 }
 
-function renderContactPhoto(item) {
-  if (item.photo) {
-    return `<img class="directory-photo" src="${esc(item.photo)}" alt="${esc(item.name)}" loading="lazy">`;
-  }
-  return `<div class="directory-photo directory-photo-placeholder">${esc(contactInitials(item.name))}</div>`;
+function contactAvatarStyle(item) {
+  const key = normalizeKey(item?.sector || '');
+  const palettes = [
+    [/setec|seintec|tecnologia|ctc/, ['#5af5c8', '#007a61']],
+    [/site|suporte/, ['#b8c2d8', '#536078']],
+    [/seom|obras|manut/, ['#f5c85a', '#9a6a16']],
+    [/seafin|sefin|secomse|sefisc|financas|compras/, ['#78b4ff', '#1f5ea8']],
+    [/sepes|seape|sefrep|crh|pessoas|rh/, ['#a78bfa', '#5b4bd8']],
+    [/eec|pec|pedagogico|curriculo/, ['#c8f55a', '#4f7d12']],
+    [/ese|supervis/, ['#5ac8f5', '#1f6f8f']],
+    [/gab|asure|gestao|dirigente/, ['#f5a85a', '#9a5316']],
+    [/segre|semat|sevesc|vida escolar|matricula/, ['#90e0b0', '#2e7d4f']]
+  ];
+  const match = palettes.find(([pattern]) => pattern.test(key));
+  const [primary, secondary] = match ? match[1] : ['#b8c2d8', '#536078'];
+  return `--directory-avatar-a:${primary};--directory-avatar-b:${secondary};`;
+}
+
+function contactDisplayName(name) {
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return parts.slice(0, 2).join(' ') || 'Contato';
+}
+
+function renderContactAvatar(item) {
+  return `<div class="directory-avatar">${esc(contactInitials(item.name))}</div>`;
+}
+
+function directorySectorFilterValue(sector) {
+  return `sector:${normalizeKey(sector || 'sem setor')}`;
+}
+
+function directoryFilterForContact(item) {
+  return directorySectorFilterValue(item?.sector || '');
+}
+
+function renderDirectoryFilterBar() {
+  const filterBar = document.getElementById('directoryFilterBar');
+  if (!filterBar) return;
+  const sectors = [...new Set((state.directoryContacts || []).map((item) => item.sector || 'Sem setor'))]
+    .sort((a, b) => a.localeCompare(b));
+  const values = ['todos', ...sectors.map(directorySectorFilterValue)];
+  if (!values.includes(currentDirectoryFilter)) currentDirectoryFilter = 'todos';
+  filterBar.innerHTML = [
+    `<button class="btn btn-g btn-sm ${currentDirectoryFilter === 'todos' ? 'active-filter' : ''}" data-directory-filter="todos" type="button" style="--directory-filter-color:#b8c2d8">Todos</button>`,
+    ...sectors.map((sector) => {
+      const value = directorySectorFilterValue(sector);
+      return `<button class="btn btn-g btn-sm ${currentDirectoryFilter === value ? 'active-filter' : ''}" data-directory-filter="${esc(value)}" type="button" style="${contactAvatarStyle({ sector }).replaceAll('directory-avatar', 'directory-filter')}--directory-filter-color:var(--directory-filter-a);">${esc(sector)}</button>`;
+    })
+  ].join('');
 }
 
 function renderSectors() {
@@ -1209,34 +1256,44 @@ function renderSectors() {
 function renderDirectoryContacts() {
   const list = document.getElementById('directoryContactsList');
   if (!list) return;
+  renderDirectoryFilterBar();
   const contacts = filteredDirectoryContacts(false)
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
   list.innerHTML = contacts.map((item) => `
-      <div class="setechub-item directory-card">
-        ${renderContactPhoto(item)}
+      <article class="directory-widget" style="${contactAvatarStyle(item)}">
+        ${renderContactAvatar(item)}
         <div class="directory-main">
           <div class="setechub-head">
             <div>
-              <strong>${esc(item.name)}</strong>
-              <div class="sync-meta">${esc(item.role || 'Contato institucional')}</div>
+              <strong class="directory-name" title="${esc(item.name)}">${esc(contactDisplayName(item.name))}</strong>
+              <div class="directory-role">${esc(item.role || 'Contato institucional')}</div>
             </div>
-            <div class="setechub-badges">
-              ${item.sector ? `<span class="diag-pill pill-info">${esc(item.sector)}</span>` : ''}
-              ${item.ramal ? `<span class="diag-pill">Ramal ${esc(item.ramal)}</span>` : ''}
+            <button class="directory-sector-pill" type="button" data-directory-filter="${esc(directoryFilterForContact(item))}">${esc(item.sector || 'Setor')}</button>
+          </div>
+          <div class="directory-contact-list">
+            <a href="mailto:${esc(item.email || '')}" class="directory-contact-line ${item.email ? '' : 'is-muted'}">
+              <span>Email</span>
+              <strong>${esc(item.email || 'Sem email cadastrado')}</strong>
+            </a>
+            ${item.whatsappUrl ? `
+              <a href="${esc(item.whatsappUrl)}" target="_blank" rel="noopener" class="directory-contact-line">
+                <span>WhatsApp</span>
+                <strong>Abrir conversa</strong>
+              </a>
+            ` : `
+            <a href="mailto:${esc(item.sectorEmail || '')}" class="directory-contact-line ${item.sectorEmail ? '' : 'is-muted'}">
+              <span>Email setor</span>
+              <strong>${esc(item.sectorEmail || 'Nao informado')}</strong>
+            </a>
+            `}
+            <div class="directory-contact-line directory-ramal-line">
+              <span>Ramal</span>
+              <strong>${esc(item.ramal || 'Sem ramal cadastrado')}</strong>
             </div>
-          </div>
-          <div class="directory-lines">
-            <span>${esc(item.email || 'Sem email cadastrado')}</span>
-            <span>${esc(item.phone || '(15) 3526-6200')}</span>
-            ${item.sectorEmail && item.sectorEmail !== item.email ? `<span>Setor: ${esc(item.sectorEmail)}</span>` : ''}
-          </div>
-          <div class="setechub-action-row left">
-            ${item.email ? `<a class="btn btn-g btn-sm" href="mailto:${esc(item.email)}">Email</a>` : ''}
-            ${item.sourceUrl ? `<a class="btn btn-g btn-sm" href="${esc(item.sourceUrl)}" target="_blank" rel="noopener">Pagina oficial</a>` : ''}
           </div>
         </div>
-      </div>
+      </article>
     `).join('') || '<div class="sync-empty">Nenhum contato oficial importado.</div>';
   const pecList = document.getElementById('pecAccountList');
   if (pecList) {
@@ -1244,19 +1301,19 @@ function renderDirectoryContacts() {
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name));
     pecList.innerHTML = pecAccountContacts.map((item) => `
-      <div class="setechub-item directory-card">
-        ${renderContactPhoto(item)}
+      <article class="directory-widget" style="${contactAvatarStyle(item)}">
+        ${renderContactAvatar(item)}
         <div class="directory-main">
         <div class="setechub-head">
           <div>
             <strong>${esc(item.name)}</strong>
             <div class="sync-meta">${esc(item.role)}</div>
           </div>
-          <span class="diag-pill">Ramal ${esc(item.ramal || item.phone)}</span>
+          <span class="diag-pill">Ramal ${esc(item.ramal || '--')}</span>
         </div>
         <div class="sync-meta">${esc(item.email)}</div>
         </div>
-      </div>
+      </article>
     `).join('') || '<div class="sync-empty">Nenhum dado PEC liberado para este acesso.</div>';
   }
   const pecsPageList = document.getElementById('pecsPageList');

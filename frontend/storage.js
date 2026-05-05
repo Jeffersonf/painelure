@@ -621,8 +621,10 @@ function ureDirectoryContacts(pecs = []) {
     directoryContact({ name: 'Fabricio Santos', role: 'Chefe de Secao', sector: 'SECOMSE', ramal: '6238', email: 'fabricio.santos05@educacao.sp.gov.br', sectorEmail: 'itv.secomse@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.secomse2, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/nucleo-de-compras-e-servicos/' }),
     directoryContact({ name: 'Rodolfo Rodrigues Pereira', role: 'Chefe de Servico', sector: 'SEAFIN', ramal: '6240', email: 'rodolfo.pereira@educacao.sp.gov.br', sectorEmail: 'itv.seafin@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.seafin, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/servico-de-administracao-e-financas-seafin/' }),
     directoryContact({ name: 'WHATS', role: 'WhatsApp institucional', sector: 'SEINTEC / SETEC', ramal: '6210', email: 'itv.setec@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.setec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/secao-de-tecnologia-setec/' }),
+    directoryContact({ id: 'contact-site-support-jefferson-felipe', name: 'Jefferson Felipe', role: 'Problemas no site', sector: 'SITE', ramal: 'WhatsApp', email: 'jefferson.paula@educacao.sp.gov.br', sectorEmail: 'deitvnit@educacao.sp.gov.br', whatsappUrl: 'https://wa.me/551535266210', photo: DIRECTORY_PHOTOS.setec }),
     directoryContact({ name: 'Elcio Renato Bonifacio de Azevedo', role: 'Chefe de Servico', sector: 'SEINTEC', ramal: '6211', email: 'elcio.azevedo@educacao.sp.gov.br', sectorEmail: 'itv.seintec@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.seintec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/nucleo-de-informacoes-educacionais-e-tecnologia/' }),
-    directoryContact({ name: 'Jefferson do Espirito Santo Moreira', role: 'Analista Prodesp', sector: 'SETEC', ramal: '6213', email: 'jefferson.paula@educacao.sp.gov.br', sectorEmail: 'itv.setec@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.setec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/secao-de-tecnologia-setec/' }),
+    directoryContact({ name: 'Jefferson Felipe', role: 'Chefe de Secao', sector: 'SETEC', ramal: '6233', email: 'jefferson.paula@educacao.sp.gov.br', sectorEmail: 'deitvnit@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.setec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/secao-de-tecnologia-setec/' }),
+    directoryContact({ name: 'Jeffeson do Espirito Santo Moreira', role: 'Tecnico Prodesp', sector: 'SETEC', ramal: '6235', email: 'jefferson.santo@educacao.sp.gov.br', sectorEmail: 'deitvnit@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.setec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/secao-de-tecnologia-setec/' }),
     directoryContact({ name: 'Gustavo', role: 'CTC', sector: 'SETEC', ramal: '6235', email: 'itv.setec@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.setec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/secao-de-tecnologia-setec/' }),
     directoryContact({ name: 'Jaqueline de Oliveira Cunha Borelli', role: 'PEC - Arte', sector: 'EEC', ramal: '6212', email: 'deitvnpe@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.eec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/equipe-de-especialistas-em-curriculo-eec/' }),
     directoryContact({ name: 'Jose do Amaral Netto', role: 'PEC - Projetos Especiais', sector: 'EEC', ramal: '6218', email: 'deitvnpe@educacao.sp.gov.br', photo: DIRECTORY_PHOTOS.eec, sourceUrl: 'https://deitapeva.educacao.sp.gov.br/equipe-de-especialistas-em-curriculo-eec/' }),
@@ -653,9 +655,22 @@ function ureDirectoryContacts(pecs = []) {
 
 function mergeDirectoryContacts(baseItems, savedItems) {
   const map = new Map();
-  const keyOf = (item) => normalizeKey(item.name || item.email || item.id);
-  baseItems.forEach((item) => map.set(keyOf(item), item));
-  savedItems.forEach((item) => {
+  const normalizeDirectoryContact = (item) => {
+    if (normalizeKey(item?.name) !== normalizeKey('Jefferson do Espirito Santo Moreira')) return item;
+    if (normalizeKey(item?.email) === normalizeKey('jefferson.paula@educacao.sp.gov.br')) {
+      return {
+        ...item,
+        name: 'Jefferson Felipe',
+        role: 'Chefe de Secao',
+        ramal: '6233',
+        sectorEmail: 'deitvnit@educacao.sp.gov.br'
+      };
+    }
+    return { ...item, name: 'Jeffeson do Espirito Santo Moreira', email: item.email || 'jefferson.santo@educacao.sp.gov.br' };
+  };
+  const keyOf = (item) => normalizeKey(item.id || item.email || item.name);
+  baseItems.map(normalizeDirectoryContact).forEach((item) => map.set(keyOf(item), item));
+  savedItems.map(normalizeDirectoryContact).forEach((item) => {
     const key = keyOf(item);
     const base = map.get(key) || {};
     map.set(key, {
@@ -863,7 +878,7 @@ function createDefaults() {
         id: uid(),
         code: 'SETEC',
         name: 'Secao de Tecnologia',
-        lead: 'Jefferson do Espirito Santo Moreira',
+        lead: 'Jefferson Felipe',
         phone: '(15) 3526-6235',
         email: 'deitvnit@educacao.sp.gov.br',
         summary: 'Apoio tecnico operacional e suporte de infraestrutura vinculados ao SEINTEC.'

@@ -36,6 +36,7 @@ const CONTEXT_KEY = 'setechub_context';
 const ACTIVE_USER_KEY = 'setechub_active_user';
 const PAUSED_NAV_PAGES = new Set(['calls']);
 const DORMANT_NAV_PAGES = new Set(['pecs']);
+const DISABLED_NAV_PAGES = new Set(['reports']);
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -388,7 +389,7 @@ function defaultPageForUser() {
 }
 
 function canAccessPage(page) {
-  return visibleNavigationPages().has(page);
+  return visibleNavigationPages().has(page) && !DISABLED_NAV_PAGES.has(page);
 }
 
 function applyAccessControl() {
@@ -398,7 +399,7 @@ function applyAccessControl() {
   document.querySelectorAll('.nav-item, .fn-item').forEach((node) => {
     if (node.dataset.page) {
       const allowed = canAccessPage(node.dataset.page);
-      node.hidden = PAUSED_NAV_PAGES.has(node.dataset.page) || (isRestrictedCtcUser() && !allowed);
+      node.hidden = PAUSED_NAV_PAGES.has(node.dataset.page) || (isRestrictedCtcUser() && !visibleNavigationPages().has(node.dataset.page));
       node.classList.toggle('nav-disabled', !allowed);
       node.setAttribute('aria-disabled', allowed ? 'false' : 'true');
       node.disabled = !allowed;
@@ -553,11 +554,27 @@ function filteredDirectoryContacts(scopeToCurrentPec = true) {
     return pecContacts.filter((item) => normalizeKey(item.name) === normalizeKey(user?.name));
   }
   if (currentDirectoryFilter === 'todos') return state.directoryContacts;
+  if (currentDirectoryFilter.startsWith('sector:')) {
+    const selectedSector = currentDirectoryFilter.slice('sector:'.length);
+    return state.directoryContacts.filter((item) => normalizeKey(item.sector || 'sem setor') === selectedSector);
+  }
   if (currentDirectoryFilter === 'supervisao') {
     return state.directoryContacts.filter((item) => /supervisor/i.test(item.role));
   }
   if (currentDirectoryFilter === 'tecnologia') {
     return state.directoryContacts.filter((item) => /prodesp|seintec|setec|tecnologia|ctc/i.test(`${item.role} ${item.sector}`));
+  }
+  if (currentDirectoryFilter === 'obras') {
+    return state.directoryContacts.filter((item) => /seom|obras|manutencao|manut/i.test(normalizeKey(`${item.role} ${item.sector} ${item.name} ${item.email || ''}`)));
+  }
+  if (currentDirectoryFilter === 'financas') {
+    return state.directoryContacts.filter((item) => /seafin|sefin|secomse|sefisc|financas|financeiro|compras|servicos|fiscalizacao|protocolo/i.test(normalizeKey(`${item.role} ${item.sector} ${item.name} ${item.email || ''}`)));
+  }
+  if (currentDirectoryFilter === 'rh') {
+    return state.directoryContacts.filter((item) => /crh|sepes|seape|sefrep|pessoas|pessoal|frequencia|pagamento|recursos humanos|rh/i.test(normalizeKey(`${item.role} ${item.sector} ${item.name} ${item.email || ''}`)));
+  }
+  if (currentDirectoryFilter === 'pedagogico') {
+    return state.directoryContacts.filter((item) => /pec|eec|curriculo|pedagogico|especialista/i.test(normalizeKey(`${item.role} ${item.sector} ${item.name} ${item.email || ''}`)));
   }
   if (currentDirectoryFilter === 'gestao') {
     return state.directoryContacts.filter((item) => /chefe|diretor|dirigente|executiva|assistente|gab|asure|seafin|sepes|segre/i.test(`${item.role} ${item.sector}`));
@@ -1539,7 +1556,7 @@ const SYSTEM_TITLE_ICONS = {
   'Automação de redes': '📄',
   'Minha conta': '👤',
   'Configurações gerais': '⚙️',
-  'Informações': 'ℹ️',
+  'Contatos': '☎️',
   'Links oficiais': '🔗',
   'Organograma e setores': '🏢',
   'Ramais e contatos': '☎️',

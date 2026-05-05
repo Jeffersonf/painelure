@@ -3856,37 +3856,198 @@ textarea {
   gap: 10px;
 }
 
-.directory-card {
+#directoryContactsList {
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  align-items: stretch;
+  gap: 16px;
+}
+
+.directory-widget {
+  min-width: 0;
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 20%, var(--bd));
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 8%, transparent), transparent 34%),
+    rgba(255,255,255,.026);
+  overflow: hidden;
+  position: relative;
+  transition: border-color .14s ease, background .14s ease;
+}
+
+.directory-widget:hover {
+  border-color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 34%, var(--bd));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 11%, transparent), transparent 38%),
+    rgba(255,255,255,.038);
 }
 
 .directory-main {
   min-width: 0;
   display: grid;
+  gap: 12px;
+}
+
+.directory-main .setechub-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px;
   gap: 9px;
+  align-items: start;
 }
 
-.directory-photo {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  object-fit: cover;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
+.directory-name {
+  display: block;
+  min-height: 17px;
+  overflow: hidden;
+  color: var(--tx);
+  font-size: 15.5px;
+  font-weight: 850;
+  line-height: 1.28;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.directory-photo-placeholder {
+.directory-role {
+  min-height: 15px;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--mt);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directory-sector-pill {
+  width: 78px;
+  min-height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--ac);
-  font-weight: 800;
-  letter-spacing: 0;
-  background: linear-gradient(135deg, rgba(200,245,90,.16), rgba(90,245,200,.08));
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 32%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 12%, transparent);
+  color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 86%, var(--tx));
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  overflow: hidden;
+  padding: 0 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+.directory-avatar {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 38%, transparent);
+  border-radius: 11px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 18%, transparent), color-mix(in srgb, var(--directory-avatar-b, var(--ac)) 10%, transparent)),
+    rgba(255,255,255,.035);
+  color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 84%, var(--tx));
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.directory-contact-list {
+  display: grid;
+  grid-template-rows: repeat(3, 30px);
+  gap: 8px;
+}
+
+.directory-contact-line {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 30px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.directory-contact-line span {
+  color: var(--mt);
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.directory-contact-line strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--tx);
+  font-size: 13.5px;
+  font-weight: 750;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.directory-ramal-line {
+  width: fit-content;
+  min-width: 112px;
+  align-items: center;
+  justify-self: center;
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 32%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 10%, rgba(255,255,255,.025));
+}
+
+.directory-ramal-line strong {
+  color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 82%, var(--tx));
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.directory-contact-line:not(.directory-ramal-line):hover strong {
+  color: var(--ac2);
+}
+
+.directory-contact-line.is-muted {
+  pointer-events: none;
+}
+
+#directoryFilterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#directoryFilterBar [data-directory-filter] {
+  --directory-filter-color: var(--ac2);
+  border-color: color-mix(in srgb, var(--directory-filter-color) 22%, var(--bd));
+}
+
+#directoryFilterBar [data-directory-filter]:hover,
+#directoryFilterBar [data-directory-filter].active-filter {
+  border-color: color-mix(in srgb, var(--directory-filter-color) 44%, var(--bd));
+  background: color-mix(in srgb, var(--directory-filter-color) 15%, transparent);
+  color: color-mix(in srgb, var(--directory-filter-color) 86%, var(--tx));
+}
+
+#directoryFilterBar [data-directory-filter="todos"] { --directory-filter-color: #b8c2d8; }
+#directoryFilterBar [data-directory-filter="supervisao"] { --directory-filter-color: #5ac8f5; }
+#directoryFilterBar [data-directory-filter="tecnologia"] { --directory-filter-color: #5af5c8; }
+#directoryFilterBar [data-directory-filter="obras"] { --directory-filter-color: #f5c85a; }
+#directoryFilterBar [data-directory-filter="financas"] { --directory-filter-color: #78b4ff; }
+#directoryFilterBar [data-directory-filter="rh"] { --directory-filter-color: #a78bfa; }
+#directoryFilterBar [data-directory-filter="pedagogico"] { --directory-filter-color: #c8f55a; }
+#directoryFilterBar [data-directory-filter="gestao"] { --directory-filter-color: #f5a85a; }
 
 .directory-lines {
   display: flex;
@@ -3900,6 +4061,10 @@ textarea {
 .directory-lines span {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.directory-lines:empty {
+  display: none;
 }
 
 .directory-sector-card .sync-meta {
@@ -4476,6 +4641,169 @@ a {
   color: var(--ac2);
 }
 
+/* Login refresh */
+.setup-screen {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 28px;
+  background:
+    linear-gradient(90deg, rgba(90,245,200,.07) 0 1px, transparent 1px 96px),
+    linear-gradient(0deg, rgba(200,245,90,.055) 0 1px, transparent 1px 96px),
+    radial-gradient(circle at 12% 12%, rgba(200,245,90,.10), transparent 26%),
+    linear-gradient(135deg, #08090d 0%, #0d1118 52%, #08090d 100%);
+  backdrop-filter: none;
+}
+
+.setup-screen::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(8,9,13,.96), rgba(8,9,13,.70) 44%, rgba(8,9,13,.96)),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 38%);
+}
+
+.setup-shell.login-only {
+  width: min(430px, calc(100vw - 36px));
+  max-width: min(430px, calc(100vw - 36px));
+  position: relative;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--bd) 78%, transparent);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+    color-mix(in srgb, var(--sf) 92%, transparent);
+  box-shadow: 0 28px 80px rgba(0,0,0,.34);
+  overflow: hidden;
+}
+
+.setup-shell.login-only::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ac), var(--ac2));
+}
+
+.setup-shell.login-only .setup-auth {
+  min-height: auto;
+  padding: 38px 34px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  justify-content: center;
+}
+
+.setup-auth-panel {
+  max-width: 370px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.setup-shell.login-only .slogo {
+  margin-bottom: 8px;
+  font-size: 46px;
+  display: flex;
+  gap: 0;
+}
+
+.setup-org-mark {
+  margin-bottom: 24px;
+  color: var(--mt);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.42;
+  text-transform: lowercase;
+}
+
+.setup-org-mark strong,
+.setup-org-mark span {
+  display: block;
+}
+
+.setup-org-mark strong {
+  color: var(--tx2);
+}
+
+.setup-auth-badge {
+  width: fit-content;
+  min-height: 26px;
+  padding: 0 11px;
+  border-color: color-mix(in srgb, var(--ac2) 24%, transparent);
+  background: color-mix(in srgb, var(--ac2) 8%, transparent);
+  color: var(--ac2);
+  margin-bottom: 18px;
+}
+
+.setup-auth-panel .auth-title {
+  margin-bottom: 10px;
+  font-size: 31px;
+  line-height: 1.08;
+}
+
+.setup-auth-intro {
+  margin-bottom: 24px;
+  color: var(--tx2);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.slbl {
+  color: var(--tx2);
+  font-size: 10.5px;
+  font-weight: 900;
+}
+
+.sinp {
+  min-height: 48px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.035);
+  border-color: color-mix(in srgb, var(--bd) 84%, transparent);
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.sinp:focus {
+  border-color: color-mix(in srgb, var(--ac2) 38%, var(--bd));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ac2) 10%, transparent);
+}
+
+.sbtn {
+  min-height: 50px;
+  border-radius: 10px;
+  margin-top: 2px;
+  box-shadow: none;
+}
+
+.sbtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(200,245,90,.16);
+}
+
+.setup-auth-note {
+  margin-top: 16px;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .setup-screen {
+    padding: 16px;
+  }
+
+  .setup-shell.login-only {
+    width: min(430px, calc(100vw - 24px));
+  }
+
+  .setup-shell.login-only .setup-auth {
+    min-height: auto;
+    padding: 28px 22px;
+  }
+}
+
 .fn-item .fni {
   font-size: 19px;
   line-height: 1;
@@ -4709,14 +5037,32 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .directory-card {
-    grid-template-columns: 52px minmax(0, 1fr);
-    gap: 11px;
+  #directoryContactsList {
+    grid-template-columns: 1fr;
   }
 
-  .directory-photo {
+  .directory-widget {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 13px;
+    padding: 15px;
+  }
+
+  .directory-main .setechub-head {
+    grid-template-columns: minmax(0, 1fr) 76px;
+  }
+
+  .directory-sector-pill {
+    width: 76px;
+  }
+
+  .directory-avatar {
     width: 52px;
     height: 52px;
-    border-radius: 14px;
+    border-radius: 12px;
   }
+
+  .directory-ramal-line {
+    width: fit-content;
+  }
+
 }

@@ -14,25 +14,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260505-school-inventory">
-<link rel="stylesheet" href="./setechub.css?v=20260505-school-inventory">
+<link rel="stylesheet" href="./styles.css?v=20260505-login-refresh">
+<link rel="stylesheet" href="./setechub.css?v=20260505-login-refresh">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
   <div class="setup-box setup-shell login-only">
     <aside class="setup-auth">
       <div class="setup-auth-panel">
-        <div class="slogo"><span style="color:var(--ac)">painel</span> <span style="color:var(--tx);font-weight:700">ure</span></div>
-        <div class="setup-auth-badge">🔐 Login</div>
-        <div class="auth-title" id="loginTitle">Entrar no PainelURE</div>
-        <div class="setup-auth-intro">Use seu nome de acesso e PIN. A base online vai substituir o armazenamento local nas próximas etapas.</div>
+        <div class="slogo"><span style="color:var(--ac)">painel</span><span style="color:var(--tx);font-weight:700">ure</span></div>
+        <div class="setup-org-mark"><strong>setec | seintec</strong><span>ure itapeva</span></div>
+        <div class="setup-auth-badge">Acesso restrito</div>
+        <div class="auth-title" id="loginTitle">Entrar no painel</div>
+        <div class="setup-auth-intro">Use seu nome de acesso e PIN para entrar no painel.</div>
         <form id="loginForm">
           <label class="slbl">Nome</label>
           <input type="text" class="sinp" id="loginName" placeholder="Seu nome" autocomplete="username" aria-label="Nome de acesso" required>
           <label class="slbl">PIN</label>
           <input type="password" class="sinp" id="loginPin" placeholder="PIN local" autocomplete="current-password" inputmode="numeric" aria-label="PIN local" required>
           <div id="loginError" class="serr"></div>
-          <button class="sbtn" type="submit">Entrar no painel</button>
+          <button class="sbtn" type="submit">Entrar</button>
         </form>
         <form id="forcePinForm" hidden>
           <label class="slbl">Novo PIN</label>
@@ -42,7 +43,6 @@
           <div id="forcePinError" class="serr"></div>
           <button class="sbtn" type="submit">Salvar novo PIN</button>
         </form>
-        <div class="setup-auth-note">Use o acesso informado pelo administrador.</div>
       </div>
     </aside>
   </div>
@@ -51,9 +51,9 @@
 <nav class="fnav" id="fnav" aria-label="Navegação principal móvel">
   <button class="fn-item active" type="button" data-page="dashboard" aria-current="page"><span class="fni">&#128202;</span>Início</button>
   <button class="fn-item" type="button" data-page="schools"><span class="fni">&#127979;</span>Escolas</button>
-  <button class="fn-item" type="button" data-page="supervisors"><span class="fni">&#128101;</span>Superv.</button>
   <button class="fn-item" type="button" data-page="assets"><span class="fni">&#128187;</span>Invent.</button>
-  <button class="fn-item sl-n" type="button" data-page="info"><span class="fni">&#8505;</span>Info</button>
+  <button class="fn-item" type="button" data-page="supervisors"><span class="fni">&#128101;</span>Superv.</button>
+  <button class="fn-item sl-n" type="button" data-page="info"><span class="fni">&#9742;</span>Contatos</button>
   <button class="fn-item fn-logout logout-action" type="button"><span class="fni">&#8617;</span>Sair</button>
 </nav>
 
@@ -72,11 +72,11 @@
   <nav aria-label="Navegação principal">
     <button class="nav-item active" type="button" data-page="dashboard" aria-current="page"><span class="ico">&#128202;</span>Painel</button>
     <button class="nav-item" type="button" data-page="schools"><span class="ico">&#127979;</span>Escolas</button>
+    <button class="nav-item" type="button" data-page="assets"><span class="ico">&#128187;</span>Inventário</button>
     <button class="nav-item" type="button" data-page="supervisors"><span class="ico">&#128101;</span>Supervisores</button>
     <button class="nav-item" type="button" data-page="ctc"><span class="ico">&#128736;</span>CTC</button>
-    <button class="nav-item" type="button" data-page="assets"><span class="ico">&#128187;</span>Inventário</button>
     <button class="nav-item fn" type="button" data-page="reports"><span class="ico">&#128204;</span>Relatórios</button>
-    <button class="nav-item sl-n" type="button" data-page="info"><span class="ico">&#8505;</span>Informações</button>
+    <button class="nav-item sl-n" type="button" data-page="info"><span class="ico">&#9742;</span>Contatos</button>
   </nav>
   <div class="sb-bottom">
     <div class="conn-wrap"></div>
@@ -718,38 +718,9 @@
   <div class="page" id="page-info">
     <div class="ph">
       <div>
-        <div class="pt">Informações</div>
-        <div class="ps">Nomes, organograma, links oficiais, ramais e contatos da URE.</div>
+        <div class="pt">Contatos</div>
+        <div class="ps">Nomes, ramais e contatos da URE.</div>
       </div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Links oficiais</div><div class="cs">Atalhos fixos para consulta da rotina de trabalho.</div></div>
-      </div>
-      <form id="officialForm" class="setechub-form setechub-note-form" data-admin-only>
-        <input class="fi" id="officeContactInput" placeholder="Contato oficial ou observação da diretoria" aria-label="Contato oficial ou observação da diretoria">
-        <div class="setechub-form setechub-form-links">
-          <input class="fi" id="officialLabel" placeholder="Nome do link oficial" aria-label="Nome do link oficial">
-          <input class="fi" id="officialUrl" placeholder="https://..." aria-label="URL do link oficial">
-          <button class="btn btn-p" type="submit">Adicionar link</button>
-        </div>
-      </form>
-      <div id="officialLinksList" class="stack-list"></div>
-    </div>
-    <div class="box">
-      <div class="bh">
-        <div><div class="ct">Organograma e setores</div><div class="cs">Setores, responsáveis e contatos principais.</div></div>
-      </div>
-      <form id="sectorForm" class="setechub-form setechub-form-sector" data-admin-only>
-        <input class="fi" id="sectorCode" placeholder="Sigla" aria-label="Sigla">
-        <input class="fi" id="sectorName" placeholder="Nome do setor" aria-label="Nome do setor">
-        <input class="fi" id="sectorLead" placeholder="Responsável" aria-label="Responsável">
-        <input class="fi" id="sectorPhone" placeholder="Telefone" aria-label="Telefone">
-        <input class="fi" id="sectorEmail" placeholder="E-mail" aria-label="E-mail">
-        <input class="fi" id="sectorSummary" placeholder="Resumo rápido do setor" aria-label="Resumo rápido do setor">
-        <button class="btn btn-p" type="submit">Salvar setor</button>
-      </form>
-      <div id="sectorDirectoryList" class="stack-list"></div>
     </div>
     <div class="box">
       <div class="bh">
@@ -759,6 +730,10 @@
         <button class="btn btn-g btn-sm active-filter" data-directory-filter="todos" type="button">Todos</button>
         <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisão</button>
         <button class="btn btn-g btn-sm" data-directory-filter="tecnologia" type="button">Tecnologia</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="obras" type="button">Obras</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="financas" type="button">Finanças</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="rh" type="button">RH</button>
+        <button class="btn btn-g btn-sm" data-directory-filter="pedagogico" type="button">Pedagógico</button>
         <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestão</button>
       </div>
       <div id="directoryContactsList" class="stack-list"></div>
@@ -927,12 +902,12 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="./school-data.js?v=20260505-school-inventory"></script>
-<script src="./storage.js?v=20260505-school-inventory"></script>
-<script src="./app.js?v=20260505-school-inventory"></script>
-<script src="./render.js?v=20260505-school-inventory"></script>
-<script src="./api.js?v=20260505-school-inventory"></script>
-<script src="./actions.js?v=20260505-school-inventory"></script>
-<script src="./bootstrap.js?v=20260505-school-inventory"></script>
+<script src="./school-data.js?v=20260505-login-refresh"></script>
+<script src="./storage.js?v=20260505-login-refresh"></script>
+<script src="./app.js?v=20260505-login-refresh"></script>
+<script src="./render.js?v=20260505-login-refresh"></script>
+<script src="./api.js?v=20260505-login-refresh"></script>
+<script src="./actions.js?v=20260505-login-refresh"></script>
+<script src="./bootstrap.js?v=20260505-login-refresh"></script>
 </body>
 </html>
