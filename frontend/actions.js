@@ -138,7 +138,12 @@ function toggleUserActive(id) {
   refreshAll();
 }
 
-function randomPin(length = 6) {
+function normalizePin(value, fallback = '1234') {
+  const pin = String(value || '').replace(/\D/g, '').slice(0, 4);
+  return pin || fallback;
+}
+
+function randomPin(length = 4) {
   const digits = '0123456789';
   return Array.from({ length }, () => digits[Math.floor(Math.random() * digits.length)]).join('');
 }
@@ -1673,6 +1678,9 @@ function setupEventListeners() {
   document.getElementById('supervisorFullscreenBtn')?.addEventListener('click', toggleSupervisorPanelFullscreen);
   document.getElementById('refreshSupervisorSheetBtn')?.addEventListener('click', syncCurrentSupervisorVisitSource);
   document.getElementById('randomUserPinBtn')?.addEventListener('click', fillRandomUserPin);
+  document.getElementById('userPin')?.addEventListener('input', (event) => {
+    event.target.value = String(event.target.value || '').replace(/\D/g, '').slice(0, 4);
+  });
   document.getElementById('cancelUserEditBtn')?.addEventListener('click', cancelUserEdit);
   document.getElementById('adminSchoolPicker')?.addEventListener('change', (event) => {
     if (event.target.value) editAdminSchool(event.target.value);
@@ -1687,10 +1695,14 @@ function setupEventListeners() {
     const editingId = document.getElementById('editingUserId').value;
     const name = document.getElementById('userName').value.trim();
     const login = document.getElementById('userLogin').value.trim() || name;
-    const pin = document.getElementById('userPin').value.trim() || '1234';
+    const pin = normalizePin(document.getElementById('userPin').value);
     const role = document.getElementById('userRole').value;
     const supervisorName = document.getElementById('userSupervisorName').value;
     if (!name || !login) return;
+    if (pin.length !== 4) {
+      alert('O PIN precisa ter exatamente 4 digitos.');
+      return;
+    }
     const existing = editingId
       ? (state.users || []).find((item) => item.id === editingId)
       : (state.users || []).find((item) => normalizeKey(item.login || item.name) === normalizeKey(login));

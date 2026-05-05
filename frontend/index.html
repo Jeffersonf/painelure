@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260505-font-nav">
-<link rel="stylesheet" href="./setechub.css?v=20260505-font-nav">
+<link rel="stylesheet" href="./styles.css?v=20260505-admin-pin">
+<link rel="stylesheet" href="./setechub.css?v=20260505-admin-pin">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
@@ -790,7 +790,7 @@
         <input id="editingUserId" type="hidden">
         <input class="fi" id="userName" placeholder="Nome exibido" aria-label="Nome exibido">
         <input class="fi" id="userLogin" placeholder="Login" aria-label="Login">
-        <input class="fi" id="userPin" placeholder="PIN" aria-label="PIN">
+        <input class="fi" id="userPin" placeholder="PIN" aria-label="PIN" inputmode="numeric" maxlength="4" pattern="[0-9]{4}">
         <select class="fi" id="userRole" aria-label="Perfil do usuário">
           <option value="supervisor">Supervisor</option>
           <option value="dirigente">Dirigente</option>
@@ -900,12 +900,12 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="./school-data.js?v=20260505-font-nav"></script>
-<script src="./storage.js?v=20260505-font-nav"></script>
-<script src="./app.js?v=20260505-font-nav"></script>
-<script src="./render.js?v=20260505-font-nav"></script>
-<script src="./api.js?v=20260505-font-nav"></script>
-<script src="./actions.js?v=20260505-font-nav"></script>
-<script src="./bootstrap.js?v=20260505-font-nav"></script>
+<script src="./school-data.js?v=20260505-admin-pin"></script>
+<script src="./storage.js?v=20260505-admin-pin"></script>
+<script src="./app.js?v=20260505-admin-pin"></script>
+<script src="./render.js?v=20260505-admin-pin"></script>
+<script src="./api.js?v=20260505-admin-pin"></script>
+<script src="./actions.js?v=20260505-admin-pin"></script>
+<script src="./bootstrap.js?v=20260505-admin-pin"></script>
 </body>
 </html>
