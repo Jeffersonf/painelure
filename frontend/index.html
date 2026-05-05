@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260505-textfix">
-<link rel="stylesheet" href="./setechub.css?v=20260505-textfix">
+<link rel="stylesheet" href="./styles.css?v=20260505-hide-pecs">
+<link rel="stylesheet" href="./setechub.css?v=20260505-hide-pecs">
 </head>
 <body>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
@@ -44,7 +44,6 @@
   <button class="fn-item active" type="button" data-page="dashboard" aria-current="page"><span class="fni">&#128202;</span>Início</button>
   <button class="fn-item" type="button" data-page="schools"><span class="fni">&#127979;</span>Escolas</button>
   <button class="fn-item" type="button" data-page="supervisors"><span class="fni">&#128101;</span>Superv.</button>
-  <button class="fn-item dormant-page nav-disabled" type="button" data-page="pecs" aria-disabled="true" title="Página pausada"><span class="fni">&#127891;</span>PECs</button>
   <button class="fn-item" type="button" data-page="assets"><span class="fni">&#128187;</span>Invent.</button>
   <button class="fn-item acc-n" type="button" data-page="calls"><span class="fni">&#128295;</span>Cham.</button>
   <button class="fn-item sl-n" type="button" data-page="info"><span class="fni">&#8505;</span>Info</button>
@@ -67,7 +66,6 @@
     <button class="nav-item active" type="button" data-page="dashboard" aria-current="page"><span class="ico">&#128202;</span>Painel</button>
     <button class="nav-item" type="button" data-page="schools"><span class="ico">&#127979;</span>Escolas</button>
     <button class="nav-item" type="button" data-page="supervisors"><span class="ico">&#128101;</span>Supervisores</button>
-    <button class="nav-item dormant-page nav-disabled" type="button" data-page="pecs" aria-disabled="true" title="Página pausada"><span class="ico">&#127891;</span>PECs</button>
     <button class="nav-item" type="button" data-page="ctc"><span class="ico">&#128736;</span>CTC</button>
     <button class="nav-item" type="button" data-page="assets"><span class="ico">&#128187;</span>Inventário</button>
     <button class="nav-item an" type="button" data-page="calls"><span class="ico">&#128295;</span>Atendimentos</button>
@@ -735,7 +733,6 @@
       <div class="setechub-toolbar" id="directoryFilterBar">
         <button class="btn btn-g btn-sm active-filter" data-directory-filter="todos" type="button">Todos</button>
         <button class="btn btn-g btn-sm" data-directory-filter="supervisao" type="button">Supervisão</button>
-        <button class="btn btn-g btn-sm dormant-page nav-disabled" data-directory-filter="pecs" type="button" disabled>PECs</button>
         <button class="btn btn-g btn-sm" data-directory-filter="tecnologia" type="button">Tecnologia</button>
         <button class="btn btn-g btn-sm" data-directory-filter="gestao" type="button">Gestão</button>
       </div>
@@ -880,12 +877,12 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="./school-data.js?v=20260505-textfix"></script>
-<script src="./storage.js?v=20260505-textfix"></script>
-<script src="./app.js?v=20260505-textfix"></script>
-<script src="./render.js?v=20260505-textfix"></script>
-<script src="./api.js?v=20260505-textfix"></script>
-<script src="./actions.js?v=20260505-textfix"></script>
-<script src="./bootstrap.js?v=20260505-textfix"></script>
+<script src="./school-data.js?v=20260505-hide-pecs"></script>
+<script src="./storage.js?v=20260505-hide-pecs"></script>
+<script src="./app.js?v=20260505-hide-pecs"></script>
+<script src="./render.js?v=20260505-hide-pecs"></script>
+<script src="./api.js?v=20260505-hide-pecs"></script>
+<script src="./actions.js?v=20260505-hide-pecs"></script>
+<script src="./bootstrap.js?v=20260505-hide-pecs"></script>
 </body>
 </html>
