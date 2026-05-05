@@ -278,6 +278,20 @@ function csvValue(record, names) {
   return repairMojibakeString(entry?.[1] || '').trim();
 }
 
+function csvRecords(headers, dataRows) {
+  return dataRows.map((row) => {
+    const record = {};
+    headers.forEach((header, index) => {
+      const key = normalizeCsvHeader(header);
+      const value = row[index] || '';
+      if (!key) return;
+      if (record[key] && value) record[key] = `${record[key]} | ${value}`;
+      else if (value || !(key in record)) record[key] = value;
+    });
+    return record;
+  });
+}
+
 function parseBrazilianDate(value) {
   const text = String(value || '').trim();
   const match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
@@ -400,6 +414,14 @@ function rowSupervisorName(row) {
   ]);
 }
 
+function rowVisitedSchools(row) {
+  const text = csvValue(row, ['Escola Visitada', 'Escola', 'Escolas Visitadas']);
+  return [...new Set(String(text || '')
+    .split(/\s+\|\s+|[;]+/)
+    .map(canonicalSchoolName)
+    .filter(Boolean))];
+}
+
 function parseVisitCount(value) {
   const match = String(value || '').match(/\d+/);
   return match ? Number(match[0]) : 0;
@@ -458,7 +480,7 @@ async function syncSupervisorPanelSource(source) {
   const rows = parseCsvRows(await response.text());
   const [headers, ...dataRows] = rows;
   if (!headers?.length) return 0;
-  const records = dataRows.map((row) => Object.fromEntries(headers.map((header, index) => [normalizeCsvHeader(header), row[index] || ''])));
+  const records = csvRecords(headers, dataRows);
   return mergeSupervisorPanelRows(source, records);
 }
 
@@ -479,18 +501,18 @@ function googleSheetTabCsvUrl(url, tabName) {
 function mergeSupervisorVisitSourceRows(source, rows) {
   const importedAt = new Date().toISOString();
   const incoming = rows
-    .map((row) => {
+    .flatMap((row) => {
       const rowSupervisor = rowSupervisorName(row) || (source.requireSupervisorColumn ? '' : source.supervisor);
       const supervisor = source.supervisor
         ? supervisorVisitSourceFor(source)
         : supervisorForSourceRow(rowSupervisor, source);
-      const school = canonicalSchoolName(csvValue(row, ['Escola Visitada', 'Escola']));
+      const schools = rowVisitedSchools(row);
       const date = parseBrazilianDate(csvValue(row, ['Data Da Visita', 'Data da Visita', 'Data']));
-      if (!supervisor || !rowSupervisor || !school || !date) return null;
-      if (source.supervisor && !sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor)) return null;
+      if (!supervisor || !rowSupervisor || !schools.length || !date) return [];
+      if (source.supervisor && !sourceRowBelongsToSupervisor(rowSupervisor, source, supervisor)) return [];
       const submittedAt = csvValue(row, ['Carimbo de data/hora', 'Timestamp']);
       const confirmation = csvValue(row, ['Confirmacao de Visita', 'Confirmacao', 'Confirmação de Visita']);
-      return {
+      return schools.map((school) => ({
         id: `${source.id}-${normalizeKey(supervisor.name)}-${normalizeKey(school)}-${date}`,
         supervisor: supervisor.name,
         school,
@@ -503,7 +525,7 @@ function mergeSupervisorVisitSourceRows(source, rows) {
         importedAt,
         submittedAt,
         confirmation
-      };
+      }));
     })
     .filter(Boolean);
   if (!incoming.length) return 0;
@@ -571,7 +593,7 @@ async function syncSupervisorVisitSource(source) {
   const rows = parseCsvRows(await response.text());
   const [headers, ...dataRows] = rows;
   if (!headers?.length) return 0;
-  const records = dataRows.map((row) => Object.fromEntries(headers.map((header, index) => [normalizeCsvHeader(header), row[index] || ''])));
+  const records = csvRecords(headers, dataRows);
   return mergeSupervisorVisitSourceRows({ ...source, requireSupervisorColumn: fallbackToSourceCsv }, records);
 }
 
@@ -641,7 +663,11 @@ async function syncSupervisorMonthlySheet(linkId) {
   const toast = showToast(`Atualizando ${source.label}...`, 'syncing', { persist: true });
   try {
     const { importedCount, errorCount } = await syncSupervisorSourceList([source], { refresh: false });
-    if (importedCount) refreshAll();
+    if (/^\d{4}-\d{2}$/.test(link.monthKey || '')) {
+      const [year, month] = link.monthKey.split('-').map(Number);
+      currentViewDate = new Date(year, month - 1, 1);
+    }
+    refreshAll();
     if (importedCount) {
       toast.update(`${importedCount} visita(s) importada(s) de ${source.label}.`, 'success');
     } else if (errorCount) {

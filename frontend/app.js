@@ -955,6 +955,7 @@ function saveUiContext() {
       schoolZoneFilter: currentSchoolZoneFilter,
       schoolSort: currentSchoolSort,
       supervisorFilter: currentSupervisorFilter,
+      supervisorMonth: `${currentViewDate.getFullYear()}-${String(currentViewDate.getMonth() + 1).padStart(2, '0')}`,
       schoolSearch: currentSchoolSearch,
       assetFilter: currentAssetFilter,
       importFilter: currentImportFilter,
@@ -988,6 +989,10 @@ function restoreUiContext() {
     currentSchoolZoneFilter = context.schoolZoneFilter || currentSchoolZoneFilter;
     currentSchoolSort = context.schoolSort || currentSchoolSort;
     currentSupervisorFilter = context.supervisorFilter || currentSupervisorFilter;
+    if (/^\d{4}-\d{2}$/.test(context.supervisorMonth || '')) {
+      const [year, month] = context.supervisorMonth.split('-').map(Number);
+      currentViewDate = new Date(year, month - 1, 1);
+    }
     currentSchoolSearch = context.schoolSearch || '';
     currentAssetFilter = context.assetFilter || currentAssetFilter;
     currentImportFilter = context.importFilter || currentImportFilter;

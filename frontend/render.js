@@ -1629,6 +1629,15 @@ function supervisorOfficialMonthlyVisits(supervisor, fallback) {
   return Number.isFinite(Number(supervisor.monthlyVisits)) ? Number(supervisor.monthlyVisits) : fallback;
 }
 
+function supervisorViewMonthIsCurrent() {
+  const today = new Date();
+  return currentViewDate.getFullYear() === today.getFullYear() && currentViewDate.getMonth() === today.getMonth();
+}
+
+function supervisorMonthlyVisitsForView(supervisor, fallback) {
+  return supervisorViewMonthIsCurrent() ? supervisorOfficialMonthlyVisits(supervisor, fallback) : fallback;
+}
+
 function supervisorOfficialWeeklyVisits(supervisor) {
   return Number.isFinite(Number(supervisor.weeklyVisits)) ? Number(supervisor.weeklyVisits) : 0;
 }
@@ -1645,7 +1654,8 @@ function supervisorSheetMetrics(item) {
   const weeklyGoal = Number(supervisor.weeklyGoal || 0);
   const monthlyGoal = Number(supervisor.monthlyGoal || assigned || 1);
   const weeklyVisits = supervisorOfficialWeeklyVisits(supervisor);
-  const monthlyVisits = supervisorOfficialMonthlyVisits(supervisor, item.visits || 0);
+  const fallbackVisits = Number.isFinite(Number(item.monthlyVisitFallback)) ? Number(item.monthlyVisitFallback) : item.visits || 0;
+  const monthlyVisits = supervisorMonthlyVisitsForView(supervisor, fallbackVisits);
   return {
     assigned,
     weeklyGoal,
@@ -1662,6 +1672,8 @@ function renderSupervisors() {
   const metricCount = document.getElementById('supervisorMetricCount');
   const stats = supervisorStats();
   const visits = state.supervisorVisits || [];
+  const viewMonthKey = `${currentViewDate.getFullYear()}-${String(currentViewDate.getMonth() + 1).padStart(2, '0')}`;
+  const viewMonthLabel = supervisorSheetMonthLabel(viewMonthKey);
   const assignedSchoolCount = new Set(stats.flatMap((item) => item.assignedSchools)).size;
   const averageCoverage = stats.length
     ? Math.round(stats.reduce((sum, item) => sum + item.coverage, 0) / stats.length)
@@ -1695,6 +1707,8 @@ function renderSupervisors() {
   }
   const visitDate = document.getElementById('visitDate');
   if (visitDate && !visitDate.value) visitDate.value = new Date().toISOString().slice(0, 10);
+  const monthPicker = document.getElementById('supervisorMonthPicker');
+  if (monthPicker && monthPicker.value !== viewMonthKey) monthPicker.value = viewMonthKey;
 
   const panelGrid = document.getElementById('supervisorPanelGrid');
   if (panelGrid) {
@@ -1710,7 +1724,7 @@ function renderSupervisors() {
       const weeklyGoal = Number(supervisor.weeklyGoal || 0);
       const monthlyGoal = Number(supervisor.monthlyGoal || item.assignedSchools.length || 1);
       const weeklyVisits = supervisorOfficialWeeklyVisits(supervisor);
-      const monthlyVisits = supervisorOfficialMonthlyVisits(supervisor, localCount);
+      const monthlyVisits = supervisorMonthlyVisitsForView(supervisor, localCount);
       const weeklyIndicator = supervisor.weeklyIndicator || 'aviso';
       const monthlyIndicator = supervisor.monthlyIndicator || 'aviso';
       return {
@@ -1768,7 +1782,7 @@ function renderSupervisors() {
         </table>
       </div>
       <div class="supervisor-sheet-foot">
-        <span>Fonte: planilha oficial de supervisao</span>
+        <span>Fonte: planilha oficial de supervisao | Mes exibido: ${esc(viewMonthLabel)}</span>
         <span>${esc(syncedCount ? `Atualizada em ${timestampLabel(new Date(sheetRows.find((row) => row.supervisor.sourceSyncedAt)?.supervisor.sourceSyncedAt || Date.now()))}` : 'Aguardando sincronizacao')}</span>
       </div>
     `;
@@ -1779,7 +1793,11 @@ function renderSupervisors() {
     selectorList.innerHTML = stats.map((item) => `
       <div class="setechub-item setechub-clickable supervisor-list-card" onclick="openSupervisorRecord('${esc(item.supervisor.name)}')">
         ${(() => {
-          const metrics = supervisorSheetMetrics(item);
+          const selectedMonthCount = visits.filter((visit) => {
+            const date = new Date(`${visit.date}T00:00:00`);
+            return visit.supervisor === item.supervisor.name && date.getFullYear() === currentViewDate.getFullYear() && date.getMonth() === currentViewDate.getMonth();
+          }).length;
+          const metrics = supervisorSheetMetrics({ ...item, monthlyVisitFallback: selectedMonthCount });
           const monthlyIndicator = metrics.monthlyIndicator;
           return `
             <div class="setechub-head">
@@ -2062,6 +2080,8 @@ function renderSupervisorRecord() {
   const now = currentViewDate;
   const year = now.getFullYear();
   const month = now.getMonth();
+  const viewMonthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const viewMonthLabel = supervisorSheetMonthLabel(viewMonthKey);
   const allVisits = (state.supervisorVisits || []).filter((visit) => visit.supervisor === supervisor.name);
   const monthVisits = allVisits.filter((visit) => {
     const date = new Date(`${visit.date}T00:00:00`);
@@ -2069,7 +2089,7 @@ function renderSupervisorRecord() {
   });
   const visitedSchoolSet = new Set(monthVisits.map((visit) => visit.school));
   const pendingSchools = selectedStat.assignedSchools.filter((school) => !visitedSchoolSet.has(school));
-  const sheetMetrics = supervisorSheetMetrics(selectedStat);
+  const sheetMetrics = supervisorSheetMetrics({ ...selectedStat, monthlyVisitFallback: monthVisits.length });
   const monthlyGoal = sheetMetrics.monthlyGoal;
   const weeklyGoal = sheetMetrics.weeklyGoal;
   const monthlyVisitCount = sheetMetrics.monthlyVisits;
@@ -2087,7 +2107,7 @@ function renderSupervisorRecord() {
   const title = document.getElementById('supervisorRecordTitle');
   const subtitle = document.getElementById('supervisorRecordSubtitle');
   if (title) title.textContent = supervisor.name;
-  if (subtitle) subtitle.textContent = `${sheetMetrics.assigned} escola(s) | ${monthlyVisitCount}/${monthlyGoal} visita(s) no mes | ${goalMet ? 'meta cumprida' : 'meta pendente'}.`;
+  if (subtitle) subtitle.textContent = `${sheetMetrics.assigned} escola(s) | ${monthlyVisitCount}/${monthlyGoal} visita(s) em ${viewMonthLabel} | ${goalMet ? 'meta cumprida' : 'meta pendente'}.`;
   const refreshButton = document.getElementById('refreshSupervisorSheetBtn');
   if (refreshButton) {
     refreshButton.hidden = !supervisor.visitSourceUrl;
@@ -2119,13 +2139,13 @@ function renderSupervisorRecord() {
       <span class="diag-pill ${goalMet ? 'pill-ok' : 'pill-warn'}">${esc(String(goalPct))}%</span>
     </div>
     <div class="setechub-bar"><span style="width:${esc(String(Math.max(4, goalPct)))}%"></span></div>
-    <div class="sync-meta">${goalMet ? 'Meta de visitas cumprida no mes atual.' : `Faltam ${esc(String(Math.max(0, monthlyGoal - monthlyVisitCount)))} visita(s) para cumprir a meta.`}</div>
+    <div class="sync-meta">${goalMet ? `Meta de visitas cumprida em ${esc(viewMonthLabel)}.` : `Faltam ${esc(String(Math.max(0, monthlyGoal - monthlyVisitCount)))} visita(s) para cumprir a meta de ${esc(viewMonthLabel)}.`}</div>
   `;
 
   document.getElementById('supervisorRecordMetrics').innerHTML = [
     { label: 'Escolas', value: String(sheetMetrics.assigned), note: 'numero vindo da planilha' },
     { label: 'Semana', value: weeklyGoal ? `${weeklyVisitCount}/${weeklyGoal}` : String(weeklyVisitCount), note: `indicador ${supervisorIndicatorText(weeklyIndicator)}` },
-    { label: 'Visitadas', value: String(visitedSchoolSet.size), note: 'escolas distintas no mes' },
+    { label: 'Visitadas', value: String(visitedSchoolSet.size), note: `escolas distintas em ${viewMonthLabel}` },
     { label: 'Faltantes', value: String(sheetMetrics.pendingMonth), note: 'meta mensal menos visitas' },
     { label: 'Chamados', value: String(selectedStat.openCalls), note: 'ativos nas escolas vinculadas' },
     { label: 'Indicador mes', value: supervisorIndicatorText(monthlyIndicator), note: `${monthlyVisitCount}/${monthlyGoal} visita(s)` },

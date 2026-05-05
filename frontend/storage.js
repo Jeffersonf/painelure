@@ -931,6 +931,14 @@ function createDefaults() {
     ],
     directoryContacts: ureDirectoryContacts(pecs),
     officialLinks: [
+      {
+        id: uid(),
+        label: 'Planilha supervisores - abril de 2026',
+        url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS4b4nZ79Ev8139wvRESOX9YNedCB4PwNiqU2i-UbYUI3c4oKYrmuXjuiMS742RTluOFv94eGK0qMwd/pub?output=csv',
+        category: 'supervisor-sheet',
+        monthKey: '2026-04',
+        panelGid: ''
+      },
       { id: uid(), label: 'Portal da Diretoria de Ensino de Itapeva', url: 'https://deitapeva.educacao.sp.gov.br/' },
       { id: uid(), label: 'Escolas da URE Itapeva', url: 'https://deitapeva.educacao.sp.gov.br/escolas/' },
       { id: uid(), label: 'Lista de ramais da URE Itapeva', url: 'https://deitapeva.educacao.sp.gov.br/lista-de-ramais/' },
