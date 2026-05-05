@@ -1804,7 +1804,6 @@ function renderSupervisors() {
               <tr class="supervisor-sheet-row" onclick="openSupervisorRecord('${esc(row.supervisor.name)}')">
                 <td>
                   <strong>${esc(row.supervisor.name)}</strong>
-                  <span>${esc(row.supervisor.email || row.supervisor.phone || 'Supervisor educacional')}</span>
                 </td>
                 <td>${esc(String(row.assigned || row.item.assignedSchools.length))}</td>
                 <td>

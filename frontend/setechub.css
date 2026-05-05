@@ -2871,13 +2871,13 @@ textarea {
 
 .supervisor-sheet-table td > strong {
   display: block;
-  font-size: 13px;
-  line-height: 1.25;
+  font-size: 15px;
+  line-height: 1.28;
 }
 
 #painelSupervisor:fullscreen .supervisor-sheet-table td > strong,
 #painelSupervisor.supervisor-panel-fullscreen .supervisor-sheet-table td > strong {
-  font-size: 17px;
+  font-size: 19px;
 }
 
 .supervisor-sheet-table td > span {
