@@ -361,6 +361,12 @@ function applyAccessControl() {
   document.querySelectorAll('[data-admin-only]').forEach((node) => {
     node.hidden = !canManageUsers();
   });
+  const accountAdminButton = document.getElementById('accountAdminBtn');
+  if (accountAdminButton) {
+    const allowed = canManageUsers();
+    accountAdminButton.hidden = !allowed;
+    accountAdminButton.style.display = allowed ? '' : 'none';
+  }
   [
     'taskForm',
     'callForm',
