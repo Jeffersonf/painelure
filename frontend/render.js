@@ -724,9 +724,19 @@ function renderInventoryWorkspace() {
   const totalSchools = visibleSchools().length || 1;
   const coveragePct = Math.round((coveredSchools / totalSchools) * 100);
   const issuePct = totalUnits ? Math.round((alertUnits / totalUnits) * 100) : 0;
+  const inventorySchoolUpdatedAt = (schoolName) => {
+    const canonical = canonicalSchoolName(schoolName) || schoolName;
+    return state.inventoryUpdatedBySchool?.[canonical] || state.inventoryUpdatedAt || '';
+  };
+  const inventorySchoolUpdatedLabel = (schoolName) => {
+    const value = inventorySchoolUpdatedAt(schoolName);
+    return value ? timestampLabel(new Date(value)) : 'Nao registrada';
+  };
   const updatedAtNode = document.getElementById('inventoryUpdatedAtMeta');
   if (updatedAtNode) {
-    updatedAtNode.textContent = `Ultima atualizacao do inventario: ${state.inventoryUpdatedAt ? timestampLabel(new Date(state.inventoryUpdatedAt)) : 'nao registrada'}`;
+    updatedAtNode.textContent = regionalView
+      ? `Ultima atualizacao geral do inventario: ${state.inventoryUpdatedAt ? timestampLabel(new Date(state.inventoryUpdatedAt)) : 'nao registrada'}`
+      : `Ultima atualizacao desta escola: ${inventorySchoolUpdatedLabel(focusSchool)}`;
   }
   const schoolListAssets = state.schoolAssets.filter((item) => {
     if (!canViewSchool(item.school)) return false;
@@ -951,7 +961,7 @@ function renderInventoryWorkspace() {
         <div class="inventory-school-row-main">
           <div>
             <strong>${esc(item.school)}</strong>
-            <div class="sync-meta">CIE ${esc(item.cie || '--')} | ${esc(item.zone || '--')}</div>
+            <div class="sync-meta">CIE ${esc(item.cie || '--')} | ${esc(item.zone || '--')} | atualizado ${esc(inventorySchoolUpdatedLabel(item.school))}</div>
           </div>
           <div class="inventory-school-row-metrics">
             <span><strong>${esc(String(item.totalUnits))}</strong> total</span>
@@ -1003,7 +1013,7 @@ function renderInventoryWorkspace() {
           <div class="inventory-matrix-row">
             <button class="inventory-matrix-school" type="button" onclick="openSchoolRecord('${esc(row.school.name)}')">
               <span class="school-widget-avatar mini" style="${schoolAvatarStyle(row.school)}">${esc(schoolAvatarInitials(row.school.name))}</span>
-              <span><strong>${esc(row.school.name)}</strong></span>
+              <span><strong>${esc(row.school.name)}</strong><small>Atualizado ${esc(inventorySchoolUpdatedLabel(row.school.name))}</small></span>
             </button>
             ${row.cells.map((cell) => `
               <button class="inventory-matrix-cell ${cell.units ? 'has-value' : ''} ${cell.alertUnits ? 'has-alert' : ''}" type="button" onclick="openInventoryCategory('todos', '${esc(cell.category)}', '${esc(row.school.name)}')" ${cell.units ? '' : 'disabled'}>

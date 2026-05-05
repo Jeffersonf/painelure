@@ -825,6 +825,7 @@ function createDefaults() {
     stateVersion: STATE_VERSION,
     lastUpdatedAt: new Date().toISOString(),
     inventoryUpdatedAt: new Date().toISOString(),
+    inventoryUpdatedBySchool: {},
     profile: {
       name: 'Jefferson',
       unit: 'URE Itapeva',
@@ -1020,6 +1021,11 @@ function mergeState(saved) {
   const savedVersion = Number(repaired.stateVersion || 1);
   const lastUpdatedAt = repaired.lastUpdatedAt || new Date().toISOString();
   const inventoryUpdatedAt = repaired.inventoryUpdatedAt || lastUpdatedAt;
+  const inventoryUpdatedBySchool = repaired.inventoryUpdatedBySchool && typeof repaired.inventoryUpdatedBySchool === 'object'
+    ? Object.fromEntries(Object.entries(repaired.inventoryUpdatedBySchool)
+      .map(([school, value]) => [canonicalSchoolName(school) || school, value])
+      .filter(([school, value]) => school && value))
+    : {};
   const savedMunicipalities = Array.isArray(repaired.municipalities) ? repaired.municipalities.filter((item) => normalizeKey(item.name) !== normalizeKey('Nao definido')) : [];
   const savedSectors = Array.isArray(repaired.sectors) ? repaired.sectors : [];
   const savedDirectoryContacts = Array.isArray(repaired.directoryContacts) ? repaired.directoryContacts : [];
@@ -1071,6 +1077,7 @@ function mergeState(saved) {
     stateVersion: Math.max(STATE_VERSION, savedVersion),
     lastUpdatedAt,
     inventoryUpdatedAt,
+    inventoryUpdatedBySchool,
     profile: { ...base.profile, ...(repaired.profile || {}) },
     users: normalizeDefaultUserNames(mergeUniqueBy(
       base.users,

@@ -478,8 +478,19 @@ function createTaskFromSchool(id) {
   showPage('agenda');
 }
 
-function touchInventoryUpdatedAt() {
-  state.inventoryUpdatedAt = new Date().toISOString();
+function touchInventoryUpdatedAt(schools = []) {
+  const timestamp = new Date().toISOString();
+  state.inventoryUpdatedAt = timestamp;
+  const schoolList = Array.isArray(schools) ? schools : [schools];
+  const currentMap = state.inventoryUpdatedBySchool || {};
+  const nextMap = { ...currentMap };
+  schoolList
+    .map((school) => canonicalSchoolName(school) || school)
+    .filter(Boolean)
+    .forEach((school) => {
+      nextMap[school] = timestamp;
+    });
+  state.inventoryUpdatedBySchool = nextMap;
 }
 
 function cycleAsset(id) {
@@ -582,11 +593,11 @@ function rejectSchoolImport(id) {
   state.schoolImports = state.schoolImports.filter((item) => item.id !== id);
   if (importId.startsWith('seed-import-csv-') || /excel|csv|xlsx|xls|tsv/i.test(sourceType)) {
     state.schoolAssets = state.schoolAssets.filter((item) => !(normalizeKey(item.school) === key && String(item.id || '').startsWith('seed-csv-')));
-    touchInventoryUpdatedAt();
+    touchInventoryUpdatedAt(target.school);
   }
   if (importId.startsWith('seed-import-') && !importId.startsWith('seed-import-csv-')) {
     state.schoolAssets = state.schoolAssets.filter((item) => !(normalizeKey(item.school) === key && String(item.id || '').startsWith('seed-asset-')));
-    touchInventoryUpdatedAt();
+    touchInventoryUpdatedAt(target.school);
   }
   if (/rede adm|cameras instaladas|dvr|firewall/i.test(`${target.preview || ''} ${target.summary || ''}`)) {
     state.schoolNetworks = state.schoolNetworks.filter((item) => normalizeKey(item.school) !== key);
@@ -597,19 +608,21 @@ function rejectSchoolImport(id) {
 
 function cycleSchoolAsset(id) {
   if (!requireEditAccess()) return;
+  const target = state.schoolAssets.find((item) => item.id === id);
   const order = ['ok', 'manutencao', 'defeito'];
   state.schoolAssets = state.schoolAssets.map((item) => {
     if (item.id !== id) return item;
     return { ...item, status: order[(order.indexOf(item.status) + 1) % order.length] };
   });
-  touchInventoryUpdatedAt();
+  touchInventoryUpdatedAt(target?.school);
   refreshAll();
 }
 
 function removeSchoolAsset(id) {
   if (!requireEditAccess()) return;
+  const target = state.schoolAssets.find((item) => item.id === id);
   state.schoolAssets = state.schoolAssets.filter((item) => item.id !== id);
-  touchInventoryUpdatedAt();
+  touchInventoryUpdatedAt(target?.school);
   refreshAll();
 }
 
@@ -731,6 +744,13 @@ function renameSchoolReferences(previousName, nextName) {
   state.schoolProfiles = state.schoolProfiles.map((item) => item.school === previousName ? { ...item, school: nextName } : item);
   state.schoolImports = state.schoolImports.map((item) => item.school === previousName ? { ...item, school: nextName } : item);
   state.schoolAssets = state.schoolAssets.map((item) => item.school === previousName ? { ...item, school: nextName } : item);
+  if (state.inventoryUpdatedBySchool?.[previousName]) {
+    state.inventoryUpdatedBySchool = {
+      ...state.inventoryUpdatedBySchool,
+      [nextName]: state.inventoryUpdatedBySchool[previousName]
+    };
+    delete state.inventoryUpdatedBySchool[previousName];
+  }
   state.schoolNetworks = state.schoolNetworks.map((item) => item.school === previousName ? { ...item, school: nextName } : item);
   state.supervisors = (state.supervisors || []).map((supervisor) => ({
     ...supervisor,
@@ -749,6 +769,10 @@ function purgeSchoolReferences(name) {
   state.schoolProfiles = state.schoolProfiles.filter((item) => item.school !== name);
   state.schoolImports = state.schoolImports.filter((item) => item.school !== name);
   state.schoolAssets = state.schoolAssets.filter((item) => item.school !== name);
+  if (state.inventoryUpdatedBySchool?.[name]) {
+    state.inventoryUpdatedBySchool = { ...state.inventoryUpdatedBySchool };
+    delete state.inventoryUpdatedBySchool[name];
+  }
   state.schoolNetworks = state.schoolNetworks.filter((item) => item.school !== name);
   state.supervisors = (state.supervisors || []).map((supervisor) => ({
     ...supervisor,
@@ -1264,7 +1288,7 @@ async function importSchoolInventoryExcel(file) {
       ...imported.map((item) => item.school)
     ]));
     state.schoolAssets = [...imported, ...state.schoolAssets];
-    touchInventoryUpdatedAt();
+    touchInventoryUpdatedAt([...new Set(imported.map((item) => item.school))]);
     currentInventorySchool = imported[0]?.school || currentInventorySchool;
     currentInventoryStatus = 'todos';
     currentInventoryCategory = 'todas';
@@ -1439,7 +1463,7 @@ function setupEventListeners() {
     const notes = document.getElementById('schoolAssetNotes').value.trim();
     if (!school || !name) return;
     state.schoolAssets.unshift({ id: uid(), school, name, status, notes: formatSchoolAssetNotes(notes, quantity) });
-    touchInventoryUpdatedAt();
+    touchInventoryUpdatedAt(school);
     logSchoolEvent(school, 'inventory', `Equipamento adicionado manualmente: ${name}.`);
     event.target.reset();
     document.getElementById('schoolAssetQuantity').value = '1';
@@ -1469,7 +1493,7 @@ function setupEventListeners() {
         notes: row.notes
       });
     });
-    touchInventoryUpdatedAt();
+    touchInventoryUpdatedAt(school);
     logSchoolEvent(school, 'inventory', `Lote rapido importado com ${rows.length} item(ns).`);
     event.target.reset();
     statusNode.textContent = `${rows.length} item(ns) adicionados ao inventario da escola.`;
