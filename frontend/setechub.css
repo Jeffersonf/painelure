@@ -167,6 +167,168 @@ textarea {
   padding-inline: 10px;
 }
 
+.pt,
+.ct,
+.inventory-kicker,
+#inventoryHeroTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: .42em;
+}
+
+.school-directory-shell,
+.inventory-filter-shell,
+.inventory-manage-card {
+  background:
+    linear-gradient(145deg, rgba(90,245,200,.055), rgba(200,245,90,.026)),
+    var(--sf);
+}
+
+.school-directory-filters .fi,
+.inventory-filter-grid .fi,
+.setechub-form-school-asset .fi,
+#schoolAssetBulkForm .fi {
+  min-height: 44px;
+  border-color: color-mix(in srgb, var(--bd) 80%, rgba(90,245,200,.22));
+}
+
+.school-directory-row {
+  min-height: 98px;
+  padding: 16px;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  border-color: color-mix(in srgb, var(--bd) 78%, transparent);
+}
+
+.school-directory-row::after {
+  content: '›';
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(200,245,90,.08);
+  color: var(--ac);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.school-directory-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 15px;
+  background:
+    linear-gradient(145deg, rgba(90,245,200,.17), rgba(200,245,90,.08));
+}
+
+.school-directory-main strong {
+  font-size: 16.5px;
+  line-height: 1.22;
+}
+
+.school-directory-main span {
+  font-size: 12.5px;
+}
+
+.school-directory-meta > span:not(.diag-pill),
+.inventory-school-row-metrics span,
+.inventory-issue-meta span {
+  font-size: 12px;
+}
+
+.inventory-hero {
+  grid-template-columns: minmax(0, 1.18fr) minmax(360px, .82fr);
+  gap: 16px;
+}
+
+.inventory-hero-main,
+.inventory-hero-side,
+.inventory-focus-card,
+.inventory-category-card,
+.inventory-detail-card,
+.inventory-issues-card {
+  border-color: color-mix(in srgb, var(--bd) 70%, rgba(90,245,200,.24));
+  box-shadow: 0 16px 38px rgba(0,0,0,.12);
+}
+
+.inventory-hero-main h1 {
+  font-size: clamp(32px, 4vw, 52px);
+}
+
+.inventory-hero-main p {
+  font-size: 15px;
+}
+
+.inventory-hero-stat strong,
+.inventory-risk-top strong,
+.inventory-focus-metrics strong,
+.inventory-category-chip strong {
+  font-size: clamp(24px, 2vw, 32px);
+}
+
+.inventory-school-row {
+  grid-template-columns: 46px minmax(0, 1fr);
+  padding: 14px;
+}
+
+.inventory-rank {
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+  background:
+    linear-gradient(145deg, rgba(90,245,200,.18), rgba(200,245,90,.08));
+}
+
+.inventory-category-chip {
+  min-height: 104px;
+  padding: 15px;
+}
+
+.inventory-detail-card .setechub-table th,
+.inventory-detail-card .setechub-table td,
+.inventory-category-card .setechub-table th,
+.inventory-category-card .setechub-table td {
+  padding-block: 12px;
+  font-size: 13px;
+}
+
+#painelSupervisor .ct {
+  font-size: 20px;
+}
+
+#painelSupervisor .cs {
+  font-size: 14px;
+}
+
+.supervisor-sheet-card {
+  padding: 16px;
+}
+
+.supervisor-sheet-card strong {
+  font-size: 31px;
+}
+
+.supervisor-sheet-table th {
+  font-size: 12px;
+}
+
+.supervisor-sheet-table td {
+  font-size: 15px;
+}
+
+.supervisor-sheet-table td > strong {
+  font-size: 15.5px;
+}
+
+.supervisor-sheet-table td > span,
+.supervisor-sheet-foot {
+  font-size: 12.5px;
+}
+
+.supervisor-selector-btn span,
+.supervisor-card strong {
+  font-size: 14px;
+}
+
 @media (max-width: 920px) {
   .admin-user-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));

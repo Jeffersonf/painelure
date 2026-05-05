@@ -1413,10 +1413,74 @@ function refreshAll() {
   renderDiagnostics();
   renderUsers();
   renderAdminSchoolTools();
+  applySystemIcons();
   applyPrivacy();
   const searchInput = document.getElementById('sidebarSearch');
   if (searchInput && searchInput.value !== currentSearchQuery) {
     searchInput.value = currentSearchQuery;
   }
   saveUiContext();
+}
+
+const SYSTEM_TITLE_ICONS = {
+  'Painel': '📊',
+  'Agenda compartilhada': '🗓️',
+  'Agenda pessoal': '⭐',
+  'Nova visita CTC': '🚗',
+  'Agenda': '📅',
+  'Novo agendamento': '➕',
+  'Escolas': '🏫',
+  'Dados da escola': '🏫',
+  'Dados principais': '🪪',
+  'Contatos': '☎️',
+  'O que olhar agora': '🎯',
+  'Resumo técnico': '🧰',
+  'Atualizacao da ficha': '✏️',
+  'Atualização da ficha': '✏️',
+  'Histórico da escola': '🕘',
+  'Supervisores': '👥',
+  'Painel de supervisores': '📈',
+  'Meta mensal': '🎯',
+  'Indicadores do supervisor': '📌',
+  'Calendário de visitas': '🗓️',
+  'Escolas visitadas': '✅',
+  'Faltam visitas': '⏳',
+  'Todas as escolas vinculadas': '🧭',
+  'Registrar visita': '📝',
+  'Histórico de visitas': '🕘',
+  'Inventário': '💻',
+  'Inventário regional': '💻',
+  'Recorte': '🔎',
+  'Tipos': '🧩',
+  'Equipamentos': '🖥️',
+  'Manutenção e defeitos': '🛠️',
+  'Manutenção do inventário': '🧰',
+  'Relatórios e Automação': '📌',
+  'Resumo e histórico': '📝',
+  'Automacao de redes': '📄',
+  'Automação de redes': '📄',
+  'Minha conta': '👤',
+  'Configurações gerais': '⚙️',
+  'Informações': 'ℹ️',
+  'Links oficiais': '🔗',
+  'Organograma e setores': '🏢',
+  'Ramais e contatos': '☎️',
+  'Painel admin': '🔐',
+  'Categorias ocultas': '🗂️',
+  'Usuários e permissões': '👥',
+  'Escolas e vínculos': '🏫',
+  'Banco local': '💾',
+  'Servidor local': '🖥️',
+  'Migração do protótipo': '🚚',
+  'Diagnóstico local': '🧪',
+  'Importações da base': '📥'
+};
+
+function applySystemIcons() {
+  document.querySelectorAll('.pt, .ct, .inventory-kicker, #inventoryHeroTitle').forEach((node) => {
+    const raw = String(node.textContent || '').replace(/^[^\p{L}\p{N}]+/u, '').trim();
+    const icon = SYSTEM_TITLE_ICONS[raw];
+    if (!icon || String(node.textContent || '').trim().startsWith(icon)) return;
+    node.textContent = `${icon} ${raw}`;
+  });
 }
