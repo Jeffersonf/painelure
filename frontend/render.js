@@ -2175,18 +2175,18 @@ function renderSupervisorRecord() {
   `;
 
   document.getElementById('supervisorRecordMetrics').innerHTML = [
-    { label: 'Escolas', value: String(sheetMetrics.assigned), note: 'numero vindo da planilha' },
-    { label: 'Semana', value: weeklyGoal ? `${weeklyVisitCount}/${weeklyGoal}` : String(weeklyVisitCount), note: `indicador ${supervisorIndicatorText(weeklyIndicator)}` },
-    { label: 'Visitadas', value: String(visitedSchoolSet.size), note: `escolas distintas em ${viewMonthLabel}` },
-    { label: 'Faltantes', value: String(sheetMetrics.pendingMonth), note: 'meta mensal menos visitas' },
-    { label: 'Chamados', value: String(selectedStat.openCalls), note: 'ativos nas escolas vinculadas' },
+    { label: 'Escolas', value: String(sheetMetrics.assigned), note: 'Vindo da planilha' },
+    { label: 'Semana', value: weeklyGoal ? `${weeklyVisitCount}/${weeklyGoal}` : String(weeklyVisitCount), note: supervisorIndicatorText(weeklyIndicator) },
+    { label: 'Visitadas', value: String(visitedSchoolSet.size), note: viewMonthLabel },
+    { label: 'Faltantes', value: String(sheetMetrics.pendingMonth), note: 'Meta mensal' },
+    { label: 'Chamados', value: String(selectedStat.openCalls), note: 'Ativos vinculados' },
     { label: 'Indicador mes', value: supervisorIndicatorText(monthlyIndicator), note: `${monthlyVisitCount}/${monthlyGoal} visita(s)` },
-    { label: 'Historico', value: String(allVisits.length), note: 'registros importados' }
+    { label: 'Historico', value: String(allVisits.length), note: 'Importados' }
   ].map((item) => `
-    <div class="setechub-monitor-card compact">
-      <div class="sync-meta">${esc(item.label)}</div>
+    <div class="setechub-monitor-card compact supervisor-metric-card">
+      <div class="supervisor-metric-label">${esc(item.label)}</div>
       <strong>${esc(item.value)}</strong>
-      <div class="diag-pill">${esc(item.note)}</div>
+      <div class="supervisor-metric-note">${esc(item.note)}</div>
     </div>
   `).join('');
 

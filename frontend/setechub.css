@@ -3791,15 +3791,50 @@ textarea {
 }
 
 .compact-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .compact-grid .setechub-monitor-card {
   min-width: 0;
   display: grid;
   align-content: start;
-  gap: 7px;
+  gap: 9px;
   overflow: hidden;
+}
+
+#supervisorRecordMetrics {
+  gap: 10px;
+}
+
+#supervisorRecordMetrics .supervisor-metric-card {
+  min-height: 118px;
+  padding: 16px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02)),
+    rgba(255,255,255,.025);
+  border-color: rgba(255,255,255,.105);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+#supervisorRecordMetrics .supervisor-metric-label {
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#supervisorRecordMetrics .supervisor-metric-card strong {
+  margin: 0;
+  font-size: 24px;
+}
+
+#supervisorRecordMetrics .supervisor-metric-note {
+  align-self: end;
+  color: var(--ac);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-transform: none;
 }
 
 .setechub-clickable {
