@@ -226,6 +226,17 @@ function relationalRowId(key, item, index) {
   return String(item?.id || normalizeKey(`${key}-${item?.name || item?.school || item?.label || item?.text || index}`) || `${key}-${index}`);
 }
 
+function uniqueRelationalRowId(id, usedIds) {
+  let candidate = String(id || 'item');
+  let suffix = 2;
+  while (usedIds.has(candidate)) {
+    candidate = `${id}-${suffix}`;
+    suffix += 1;
+  }
+  usedIds.add(candidate);
+  return candidate;
+}
+
 function relationalValue(getter, item) {
   if (!getter) return null;
   const value = getter(item);
@@ -235,16 +246,20 @@ function relationalValue(getter, item) {
 function stateArrayRows(definition) {
   const list = Array.isArray(state[definition.key]) ? state[definition.key] : [];
   const now = new Date().toISOString();
-  return list.map((item, index) => ({
-    id: relationalRowId(definition.key, item, index),
-    label: relationalValue(definition.label, item),
-    ref: relationalValue(definition.ref, item),
-    ref2: relationalValue(definition.ref2, item),
-    period: relationalValue(definition.period, item),
-    status: relationalValue(definition.status, item),
-    payload: { ...item, id: item?.id || relationalRowId(definition.key, item, index) },
-    updated_at: now
-  }));
+  const usedIds = new Set();
+  return list.map((item, index) => {
+    const id = uniqueRelationalRowId(relationalRowId(definition.key, item, index), usedIds);
+    return {
+      id,
+      label: relationalValue(definition.label, item),
+      ref: relationalValue(definition.ref, item),
+      ref2: relationalValue(definition.ref2, item),
+      period: relationalValue(definition.period, item),
+      status: relationalValue(definition.status, item),
+      payload: { ...item, id },
+      updated_at: now
+    };
+  });
 }
 
 function stateSettingsRows() {
