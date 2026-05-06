@@ -53,6 +53,28 @@ const ROLE_LABELS = {
   supervisor: 'Supervisor'
 };
 
+const ROLE_EMOJIS = {
+  admin: '\u{1F6E1}\uFE0F',
+  dirigente: '\u{1F3DB}\uFE0F',
+  seintec: '\u{1F4BB}',
+  seom: '\u{1F3D7}\uFE0F',
+  ctc: '\u{1F697}',
+  pec: '\u{1F393}',
+  supervisor: '\u{1F9ED}'
+};
+
+function roleLabel(role) {
+  return ROLE_LABELS[role] || badgeText(role || 'operacao');
+}
+
+function roleEmoji(role) {
+  return ROLE_EMOJIS[role] || '\u{1F464}';
+}
+
+function roleDisplay(role) {
+  return `${roleEmoji(role)} ${roleLabel(role)}`;
+}
+
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
     '&': '&amp;',
@@ -271,6 +293,7 @@ function showPage(page) {
     page = defaultPageForUser();
   }
   currentPage = page;
+  document.body.dataset.page = page;
   sessionStorage.setItem(PAGE_KEY, page);
   document.querySelectorAll('.page').forEach((node) => node.classList.toggle('active', node.id === `page-${page}`));
   document.querySelectorAll('.nav-item, .fn-item').forEach((node) => {
@@ -477,9 +500,8 @@ function applyAccessControl() {
 
 function updateIdentity() {
   const user = currentUser() || state.users?.[0] || { name: state.profile.name, role: 'admin', pin: state.profile.pin };
-  const roleLabel = ROLE_LABELS[user.role] || badgeText(user.role || 'operacao');
   document.getElementById('uName').textContent = user.name;
-  document.getElementById('uRole').textContent = `👤 ${roleLabel}`;
+  document.getElementById('uRole').textContent = roleDisplay(user.role);
   setAvatarNode(document.getElementById('uAvatar'), user);
   setAvatarNode(document.getElementById('profilePhotoPreview'), user);
   document.getElementById('profileName').value = user.name;

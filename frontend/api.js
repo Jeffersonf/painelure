@@ -385,7 +385,7 @@ async function writeStateToSupabase(options = {}) {
 function scheduleSupabaseAutoSave() {
   if (!supabaseAutoSaveReady || supabaseAutoSaveSuspended || !supabaseConfigured()) return;
   window.clearTimeout(supabaseAutoSaveTimer);
-  supabaseAutoSaveTimer = window.setTimeout(flushSupabaseAutoSave, 1500);
+  supabaseAutoSaveTimer = window.setTimeout(flushSupabaseAutoSave, 5000);
 }
 
 async function flushSupabaseAutoSave() {

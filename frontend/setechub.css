@@ -7,6 +7,58 @@
   backdrop-filter: blur(20px);
 }
 
+body[data-page="schools"] .setechub-item,
+body[data-page="schools"] .school-widget-card,
+body[data-page="schools"] .school-preview-card,
+body[data-page="school-record"] .school-record-hero-main,
+body[data-page="school-record"] .school-record-metric,
+body[data-page="school-record"] .school-record-note-card,
+body[data-page="school-record"] .school-record-action-item,
+body[data-page="school-record"] .school-record-tech-card,
+body[data-page="school-record"] .school-detail-data-card,
+body[data-page="assets"] .inventory-filter-simple,
+body[data-page="assets"] .inventory-detail-card,
+body[data-page="assets"] .inventory-simple-row,
+body[data-page="assets"] .inventory-widget-card,
+body[data-page="assets"] .inventory-matrix-school,
+body[data-page="assets"] .inventory-matrix-cell,
+body[data-page="assets"] .inventory-matrix-stopped,
+body[data-page="assets"] .inventory-matrix-total,
+body[data-page="supervisors"] .supervisor-sheet-card,
+body[data-page="supervisors"] .supervisor-sheet-table-wrap,
+body[data-page="admin"] .setechub-item,
+body[data-page="admin"] .admin-user-row {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  transition: border-color .12s ease, background .12s ease, color .12s ease !important;
+}
+
+body[data-page="schools"] .setechub-item:hover,
+body[data-page="schools"] .school-widget-card:hover,
+body[data-page="school-record"] .school-record-action-item:hover,
+body[data-page="assets"] .inventory-simple-row:hover,
+body[data-page="assets"] .inventory-widget-card:hover,
+body[data-page="assets"] .inventory-matrix-school:hover,
+body[data-page="assets"] .inventory-matrix-cell.has-value:hover,
+body[data-page="assets"] .inventory-matrix-stopped:hover,
+body[data-page="assets"] .inventory-matrix-total:hover,
+body[data-page="supervisors"] .supervisor-sheet-row:hover,
+body[data-page="admin"] .setechub-item:hover {
+  transform: none !important;
+}
+
+body[data-page="schools"] .setechub-item,
+body[data-page="schools"] .school-widget-card,
+body[data-page="school-record"] .school-record-grid > *,
+body[data-page="assets"] .inventory-detail-card,
+body[data-page="assets"] .inventory-widget-card,
+body[data-page="supervisors"] .supervisor-sheet-panel,
+body[data-page="admin"] .admin-module {
+  content-visibility: auto;
+  contain-intrinsic-size: 280px;
+}
+
 [hidden] {
   display: none !important;
 }

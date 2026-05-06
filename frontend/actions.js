@@ -127,7 +127,7 @@ function exportSummary() {
   const summary = [
     'SETECHUB | Resumo operacional',
     `Responsavel: ${user?.name || state.profile.name}`,
-    `Perfil: ${ROLE_LABELS[user?.role] || state.profile.unit}`,
+    `Perfil: ${user?.role ? roleDisplay(user.role) : state.profile.unit}`,
     '',
     `Tarefas totais: ${state.tasks.length}`,
     `Tarefas concluidas: ${state.tasks.filter((item) => item.done).length}`,
@@ -160,13 +160,12 @@ async function toggleSupervisorPanelFullscreen() {
 }
 
 async function prepareSupervisorPresentation() {
-  const input = document.getElementById('supervisorPresentationMonth');
-  const monthKey = input?.value || viewMonthValue();
+  const monthKey = viewMonthValue();
   const [year, month] = String(monthKey || '').split('-').map(Number);
   if (year && month) currentViewDate = new Date(year, month - 1, 1);
   showPage('supervisors');
   const currentMonthKey = viewMonthValue(new Date());
-  const button = document.getElementById('prepareSupervisorPresentationBtn');
+  const button = document.getElementById('supervisorFullscreenBtn');
   if (button) {
     button.disabled = true;
     button.textContent = 'Preparando...';
@@ -191,7 +190,7 @@ async function prepareSupervisorPresentation() {
   } finally {
     if (button) {
       button.disabled = false;
-      button.textContent = 'Preparar apresentacao';
+      updateSupervisorFullscreenButton();
     }
   }
 }
@@ -201,7 +200,7 @@ function updateSupervisorFullscreenButton() {
   const panel = document.getElementById('painelSupervisor');
   if (!button || !panel) return;
   const active = document.fullscreenElement === panel || panel.classList.contains('supervisor-panel-fullscreen');
-  button.textContent = active ? 'Sair da tela cheia' : 'Tela cheia';
+  button.textContent = active ? 'Sair' : 'Apresentar';
   if (!active) panel.classList.remove('supervisor-presentation-mode');
 }
 
@@ -352,7 +351,7 @@ function findLoginUser(name, pin) {
 function loginCandidates(user) {
   const values = [user.login, user.name, user.supervisorName];
   if (user.role && !['supervisor', 'pec'].includes(user.role)) {
-    values.push(user.role, ROLE_LABELS[user.role]);
+    values.push(user.role, roleLabel(user.role));
   }
   return values.filter(Boolean);
 }
@@ -1925,8 +1924,7 @@ function setupEventListeners() {
   document.getElementById('checkSupabaseBtn')?.addEventListener('click', checkSupabaseConnection);
   document.getElementById('seedSupervisorVisitsBtn')?.addEventListener('click', addSupervisorTestVisits);
   document.getElementById('syncSupervisorSourcesBtn')?.addEventListener('click', syncSupervisorVisitSources);
-  document.getElementById('prepareSupervisorPresentationBtn')?.addEventListener('click', prepareSupervisorPresentation);
-  document.getElementById('supervisorFullscreenBtn')?.addEventListener('click', toggleSupervisorPanelFullscreen);
+  document.getElementById('supervisorFullscreenBtn')?.addEventListener('click', prepareSupervisorPresentation);
   document.getElementById('refreshSupervisorSheetBtn')?.addEventListener('click', syncCurrentSupervisorVisitSource);
   document.getElementById('randomUserPinBtn')?.addEventListener('click', fillRandomUserPin);
   document.getElementById('userPin')?.addEventListener('input', restrictPinInput);

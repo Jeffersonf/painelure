@@ -379,7 +379,7 @@ function renderDashboardOperationalLists() {
 function renderRoleDashboard(profileNode, roleCardsNode, attentionNode) {
   const user = currentUser() || {};
   const role = currentUserRole();
-  const roleLabel = ROLE_LABELS[role] || badgeText(role);
+  const roleLabel = roleDisplay(role);
   const schools = visibleSchools();
   const allSchools = state.schools || [];
   const schoolAlerts = schools.filter((school) => schoolAlertUnits(school.name) > 0).length;
@@ -1724,9 +1724,6 @@ function renderSupervisors() {
   const averageCoverage = stats.length
     ? Math.round(stats.reduce((sum, item) => sum + item.coverage, 0) / stats.length)
     : 0;
-  const presentationMonth = document.getElementById('supervisorPresentationMonth');
-  if (presentationMonth && presentationMonth.value !== viewMonthKey) presentationMonth.value = viewMonthKey;
-
   if (metricCount) metricCount.textContent = String(stats.length);
   const metricSchools = document.getElementById('supervisorMetricSchools');
   const metricVisits = document.getElementById('supervisorMetricVisits');
@@ -2428,7 +2425,7 @@ function renderTasks(filtered) {
   if (ownerSelect) {
     const selected = ownerSelect.value || currentUser()?.name || '';
     const users = (state.users || []).filter((item) => item.active !== false);
-    ownerSelect.innerHTML = users.map((user) => `<option value="${esc(user.name)}">${esc(user.name)} (${esc(ROLE_LABELS[user.role] || user.role)})</option>`).join('');
+    ownerSelect.innerHTML = users.map((user) => `<option value="${esc(user.name)}">${esc(user.name)} (${esc(roleDisplay(user.role))})</option>`).join('');
     ownerSelect.value = selected || currentUser()?.name || users[0]?.name || '';
   }
   const dateInput = document.getElementById('taskDate');
@@ -2932,7 +2929,7 @@ function renderUsers() {
     <div class="admin-user-row">
       <div class="admin-user-main">
         <strong>${esc(user.name)}</strong>
-        <div class="sync-meta">${esc(user.login || user.name)} | ${esc(ROLE_LABELS[user.role] || badgeText(user.role))}${user.supervisorName ? ` | ${esc(user.supervisorName)}` : ''} | PIN ${esc(user.pin || 'sem PIN')}</div>
+        <div class="sync-meta">${esc(user.login || user.name)} | ${esc(roleDisplay(user.role))}${user.supervisorName ? ` | ${esc(user.supervisorName)}` : ''} | PIN ${esc(user.pin || 'sem PIN')}</div>
       </div>
       <div class="admin-user-actions">
         <span class="diag-pill ${user.active === false ? 'pill-warn' : 'pill-ok'}">${user.active === false ? 'Inativo' : 'Ativo'}</span>
