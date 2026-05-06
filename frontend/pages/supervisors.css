@@ -5,6 +5,10 @@
   overflow: hidden;
 }
 
+#supervisorRecordWeeklyMatrixBox {
+  padding: 12px;
+}
+
 .supervisor-weekly-matrix-wrap {
   overflow: auto;
   max-height: min(58vh, 620px);
@@ -30,11 +34,11 @@
   top: 0;
   z-index: 2;
   padding: 8px 10px;
-  border: 1px solid rgba(255,255,255,.06);
+  border: 0;
   border-radius: 8px;
-  background: var(--sf);
-  color: var(--mt);
-  font-size: 10.5px;
+  background: rgba(255,255,255,.055);
+  color: var(--tx);
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   white-space: nowrap;
@@ -49,7 +53,7 @@
 }
 
 .supervisor-weekly-matrix th.week-col {
-  background: var(--sf);
+  background: rgba(255,255,255,.055);
 }
 
 .supervisor-weekly-matrix td {
