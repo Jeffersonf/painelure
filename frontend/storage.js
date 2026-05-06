@@ -1166,6 +1166,7 @@ function saveState() {
   state.stateVersion = STATE_VERSION;
   state.lastUpdatedAt = new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if (typeof scheduleSupabaseAutoSave === 'function') scheduleSupabaseAutoSave();
 }
 
 function mergeLegacyState(saved) {

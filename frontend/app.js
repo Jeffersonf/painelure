@@ -29,6 +29,11 @@ let currentViewDate = new Date();
 let serverStatus = { available: false, message: 'Servidor local nao verificado.' };
 let serverSnapshots = [];
 let supabaseStatus = { configured: false, message: 'Supabase nao configurado.' };
+let supabaseAutoSaveReady = false;
+let supabaseAutoSaveSuspended = false;
+let supabaseAutoSaveTimer = null;
+let supabaseAutoSaveBusy = false;
+let supabaseAutoSavePending = false;
 let searchTimer = null;
 
 const PAGE_KEY = 'setechub_page';

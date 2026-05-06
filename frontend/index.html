@@ -860,6 +860,17 @@
         <div class="sync-meta" id="backupStatusMeta">Backup ainda nao exportado nesta sessao.</div>
       </div>
     </div>
+    <div class="box admin-module" data-admin-only>
+      <div class="bh">
+        <div><div class="ct">Banco online</div><div class="cs">Supabase agora e a base compartilhada entre computadores.</div></div>
+      </div>
+      <div class="setechub-action-col">
+        <button class="btn btn-p" id="saveSupabaseBtn" type="button">Salvar agora no Supabase</button>
+        <button class="btn btn-g" id="loadSupabaseBtn" type="button">Carregar do Supabase</button>
+        <button class="btn btn-g" id="checkSupabaseBtn" type="button">Testar conexao</button>
+        <div class="sync-meta" id="supabaseStatusMeta">Supabase nao verificado.</div>
+      </div>
+    </div>
     <div class="box admin-module">
       <div class="bh">
         <div><div class="ct">🖥️ Servidor local</div><div class="cs">Salve e carregue o estado por uma API local quando o app estiver rodando pelo Node.</div></div>
@@ -914,11 +925,11 @@
 <datalist id="officialSchoolOptions"></datalist>
 
 <script src="./school-data.js?v=20260505-login-refresh"></script>
-<script src="./storage.js?v=20260506-presentation-db"></script>
-<script src="./app.js?v=20260505-supervisor-indicators"></script>
+<script src="./storage.js?v=20260506-online-db"></script>
+<script src="./app.js?v=20260506-online-db"></script>
 <script src="./render.js?v=20260506-presentation-db"></script>
-<script src="./api.js?v=20260505-supervisor-indicators"></script>
+<script src="./api.js?v=20260506-online-db"></script>
 <script src="./actions.js?v=20260506-presentation-db"></script>
-<script src="./bootstrap.js?v=20260505-login-refresh"></script>
+<script src="./bootstrap.js?v=20260506-online-db"></script>
 </body>
 </html>

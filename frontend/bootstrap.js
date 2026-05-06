@@ -4,8 +4,6 @@ applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
 setupEventListeners();
 restoreUiContext();
 restorePageFromHash();
-refreshAll();
-showPage(currentPage || sessionStorage.getItem(PAGE_KEY) || 'dashboard');
 updateSupabaseStatus(
   supabaseConfig().url && supabaseConfig().anonKey
     ? 'Supabase configurado neste navegador.'
@@ -32,23 +30,31 @@ window.addEventListener('hashchange', () => {
 
 document.addEventListener('fullscreenchange', updateSupervisorFullscreenButton);
 
-if (sessionStorage.getItem(SESSION_KEY) === 'ok') {
-  if (!sessionStorage.getItem(ACTIVE_USER_KEY)) {
-    const fallbackUser = (state.users || []).find((item) => item.role === 'admin') || state.users?.[0];
-    if (fallbackUser) sessionStorage.setItem(ACTIVE_USER_KEY, fallbackUser.id);
-  }
-  if (currentUser()) {
-    setLoginVisible(false);
+function restoreLoginState() {
+  if (sessionStorage.getItem(SESSION_KEY) === 'ok') {
+    if (!sessionStorage.getItem(ACTIVE_USER_KEY)) {
+      const fallbackUser = (state.users || []).find((item) => item.role === 'admin') || state.users?.[0];
+      if (fallbackUser) sessionStorage.setItem(ACTIVE_USER_KEY, fallbackUser.id);
+    }
+    if (currentUser()) {
+      setLoginVisible(false);
+    } else {
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(ACTIVE_USER_KEY);
+      setLoginVisible(true);
+    }
   } else {
-    sessionStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(ACTIVE_USER_KEY);
     setLoginVisible(true);
   }
-} else {
-  setLoginVisible(true);
 }
 
 (async () => {
+  await initializeSupabaseState();
+  refreshAll();
+  showPage(currentPage || sessionStorage.getItem(PAGE_KEY) || 'dashboard');
+  restoreLoginState();
+  supabaseAutoSaveReady = true;
+  scheduleSupabaseAutoSave();
   await refreshServerHealth();
   await syncFromServerIfUseful();
   await loadServerSnapshots();

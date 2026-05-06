@@ -161,6 +161,11 @@ function supabaseConfig() {
   };
 }
 
+function supabaseConfigured() {
+  const config = supabaseConfig();
+  return !!(config.url && config.anonKey);
+}
+
 function updateSupabaseStatus(message, configured = false) {
   supabaseStatus = { configured, message };
   const node = document.getElementById('supabaseStatusMeta');
@@ -205,33 +210,110 @@ async function checkSupabaseConnection() {
   }
 }
 
-async function saveStateToSupabase() {
-  if (!canManageUsers()) return;
+async function writeStateToSupabase(options = {}) {
   try {
     await supabaseRequest('app_state?on_conflict=id', {
       method: 'POST',
       headers: { Prefer: 'return=representation,resolution=merge-duplicates' },
       body: JSON.stringify({ id: 'setechub_state', state, updated_at: new Date().toISOString() })
     });
-    updateSupabaseStatus('Estado salvo no Supabase.', true);
+    updateSupabaseStatus(options.auto ? 'Banco online sincronizado.' : 'Estado salvo no Supabase.', true);
+    return true;
   } catch (error) {
     updateSupabaseStatus(`Nao foi possivel salvar no Supabase: ${error.message}`, false);
+    return false;
   }
 }
 
-async function loadStateFromSupabase() {
+function scheduleSupabaseAutoSave() {
+  if (!supabaseAutoSaveReady || supabaseAutoSaveSuspended || !supabaseConfigured()) return;
+  window.clearTimeout(supabaseAutoSaveTimer);
+  supabaseAutoSaveTimer = window.setTimeout(flushSupabaseAutoSave, 1500);
+}
+
+async function flushSupabaseAutoSave() {
+  if (!supabaseAutoSaveReady || supabaseAutoSaveSuspended || !supabaseConfigured()) return;
+  if (supabaseAutoSaveBusy) {
+    supabaseAutoSavePending = true;
+    return;
+  }
+  supabaseAutoSaveBusy = true;
+  supabaseAutoSavePending = false;
+  await writeStateToSupabase({ auto: true });
+  supabaseAutoSaveBusy = false;
+  if (supabaseAutoSavePending) scheduleSupabaseAutoSave();
+}
+
+async function saveStateToSupabase() {
   if (!canManageUsers()) return;
+  await writeStateToSupabase();
+}
+
+function stateDateValue(value) {
+  const date = new Date(value || 0);
+  const time = date.getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
+async function fetchSupabaseStateRow() {
+  const rows = await supabaseRequest('app_state?select=state,updated_at&id=eq.setechub_state&limit=1');
+  return rows?.[0] || null;
+}
+
+async function initializeSupabaseState() {
+  if (!supabaseConfigured()) {
+    updateSupabaseStatus('Supabase nao configurado.', false);
+    return false;
+  }
   try {
-    const rows = await supabaseRequest('app_state?select=state,updated_at&id=eq.setechub_state&limit=1');
-    const remoteState = rows?.[0]?.state;
+    const localRaw = localStorage.getItem(STORAGE_KEY);
+    const localState = localRaw ? mergeState(JSON.parse(localRaw)) : state;
+    const localTime = stateDateValue(localState?.lastUpdatedAt);
+    const row = await fetchSupabaseStateRow();
+    const remoteState = row?.state ? mergeState(row.state) : null;
+    const remoteTime = Math.max(stateDateValue(row?.updated_at), stateDateValue(remoteState?.lastUpdatedAt));
+
+    if (remoteState && (!localRaw || remoteTime >= localTime)) {
+      supabaseAutoSaveSuspended = true;
+      state = remoteState;
+      saveState();
+      supabaseAutoSaveSuspended = false;
+      updateSupabaseStatus(`Banco online carregado. Atualizado em ${row.updated_at || 'data nao informada'}.`, true);
+      return true;
+    }
+
+    state = localState;
+    updateSupabaseStatus(
+      remoteState
+        ? 'Cache deste navegador mais recente; atualizando banco online.'
+        : 'Banco online vazio; criando estado inicial.',
+      true
+    );
+    await writeStateToSupabase({ auto: true });
+    return true;
+  } catch (error) {
+    supabaseAutoSaveSuspended = false;
+    updateSupabaseStatus(`Falha ao iniciar banco online: ${error.message}. Usando cache local.`, false);
+    return false;
+  }
+}
+
+async function loadStateFromSupabase(options = {}) {
+  if (!options.allowAnyUser && !canManageUsers()) return;
+  try {
+    const row = await fetchSupabaseStateRow();
+    const remoteState = row?.state;
     if (!remoteState) {
       updateSupabaseStatus('Nenhum estado setechub_state encontrado no Supabase.', true);
       return;
     }
+    supabaseAutoSaveSuspended = true;
     state = mergeState(remoteState);
     refreshAll();
-    updateSupabaseStatus(`Estado carregado do Supabase. Atualizado em ${rows[0].updated_at || 'data nao informada'}.`, true);
+    supabaseAutoSaveSuspended = false;
+    updateSupabaseStatus(`Estado carregado do Supabase. Atualizado em ${row.updated_at || 'data nao informada'}.`, true);
   } catch (error) {
+    supabaseAutoSaveSuspended = false;
     updateSupabaseStatus(`Nao foi possivel carregar do Supabase: ${error.message}`, false);
   }
 }
