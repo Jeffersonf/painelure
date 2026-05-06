@@ -1659,21 +1659,30 @@ function supervisorOfficialWeeklyVisits(supervisor) {
   return Number.isFinite(Number(supervisor.weeklyVisits)) ? Number(supervisor.weeklyVisits) : 0;
 }
 
-function supervisorWeekOfMonth(date) {
-  return Math.ceil(Number(date.getDate() || 1) / 7);
+function supervisorViewWeekOneStart() {
+  const firstDay = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth(), 1);
+  const start = new Date(firstDay);
+  start.setDate(firstDay.getDate() - firstDay.getDay());
+  return start;
+}
+
+function supervisorDateWeekForView(date) {
+  const start = supervisorViewWeekOneStart();
+  const current = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.floor((current - start) / 86400000);
+  if (diffDays < 0) return 0;
+  return Math.floor(diffDays / 7) + 1;
 }
 
 function supervisorLastWeekOfViewMonth() {
-  return supervisorWeekOfMonth(new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 1, 0));
+  return supervisorDateWeekForView(new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 1, 0));
 }
 
 function supervisorVisitsInViewWeek(visits, supervisorName, weekNumber) {
   return (visits || []).filter((visit) => {
     if (visit.supervisor !== supervisorName) return false;
     const date = new Date(`${visit.date}T00:00:00`);
-    return date.getFullYear() === currentViewDate.getFullYear() &&
-      date.getMonth() === currentViewDate.getMonth() &&
-      supervisorWeekOfMonth(date) === weekNumber;
+    return supervisorDateWeekForView(date) === weekNumber;
   }).length;
 }
 
@@ -2594,7 +2603,6 @@ function renderSchools() {
       .map((school) => `<option value="${esc(school.name)}"></option>`)
       .join('');
   }
-  renderSchoolImports();
 }
 
 function renderAssets() {

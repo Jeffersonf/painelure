@@ -1511,35 +1511,7 @@ function refreshAll() {
   syncFilterButtons('school');
   syncFilterButtons('directory');
   renderSetupStats();
-  renderDashboardHero();
-  renderDashboardAccess();
-  renderDashboardOperationalLists();
-  renderPendingQueue();
-  renderOperationsCenter();
-  renderMetrics();
-  renderFocus();
-  renderWeekBadges();
-  renderTimeline();
-  renderChecklist();
-  renderPonto();
-  renderRoutes();
-  renderMunicipalities();
-  renderOfficialData();
-  renderSectors();
-  renderDirectoryContacts();
-  renderCtcAgenda();
-  renderTasks();
-  renderCalls();
-  renderCallHistory();
-  renderSchools();
-  renderSupervisors();
-  renderSupervisorRecord();
-  renderSchoolDetail();
-  renderAssets();
-  renderReports();
-  renderDiagnostics();
-  renderUsers();
-  renderAdminSchoolTools();
+  renderCurrentPage();
   applySystemIcons();
   applyPrivacy();
   const searchInput = document.getElementById('sidebarSearch');
@@ -1547,6 +1519,74 @@ function refreshAll() {
     searchInput.value = currentSearchQuery;
   }
   saveUiContext();
+}
+
+function renderCurrentPage(page = currentPage) {
+  if (page === 'dashboard') {
+    renderDashboardHero();
+    renderDashboardAccess();
+    renderDashboardOperationalLists();
+    renderPendingQueue();
+    renderOperationsCenter();
+    renderMetrics();
+    renderFocus();
+    renderWeekBadges();
+    return;
+  }
+  if (page === 'agenda') {
+    renderTimeline();
+    renderChecklist();
+    renderPonto();
+    renderRoutes();
+    renderTasks();
+    return;
+  }
+  if (page === 'ctc') {
+    renderCtcAgenda();
+    return;
+  }
+  if (page === 'calls') {
+    renderCalls();
+    renderCallHistory();
+    return;
+  }
+  if (page === 'schools') {
+    renderSchools();
+    return;
+  }
+  if (page === 'school-record') {
+    renderSchoolDetail();
+    renderSchoolImports();
+    return;
+  }
+  if (page === 'supervisors') {
+    renderSupervisors();
+    return;
+  }
+  if (page === 'supervisor-record') {
+    renderSupervisorRecord();
+    return;
+  }
+  if (page === 'assets') {
+    renderAssets();
+    return;
+  }
+  if (page === 'reports') {
+    renderReports();
+    return;
+  }
+  if (page === 'info' || page === 'settings') {
+    renderMunicipalities();
+    renderOfficialData();
+    renderSectors();
+    renderDirectoryContacts();
+    return;
+  }
+  if (page === 'admin') {
+    renderDiagnostics();
+    renderUsers();
+    renderAdminSchoolTools();
+  }
 }
 
 const SYSTEM_TITLE_ICONS = {

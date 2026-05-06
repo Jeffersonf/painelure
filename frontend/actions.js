@@ -195,6 +195,19 @@ async function prepareSupervisorPresentation() {
   }
 }
 
+async function syncSupervisorSourcesForCurrentMonth() {
+  const monthKey = viewMonthValue();
+  const currentMonthKey = viewMonthValue(new Date());
+  if (monthKey !== currentMonthKey) {
+    const link = supervisorMonthlySheetLinks().find((item) => item.monthKey === monthKey);
+    if (link) {
+      await syncSupervisorMonthlySheet(link.id);
+      return;
+    }
+  }
+  await syncSupervisorVisitSources();
+}
+
 function updateSupervisorFullscreenButton() {
   const button = document.getElementById('supervisorFullscreenBtn');
   const panel = document.getElementById('painelSupervisor');
@@ -751,8 +764,7 @@ function openMainNavigationPage(page) {
     currentInventorySearch = '';
   }
   showPage(page);
-  if (page === 'assets') renderAssets();
-  if (page === 'schools') renderSchools();
+  renderCurrentPage(page);
 }
 
 function openCallCategory(filter = 'todos') {
@@ -1825,6 +1837,7 @@ function setupEventListeners() {
     if (!pageButton) return;
     event.preventDefault();
     showPage(pageButton.dataset.openPage);
+    renderCurrentPage(pageButton.dataset.openPage);
   });
   document.addEventListener('click', (event) => {
     const shiftButton = event.target.closest('[data-focus-shift]');
@@ -1922,7 +1935,7 @@ function setupEventListeners() {
   document.getElementById('loadSupabaseBtn')?.addEventListener('click', loadStateFromSupabase);
   document.getElementById('checkSupabaseBtn')?.addEventListener('click', checkSupabaseConnection);
   document.getElementById('seedSupervisorVisitsBtn')?.addEventListener('click', addSupervisorTestVisits);
-  document.getElementById('syncSupervisorSourcesBtn')?.addEventListener('click', syncSupervisorVisitSources);
+  document.getElementById('syncSupervisorSourcesBtn')?.addEventListener('click', syncSupervisorSourcesForCurrentMonth);
   document.getElementById('supervisorFullscreenBtn')?.addEventListener('click', prepareSupervisorPresentation);
   document.getElementById('refreshSupervisorSheetBtn')?.addEventListener('click', syncCurrentSupervisorVisitSource);
   document.getElementById('randomUserPinBtn')?.addEventListener('click', fillRandomUserPin);
