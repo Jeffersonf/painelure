@@ -200,24 +200,166 @@ async function supabaseRequest(path, options = {}) {
   return response.json();
 }
 
+const RELATIONAL_STATE_TABLES = [
+  { key: 'users', table: 'setechub_users', label: (item) => item.name, ref: (item) => item.role, status: (item) => item.active === false ? 'inactive' : 'active' },
+  { key: 'municipalities', table: 'setechub_municipalities', label: (item) => item.name },
+  { key: 'sectors', table: 'setechub_sectors', label: (item) => item.name, ref: (item) => item.code },
+  { key: 'directoryContacts', table: 'setechub_directory_contacts', label: (item) => item.name, ref: (item) => item.sector },
+  { key: 'officialLinks', table: 'setechub_official_links', label: (item) => item.label, ref: (item) => item.category, period: (item) => item.monthKey },
+  { key: 'checklist', table: 'setechub_checklist_items', label: (item) => item.text, status: (item) => item.done ? 'done' : 'open' },
+  { key: 'tasks', table: 'setechub_tasks', label: (item) => item.text || item.title, ref: (item) => item.place || item.scope, status: (item) => item.done ? 'done' : 'open' },
+  { key: 'calls', table: 'setechub_calls', label: (item) => item.title || item.problem, ref: (item) => item.school, status: (item) => item.status },
+  { key: 'schools', table: 'setechub_schools', label: (item) => item.name, ref: (item) => item.cie, ref2: (item) => item.zone, status: (item) => item.status },
+  { key: 'supervisors', table: 'setechub_supervisors', label: (item) => item.name, ref: (item) => item.email, status: (item) => item.monthlyIndicator || item.indicator },
+  { key: 'supervisorVisits', table: 'setechub_supervisor_visits', label: (item) => item.supervisor, ref: (item) => item.school, period: (item) => item.date, status: (item) => item.type },
+  { key: 'schoolProfiles', table: 'setechub_school_profiles', label: (item) => item.school, ref: (item) => item.municipality },
+  { key: 'schoolImports', table: 'setechub_school_imports', label: (item) => item.label || item.filename, ref: (item) => item.school, status: (item) => item.reviewStatus },
+  { key: 'schoolAssets', table: 'setechub_school_assets', label: (item) => item.name, ref: (item) => item.school, status: (item) => item.status },
+  { key: 'schoolNetworks', table: 'setechub_school_networks', label: (item) => item.school, ref: (item) => item.adminNetwork, ref2: (item) => item.pedNetwork },
+  { key: 'assets', table: 'setechub_assets', label: (item) => item.name, ref: (item) => item.place, status: (item) => item.status },
+  { key: 'notes', table: 'setechub_notes', label: (item) => item.title || item.text, ref: (item) => item.owner || item.createdBy }
+];
+
+const RELATIONAL_SETTINGS_TABLE = 'setechub_settings';
+
+function relationalRowId(key, item, index) {
+  return String(item?.id || normalizeKey(`${key}-${item?.name || item?.school || item?.label || item?.text || index}`) || `${key}-${index}`);
+}
+
+function relationalValue(getter, item) {
+  if (!getter) return null;
+  const value = getter(item);
+  return value === undefined || value === null || value === '' ? null : String(value);
+}
+
+function stateArrayRows(definition) {
+  const list = Array.isArray(state[definition.key]) ? state[definition.key] : [];
+  const now = new Date().toISOString();
+  return list.map((item, index) => ({
+    id: relationalRowId(definition.key, item, index),
+    label: relationalValue(definition.label, item),
+    ref: relationalValue(definition.ref, item),
+    ref2: relationalValue(definition.ref2, item),
+    period: relationalValue(definition.period, item),
+    status: relationalValue(definition.status, item),
+    payload: { ...item, id: item?.id || relationalRowId(definition.key, item, index) },
+    updated_at: now
+  }));
+}
+
+function stateSettingsRows() {
+  const now = new Date().toISOString();
+  return [
+    { id: 'profile', payload: state.profile || {}, updated_at: now },
+    { id: 'officialContacts', payload: state.officialContacts || {}, updated_at: now },
+    { id: 'histories', payload: state.histories || {}, updated_at: now },
+    { id: 'ponto', payload: state.ponto || {}, updated_at: now },
+    { id: 'redes', payload: state.redes || {}, updated_at: now },
+    {
+      id: 'metadata',
+      payload: {
+        stateVersion: state.stateVersion,
+        lastUpdatedAt: state.lastUpdatedAt,
+        lastBackupAt: state.lastBackupAt,
+        inventoryUpdatedAt: state.inventoryUpdatedAt,
+        inventoryUpdatedBySchool: state.inventoryUpdatedBySchool || {},
+        inventoryReplacementSchools: state.inventoryReplacementSchools || []
+      },
+      updated_at: now
+    }
+  ];
+}
+
+async function replaceSupabaseTable(table, rows) {
+  await supabaseRequest(`${table}?id=not.is.null`, {
+    method: 'DELETE',
+    headers: { Prefer: 'return=minimal' }
+  });
+  if (!rows.length) return;
+  for (let index = 0; index < rows.length; index += 500) {
+    await supabaseRequest(table, {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify(rows.slice(index, index + 500))
+    });
+  }
+}
+
+async function writeStateToRelationalSupabase() {
+  for (const definition of RELATIONAL_STATE_TABLES) {
+    await replaceSupabaseTable(definition.table, stateArrayRows(definition));
+  }
+  await replaceSupabaseTable(RELATIONAL_SETTINGS_TABLE, stateSettingsRows());
+}
+
+async function readRelationalRows(table) {
+  return supabaseRequest(`${table}?select=id,payload&order=id.asc`);
+}
+
+async function loadStateFromRelationalSupabase() {
+  const next = {};
+  let rowCount = 0;
+  for (const definition of RELATIONAL_STATE_TABLES) {
+    const rows = await readRelationalRows(definition.table);
+    rowCount += rows.length;
+    next[definition.key] = rows.map((row) => row.payload).filter(Boolean);
+  }
+  const settingsRows = await readRelationalRows(RELATIONAL_SETTINGS_TABLE);
+  rowCount += settingsRows.length;
+  if (!rowCount) throw new Error('Banco relacional ainda vazio.');
+  const settings = Object.fromEntries(settingsRows.map((row) => [row.id, row.payload || {}]));
+  const metadata = settings.metadata || {};
+  return mergeState({
+    ...next,
+    stateVersion: metadata.stateVersion,
+    lastUpdatedAt: metadata.lastUpdatedAt,
+    lastBackupAt: metadata.lastBackupAt,
+    inventoryUpdatedAt: metadata.inventoryUpdatedAt,
+    inventoryUpdatedBySchool: metadata.inventoryUpdatedBySchool,
+    inventoryReplacementSchools: metadata.inventoryReplacementSchools,
+    profile: settings.profile,
+    officialContacts: settings.officialContacts,
+    histories: settings.histories,
+    ponto: settings.ponto,
+    redes: settings.redes
+  });
+}
+
 async function checkSupabaseConnection() {
   if (!canManageUsers()) return;
   try {
     await supabaseRequest('app_state?select=id,updated_at&id=eq.setechub_state&limit=1');
-    updateSupabaseStatus('Supabase conectado. Tabela app_state acessivel.', true);
+    try {
+      await readRelationalRows(RELATIONAL_SETTINGS_TABLE);
+      updateSupabaseStatus('Supabase conectado. Banco relacional acessivel.', true);
+    } catch {
+      updateSupabaseStatus('Supabase conectado. JSON online ativo; aplique a migration relacional.', true);
+    }
   } catch (error) {
     updateSupabaseStatus(`Falha no Supabase: ${error.message}`, false);
   }
 }
 
 async function writeStateToSupabase(options = {}) {
+  let relationalSynced = false;
   try {
     await supabaseRequest('app_state?on_conflict=id', {
       method: 'POST',
       headers: { Prefer: 'return=representation,resolution=merge-duplicates' },
       body: JSON.stringify({ id: 'setechub_state', state, updated_at: new Date().toISOString() })
     });
-    updateSupabaseStatus(options.auto ? 'Banco online sincronizado.' : 'Estado salvo no Supabase.', true);
+    try {
+      await writeStateToRelationalSupabase();
+      relationalSynced = true;
+    } catch (error) {
+      console.warn('Banco relacional Supabase indisponivel; mantendo JSON online.', error);
+    }
+    updateSupabaseStatus(
+      relationalSynced
+        ? (options.auto ? 'Banco relacional sincronizado.' : 'Estado salvo no banco relacional.')
+        : (options.auto ? 'Banco JSON sincronizado. Migration relacional pendente.' : 'Estado salvo no JSON do Supabase.'),
+      true
+    );
     return true;
   } catch (error) {
     updateSupabaseStatus(`Nao foi possivel salvar no Supabase: ${error.message}`, false);
@@ -269,6 +411,24 @@ async function initializeSupabaseState() {
     const localRaw = localStorage.getItem(STORAGE_KEY);
     const localState = localRaw ? mergeState(JSON.parse(localRaw)) : state;
     const localTime = stateDateValue(localState?.lastUpdatedAt);
+    try {
+      const relationalState = await loadStateFromRelationalSupabase();
+      const relationalTime = stateDateValue(relationalState?.lastUpdatedAt);
+      if (!localRaw || relationalTime >= localTime) {
+        supabaseAutoSaveSuspended = true;
+        state = relationalState;
+        saveState();
+        supabaseAutoSaveSuspended = false;
+        updateSupabaseStatus('Banco relacional carregado.', true);
+        return true;
+      }
+      state = localState;
+      updateSupabaseStatus('Cache deste navegador mais recente; atualizando banco relacional.', true);
+      await writeStateToSupabase({ auto: true });
+      return true;
+    } catch (error) {
+      console.warn('Banco relacional Supabase indisponivel; usando app_state JSON.', error);
+    }
     const row = await fetchSupabaseStateRow();
     const remoteState = row?.state ? mergeState(row.state) : null;
     const remoteTime = Math.max(stateDateValue(row?.updated_at), stateDateValue(remoteState?.lastUpdatedAt));
@@ -301,6 +461,17 @@ async function initializeSupabaseState() {
 async function loadStateFromSupabase(options = {}) {
   if (!options.allowAnyUser && !canManageUsers()) return;
   try {
+    try {
+      supabaseAutoSaveSuspended = true;
+      state = await loadStateFromRelationalSupabase();
+      refreshAll();
+      supabaseAutoSaveSuspended = false;
+      updateSupabaseStatus('Estado carregado do banco relacional.', true);
+      return;
+    } catch (error) {
+      supabaseAutoSaveSuspended = false;
+      console.warn('Banco relacional Supabase indisponivel; carregando app_state JSON.', error);
+    }
     const row = await fetchSupabaseStateRow();
     const remoteState = row?.state;
     if (!remoteState) {
