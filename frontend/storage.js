@@ -1227,7 +1227,8 @@ function mergeState(saved) {
     inventoryUpdatedBySchool,
     settings: {
       ...base.settings,
-      ...(repaired.settings || {})
+      ...(repaired.settings || {}),
+      funAdsEnabled: false
     },
     profile: { ...base.profile, ...(repaired.profile || {}) },
     users: normalizeDefaultUserNames(mergeUniqueBy(

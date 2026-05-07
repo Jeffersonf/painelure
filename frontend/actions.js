@@ -1,7 +1,8 @@
 'use strict';
 
 let funAdsPopupTimer = null;
-const FUN_AD_LAYER_VERSION = '20260507-fun-ads-7';
+const FUN_AD_LAYER_VERSION = '20260507-fun-ads-8';
+const FUN_AD_SESSION_KEY = 'setechub_fun_ads_enabled';
 const FUN_AD_POPUPS = [
   {
     brand: 'Betano',
@@ -34,7 +35,7 @@ const FUN_AD_POPUPS = [
 ];
 
 function funAdsEnabled() {
-  return Boolean(state.settings?.funAdsEnabled);
+  return Boolean(canManageUsers() && sessionStorage.getItem(FUN_AD_SESSION_KEY) === '1');
 }
 
 function renderFunAdsStatus() {
@@ -168,11 +169,8 @@ function applyFunAdsMode() {
 }
 
 function toggleFunAdsMode(enabled) {
-  state.settings = {
-    ...(state.settings || {}),
-    funAdsEnabled: Boolean(enabled)
-  };
-  saveState();
+  if (enabled) sessionStorage.setItem(FUN_AD_SESSION_KEY, '1');
+  else sessionStorage.removeItem(FUN_AD_SESSION_KEY);
   applyFunAdsMode();
   showToast(enabled ? 'Modo anuncios falsos ativado.' : 'Modo anuncios falsos desativado.', 'info');
 }
@@ -2366,3 +2364,4 @@ function setupEventListeners() {
     renderAssets();
   });
 }
+
