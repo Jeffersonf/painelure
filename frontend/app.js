@@ -496,11 +496,19 @@ function visibleSchools() {
   return (state.schools || []).filter((school) => allowed.has(school.name));
 }
 
+function sortSupervisorsByName(supervisors) {
+  return (supervisors || []).slice().sort((a, b) =>
+    String(a?.name || '').localeCompare(String(b?.name || ''), 'pt-BR', { sensitivity: 'base' })
+  );
+}
+
 function visibleSupervisors() {
-  if (!isSupervisorUser()) return state.supervisors || [];
+  if (!isSupervisorUser()) return sortSupervisorsByName(state.supervisors);
   const user = currentUser();
-  return (state.supervisors || []).filter((supervisor) =>
-    normalizeKey(supervisor.name) === normalizeKey(user?.supervisorName || user?.name || user?.login)
+  return sortSupervisorsByName(
+    (state.supervisors || []).filter((supervisor) =>
+      normalizeKey(supervisor.name) === normalizeKey(user?.supervisorName || user?.name || user?.login)
+    )
   );
 }
 
