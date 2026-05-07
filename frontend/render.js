@@ -285,7 +285,7 @@ function renderDashboardAccess() {
   const drilldownBox = document.getElementById('dashboardDrilldownBox');
 
   if (VIEWER_MODE_V1) {
-    [attentionNode, quickBox, drilldownBox].forEach((node) => {
+    [profileNode, roleCardsNode, attentionNode, quickBox, drilldownBox].forEach((node) => {
       if (!node) return;
       node.hidden = true;
       node.innerHTML = '';
@@ -293,7 +293,6 @@ function renderDashboardAccess() {
     if (linksNode) linksNode.innerHTML = '';
     if (drilldownNode) drilldownNode.innerHTML = '';
 
-    const template = dashboardTemplateForRole();
     const role = currentUserRole();
     const schools = visibleSchools();
     const schoolAlertCount = schools.filter((item) => item.status !== 'estavel').length;
@@ -320,27 +319,6 @@ function renderDashboardAccess() {
     const modules = allModules
       .filter((item) => (rolePages[role] || rolePages.admin).includes(item.page))
       .filter((item) => canAccessPage(item.page));
-
-    if (profileNode) {
-      profileNode.hidden = false;
-      profileNode.innerHTML = template.metrics.map((item) => `
-        <div class="dashboard-profile-card">
-          <span>${esc(item.label)}</span>
-          <strong>${esc(item.value)}</strong>
-          <small>${esc(template.title)}</small>
-        </div>
-      `).join('');
-    }
-    if (roleCardsNode) {
-      roleCardsNode.hidden = false;
-      roleCardsNode.innerHTML = modules.slice(0, 4).map((item) => dashboardRoleCard({
-        title: item.title,
-        value: item.meta.split('|')[0].trim(),
-        meta: item.meta,
-        tone: item.tone,
-        action: item.action
-      })).join('');
-    }
 
     if (categoryBox) categoryBox.hidden = !modules.length;
     if (categoryNode) {

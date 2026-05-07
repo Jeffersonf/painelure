@@ -115,26 +115,19 @@ function renderDashboardAccess() {
   const roleCardsNode = document.getElementById('dashboardRoleCards');
   const attentionNode = document.getElementById('dashboardAttentionCards');
   if (profileNode) {
-    profileNode.innerHTML = [
-      ['Perfil', roleLabel(currentUserRole())],
-      ['Modo', VIEWER_MODE_V1 ? 'Visualizador' : 'Operacao'],
-      ['Escolas', visibleSchools().length],
-      ['Supervisores', visibleSupervisors().length]
-    ].map(([label, value]) => `<div class="insight-card"><div class="insight-l">${esc(label)}</div><div class="insight-v">${esc(String(value))}</div></div>`).join('');
+    profileNode.hidden = true;
+    profileNode.innerHTML = '';
   }
   if (roleCardsNode) {
-    roleCardsNode.innerHTML = [
-      ['Escolas', `${visibleSchools().length} unidades`, "showPage('schools')"],
-      ['Supervisores', `${visibleSupervisors().length} registros`, "showPage('supervisors')"],
-      ['Inventario', `${state.schoolAssets.length} linhas`, "showPage('assets')"]
-    ].map(([title, meta, action]) => `<button class="dashboard-drill-card teal" type="button" onclick="${action}"><strong>${esc(title)}</strong><span>${esc(meta)}</span></button>`).join('');
+    roleCardsNode.hidden = true;
+    roleCardsNode.innerHTML = '';
   }
   if (attentionNode) attentionNode.innerHTML = '';
   const categoryNode = document.getElementById('dashboardCategoryGrid');
   const linksNode = document.getElementById('dashboardQuickLinks');
   const drillNode = document.getElementById('dashboardDrilldownGrid');
   if (categoryNode) categoryNode.innerHTML = '';
-  if (linksNode) linksNode.innerHTML = topSchoolSignals(4).map(({ school }) => `<div class="setechub-item setechub-clickable" onclick="openSchoolRecord('${esc(school.name)}')"><strong>${esc(school.name)}</strong><div class="sync-meta">${esc(school.zone)} | CIE ${esc(school.cie || '--')}</div></div>`).join('');
+  if (linksNode) linksNode.innerHTML = '';
   if (drillNode) drillNode.innerHTML = '';
 }
 
