@@ -823,6 +823,10 @@ function renderInventoryWorkspace() {
   const categorySelect = document.getElementById('inventoryCategorySelect');
   const searchInput = document.getElementById('inventorySearchInput');
   const issueNode = document.getElementById('inventoryIssuesList');
+  const manageCard = document.querySelector('.inventory-manage-card');
+  if (manageCard) {
+    manageCard.hidden = regionalView || !canImportData();
+  }
   const schoolFilterSource = visibleSchoolRows
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
