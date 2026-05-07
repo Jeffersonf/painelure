@@ -1745,8 +1745,8 @@ function supervisorSheetMetrics(item) {
   const assigned = Number(supervisor.assignedSchoolCount || item.assignedSchools?.length || supervisor.schools?.length || 0);
   const weeklyGoal = Number(supervisor.weeklyGoal || 0);
   const monthlyGoal = Number(supervisor.monthlyGoal || 0);
-  const weeklyGoalLabel = supervisor.weeklyGoalLabel || (weeklyGoal ? String(weeklyGoal) : '--');
-  const monthlyGoalLabel = supervisor.monthlyGoalLabel || (monthlyGoal ? String(monthlyGoal) : '--');
+  const weeklyGoalLabel = weeklyGoal ? String(weeklyGoal) : '--';
+  const monthlyGoalLabel = monthlyGoal ? String(monthlyGoal) : '--';
   const fallbackWeeklyVisits = Number.isFinite(Number(item.weeklyVisitFallback)) ? Number(item.weeklyVisitFallback) : 0;
   const weeklyVisits = supervisorWeeklyVisitsForView(supervisor, fallbackWeeklyVisits);
   const fallbackVisits = Number.isFinite(Number(item.monthlyVisitFallback)) ? Number(item.monthlyVisitFallback) : item.visits || 0;
@@ -1830,8 +1830,8 @@ function renderSupervisors() {
       const assigned = Number(supervisor.assignedSchoolCount || item.assignedSchools.length || 0);
       const weeklyGoal = Number(supervisor.weeklyGoal || 0);
       const monthlyGoal = Number(supervisor.monthlyGoal || 0);
-      const weeklyGoalLabel = supervisor.weeklyGoalLabel || (weeklyGoal ? String(weeklyGoal) : '--');
-      const monthlyGoalLabel = supervisor.monthlyGoalLabel || (monthlyGoal ? String(monthlyGoal) : '--');
+      const weeklyGoalLabel = weeklyGoal ? String(weeklyGoal) : '--';
+      const monthlyGoalLabel = monthlyGoal ? String(monthlyGoal) : '--';
       const weeklyVisits = supervisorWeeklyVisitsForView(supervisor, localWeekCount);
       const monthlyVisits = supervisorMonthlyVisitsForView(supervisor, localCount);
       const weeklyIndicator = supervisorViewMonthIsCurrent() ? supervisor.weeklyIndicator || 'aviso' : supervisorIndicatorFromGoal(weeklyVisits, weeklyGoal);

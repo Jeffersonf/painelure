@@ -715,9 +715,9 @@ function mergeSupervisorPanelRows(source, rows) {
     updatedCount += 1;
     const assignedSchoolCount = parseVisitCount(csvValue(row, ['Escolas Atribuidas', 'Escolas Atribuídas']));
     const weeklyGoalLabel = '3';
-    const monthlyGoalLabel = csvValue(row, ['Meta Mensal']);
     const weeklyGoal = 3;
-    const monthlyGoal = parseVisitCount(monthlyGoalLabel);
+    const monthlyGoal = parseVisitCount(csvValue(row, ['Meta Mensal']));
+    const monthlyGoalLabel = monthlyGoal ? String(monthlyGoal) : '--';
     const currentWeek = parseVisitCount(csvValue(row, ['Semana do Mes', 'Semana do Mês']));
     const weeklyVisits = parseVisitCount(csvValue(row, ['Visitas na Semana']));
     const monthlyVisits = parseVisitCount(csvValue(row, ['Visitas no Mes', 'Visitas no Mês']));

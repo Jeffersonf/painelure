@@ -3096,9 +3096,10 @@ textarea {
 }
 
 .supervisor-sheet-table .supervisor-goal-cell > strong {
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.2;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  line-height: inherit;
   letter-spacing: 0;
   white-space: nowrap;
 }
@@ -3110,7 +3111,7 @@ textarea {
 
 #painelSupervisor:fullscreen .supervisor-sheet-table .supervisor-goal-cell > strong,
 #painelSupervisor.supervisor-panel-fullscreen .supervisor-sheet-table .supervisor-goal-cell > strong {
-  font-size: 16px;
+  font-size: inherit;
 }
 
 .supervisor-sheet-table td > span {
