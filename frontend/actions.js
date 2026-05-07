@@ -1,5 +1,182 @@
 'use strict';
 
+let funAdsPopupTimer = null;
+const FUN_AD_LAYER_VERSION = '20260507-fun-ads-7';
+const FUN_AD_POPUPS = [
+  {
+    brand: 'Betano',
+    title: 'Ganhe ate R$500 em bonus de boas-vindas',
+    text: 'Oferta para novos cadastros com saque rapido via Pix e mercados ao vivo todos os dias.',
+    cta: 'Criar conta agora',
+    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80'
+  },
+  {
+    brand: 'bet365',
+    title: 'Aposte ao vivo com cash out disponivel',
+    text: 'Futebol, tenis e basquete com estatisticas em tempo real e centenas de mercados.',
+    cta: 'Ver odds ao vivo',
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=80'
+  },
+  {
+    brand: 'Blaze',
+    title: 'Crash, Double e slots em uma unica conta',
+    text: 'Rodadas instantaneas, multiplicadores altos e pagamentos automatizados no app.',
+    cta: 'Jogar agora',
+    image: 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=900&q=80'
+  },
+  {
+    brand: 'Superbet',
+    title: 'Super odds para os principais campeonatos',
+    text: 'Ganhe freebets semanais, acompanhe placares ao vivo e saque quando quiser.',
+    cta: 'Resgatar bonus',
+    image: 'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=900&q=80'
+  }
+];
+
+function funAdsEnabled() {
+  return Boolean(state.settings?.funAdsEnabled);
+}
+
+function renderFunAdsStatus() {
+  const toggle = document.getElementById('funAdsToggle');
+  const status = document.getElementById('funAdsStatus');
+  if (toggle) toggle.checked = funAdsEnabled();
+  if (status) {
+    status.textContent = funAdsEnabled()
+      ? 'Ligado: popups falsos ativos'
+      : 'Desativado';
+  }
+}
+
+function closeFunAdPopup() {
+  document.querySelector('.fun-ad-popup')?.remove();
+  if (!funAdsEnabled()) return;
+  clearTimeout(funAdsPopupTimer);
+  funAdsPopupTimer = setTimeout(showFunAdPopup, 4200);
+}
+
+function closeFunAdUnit(button) {
+  button?.closest?.('[data-fun-ad-unit]')?.remove();
+}
+
+function showFunAdPopup() {
+  if (!funAdsEnabled()) return;
+  const layer = ensureFunAdsLayer();
+  if (!layer) return;
+  document.querySelector('.fun-ad-popup')?.remove();
+  const ad = FUN_AD_POPUPS[Math.floor(Math.random() * FUN_AD_POPUPS.length)];
+  layer.insertAdjacentHTML('beforeend', `
+    <div class="fun-ad-popup" role="dialog" aria-label="Anuncio promocional" style="--fun-ad-image: url('${esc(ad.image)}')">
+      <button class="fun-ad-x" type="button" onclick="closeFunAdPopup()" aria-label="Fechar anuncio">x</button>
+      <div class="fun-ad-kicker">PUBLICIDADE</div>
+      <em>${esc(ad.brand)}</em>
+      <strong>${esc(ad.title)}</strong>
+      <span>${esc(ad.text)}</span>
+      <div class="fun-ad-actions">
+        <button type="button" onclick="closeFunAdPopup()">Agora nao</button>
+        <button type="button" onclick="showToast('Anuncio bloqueado no painel: nenhum site foi aberto.', 'info')">${esc(ad.cta)}</button>
+      </div>
+    </div>
+  `);
+  clearTimeout(funAdsPopupTimer);
+  funAdsPopupTimer = setTimeout(showFunAdPopup, 6500);
+}
+
+function ensureFunAdsLayer() {
+  let layer = document.getElementById('funAdsLayer');
+  if (layer?.dataset.version === FUN_AD_LAYER_VERSION) return layer;
+  if (layer) layer.remove();
+  layer = document.createElement('div');
+  layer.id = 'funAdsLayer';
+  layer.className = 'fun-ad-layer';
+  layer.dataset.version = FUN_AD_LAYER_VERSION;
+  layer.innerHTML = `
+    <div class="fun-ad-subscription-strip" data-fun-ad-unit>
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <strong>REMOVER ANUNCIOS</strong>
+      <span>Assine agora por apenas R$149,90 reais por mes e navegue sem interrupcoes.</span>
+      <button type="button" onclick="showToast('Plano de brincadeira: nenhum pagamento foi iniciado.', 'info')">Assinar sem anuncios</button>
+    </div>
+    <div class="fun-ad-rail" data-fun-ad-unit style="--fun-ad-image: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80')">
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <strong>BETANO</strong>
+      <span>Ganhe ate R$500 para apostar nos seus jogos favoritos.</span>
+      <button type="button" onclick="showToast('Anuncio bloqueado no painel: nenhum site foi aberto.', 'info')">Comecar</button>
+    </div>
+    <div class="fun-ad-rail fun-ad-rail-left" data-fun-ad-unit style="--fun-ad-image: url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=80')">
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <strong>bet365</strong>
+      <span>Apostas ao vivo, cash out e placar em tempo real.</span>
+      <button type="button" onclick="showToast('Anuncio bloqueado no painel: nenhum site foi aberto.', 'info')">Ver odds</button>
+    </div>
+    <div class="fun-ad-card fun-ad-card-a" data-fun-ad-unit style="--fun-ad-image: url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&w=900&q=80')">
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <strong>Blaze</strong>
+      <span>Crash e Double com rodadas instantaneas 24h por dia.</span>
+      <button type="button" onclick="showFunAdPopup()">Jogar</button>
+    </div>
+    <div class="fun-ad-card fun-ad-card-b" data-fun-ad-unit style="--fun-ad-image: url('https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=900&q=80')">
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <strong>Superbet</strong>
+      <span>Super odds, freebets semanais e saque por Pix.</span>
+      <button type="button" onclick="showToast('Anuncio bloqueado no painel: nenhum site foi aberto.', 'info')">Resgatar</button>
+    </div>
+    <div class="fun-ad-banner" data-fun-ad-unit style="--fun-ad-image: url('https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=1200&q=80')">
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <strong>TIGRINHO PREMIUM 777</strong>
+      <span>Rodadas gratis no cadastro, jackpot progressivo e saque instantaneo.</span>
+      <button type="button" onclick="showFunAdPopup()">Ativar bonus</button>
+    </div>
+    <div class="fun-ad-toast" data-fun-ad-unit>
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <span>Oferta exclusiva: bonus de entrada liberado por tempo limitado</span>
+      <button type="button" onclick="closeFunAdPopup()">fechar</button>
+    </div>
+    <div class="fun-ad-dating" data-fun-ad-unit style="--fun-ad-image: url('https://images.pexels.com/photos/11055482/pexels-photo-11055482.jpeg?auto=compress&cs=tinysrgb&w=900')">
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <div class="fun-ad-dating-photo"></div>
+      <div>
+        <small>PUBLICIDADE 18+</small>
+        <strong>Mulheres solteiras perto de voce</strong>
+        <span>Veja perfis ativos na sua regiao e comece uma conversa hoje.</span>
+        <button type="button" onclick="showToast('Anuncio bloqueado no painel: nenhum site foi aberto.', 'info')">Conhecer agora</button>
+      </div>
+    </div>
+    <div class="fun-ad-gogo" data-fun-ad-unit style="--fun-ad-image: url('https://images.unsplash.com/photo-1506629905607-d405b7a30db9?auto=format&fit=crop&w=900&q=80')">
+      <button class="fun-ad-unit-x" type="button" onclick="closeFunAdUnit(this)" aria-label="Fechar anuncio">x</button>
+      <small>SHOW PARTICULAR</small>
+      <strong>Homem gogoboy</strong>
+      <span>Contrate uma apresentacao surpresa por apenas R$15,90.</span>
+      <button type="button" onclick="showToast('Anuncio bloqueado no painel: nenhum site foi aberto.', 'info')">Reservar por R$15,90</button>
+    </div>
+  `;
+  document.body.appendChild(layer);
+  return layer;
+}
+
+function applyFunAdsMode() {
+  document.body.classList.toggle('fun-ads-on', funAdsEnabled());
+  renderFunAdsStatus();
+  if (!funAdsEnabled()) {
+    clearTimeout(funAdsPopupTimer);
+    document.getElementById('funAdsLayer')?.remove();
+    return;
+  }
+  ensureFunAdsLayer();
+  clearTimeout(funAdsPopupTimer);
+  funAdsPopupTimer = setTimeout(showFunAdPopup, 700);
+}
+
+function toggleFunAdsMode(enabled) {
+  state.settings = {
+    ...(state.settings || {}),
+    funAdsEnabled: Boolean(enabled)
+  };
+  saveState();
+  applyFunAdsMode();
+  showToast(enabled ? 'Modo anuncios falsos ativado.' : 'Modo anuncios falsos desativado.', 'info');
+}
+
 function downloadFile(filename, content, type) {
   const blob = new Blob([content], { type });
   const link = document.createElement('a');
@@ -160,6 +337,15 @@ async function toggleSupervisorPanelFullscreen() {
 }
 
 async function prepareSupervisorPresentation() {
+  if (!canImportData()) {
+    showPage('supervisors');
+    const panel = document.getElementById('painelSupervisor');
+    if (panel) panel.classList.add('supervisor-presentation-mode');
+    if (panel && document.fullscreenElement !== panel && !panel.classList.contains('supervisor-panel-fullscreen')) {
+      await toggleSupervisorPanelFullscreen();
+    }
+    return;
+  }
   const monthKey = viewMonthValue();
   const [year, month] = String(monthKey || '').split('-').map(Number);
   if (year && month) currentViewDate = new Date(year, month - 1, 1);
@@ -196,6 +382,7 @@ async function prepareSupervisorPresentation() {
 }
 
 async function syncSupervisorSourcesForCurrentMonth() {
+  if (!canImportData()) return;
   const monthKey = viewMonthValue();
   const currentMonthKey = viewMonthValue(new Date());
   if (monthKey !== currentMonthKey) {
@@ -764,7 +951,6 @@ function openMainNavigationPage(page) {
     currentInventorySearch = '';
   }
   showPage(page);
-  renderCurrentPage(page);
 }
 
 function openCallCategory(filter = 'todos') {
@@ -1217,6 +1403,7 @@ function parseFleetWorksheetRows(rows, sheetName) {
 }
 
 async function importFleetSchedule(file) {
+  if (!canImportData()) return;
   const status = document.getElementById('fleetImportStatus');
   if (status) status.textContent = 'Lendo planilha da frota para montar o calendario...';
   try {
@@ -1305,8 +1492,9 @@ function parseInventoryExcelRows(workbook, fileName) {
 }
 
 async function importSchoolInventoryExcel(file) {
+  if (!canImportData()) return;
   const statusNode = document.getElementById('schoolAssetBulkStatus');
-  if (statusNode) statusNode.textContent = 'Lendo inventario Excel e consolidando por tipo/status...';
+  if (statusNode) statusNode.textContent = 'Lendo planilha, consolidando nomes e preparando substituicao por escola...';
   try {
     await loadExternalScript('XLSX', 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
     const buffer = await readFileAsArrayBuffer(file);
@@ -1824,6 +2012,19 @@ function setupEventListeners() {
   document.getElementById('sidebarSearch')?.addEventListener('input', (event) => {
     handleSearch(event.target.value);
   });
+  document.getElementById('quickActionFab')?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    toggleQuickActions();
+  });
+  document.getElementById('commandInput')?.addEventListener('input', (event) => {
+    clearTimeout(commandSearchTimer);
+    const value = event.target.value;
+    commandSearchTimer = setTimeout(() => renderCommandPalette(value), 120);
+  });
+  document.querySelector('[data-command-close]')?.addEventListener('click', closeCommandPalette);
+  document.getElementById('commandOverlay')?.addEventListener('click', (event) => {
+    if (event.target.id === 'commandOverlay') closeCommandPalette();
+  });
   document.getElementById('profilePhotoInput')?.addEventListener('change', async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -1843,7 +2044,6 @@ function setupEventListeners() {
     if (!pageButton) return;
     event.preventDefault();
     showPage(pageButton.dataset.openPage);
-    renderCurrentPage(pageButton.dataset.openPage);
   });
   document.addEventListener('click', (event) => {
     const shiftButton = event.target.closest('[data-focus-shift]');
@@ -1864,10 +2064,32 @@ function setupEventListeners() {
     document.getElementById(focusButton.dataset.focusTarget)?.focus();
   });
   document.addEventListener('click', (event) => {
+    const quickButton = event.target.closest('[data-quick-action]');
+    if (!quickButton) return;
+    event.preventDefault();
+    handleQuickAction(quickButton.dataset.quickAction);
+  });
+  document.addEventListener('click', (event) => {
+    const commandButton = event.target.closest('[data-command-action]');
+    if (!commandButton) return;
+    event.preventDefault();
+    runCommandAction(commandButton.dataset.commandAction, commandButton.dataset.commandValue);
+  });
+  document.addEventListener('click', (event) => {
     if (!event.target.closest('.acct-area')) closeAccountMenu();
+    if (!event.target.closest('#quickActionShell')) toggleQuickActions(false);
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeAccountMenu();
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      openCommandPalette('');
+      return;
+    }
+    if (event.key === 'Escape') {
+      closeAccountMenu();
+      closeCommandPalette();
+      toggleQuickActions(false);
+    }
   });
   document.getElementById('resetBtn').addEventListener('click', () => {
     if (!canManageUsers()) return;
@@ -1956,6 +2178,9 @@ function setupEventListeners() {
   document.getElementById('adminSchoolForm')?.addEventListener('submit', saveAdminSchool);
   document.getElementById('clearAdminSchoolBtn')?.addEventListener('click', clearAdminSchoolForm);
   document.getElementById('mergeSchoolsBtn')?.addEventListener('click', mergeAdminSchools);
+  document.getElementById('funAdsToggle')?.addEventListener('change', (event) => {
+    toggleFunAdsMode(event.target.checked);
+  });
   document.getElementById('userForm')?.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!canManageUsers()) return;

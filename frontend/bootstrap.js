@@ -24,6 +24,10 @@ function setLoginVisible(visible) {
 window.setLoginVisible = setLoginVisible;
 
 window.addEventListener('hashchange', () => {
+  if (window.__setecInternalHashChange) {
+    window.__setecInternalHashChange = false;
+    return;
+  }
   restorePageFromHash();
   showPage(currentPage || 'dashboard');
 });
@@ -51,13 +55,20 @@ function restoreLoginState() {
 (async () => {
   await initializeSupabaseState();
   refreshAll();
-  showPage(currentPage || sessionStorage.getItem(PAGE_KEY) || 'dashboard');
+  showPage(currentPage || sessionStorage.getItem(PAGE_KEY) || 'dashboard', { render: false });
+  if (typeof applyFunAdsMode === 'function') applyFunAdsMode();
   restoreLoginState();
   supabaseAutoSaveReady = true;
   scheduleSupabaseAutoSave();
-  await refreshServerHealth();
-  await syncFromServerIfUseful();
-  await loadServerSnapshots();
-  await syncSupervisorVisitSources({ silent: true });
-  await refreshServerHealth();
+  setTimeout(async () => {
+    try {
+      await refreshServerHealth();
+      await syncFromServerIfUseful();
+      await loadServerSnapshots();
+      await syncSupervisorVisitSources({ silent: true });
+      await refreshServerHealth();
+    } catch (error) {
+      console.warn('Sincronização em segundo plano não concluída.', error);
+    }
+  }, 250);
 })();

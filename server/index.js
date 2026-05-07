@@ -103,7 +103,11 @@ function validateStateShape(candidate) {
 
 function safeResolve(urlPath) {
   const normalized = decodeURIComponent(urlPath.split('?')[0]);
-  const requested = ['/', '/login'].includes(normalized) ? '/frontend/index.html' : normalized;
+  const requested = ['/', '/login'].includes(normalized)
+    ? '/frontend/index.html'
+    : normalized.endsWith('/')
+      ? `${normalized}index.html`
+      : normalized;
   const resolved = path.resolve(ROOT_DIR, `.${requested}`);
   if (!resolved.startsWith(ROOT_DIR)) return null;
   return resolved;
@@ -120,7 +124,13 @@ function serveFile(res, filePath) {
       return;
     }
     const ext = path.extname(filePath).toLowerCase();
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+    const headers = { 'Content-Type': MIME[ext] || 'application/octet-stream' };
+    if (['.html', '.css', '.js'].includes(ext)) {
+      headers['Cache-Control'] = 'no-store, max-age=0';
+      headers.Pragma = 'no-cache';
+      headers.Expires = '0';
+    }
+    res.writeHead(200, headers);
     res.end(content);
   });
 }

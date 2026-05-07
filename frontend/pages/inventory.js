@@ -69,13 +69,20 @@ window.renderAssets = function renderAssetsPage() {
   cancelIdleRender(inventoryRenderTicket);
   renderInventoryQuickHeader();
   renderInventorySelectsQuickly();
-  try {
-    legacyRenderAssets();
-  } catch (error) {
-    console.error('Falha ao carregar inventario', error);
-    renderDeferredPlaceholders([
-      '#inventoryDetailTable',
-      '#schoolAssetList'
-    ], 'Nao foi possivel carregar o inventario. Atualize a pagina.');
-  }
+  renderDeferredPlaceholders([
+    '#inventoryDetailTable',
+    '#inventorySchoolRanking',
+    '#schoolAssetList'
+  ]);
+  inventoryRenderTicket = scheduleIdleRender(() => {
+    try {
+      legacyRenderAssets();
+    } catch (error) {
+      console.error('Falha ao carregar inventario', error);
+      renderDeferredPlaceholders([
+        '#inventoryDetailTable',
+        '#schoolAssetList'
+      ], 'Nao foi possivel carregar o inventario. Atualize a pagina.');
+    }
+  }, { timeout: 700, delay: 30 });
 };

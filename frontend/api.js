@@ -895,6 +895,7 @@ async function syncSupervisorSourceList(sources, options = {}) {
 }
 
 async function syncSupervisorVisitSources(options = {}) {
+  if (!canImportData()) return;
   const sources = Array.isArray(SUPERVISOR_VISIT_SOURCES) ? SUPERVISOR_VISIT_SOURCES : [];
   if (!sources.length) return;
   const silent = options.silent === true;
@@ -913,6 +914,7 @@ async function syncSupervisorVisitSources(options = {}) {
 }
 
 async function syncSupervisorMonthlySheet(linkId) {
+  if (!canImportData()) return;
   const link = (state.officialLinks || []).find((item) =>
     item.category === 'supervisor-sheet' && String(item.id) === String(linkId)
   );
@@ -943,6 +945,7 @@ async function syncSupervisorMonthlySheet(linkId) {
 }
 
 async function syncCurrentSupervisorVisitSource() {
+  if (!canImportData()) return;
   const supervisor = supervisorByName(currentSupervisorDetail);
   if (!supervisor?.visitSourceUrl) {
     showToast('Supervisor sem planilha vinculada.', 'error');

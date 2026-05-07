@@ -35,13 +35,32 @@ let supabaseAutoSaveTimer = null;
 let supabaseAutoSaveBusy = false;
 let supabaseAutoSavePending = false;
 let searchTimer = null;
+let commandSearchTimer = null;
+let derivedCache = null;
+let commandPaletteOpen = false;
+let dashboardDeferredTimer = null;
 
 const PAGE_KEY = 'setechub_page';
 const CONTEXT_KEY = 'setechub_context';
 const ACTIVE_USER_KEY = 'setechub_active_user';
+const SCHOOL_RENDER_LIMIT = 96;
+const INVENTORY_RENDER_LIMIT = 80;
+const VIEWER_MODE_V1 = true;
+const PERF_LOG = localStorage.getItem('setechub_perf') === '1';
 const PAUSED_NAV_PAGES = new Set(['calls']);
 const DORMANT_NAV_PAGES = new Set(['pecs']);
 const DISABLED_NAV_PAGES = new Set(['reports']);
+
+function measurePerf(label, fn, threshold = 12) {
+  if (!PERF_LOG || typeof performance === 'undefined') return fn();
+  const startedAt = performance.now();
+  const result = fn();
+  const elapsed = performance.now() - startedAt;
+  if (elapsed >= threshold) {
+    console.info(`[PainelURE perf] ${label}: ${elapsed.toFixed(1)}ms`);
+  }
+  return result;
+}
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -83,6 +102,79 @@ function esc(value) {
     '"': '&quot;',
     "'": '&#39;'
   }[char]));
+}
+
+function listLimitNotice(total, limit, label) {
+  if (total <= limit) return '';
+  return `<div class="sync-empty compact">Mostrando ${esc(String(limit))} de ${esc(String(total))} ${esc(label)}. Use filtros ou busca para refinar.</div>`;
+}
+
+function resetDerivedCache() {
+  derivedCache = null;
+}
+
+function getDerivedCache() {
+  if (derivedCache) return derivedCache;
+  const assetsBySchool = new Map();
+  (state.schoolAssets || []).forEach((item) => {
+    const bucket = assetsBySchool.get(item.school) || [];
+    bucket.push(item);
+    assetsBySchool.set(item.school, bucket);
+  });
+  const openCallsBySchool = new Map();
+  (state.calls || []).forEach((item) => {
+    if (item.status === 'resolvido') return;
+    openCallsBySchool.set(item.school, (openCallsBySchool.get(item.school) || 0) + 1);
+  });
+  const pendingTasksBySchool = new Map();
+  (state.tasks || []).forEach((item) => {
+    if (item.done) return;
+    if (item.place) pendingTasksBySchool.set(item.place, (pendingTasksBySchool.get(item.place) || 0) + 1);
+  });
+  const profilesBySchool = new Map();
+  (state.schoolProfiles || []).forEach((item) => profilesBySchool.set(item.school, item));
+  const networksBySchool = new Map();
+  (state.schoolNetworks || []).forEach((item) => networksBySchool.set(item.school, item));
+  const importsBySchool = new Map();
+  (state.schoolImports || []).forEach((item) => {
+    importsBySchool.set(item.school, (importsBySchool.get(item.school) || 0) + 1);
+  });
+  const supervisorsBySchool = new Map();
+  (state.supervisors || []).forEach((supervisor) => {
+    (supervisor.schools || []).forEach((school) => {
+      const bucket = supervisorsBySchool.get(school) || [];
+      bucket.push(supervisor.name);
+      supervisorsBySchool.set(school, bucket);
+    });
+  });
+  const visitsBySupervisor = new Map();
+  (state.supervisorVisits || []).forEach((visit) => {
+    const bucket = visitsBySupervisor.get(visit.supervisor) || [];
+    bucket.push(visit);
+    visitsBySupervisor.set(visit.supervisor, bucket);
+  });
+  derivedCache = {
+    assetsBySchool,
+    openCallsBySchool,
+    pendingTasksBySchool,
+    profilesBySchool,
+    networksBySchool,
+    importsBySchool,
+    supervisorsBySchool,
+    visitsBySupervisor,
+    profileCompletionBySchool: new Map(),
+    missingProfileFieldsBySchool: new Map(),
+    operationalSnapshotBySchool: new Map(),
+    topInventoryAlerts: null,
+    operationalCoverage: null,
+    dashboardHealth: null,
+    topSchoolSignals: null,
+    operationalSuggestions: null,
+    summaryPreview: null,
+    pendingQueueItems: null,
+    supervisorStats: null
+  };
+  return derivedCache;
 }
 
 function schoolSlug(value) {
@@ -288,10 +380,11 @@ function timelineItems() {
   return [...tasks, ...calls].slice(0, 8);
 }
 
-function showPage(page) {
+function showPage(page, options = {}) {
   if (!canAccessPage(page)) {
     page = defaultPageForUser();
   }
+  const shouldRender = options.render !== false;
   currentPage = page;
   document.body.dataset.page = page;
   sessionStorage.setItem(PAGE_KEY, page);
@@ -311,10 +404,16 @@ function showPage(page) {
       ? `supervisor/${supervisorSlug(currentSupervisorDetail)}`
       : page;
   if (window.location.hash !== `#${hash}`) {
+    window.__setecInternalHashChange = true;
     window.location.hash = hash;
   }
   saveUiContext();
   applyAccessControl();
+  if (shouldRender) {
+    renderCurrentPage(page);
+    applySystemIcons();
+    applyPrivacy();
+  }
 }
 
 function currentUser() {
@@ -349,11 +448,16 @@ function isRestrictedCtcUser() {
 }
 
 function canEditData() {
+  if (VIEWER_MODE_V1) return canManageUsers();
   return ['admin', 'seintec', 'ctc'].includes(currentUserRole());
 }
 
 function canManageUsers() {
   return sessionStorage.getItem(SESSION_KEY) === 'ok' && currentUserRole() === 'admin';
+}
+
+function canImportData() {
+  return canManageUsers();
 }
 
 function visibleNavigationPages() {
@@ -423,6 +527,9 @@ function canAccessPage(page) {
 function applyAccessControl() {
   const role = currentUserRole();
   document.body.dataset.role = role;
+  document.body.classList.remove('app-stage-v2');
+  document.body.classList.add('app-stage-v3');
+  document.body.classList.toggle('viewer-mode-v1', VIEWER_MODE_V1);
   document.body.classList.toggle('is-read-only', !canEditData());
   document.querySelectorAll('.nav-item, .fn-item').forEach((node) => {
     if (node.dataset.page) {
@@ -448,6 +555,15 @@ function applyAccessControl() {
   document.querySelectorAll('[data-admin-only]').forEach((node) => {
     node.hidden = !canManageUsers();
   });
+  document.querySelectorAll('[data-v1-admin-import]').forEach((node) => {
+    node.hidden = !canImportData();
+  });
+  document.querySelectorAll('[data-v1-hide]').forEach((node) => {
+    node.hidden = VIEWER_MODE_V1;
+  });
+  document.querySelectorAll('[data-v1-admin-edit]').forEach((node) => {
+    node.hidden = VIEWER_MODE_V1 ? !canManageUsers() : !canEditData();
+  });
   const accountAdminButton = document.getElementById('accountAdminBtn');
   if (accountAdminButton) {
     const allowed = canManageUsers();
@@ -469,7 +585,18 @@ function applyAccessControl() {
     'redeAutomationForm'
   ].forEach((id) => {
     const node = document.getElementById(id);
-    if (node) node.hidden = !canEditData();
+    if (node) node.hidden = VIEWER_MODE_V1 ? true : !canEditData();
+  });
+  [
+    'schoolImportForm',
+    'fleetScheduleInput',
+    'schoolAssetExcelInput',
+    'syncSupervisorSourcesBtn',
+    'refreshSupervisorSheetBtn',
+    'monthlySupervisorSheetForm'
+  ].forEach((id) => {
+    const node = document.getElementById(id);
+    if (node) node.hidden = !canImportData();
   });
   [
     'backupBtn',
@@ -802,6 +929,34 @@ function schoolEventHistory(schoolName, limit = 8) {
 }
 
 function pendingQueueItems(limit = 20) {
+  const cache = getDerivedCache();
+  if (!cache.pendingQueueItems) {
+    const items = [];
+    visibleSchools().forEach((school) => {
+      const missingFields = schoolMissingProfileFields(school.name);
+      const network = schoolNetworkRecord(school.name);
+      const networkGap = network ? Math.max(0, Number(network.cameraInstalled || 0) - Number(network.cameraWorking || 0)) : 0;
+      const alerts = schoolAlertUnits(school.name);
+      if (missingFields.length) {
+        items.push({ school: school.name, type: 'ficha', tone: 'pill-info', text: `Ficha incompleta: faltam ${missingFields.slice(0, 3).join(', ')}${missingFields.length > 3 ? '...' : ''}.` });
+      }
+      if (!network) {
+        items.push({ school: school.name, type: 'rede', tone: 'pill-warn', text: 'Sem importação de rede e câmeras.' });
+      } else if (networkGap > 0) {
+        items.push({ school: school.name, type: 'rede', tone: 'pill-danger', text: `${networkGap} câmera(s) abaixo da cobertura esperada.` });
+      }
+      if (alerts > 0) {
+        items.push({ school: school.name, type: 'inventario', tone: 'pill-danger', text: `${alerts} unidade(s) em manutenção/defeito no inventário.` });
+      }
+    });
+    const priority = { inventario: 0, rede: 1, ficha: 2 };
+    cache.pendingQueueItems = items
+      .sort((a, b) => (priority[a.type] ?? 99) - (priority[b.type] ?? 99) || a.school.localeCompare(b.school));
+  }
+  return cache.pendingQueueItems.slice(0, limit);
+}
+
+function pendingQueueItemsLegacy(limit = 20) {
   const items = [];
   visibleSchools().forEach((school) => {
     const missingFields = schoolMissingProfileFields(school.name);
@@ -971,9 +1126,163 @@ function filteredSchoolImports() {
   return source;
 }
 
+function commandPaletteItems(query = '') {
+  const normalizedQuery = normalizeKey(query);
+  const match = (text) => !normalizedQuery || normalizeKey(text).includes(normalizedQuery);
+  const items = [];
+  visibleSchools().forEach((school) => {
+    const profile = state.schoolProfiles.find((item) => item.school === school.name);
+    const haystack = `${school.name} ${school.cie || ''} ${school.zone} ${profile?.director || ''} ${profile?.phone || ''}`;
+    if (!match(haystack)) return;
+    items.push({
+      type: 'school',
+      title: school.name,
+      meta: `Escola | ${school.zone} | CIE ${school.cie || '--'}`,
+      tone: toneBySchool(school.status),
+      value: school.name
+    });
+  });
+  visibleSupervisors().forEach((supervisor) => {
+    if (!match(`${supervisor.name} ${(supervisor.schools || []).join(' ')}`)) return;
+    items.push({
+      type: 'supervisor',
+      title: supervisor.name,
+      meta: `Supervisor | ${(supervisor.schools || []).length} escola(s)`,
+      tone: 'pill-info',
+      value: supervisor.name
+    });
+  });
+  aggregateInventoryItems(state.schoolAssets || []).forEach((item) => {
+    if (!match(`${item.school} ${item.name} ${item.notePreview || ''}`)) return;
+    items.push({
+      type: 'inventory',
+      title: item.name,
+      meta: `Inventario | ${item.school} | ${item.units} unid.`,
+      tone: item.defectUnits > 0 ? 'pill-danger' : item.alertUnits > 0 ? 'pill-warn' : 'pill-ok',
+      value: item.school
+    });
+  });
+  (state.tasks || []).filter((task) => !task.done).forEach((task) => {
+    if (!match(`${task.title} ${task.place || ''} ${task.owner || ''} ${task.category || ''}`)) return;
+    items.push({
+      type: 'task',
+      title: task.title,
+      meta: `Agenda | ${task.place || 'sem local'} | ${badgeText(task.priority)}`,
+      tone: toneByPriority(task.priority),
+      value: task.id
+    });
+  });
+  filteredDirectoryContacts(false).forEach((contact) => {
+    if (!match(`${contact.name} ${contact.role || ''} ${contact.sector || ''} ${contact.email || ''}`)) return;
+    items.push({
+      type: 'contact',
+      title: contact.name,
+      meta: `Contato | ${contact.role || contact.sector || 'diretorio'}`,
+      tone: 'pill-info',
+      value: contact.id || contact.name
+    });
+  });
+  const order = { school: 0, supervisor: 1, inventory: 2, task: 3, contact: 4 };
+  return items
+    .sort((a, b) => (order[a.type] ?? 99) - (order[b.type] ?? 99) || a.title.localeCompare(b.title))
+    .slice(0, 24);
+}
+
+function renderCommandPalette(query = '') {
+  const results = document.getElementById('commandResults');
+  if (!results) return;
+  const items = commandPaletteItems(query);
+  results.innerHTML = items.map((item) => `
+    <button type="button" class="command-result" data-command-action="${esc(item.type)}" data-command-value="${esc(item.value)}">
+      <span>
+        <strong>${esc(item.title)}</strong>
+        <small>${esc(item.meta)}</small>
+      </span>
+      <span class="diag-pill ${esc(item.tone)}">${esc(badgeText(item.type))}</span>
+    </button>
+  `).join('') || '<div class="sync-empty">Nada encontrado. Tente escola, supervisor, inventario, agenda ou contato.</div>';
+}
+
+function openCommandPalette(seed = '') {
+  const overlay = document.getElementById('commandOverlay');
+  const input = document.getElementById('commandInput');
+  if (!overlay || !input) return;
+  commandPaletteOpen = true;
+  overlay.classList.add('open');
+  input.value = seed;
+  renderCommandPalette(seed);
+  setTimeout(() => input.focus(), 0);
+}
+
+function closeCommandPalette() {
+  const overlay = document.getElementById('commandOverlay');
+  if (!overlay) return;
+  commandPaletteOpen = false;
+  overlay.classList.remove('open');
+}
+
+function runCommandAction(type, value) {
+  closeCommandPalette();
+  if (type === 'school') {
+    openSchoolRecord(value);
+    return;
+  }
+  if (type === 'supervisor') {
+    openSupervisorRecord(value);
+    return;
+  }
+  if (type === 'inventory') {
+    setInventorySchool(value);
+    return;
+  }
+  if (type === 'task') {
+    showPage('agenda');
+    return;
+  }
+  if (type === 'contact') {
+    currentDirectoryFilter = 'todos';
+    showPage('info');
+    renderDirectoryContacts();
+  }
+}
+
+function toggleQuickActions(forceOpen = null) {
+  const shell = document.getElementById('quickActionShell');
+  const fab = document.getElementById('quickActionFab');
+  if (!shell || !fab) return;
+  const nextOpen = forceOpen === null ? !shell.classList.contains('open') : Boolean(forceOpen);
+  shell.classList.toggle('open', nextOpen);
+  fab.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+}
+
+function handleQuickAction(action) {
+  toggleQuickActions(false);
+  if (action === 'supervisors' || action === 'visit') {
+    showPage('supervisors');
+    return;
+  }
+  if (action === 'school') {
+    openCommandPalette('');
+    return;
+  }
+  if (action === 'inventory') {
+    openInventoryCategory('criticos');
+    return;
+  }
+  if (action === 'agenda') {
+    showPage('agenda');
+    return;
+  }
+  if (action === 'import') {
+    if (canImportData()) showPage('admin');
+    return;
+  }
+  if (action === 'command') openCommandPalette('');
+}
+
 function saveUiContext() {
   try {
-    sessionStorage.setItem(CONTEXT_KEY, JSON.stringify({
+    const payload = JSON.stringify({
       page: currentPage,
       taskFilter: currentTaskFilter,
       callFilter: currentCallFilter,
@@ -997,15 +1306,17 @@ function saveUiContext() {
       supervisorDetail: currentSupervisorDetail,
       directoryFilter: currentDirectoryFilter,
       searchQuery: currentSearchQuery
-    }));
+    });
+    sessionStorage.setItem(CONTEXT_KEY, payload);
+    localStorage.setItem(CONTEXT_KEY, payload);
   } catch {
-    // Ignore session persistence failures.
+    // Ignore persistence failures.
   }
 }
 
 function restoreUiContext() {
   try {
-    const raw = sessionStorage.getItem(CONTEXT_KEY);
+    const raw = sessionStorage.getItem(CONTEXT_KEY) || localStorage.getItem(CONTEXT_KEY);
     if (!raw) return;
     const context = JSON.parse(raw);
     currentPage = context.page || currentPage;
@@ -1066,7 +1377,7 @@ function restorePageFromHash() {
 
 function currentSchoolProfile() {
   const school = currentSchoolDetail || visibleSchools()[0]?.name || '';
-  return state.schoolProfiles.find((item) => item.school === school) || null;
+  return getDerivedCache().profilesBySchool.get(school) || null;
 }
 
 function schoolByName(schoolName) {
@@ -1086,10 +1397,13 @@ function topOpenCalls(limit = 5) {
 }
 
 function topInventoryAlerts(limit = 5) {
-  return aggregateInventoryItems(state.schoolAssets)
-    .filter((item) => item.alertUnits > 0)
-    .sort((a, b) => b.alertUnits - a.alertUnits || b.defectUnits - a.defectUnits || a.school.localeCompare(b.school))
-    .slice(0, limit);
+  const cache = getDerivedCache();
+  if (!cache.topInventoryAlerts) {
+    cache.topInventoryAlerts = aggregateInventoryItems(state.schoolAssets)
+      .filter((item) => item.alertUnits > 0)
+      .sort((a, b) => b.alertUnits - a.alertUnits || b.defectUnits - a.defectUnits || a.school.localeCompare(b.school));
+  }
+  return cache.topInventoryAlerts.slice(0, limit);
 }
 
 function recentSchoolImports(limit = 5) {
@@ -1100,15 +1414,15 @@ function recentSchoolImports(limit = 5) {
 }
 
 function schoolImportCount(schoolName) {
-  return state.schoolImports.filter((item) => item.school === schoolName).length;
+  return getDerivedCache().importsBySchool.get(schoolName) || 0;
 }
 
 function schoolNetworkRecord(schoolName) {
-  return state.schoolNetworks.find((item) => item.school === schoolName) || null;
+  return getDerivedCache().networksBySchool.get(schoolName) || null;
 }
 
 function schoolAssetLines(schoolName) {
-  return state.schoolAssets.filter((item) => item.school === schoolName);
+  return getDerivedCache().assetsBySchool.get(schoolName) || [];
 }
 
 function schoolAssetTotals(schoolName) {
@@ -1126,30 +1440,38 @@ function schoolAlertUnits(schoolName) {
 }
 
 function schoolProfileCompletion(schoolName) {
-  const profile = state.schoolProfiles.find((item) => item.school === schoolName);
+  const cache = getDerivedCache();
+  if (cache.profileCompletionBySchool.has(schoolName)) return cache.profileCompletionBySchool.get(schoolName);
+  const profile = cache.profilesBySchool.get(schoolName);
   if (!profile) return 0;
   const fields = ['director', 'viceDirector', 'proati', 'goe', 'phone', 'mobile', 'email', 'address', 'notes'];
   const filled = fields.filter((field) => String(profile[field] || '').trim()).length;
-  return Math.round((filled / fields.length) * 100);
+  const completion = Math.round((filled / fields.length) * 100);
+  cache.profileCompletionBySchool.set(schoolName, completion);
+  return completion;
 }
 
 function schoolMissingProfileFields(schoolName) {
-  const profile = state.schoolProfiles.find((item) => item.school === schoolName);
-  if (!profile) return ['direcao', 'telefone', 'email', 'endereco'];
+  const cache = getDerivedCache();
+  if (cache.missingProfileFieldsBySchool.has(schoolName)) return cache.missingProfileFieldsBySchool.get(schoolName);
+  const profile = cache.profilesBySchool.get(schoolName);
+  if (!profile) return ['direção', 'telefone', 'email', 'endereço'];
   const labels = {
-    director: 'direcao',
-    viceDirector: 'vice-direcao',
+    director: 'direção',
+    viceDirector: 'vice-direção',
     proati: 'PROATI',
     goe: 'GOE',
     phone: 'telefone',
     mobile: 'celular',
     email: 'email',
-    address: 'endereco',
-    notes: 'observacoes'
+    address: 'endereço',
+    notes: 'observações'
   };
-  return Object.entries(labels)
+  const missing = Object.entries(labels)
     .filter(([field]) => !String(profile[field] || '').trim())
     .map(([, label]) => label);
+  cache.missingProfileFieldsBySchool.set(schoolName, missing);
+  return missing;
 }
 
 function schoolHasOperationalData(schoolName) {
@@ -1157,14 +1479,18 @@ function schoolHasOperationalData(schoolName) {
 }
 
 function schoolOperationalSnapshot(school) {
+  const cache = getDerivedCache();
+  const cached = cache.operationalSnapshotBySchool.get(school.name);
+  if (cached) return cached;
   const imports = schoolImportCount(school.name);
   const assetTotals = schoolAssetTotals(school.name);
   const alertUnits = schoolAlertUnits(school.name);
   const completion = schoolProfileCompletion(school.name);
-  const openCalls = state.calls.filter((item) => item.school === school.name && item.status !== 'resolvido').length;
-  const pendingTasks = state.tasks.filter((item) => !item.done && (item.place === school.name || item.title.includes(school.name))).length;
+  const openCalls = cache.openCallsBySchool.get(school.name) || 0;
+  const pendingTasks = (cache.pendingTasksBySchool.get(school.name) || 0) +
+    state.tasks.filter((item) => !item.done && item.place !== school.name && item.title.includes(school.name)).length;
   const network = schoolNetworkRecord(school.name);
-  return {
+  const snapshot = {
     imports,
     assetLines: assetTotals.lines,
     assetUnits: assetTotals.units,
@@ -1175,6 +1501,8 @@ function schoolOperationalSnapshot(school) {
     networkStatus: network?.status || '',
     networkGap: network ? Math.max(0, Number(network.cameraInstalled || 0) - Number(network.cameraWorking || 0)) : 0
   };
+  cache.operationalSnapshotBySchool.set(school.name, snapshot);
+  return snapshot;
 }
 
 function schoolDataScore(schoolName) {
@@ -1212,15 +1540,22 @@ function supervisorVisitRows() {
 }
 
 function supervisorStats() {
+  const cache = getDerivedCache();
+  if (cache.supervisorStats) return cache.supervisorStats;
   const visits = state.supervisorVisits || [];
-  const schools = visibleSchools();
-  return visibleSupervisors().map((supervisor) => {
+  const visibleSchoolNames = new Set(visibleSchools().map((school) => school.name));
+  const callsBySchool = (state.calls || []).reduce((acc, call) => {
+    if (call.status === 'resolvido') return acc;
+    acc.set(call.school, (acc.get(call.school) || 0) + 1);
+    return acc;
+  }, new Map());
+  cache.supervisorStats = visibleSupervisors().map((supervisor) => {
     const assignedSchools = supervisor.schools || [];
-    const supervisorVisits = visits.filter((visit) => visit.supervisor === supervisor.name);
+    const supervisorVisits = cache.visitsBySupervisor.get(supervisor.name) || [];
     const visitedSchools = new Set(supervisorVisits.map((visit) => visit.school));
-    const openCalls = state.calls.filter((call) => assignedSchools.includes(call.school) && call.status !== 'resolvido').length;
+    const openCalls = assignedSchools.reduce((sum, school) => sum + (callsBySchool.get(school) || 0), 0);
     const alerts = assignedSchools.reduce((sum, school) => sum + schoolAlertUnits(school), 0);
-    const knownSchools = assignedSchools.filter((name) => schools.some((school) => school.name === name)).length;
+    const knownSchools = assignedSchools.filter((name) => visibleSchoolNames.has(name)).length;
     return {
       supervisor,
       assignedSchools,
@@ -1232,16 +1567,25 @@ function supervisorStats() {
       alerts
     };
   });
+  return cache.supervisorStats;
 }
 
 function operationalCoverage() {
+  const cache = getDerivedCache();
+  if (cache.operationalCoverage) return cache.operationalCoverage;
   const schools = visibleSchools();
   const totalSchools = schools.length || 1;
-  const schoolsWithImports = schools.filter((item) => schoolImportCount(item.name) > 0).length;
-  const schoolsWithAssets = schools.filter((item) => schoolAssetLines(item.name).length > 0).length;
-  const schoolsWithProfile = schools.filter((item) => schoolProfileCompletion(item.name) >= 35).length;
+  let schoolsWithImports = 0;
+  let schoolsWithAssets = 0;
+  let schoolsWithProfile = 0;
+  schools.forEach((school) => {
+    const snapshot = schoolOperationalSnapshot(school);
+    if (snapshot.imports > 0) schoolsWithImports += 1;
+    if (snapshot.assetLines > 0) schoolsWithAssets += 1;
+    if (snapshot.completion >= 35) schoolsWithProfile += 1;
+  });
   const activeAlerts = state.schoolAssets.filter((item) => item.status !== 'ok').length + state.assets.filter((item) => item.status !== 'ok').length;
-  return {
+  cache.operationalCoverage = {
     totalSchools,
     schoolsWithImports,
     schoolsWithAssets,
@@ -1251,6 +1595,7 @@ function operationalCoverage() {
     profileCoverage: Math.round((schoolsWithProfile / totalSchools) * 100),
     activeAlerts
   };
+  return cache.operationalCoverage;
 }
 
 function schoolCoverageSummary() {
@@ -1273,6 +1618,8 @@ function schoolCoverageSummary() {
 }
 
 function dashboardHealth() {
+  const cache = getDerivedCache();
+  if (cache.dashboardHealth) return cache.dashboardHealth;
   const coverage = operationalCoverage();
   const doneTasks = state.tasks.filter((item) => item.done).length;
   const totalTasks = state.tasks.length || 1;
@@ -1296,17 +1643,23 @@ function dashboardHealth() {
     tone = 'pill-danger';
     label = 'Base pedindo organizacao';
   }
-  return { score, tone, label, openCalls };
+  cache.dashboardHealth = { score, tone, label, openCalls };
+  return cache.dashboardHealth;
 }
 
 function topSchoolSignals(limit = 5) {
-  return visibleSchools()
-    .map((school) => ({ school, signal: schoolOperationalSnapshot(school) }))
-    .sort((a, b) => b.signal.alertUnits - a.signal.alertUnits || b.signal.openCalls - a.signal.openCalls || a.school.name.localeCompare(b.school.name))
-    .slice(0, limit);
+  const cache = getDerivedCache();
+  if (!cache.topSchoolSignals) {
+    cache.topSchoolSignals = visibleSchools()
+      .map((school) => ({ school, signal: schoolOperationalSnapshot(school) }))
+      .sort((a, b) => b.signal.alertUnits - a.signal.alertUnits || b.signal.openCalls - a.signal.openCalls || a.school.name.localeCompare(b.school.name));
+  }
+  return cache.topSchoolSignals.slice(0, limit);
 }
 
 function operationalSuggestions() {
+  const cache = getDerivedCache();
+  if (cache.operationalSuggestions) return cache.operationalSuggestions;
   const suggestions = [];
   const coverage = operationalCoverage();
   const health = dashboardHealth();
@@ -1326,22 +1679,26 @@ function operationalSuggestions() {
   weakestProfile.forEach((item) => {
     suggestions.push(`${item.school.name} esta com ficha em ${item.completion}%: faltam ${schoolMissingProfileFields(item.school.name).slice(0, 3).join(', ')}.`);
   });
-  return suggestions.slice(0, 5);
+  cache.operationalSuggestions = suggestions.slice(0, 5);
+  return cache.operationalSuggestions;
 }
 
 function buildSummaryPreview() {
+  const cache = getDerivedCache();
+  if (cache.summaryPreview) return cache.summaryPreview;
   const done = state.tasks.filter((item) => item.done).length;
   const openCalls = state.calls.filter((item) => item.status !== 'resolvido').length;
   const attentionSchools = visibleSchools().filter((item) => item.status !== 'estavel').length;
   const alertAssets = state.assets.filter((item) => item.status !== 'ok').length + state.schoolAssets.filter((item) => item.status !== 'ok').length;
   const focus = nextFocusTask();
-  return [
+  cache.summaryPreview = [
     `${done}/${state.tasks.length} tarefas concluidas`,
     `${openCalls} chamados ativos`,
     `${attentionSchools} escolas em atencao`,
     `${alertAssets} ativos em manutenção/defeito`,
     focus ? `proximo foco: ${focus.title}` : 'sem tarefa aberta'
   ].join(' | ');
+  return cache.summaryPreview;
 }
 
 function syncFilterButtons(kind) {
@@ -1499,87 +1856,89 @@ function toggleTheme() {
 }
 
 function refreshAll() {
-  state = mergeState(state);
-  saveState();
-  updateIdentity();
-  syncFilterButtons('task');
-  syncFilterButtons('call');
-  syncFilterButtons('school');
-  syncFilterButtons('directory');
-  renderSetupStats();
-  renderCurrentPage();
-  applySystemIcons();
-  applyPrivacy();
-  const searchInput = document.getElementById('sidebarSearch');
-  if (searchInput && searchInput.value !== currentSearchQuery) {
-    searchInput.value = currentSearchQuery;
-  }
-  saveUiContext();
+  return measurePerf('refreshAll', () => {
+    resetDerivedCache();
+    measurePerf('saveState', saveState, 8);
+    measurePerf('updateIdentity', updateIdentity, 8);
+    syncFilterButtons('task');
+    syncFilterButtons('call');
+    syncFilterButtons('school');
+    syncFilterButtons('directory');
+    measurePerf('renderSetupStats', renderSetupStats, 8);
+    renderCurrentPage();
+    measurePerf('applySystemIcons', applySystemIcons, 8);
+    measurePerf('applyPrivacy', applyPrivacy, 8);
+    if (typeof applyFunAdsMode === 'function') measurePerf('applyFunAdsMode', applyFunAdsMode, 8);
+    const searchInput = document.getElementById('sidebarSearch');
+    if (searchInput && searchInput.value !== currentSearchQuery) {
+      searchInput.value = currentSearchQuery;
+    }
+    saveUiContext();
+  }, 16);
 }
 
 function renderCurrentPage(page = currentPage) {
-  if (page === 'dashboard') {
-    renderDashboardHero();
-    renderDashboardAccess();
-    renderDashboardOperationalLists();
-    renderPendingQueue();
-    renderOperationsCenter();
-    renderMetrics();
-    renderFocus();
-    renderWeekBadges();
-    return;
-  }
-  if (page === 'agenda') {
-    renderTimeline();
-    renderChecklist();
-    renderPonto();
-    renderRoutes();
-    renderTasks();
-    return;
-  }
-  if (page === 'ctc') {
-    renderCtcAgenda();
-    return;
-  }
-  if (page === 'calls') {
-    renderCalls();
-    renderCallHistory();
-    return;
-  }
-  if (page === 'schools') {
-    renderSchools();
-    return;
-  }
-  if (page === 'school-record') {
-    renderSchoolDetail();
-    return;
-  }
-  if (page === 'supervisors') {
-    renderSupervisors();
-    return;
-  }
-  if (page === 'supervisor-record') {
-    renderSupervisorRecord();
-    return;
-  }
-  if (page === 'assets') {
-    renderAssets();
-    return;
-  }
-  if (page === 'reports') {
-    renderReports();
-    return;
-  }
-  if (page === 'info' || page === 'settings') {
-    renderMunicipalities();
-    renderOfficialData();
-    renderSectors();
-    renderDirectoryContacts();
-    return;
-  }
-  if (page === 'admin') {
-    renderAdminPage();
-  }
+  return measurePerf(`renderCurrentPage:${page}`, () => {
+    if (page === 'dashboard') {
+      clearTimeout(dashboardDeferredTimer);
+      measurePerf('renderDashboardHero', renderDashboardHero, 8);
+      measurePerf('renderDashboardAccess', renderDashboardAccess, 8);
+      measurePerf('renderPendingQueue', renderPendingQueue, 8);
+      return;
+    }
+    clearTimeout(dashboardDeferredTimer);
+    if (page === 'agenda') {
+      renderTimeline();
+      renderChecklist();
+      renderPonto();
+      renderRoutes();
+      renderTasks();
+      return;
+    }
+    if (page === 'ctc') {
+      renderCtcAgenda();
+      return;
+    }
+    if (page === 'calls') {
+      renderCalls();
+      renderCallHistory();
+      return;
+    }
+    if (page === 'schools') {
+      renderSchools();
+      return;
+    }
+    if (page === 'school-record') {
+      renderSchoolDetail();
+      return;
+    }
+    if (page === 'supervisors') {
+      renderSupervisors();
+      return;
+    }
+    if (page === 'supervisor-record') {
+      renderSupervisorRecord();
+      return;
+    }
+    if (page === 'assets') {
+      renderAssets();
+      return;
+    }
+    if (page === 'reports') {
+      renderReports();
+      return;
+    }
+    if (page === 'info' || page === 'settings') {
+      renderMunicipalities();
+      renderOfficialData();
+      renderSectors();
+      renderDirectoryContacts();
+      return;
+    }
+    if (page === 'admin') {
+      renderAdminPage();
+    }
+  }, 16);
 }
 
 const SYSTEM_TITLE_ICONS = {

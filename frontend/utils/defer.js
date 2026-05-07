@@ -21,6 +21,6 @@ function cancelIdleRender(ticket) {
 function renderDeferredPlaceholders(selectors, label = 'Carregando dados...') {
   selectors.forEach((selector) => {
     const node = document.querySelector(selector);
-    if (node) node.innerHTML = `<div class="sync-empty">${esc(label)}</div>`;
+    if (node) node.innerHTML = `<div class="sync-empty loading-state"><span class="loading-dot"></span>${esc(label)}</div>`;
   });
 }

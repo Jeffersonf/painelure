@@ -14,11 +14,51 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./styles.css?v=20260505-login-refresh">
-<link rel="stylesheet" href="./setechub.css?v=20260506-supervisor-record-matrix-2">
-<link rel="stylesheet" href="./pages/supervisors.css?v=20260506-supervisor-record-matrix-5">
+<link rel="stylesheet" href="./styles.css?v=20260507-fun-ads-7">
+<link rel="stylesheet" href="./setechub.css?v=20260507-fun-ads-7">
+<link rel="stylesheet" href="./setechub-theme.css?v=20260507-fun-ads-7">
+<link rel="stylesheet" href="./pages/supervisors.css?v=20260507-fun-ads-7">
+<script defer src="./school-data.js?v=20260507-fun-ads-7"></script>
+<script defer src="./storage.js?v=20260507-fun-ads-7"></script>
+<script defer src="./app.js?v=20260507-fun-ads-7"></script>
+<script defer src="./render.js?v=20260507-fun-ads-7"></script>
+<script defer src="./utils/defer.js?v=20260507-fun-ads-7"></script>
+<script defer src="./components/avatar.js?v=20260507-fun-ads-7"></script>
+<script defer src="./components/school-card.js?v=20260507-fun-ads-7"></script>
+<script defer src="./pages/schools.js?v=20260507-fun-ads-7"></script>
+<script defer src="./pages/school-record.js?v=20260507-fun-ads-7"></script>
+<script defer src="./pages/inventory.js?v=20260507-fun-ads-7"></script>
+<script defer src="./pages/supervisors.js?v=20260507-fun-ads-7"></script>
+<script defer src="./pages/admin.js?v=20260507-fun-ads-7"></script>
+<script defer src="./api.js?v=20260507-fun-ads-7"></script>
+<script defer src="./actions.js?v=20260507-fun-ads-7"></script>
+<script defer src="./bootstrap.js?v=20260507-fun-ads-7"></script>
 </head>
 <body>
+<div class="command-overlay" id="commandOverlay" role="dialog" aria-modal="true" aria-labelledby="commandTitle">
+  <div class="command-panel">
+    <div class="command-head">
+      <strong id="commandTitle">Buscar no PainelURE</strong>
+      <button type="button" class="command-close" data-command-close aria-label="Fechar busca">x</button>
+    </div>
+    <div class="command-input-row">
+      <span>&#128269;</span>
+      <input id="commandInput" autocomplete="off" placeholder="Escola, supervisor, ativo, agenda ou contato">
+    </div>
+    <div id="commandResults" class="command-results"></div>
+  </div>
+</div>
+<div class="quick-action-shell" id="quickActionShell">
+  <div class="quick-action-menu" id="quickActionMenu">
+    <button type="button" data-quick-action="supervisors">Ver supervisores</button>
+    <button type="button" data-quick-action="school">Abrir escola</button>
+    <button type="button" data-quick-action="inventory">Inventário crítico</button>
+    <button type="button" data-quick-action="agenda">Ver agenda</button>
+    <button type="button" data-quick-action="import" data-v1-admin-import>Importar dados</button>
+    <button type="button" data-quick-action="command">Buscar tudo</button>
+  </div>
+  <button type="button" class="quick-action-fab" id="quickActionFab" aria-expanded="false" aria-controls="quickActionMenu">+</button>
+</div>
 <div id="setup" class="setup-screen" aria-labelledby="loginTitle">
   <div class="setup-box setup-shell login-only">
     <aside class="setup-auth">
@@ -53,7 +93,7 @@
   <button class="fn-item active" type="button" data-page="dashboard" aria-current="page"><span class="fni">&#128202;</span>Início</button>
   <button class="fn-item" type="button" data-page="schools"><span class="fni">&#127979;</span>Escolas</button>
   <button class="fn-item" type="button" data-page="assets"><span class="fni">&#128187;</span>Invent.</button>
-  <button class="fn-item" type="button" data-page="supervisors"><span class="fni">&#128101;</span>Superv.</button>
+  <button class="fn-item" type="button" data-page="supervisors"><span class="fni">&#129517;</span>Superv.</button>
   <button class="fn-item sl-n" type="button" data-page="info"><span class="fni">&#9742;</span>Contatos</button>
   <button class="fn-item fn-logout logout-action" type="button"><span class="fni">&#8617;</span>Sair</button>
 </nav>
@@ -74,7 +114,7 @@
     <button class="nav-item active" type="button" data-page="dashboard" aria-current="page"><span class="ico">&#128202;</span>Painel</button>
     <button class="nav-item" type="button" data-page="schools"><span class="ico">&#127979;</span>Escolas</button>
     <button class="nav-item" type="button" data-page="assets"><span class="ico">&#128187;</span>Inventário</button>
-    <button class="nav-item" type="button" data-page="supervisors"><span class="ico">&#128101;</span>Supervisores</button>
+    <button class="nav-item" type="button" data-page="supervisors"><span class="ico">&#129517;</span>Supervisores</button>
     <button class="nav-item" type="button" data-page="ctc"><span class="ico">&#128736;</span>CTC</button>
     <button class="nav-item fn" type="button" data-page="reports"><span class="ico">&#128204;</span>Relatórios</button>
     <button class="nav-item sl-n" type="button" data-page="info"><span class="ico">&#9742;</span>Contatos</button>
@@ -101,7 +141,35 @@
 
 <main class="main">
   <div class="page active" id="page-dashboard">
-    <div class="ph">
+    <section class="dashboard-command-hero">
+      <div class="dashboard-command-copy">
+        <span class="dashboard-command-kicker">Operação diária</span>
+        <h1 id="dashboardHeroTitle">PainelURE</h1>
+        <p id="dashboardHeroText">Carregando a visão operacional.</p>
+        <div id="dashboardHeroActions" class="dashboard-command-actions"></div>
+      </div>
+      <div class="dashboard-command-score-card" id="dashboardHeroScore"></div>
+      <div class="dashboard-command-stats" id="dashboardHeroStats"></div>
+    </section>
+    <section class="dashboard-profile-grid" id="dashboardProfileSummary" hidden></section>
+    <section class="dashboard-role-grid" id="dashboardRoleCards" hidden></section>
+    <section class="dashboard-role-grid attention" id="dashboardAttentionCards" hidden></section>
+    <section class="dashboard-ops-grid" data-v1-dashboard-secondary hidden>
+      <div class="box"><div class="bh"><div><div class="ct">Saúde operacional</div><div class="cs">Sinais para decidir o próximo movimento.</div></div></div><div id="opsHealthPanel"></div><div id="coverageGrid" class="setechub-monitor-grid compact-grid"></div></div>
+      <div class="box"><div class="bh"><div><div class="ct">Sinais por escola</div><div class="cs">Unidades que pedem atenção primeiro.</div></div></div><div id="opsSignalList" class="stack-list"></div></div>
+      <div class="box"><div class="bh"><div><div class="ct">Ações sugeridas</div><div class="cs">Fila prática para a rotina.</div></div></div><div id="opsSuggestionList" class="stack-list"></div></div>
+    </section>
+    <section class="dashboard-v1-grid">
+      <div class="box" id="dashboardCategoryBox"><div class="bh"><div><div class="ct">Módulos</div><div class="cs">Entrada rápida por área.</div></div></div><div id="dashboardCategoryGrid" class="dashboard-category-grid"></div></div>
+      <div class="box"><div class="bh"><div><div class="ct">Atenção agora</div><div class="cs">Fila curta para decidir o próximo passo.</div></div></div><div id="pendingQueueList" class="stack-list"></div></div>
+      <div class="box" id="dashboardQuickBox" data-v1-dashboard-secondary hidden><div class="bh"><div><div class="ct">Atalhos vivos</div><div class="cs">Escolas, inventário e chamados em destaque.</div></div></div><div id="dashboardQuickLinks" class="stack-list"></div></div>
+      <div class="box" id="dashboardDrilldownBox" data-v1-dashboard-secondary hidden><div class="bh"><div><div class="ct">Recortes</div><div class="cs">Filtros prontos para investigar.</div></div></div><div id="dashboardDrilldownGrid" class="dashboard-drill-grid"></div></div>
+    </section>
+    <section class="dashboard-utility-grid" data-v1-dashboard-secondary hidden>
+      <div class="box"><div class="bh"><div><div class="ct">Inventário crítico</div><div class="cs">Itens de manutenção/defeito.</div></div></div><div id="dashboardInventoryAlerts" class="stack-list"></div></div>
+      <div class="box"><div class="bh"><div><div class="ct">Chamados ativos</div><div class="cs">Fila operacional em aberto.</div></div></div><div id="dashboardCallQueue" class="stack-list"></div></div>
+    </section>
+    <div class="ph" data-v1-dashboard-secondary hidden>
       <div>
         <div class="pt">Painel</div>
         <div class="ps">Calendários compartilhado e pessoal para acompanhar os compromissos do mês.</div>
@@ -112,24 +180,23 @@
           <span class="month-current" data-month-current>Maio</span>
           <button class="month-arrow" type="button" data-focus-shift="1" aria-label="Próximo mês" title="Próximo mês">&#8250;</button>
         </div>
-        <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('ure')">Novo compartilhado</button>
-        <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('pessoal')">Novo pessoal</button>
+        <button class="btn btn-g btn-sm" type="button" onclick="showPage('agenda')">Ver agenda</button>
       </div>
     </div>
 
-    <section class="dashboard-finanza-grid dashboard-agenda-stack">
+    <section class="dashboard-finanza-grid dashboard-agenda-stack" data-v1-dashboard-secondary hidden>
       <div class="box dashboard-focus-box">
         <div class="bh">
-        <div><div class="ct">🗓️ Agenda compartilhada</div><div class="cs">Carros oficiais e eventos da URE.</div></div>
-          <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('ure')">Adicionar evento</button>
+        <div><div class="ct">Agenda compartilhada</div><div class="cs">Carros oficiais e eventos da URE.</div></div>
+          <button class="btn btn-g btn-sm" type="button" onclick="showPage('agenda')">Abrir agenda</button>
         </div>
         <div id="dashboardSharedAgenda" class="dashboard-mini-calendar"></div>
         <div id="dashboardSharedAgendaList" class="stack-list dashboard-agenda-list"></div>
       </div>
       <div class="box dashboard-focus-box">
         <div class="bh">
-        <div><div class="ct">⭐ Agenda pessoal</div><div class="cs">Compromissos vinculados ao usuario logado.</div></div>
-          <button class="btn btn-g btn-sm" type="button" onclick="openAgendaWithScope('pessoal')">Adicionar evento</button>
+        <div><div class="ct">Agenda pessoal</div><div class="cs">Compromissos vinculados ao usuário logado.</div></div>
+          <button class="btn btn-g btn-sm" type="button" onclick="showPage('agenda')">Abrir agenda</button>
         </div>
         <div id="dashboardPersonalAgenda" class="dashboard-mini-calendar"></div>
         <div id="dashboardPersonalAgendaList" class="stack-list dashboard-agenda-list"></div>
@@ -147,7 +214,7 @@
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">🚗 Nova visita CTC</div><div class="cs">Agende uma visita para Bruno ou Danilo.</div></div>
+        <div><div class="ct">Nova visita CTC</div><div class="cs">Admin: agendamento manual preservado fora do fluxo V1.</div></div>
       </div>
       <form id="ctcVisitForm" class="setechub-form setechub-form-wide">
         <select class="fi" id="ctcVisitOwner" aria-label="Responsável pela visita CTC">
@@ -184,9 +251,9 @@
         <div class="ps">Compromissos pessoais, carros oficiais e eventos globais em um lugar só.</div>
       </div>
     </div>
-    <div class="box" id="directoryContactsBox">
+    <div class="box" id="directoryContactsBox" data-v1-hide>
       <div class="bh">
-        <div><div class="ct">➕ Novo agendamento</div><div class="cs">Crie agenda pessoal, evento da URE ou reserva de carro.</div></div>
+        <div><div class="ct">Novo agendamento</div><div class="cs">Admin: cadastro manual preservado fora do fluxo V1.</div></div>
       </div>
       <form id="taskForm" class="setechub-form setechub-form-wide">
         <input class="fi" id="taskTitle" placeholder="Título" aria-label="Título do agendamento">
@@ -219,13 +286,13 @@
     </div>
     <div class="box">
       <div class="bh">
-        <div><div class="ct">📅 Agenda</div><div class="cs">Itens ordenados por data, horário e responsável.</div></div>
+        <div><div class="ct">Agenda</div><div class="cs">Itens ordenados por data, horário e responsável.</div></div>
         <div class="mini-actions">
-          <label class="btn btn-g btn-sm" for="fleetScheduleInput">Importar frota Excel</label>
+          <label class="btn btn-g btn-sm" for="fleetScheduleInput" data-v1-admin-import>Importar frota Excel</label>
           <input id="fleetScheduleInput" type="file" accept=".xlsx,.xls" hidden>
         </div>
       </div>
-      <div class="sync-meta" id="fleetImportStatus">Importe a planilha da frota para preencher reservas de carros oficiais.</div>
+      <div class="sync-meta" id="fleetImportStatus" data-v1-admin-import>Importe a planilha da frota para preencher reservas de carros oficiais.</div>
       <div class="setechub-toolbar" id="taskFilterBar">
         <button class="btn btn-g btn-sm active-filter" data-task-filter="todas" type="button">Todas</button>
         <button class="btn btn-g btn-sm" data-task-filter="minhas" type="button">Minha agenda</button>
@@ -236,7 +303,7 @@
         <button class="btn btn-g btn-sm" data-task-filter="visita" type="button">Visita</button>
         <button class="btn btn-g btn-sm" data-task-filter="ctc" type="button">CTC / visitas</button>
       </div>
-      <div id="agendaCalendarGrid" class="supervisor-calendar-grid agenda-calendar-grid"></div>
+      <div id="agendaCalendarGrid" class="supervisor-calendar-grid agenda-calendar-grid" data-v2-heavy hidden></div>
       <div id="taskList" class="stack-list"></div>
     </div>
   </div>
@@ -248,7 +315,7 @@
         <div class="ps">Abrir, mover e concluir chamados sem soltar o historico.</div>
       </div>
     </div>
-    <div class="box">
+    <div class="box" data-v1-hide>
       <div class="bh">
         <div><div class="ct">Novo chamado</div><div class="cs">Abra um atendimento e ja ligue a uma escola.</div></div>
       </div>
@@ -290,7 +357,7 @@
     <div class="box school-directory-shell school-directory-simple">
       <div class="school-directory-filters">
         <select class="fi" id="schoolZoneFilterSelect" aria-label="Filtrar por município">
-          <option value="todas">Todos os municipios</option>
+          <option value="todas">Todos os municípios</option>
         </select>
         <select class="fi" id="schoolSortSelect" aria-label="Ordenar escolas" hidden>
           <option value="nome">Nome</option>
@@ -351,7 +418,7 @@
     <div class="school-record-grid">
       <section class="box school-record-action-card">
         <div class="bh">
-          <div><div class="ct">O que olhar agora</div><div class="cs">Pendencias e atalhos realmente uteis para esta escola.</div></div>
+          <div><div class="ct">O que olhar agora</div><div class="cs">Pendências e atalhos realmente úteis para esta escola.</div></div>
         </div>
         <div id="schoolDetailActions" class="stack-list"></div>
       </section>
@@ -365,9 +432,9 @@
         </div>
       </section>
     </div>
-    <div class="box">
+    <div class="box" data-v1-hide>
       <div class="bh">
-        <div><div class="ct">Atualizacao da ficha</div><div class="cs">Direcao, contato e observacoes da unidade.</div></div>
+        <div><div class="ct">Atualização da ficha</div><div class="cs">Direção, contato e observações da unidade.</div></div>
       </div>
       <form id="schoolProfileForm" class="setechub-form setechub-form-school-profile">
         <input class="fi" id="schoolProfileDirector" placeholder="Diretor(a)" aria-label="Diretor ou diretora">
@@ -402,7 +469,7 @@
         <div><div class="ct">Painel de supervisores</div><div class="cs">Resumo mensal das visitas, metas e indicadores da planilha oficial.</div></div>
         <div class="mini-actions">
           <a class="btn btn-g btn-sm" href="https://docs.google.com/spreadsheets/d/1AaHF-kDf-3RVd4euAACBCMVB7AsrsVwMkLnDhpg-LnM/edit?gid=1507846737#gid=1507846737" target="_blank" rel="noreferrer">Abrir planilha</a>
-          <button class="btn btn-p btn-sm" id="syncSupervisorSourcesBtn" type="button">Atualizar planilha</button>
+          <button class="btn btn-p btn-sm" id="syncSupervisorSourcesBtn" type="button" data-v1-admin-import>Atualizar planilha</button>
           <button class="btn btn-g btn-sm" id="supervisorFullscreenBtn" type="button">Apresentar</button>
         </div>
       </div>
@@ -427,13 +494,12 @@
       </div>
       <div class="page-actions">
         <button class="btn btn-p btn-sm" id="refreshSupervisorSheetBtn" type="button" hidden>Atualizar planilha</button>
-        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisitForm">Registrar visita</button>
+        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisitTable">Ver registros</button>
       </div>
     </div>
     <div class="box">
       <div class="school-record-nav">
         <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordProfile">Resumo</button>
-        <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordWeeklyMatrixBox">Semanal</button>
         <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordCalendar">Calendário</button>
         <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisited">Visitadas</button>
         <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordPending">Faltantes</button>
@@ -455,7 +521,7 @@
         <div id="supervisorRecordMetrics" class="setechub-monitor-grid compact-grid"></div>
       </div>
     </div>
-    <div class="box" id="supervisorRecordWeeklyMatrixBox">
+    <div class="box" id="supervisorRecordWeeklyMatrixBox" data-v2-heavy hidden>
       <div id="supervisorRecordWeeklyMatrix" class="supervisor-weekly-matrix-panel"></div>
     </div>
     <div class="box" id="supervisorRecordCalendar">
@@ -484,7 +550,7 @@
       </div>
       <div id="supervisorRecordSchoolMatrix" class="supervisor-school-matrix"></div>
     </div>
-    <div class="box" id="supervisorRecordVisitForm">
+    <div class="box" id="supervisorRecordVisitForm" data-v1-admin-edit>
       <div class="bh">
         <div><div class="ct">Registrar visita</div><div class="cs">Registro rápido já preso ao supervisor desta página.</div></div>
       </div>
@@ -587,11 +653,11 @@
       </div>
     </section>
 
-    <div class="box inventory-manage-card" hidden>
+    <div class="box inventory-manage-card" data-v1-admin-import hidden>
       <div class="bh">
-        <div><div class="ct">Manutenção do inventário</div><div class="cs">Adicione um item ou importe um lote rápido para a escola selecionada.</div></div>
+        <div><div class="ct">Importação do inventário</div><div class="cs">Admin: entrada de dados por planilha. Cadastro manual fica fora do fluxo V1.</div></div>
       </div>
-      <form id="schoolAssetForm" class="setechub-form setechub-form-school-asset">
+      <form id="schoolAssetForm" class="setechub-form setechub-form-school-asset" data-v1-hide>
         <select class="fi" id="schoolAssetSchool" aria-label="Escola do equipamento"></select>
         <input class="fi" id="schoolAssetName" placeholder="Equipamento ou item" aria-label="Equipamento ou item">
         <input class="fi" id="schoolAssetQuantity" type="number" min="1" step="1" value="1" placeholder="Qtd" aria-label="Quantidade">
@@ -603,16 +669,16 @@
         <input class="fi" id="schoolAssetNotes" placeholder="Observação do equipamento" aria-label="Observação do equipamento">
         <button class="btn btn-p" type="submit">Adicionar equipamento</button>
       </form>
-      <form id="schoolAssetBulkForm" class="setechub-form setechub-note-form">
+      <form id="schoolAssetBulkForm" class="setechub-form setechub-note-form" data-v1-hide>
         <select class="fi" id="schoolAssetBulkSchool" aria-label="Escola do lote de equipamentos"></select>
         <textarea class="fi" id="schoolAssetBulkText" placeholder="Lote rápido: uma linha por item. Exemplo: PC adm;7;ok;secretaria&#10;tablet;8;defeito;2 com tela trincada" aria-label="Lote rápido de equipamentos"></textarea>
         <button class="btn btn-g" type="submit">Importar lote rápido</button>
       </form>
       <div class="mini-actions">
-        <label class="btn btn-g btn-sm" for="schoolAssetExcelInput">Importar inventario Excel</label>
+        <label class="btn btn-g btn-sm" for="schoolAssetExcelInput" data-v1-admin-import>Importar inventario Excel</label>
         <input id="schoolAssetExcelInput" type="file" accept=".xlsx,.xls" hidden>
       </div>
-      <div class="sync-meta" id="schoolAssetBulkStatus">Use `nome;qtd;status;observacao` ou apenas `nome` por linha.</div>
+      <div class="sync-meta" id="schoolAssetBulkStatus">Use `nome;qtd;status;observação` ou apenas `nome` por linha.</div>
       <div id="schoolAssetList" class="stack-list"></div>
     </div>
   </div>
@@ -645,7 +711,7 @@
     <div class="setechub-two-col">
       <div class="box">
         <div class="bh">
-          <div><div class="ct">📝 Resumo e histórico</div><div class="cs">Relatórios, visitas e notas operacionais.</div></div>
+          <div><div class="ct">Resumo e histórico</div><div class="cs">Relatórios, visitas e notas operacionais.</div></div>
         </div>
         <div class="setechub-progress"><span id="taskProgressBar"></span></div>
         <div class="setechub-summary-card">
@@ -660,9 +726,9 @@
         </form>
         <div id="noteList" class="stack-list"></div>
       </div>
-      <div class="box">
+      <div class="box" data-v1-hide>
         <div class="bh">
-          <div><div class="ct">📄 Automacao de redes</div><div class="cs">Renomeie os arquivos como 170.docx, selecione a pasta e processe.</div></div>
+          <div><div class="ct">Automação de redes</div><div class="cs">Renomeie os arquivos como 170.docx, selecione a pasta e processe.</div></div>
         </div>
         <form id="redeAutomationForm" class="setechub-form setechub-note-form">
           <input class="fi" id="redeFolderPath" placeholder="Caminho da pasta com as redes" aria-label="Caminho da pasta com as redes">
@@ -672,7 +738,7 @@
             <button class="btn btn-p" id="processRedeBtn" type="button">Processar agora</button>
           </div>
         </form>
-        <div class="sync-meta" id="redeProcessStatus">O PDF sai na mesma pasta. O assunto do DOCX sera copiado automaticamente.</div>
+        <div class="sync-meta" id="redeProcessStatus">O PDF sai na mesma pasta. O assunto do DOCX será copiado automaticamente.</div>
         <label class="btn btn-g" for="redeFolderInput">Selecionar pasta de documentos</label>
         <input id="redeFolderInput" type="file" webkitdirectory directory multiple hidden>
         <div id="redePreviewList" class="stack-list"></div>
@@ -787,7 +853,7 @@
     </div>
     <div class="box admin-module" data-admin-only>
       <div class="bh">
-        <div><div class="ct">👥 Usuários e permissões</div><div class="cs">Crie acessos locais por perfil. No Supabase, estes perfis viram regras de acesso.</div></div>
+        <div><div class="ct">Usuários e permissões</div><div class="cs">Crie acessos locais por perfil. No Supabase, estes perfis viram regras de acesso.</div></div>
       </div>
       <form id="userForm" class="admin-user-form">
         <input id="editingUserId" type="hidden">
@@ -799,7 +865,7 @@
           <option value="dirigente">🏛️ Dirigente</option>
           <option value="seintec">💻 SEINTEC</option>
           <option value="seom">🏗️ SEOM</option>
-          <option value="ctc">🚗 CTC</option>
+          <option value="ctc">CTC</option>
           <option value="pec">🎓 PEC</option>
           <option value="admin">🛡️ Administrador</option>
         </select>
@@ -811,9 +877,9 @@
       <div class="admin-panel-note">Supervisor enxerga Supervisores e Escolas do próprio vínculo. SEOM consulta Escolas e Inventário. PEC e Dirigente visualizam a base. SEINTEC, CTC e administrador podem editar dados.</div>
       <div id="userList" class="stack-list"></div>
     </div>
-    <div class="box admin-module" data-admin-only>
+    <div class="box admin-module" data-admin-only data-v1-hide>
       <div class="bh">
-        <div><div class="ct">🏫 Escolas e vínculos</div><div class="cs">Edite escolas, responsáveis e resolva duplicidades sem abrir o código.</div></div>
+        <div><div class="ct">Escolas e vínculos</div><div class="cs">Edite escolas, responsáveis e resolva duplicidades sem abrir o código.</div></div>
       </div>
       <form id="adminSchoolForm" class="admin-school-form">
         <input id="adminSchoolId" type="hidden">
@@ -841,7 +907,7 @@
     </div>
     <div class="box admin-module" data-admin-only>
       <div class="bh">
-        <div><div class="ct">Planilhas mensais</div><div class="cs">Cadastre o link e use Atualizar dados no mes desejado.</div></div>
+        <div><div class="ct">Planilhas mensais</div><div class="cs">Cadastre o link e use Atualizar dados no mês desejado.</div></div>
       </div>
       <form id="monthlySupervisorSheetForm" class="setechub-form setechub-note-form">
         <input class="fi" id="monthlySupervisorSheetMonth" type="month" value="2026-04" aria-label="Mes da planilha">
@@ -853,14 +919,14 @@
     </div>
     <div class="box admin-module" data-admin-only>
       <div class="bh">
-        <div><div class="ct">💾 Banco local</div><div class="cs">Exporte, importe ou redefina o estado completo do app.</div></div>
+        <div><div class="ct">Banco local</div><div class="cs">Exporte, importe ou redefina o estado completo do app.</div></div>
       </div>
       <div class="setechub-action-col">
         <button class="btn btn-p" id="backupBtn" type="button">Exportar backup JSON</button>
         <label class="btn btn-g" for="restoreInput">Importar backup</label>
         <input id="restoreInput" type="file" accept=".json" hidden>
         <button class="btn btn-d" id="resetBtn" type="button">Redefinir base local</button>
-        <div class="sync-meta" id="backupStatusMeta">Backup ainda nao exportado nesta sessao.</div>
+        <div class="sync-meta" id="backupStatusMeta">Backup ainda não exportado nesta sessão.</div>
       </div>
     </div>
     <div class="box admin-module" data-admin-only>
@@ -871,8 +937,20 @@
         <button class="btn btn-p" id="saveSupabaseBtn" type="button">Salvar agora no Supabase</button>
         <button class="btn btn-g" id="loadSupabaseBtn" type="button">Carregar do Supabase</button>
         <button class="btn btn-g" id="checkSupabaseBtn" type="button">Testar conexao</button>
-        <div class="sync-meta" id="supabaseStatusMeta">Supabase nao verificado.</div>
+        <div class="sync-meta" id="supabaseStatusMeta">Supabase não verificado.</div>
       </div>
+    </div>
+    <div class="box admin-module" data-admin-only>
+      <div class="bh">
+        <div><div class="ct">Modo anuncios</div><div class="cs">Brincadeira visual: popups falsos e banners sem links reais.</div></div>
+      </div>
+      <label class="fun-toggle-row" for="funAdsToggle">
+        <span>
+          <strong>Ativar caos publicitario</strong>
+          <small id="funAdsStatus">Desativado</small>
+        </span>
+        <input id="funAdsToggle" type="checkbox" role="switch" aria-label="Ativar anuncios falsos">
+      </label>
     </div>
     <div class="box admin-module">
       <div class="bh">
@@ -902,7 +980,7 @@
       </div>
       <div class="box admin-module">
         <div class="bh">
-          <div><div class="ct">📥 Importações da base</div><div class="cs">Resumo informativo para administração. Fora do fluxo operacional.</div></div>
+          <div><div class="ct">Importações da base</div><div class="cs">Resumo informativo para administração. Fora do fluxo operacional.</div></div>
         </div>
         <div id="adminImportInfo" class="stack-list"></div>
       </div>
@@ -927,20 +1005,7 @@
 
 <datalist id="officialSchoolOptions"></datalist>
 
-<script src="./school-data.js?v=20260505-login-refresh"></script>
-<script src="./storage.js?v=20260506-online-db"></script>
-<script src="./app.js?v=20260506-page-modules-2"></script>
-<script src="./render.js?v=20260506-supervisor-record-matrix"></script>
-<script src="./utils/defer.js?v=20260506-page-modules-2"></script>
-<script src="./components/avatar.js?v=20260506-page-modules-2"></script>
-<script src="./components/school-card.js?v=20260506-page-modules-2"></script>
-<script src="./pages/schools.js?v=20260506-page-modules-2"></script>
-<script src="./pages/school-record.js?v=20260506-page-modules-2"></script>
-<script src="./pages/inventory.js?v=20260506-refactor-fix"></script>
-<script src="./pages/supervisors.js?v=20260506-supervisor-record-matrix-4"></script>
-<script src="./pages/admin.js?v=20260506-refactor-fix"></script>
-<script src="./api.js?v=20260506-layered-schools"></script>
-<script src="./actions.js?v=20260506-layered-schools"></script>
-<script src="./bootstrap.js?v=20260506-online-db"></script>
 </body>
 </html>
+
+

@@ -3,8 +3,7 @@
 const legacyRenderSupervisors = window.renderSupervisors;
 let supervisorsRenderTicket = null;
 
-function renderSupervisorQuickMetrics() {
-  const stats = supervisorStats();
+function renderSupervisorQuickMetrics(stats = supervisorStats()) {
   const visits = state.supervisorVisits || [];
   const assignedSchoolCount = new Set(stats.flatMap((item) => item.assignedSchools)).size;
   const averageCoverage = stats.length
@@ -20,8 +19,7 @@ function renderSupervisorQuickMetrics() {
   if (metricCoverage) metricCoverage.textContent = `${averageCoverage}%`;
 }
 
-function renderSupervisorQuickSelectors() {
-  const stats = supervisorStats();
+function renderSupervisorQuickSelectors(stats = supervisorStats()) {
   const filterSelect = document.getElementById('supervisorFilterSelect');
   const visitSupervisorSelect = document.getElementById('visitSupervisorSelect');
   const visitSchoolSelect = document.getElementById('visitSchoolSelect');
@@ -67,6 +65,18 @@ function supervisorWeekVisitCount(visits, supervisorName, schoolName, weekNumber
   }).length;
 }
 
+function supervisorWeekVisitCountMap(visits, supervisorName) {
+  const counts = new Map();
+  (visits || []).forEach((visit) => {
+    if (visit.supervisor !== supervisorName) return;
+    const date = new Date(`${visit.date}T00:00:00`);
+    const week = supervisorDateWeekForView(date);
+    const key = `${visit.school}|${week}`;
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  return counts;
+}
+
 function supervisorWeeklyMatrixStatus(visitedCount, totalSchools, weekEnd) {
   if (!totalSchools) return 'aguardando';
   if (visitedCount >= totalSchools) return 'verde';
@@ -104,6 +114,7 @@ function renderSupervisorWeeklyMatrixForRecord(selectedStat, visits) {
   }
   const weekCount = Math.max(1, supervisorLastWeekOfViewMonth());
   const weeks = Array.from({ length: weekCount }, (_, index) => index + 1);
+  const countMap = supervisorWeekVisitCountMap(visits, supervisor.name);
   panel.innerHTML = `
     <div class="supervisor-weekly-matrix-wrap">
       <table class="supervisor-weekly-matrix">
@@ -119,7 +130,7 @@ function renderSupervisorWeeklyMatrixForRecord(selectedStat, visits) {
             const rangeLabel = supervisorWeekRangeLabel(weekNumber);
             const cells = schools.map((school) => ({
               school,
-              count: supervisorWeekVisitCount(visits, supervisor.name, school, weekNumber)
+              count: countMap.get(`${school}|${weekNumber}`) || 0
             }));
             const visitedCount = cells.filter((cell) => cell.count > 0).length;
             const status = supervisorWeeklyMatrixStatus(visitedCount, schools.length, range.end);
@@ -149,15 +160,22 @@ function renderSupervisorWeeklyMatrixForRecord(selectedStat, visits) {
 
 window.renderSupervisors = function renderSupervisorsPage() {
   cancelIdleRender(supervisorsRenderTicket);
-  renderSupervisorQuickMetrics();
-  renderSupervisorQuickSelectors();
-  try {
-    legacyRenderSupervisors();
-  } catch (error) {
-    console.error('Falha ao carregar supervisao', error);
-    renderDeferredPlaceholders([
-      '#supervisorPanelGrid',
-      '#supervisorSelectorList'
-    ], 'Nao foi possivel carregar a supervisao. Atualize a pagina.');
-  }
+  const stats = supervisorStats();
+  renderSupervisorQuickMetrics(stats);
+  renderSupervisorQuickSelectors(stats);
+  renderDeferredPlaceholders([
+    '#supervisorPanelGrid',
+    '#supervisorSelectorList'
+  ]);
+  supervisorsRenderTicket = scheduleIdleRender(() => {
+    try {
+      legacyRenderSupervisors();
+    } catch (error) {
+      console.error('Falha ao carregar supervisao', error);
+      renderDeferredPlaceholders([
+        '#supervisorPanelGrid',
+        '#supervisorSelectorList'
+      ], 'Nao foi possivel carregar a supervisao. Atualize a pagina.');
+    }
+  }, { timeout: 700, delay: 30 });
 };

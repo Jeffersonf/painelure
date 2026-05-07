@@ -52,8 +52,9 @@ function renderSchools() {
   renderSchoolDirectoryStats(schools);
   const schoolList = document.getElementById('schoolList');
   if (schoolList) {
+    const visibleRows = schools.slice(0, SCHOOL_RENDER_LIMIT);
     schoolList.innerHTML = schools.length
-      ? `<div class="school-card-grid-lite">${schools.map(schoolCardMarkup).join('')}</div>`
+      ? `<div class="school-card-grid-lite">${visibleRows.map(schoolCardMarkup).join('')}</div>${listLimitNotice(schools.length, SCHOOL_RENDER_LIMIT, 'escolas')}`
       : '<div class="sync-empty">Nenhuma escola encontrada neste filtro.</div>';
   }
   const options = document.getElementById('officialSchoolOptions');

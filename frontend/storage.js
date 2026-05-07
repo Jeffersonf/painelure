@@ -14,6 +14,8 @@ const SUPABASE_DEFAULT_CONFIG = {
 const GENERATED_SCHOOL_DATA = typeof window !== 'undefined' && window.SETECHUB_SCHOOL_DATA
   ? window.SETECHUB_SCHOOL_DATA
   : { generalAssets: [], schoolImports: [], schoolAssets: [], schoolNetworks: [] };
+let lastSavedStateComparable = '';
+let lastSavedStatePayload = '';
 
 function uid() {
   return Date.now() + Math.floor(Math.random() * 10000);
@@ -77,6 +79,7 @@ function inferImportReviewStatus(item) {
 const SCHOOL_ALIASES = {
   'AGROVILA I': 'PEI EE Idalicio Mendes Lima',
   'EE BAIRRO TURVOS DOS ALMEIDAS': 'EE Bairro Turvo dos Almeidas',
+  'EE BAIRRO TURVO DO ALMEIDAS': 'EE Bairro Turvo dos Almeidas',
   'EE CELIA VASQUES DUCH': 'PEI EE Professora Celia Vasques Ferrari Duch',
   'EE CINIRA DANIEL DA SILVA': 'PEI EE Professora Cinira Daniel da Silva',
   'EE DR ANTONIO DEFUNNE': 'EE Doutor Antonio Deffune',
@@ -88,15 +91,20 @@ const SCHOOL_ALIASES = {
   'EE GERSON DE BARROS MARGARIDO': 'EE Professor Gerson de Barros Margarido',
   'EE IDALICIO MENDES LIMA': 'PEI EE Idalicio Mendes Lima',
   'EE JEMINIANO DAVID MUZEL': 'PEI EE Jeminiano David Muzel',
+  'PEI EE JEMINIANO DAVID MÜZEL': 'PEI EE Jeminiano David Muzel',
+  'EE PEI JOAO B. DO AMARAL VASCONCELLOS': 'PEI EE Professor Joao Baptista do Amaral Vasconcellos',
+  'EE PEI JOÃO B. DO AMARAL VASCONCELLOS': 'PEI EE Professor Joao Baptista do Amaral Vasconcellos',
   'EE JOAO BATISTA DO AMARAL VASCONCELLOS': 'PEI EE Professor Joao Baptista do Amaral Vasconcellos',
   'EE JOSE VASQUES FERRARI': 'PEI EE Professor Jose Vasques Ferrari',
   'EE JOSÉ VASQUES FERRARI': 'PEI EE Professor Jose Vasques Ferrari',
   'EE NICOTA SOARES': 'PEI EE Professora Nicota Soares',
   'EE OSCAR KURTZ CAMARGO': 'PEI EE Oscar Kurtz Camargo',
   'EE OTAVIO FERRARI': 'PEI EE Otavio Ferrari',
+  'PEI EE OTÁVIO FERRARI': 'PEI EE Otavio Ferrari',
   'EE PADRE ARLINDO VIEIRA': 'PEI EE Padre Arlindo Vieira',
   'EE RICARDO CAMPOLIM DE ALMEIDA': 'PEI EE Ricardo Campolim de Almeida Neto',
   'EE SILVERIO MONTEIRO': 'EE Professor Silverio Monteiro',
+  'EE PROFESSOR SILVÉRIO MONTEIRO': 'EE Professor Silverio Monteiro',
   'EE SIMPLICIANO CAMPOLIM DE ALMEIDA NETO': 'PEI EE Simpliciano Campolim de Almeida',
   'EE ZULMIRA DE OLIVEIRA': 'PEI EE Professora Zulmira de Oliveira'
 };
@@ -119,13 +127,153 @@ const SUPERVISOR_SOURCE_ALIASES = {
   daiane: ['Daiane Aparecida', 'Daiane Aparecida de Oliveira Ribeiro'],
   edilene: ['Edilene Silva', 'Edilene da Silva', 'Edilene da Silva Almeida Oliveira'],
   magda: ['Magda Gisele', 'Magda Gisele Silva de Oliveira'],
-  marcio: ['Marcio Nunes', 'Marcio Nunes da Cruz'],
-  maria: ['Maria Luiza', 'Maria Luiza Brizolla de Queiroz']
+  marcio: ['Marcio Nunes', 'Marcio Nunes da Cruz', 'Márcio Nunes da Cruz'],
+  maria: ['Maria Luiza', 'Maria Luiza Brizolla de Queiroz', 'Maria Luiza Brisolla de Queiroz']
 };
+
+const LOCKED_SUPERVISOR_ASSIGNMENTS = [
+  {
+    key: 'daiane',
+    name: 'Daiane Aparecida de Oliveira Ribeiro',
+    email: 'daiane.ribeiro@educacao.sp.gov.br',
+    phone: '(15) 3526-6227',
+    schools: [
+      'PEI EE Oscar Kurtz Camargo',
+      'EE Bairro Ferreira dos Matos',
+      'PEI EE Professora Nicota Soares',
+      'EE Professor Gerson de Barros Margarido'
+    ]
+  },
+  {
+    key: 'adilson',
+    name: 'Adilson Manoel Fogaça',
+    email: 'adilson.fogaca@educacao.sp.gov.br',
+    phone: '(15) 3526-6224',
+    schools: [
+      'PEI EE Jeminiano David Müzel',
+      'PEI EE Professora Cinira Daniel da Silva',
+      'EE Doutor Raul Venturelli'
+    ]
+  },
+  {
+    key: 'marcio',
+    name: 'Márcio Nunes da Cruz',
+    email: 'marcio.cruz@educacao.sp.gov.br',
+    phone: '(15) 3526-6208',
+    schools: [
+      'PEI EE Ricardo Campolim de Almeida Neto',
+      'PEI EE Simpliciano Campolim de Almeida',
+      'EE Professor Silvério Monteiro',
+      'PEI EE Professora Zulmira de Oliveira'
+    ]
+  },
+  {
+    key: 'maria',
+    name: 'Maria Luiza Brisolla de Queiroz',
+    email: 'maria.queiroz14@educacao.sp.gov.br',
+    phone: '(15) 3526-6216',
+    schools: [
+      'EE Bairro Boa Vista Intervales',
+      'EE Bairro Turvo do Almeidas',
+      'PEI EE Professor José Vasques Ferrari'
+    ]
+  },
+  {
+    key: 'edilene',
+    name: 'Edilene Silva Almeida Oliveira',
+    email: 'edilene.oliveira@educacao.sp.gov.br',
+    phone: '(15) 3526-6217',
+    schools: [
+      'PEI EE Otávio Ferrari',
+      'PEI EE Professora Francelina Franco',
+      'EE PEI João B. do Amaral Vasconcellos'
+    ]
+  },
+  {
+    key: 'magda',
+    name: 'Magda Gisele Silva Oliveira',
+    email: 'magda.oliveira@educacao.sp.gov.br',
+    phone: '(15) 3526-6232',
+    schools: [
+      'EE Professora Célia Vasques Ferrari Duch',
+      'PEI E.E Idalicio Mendes Lima',
+      'PEI EE Padre Arlindo Vieira',
+      'PEI EE Doutor Antonio Deffune'
+    ]
+  }
+];
 
 function supervisorSourceAliases(name) {
   const firstName = normalizeKey(String(name || '').trim().split(/\s+/)[0]);
   return SUPERVISOR_SOURCE_ALIASES[firstName] || [];
+}
+
+function lockedSupervisorAssignmentFor(supervisor) {
+  const key = normalizeKey(`${supervisor?.name || ''} ${supervisor?.email || ''} ${(supervisor?.sourceAliases || []).join(' ')}`);
+  return LOCKED_SUPERVISOR_ASSIGNMENTS.find((item) =>
+    key.includes(normalizeKey(item.key)) ||
+    key.includes(normalizeKey(item.name)) ||
+    normalizeKey(supervisor?.email) === normalizeKey(item.email)
+  ) || null;
+}
+
+function lockedSupervisorSchools(schools) {
+  const knownSchools = new Set((schools || []).map((school) => normalizeKey(school.name || school)));
+  return (schoolNames) => Array.from(new Set(schoolNames
+    .map((school) => canonicalSchoolName(school))
+    .filter((school) => !knownSchools.size || knownSchools.has(normalizeKey(school)))));
+}
+
+function applyLockedSupervisorAssignments(supervisors, schools = SCHOOL_MASTER) {
+  const canonicalizeSchools = lockedSupervisorSchools(schools);
+  const usedKeys = new Set();
+  const normalized = (supervisors || []).map((supervisor) => {
+    const locked = lockedSupervisorAssignmentFor(supervisor);
+    if (!locked) return supervisor;
+    usedKeys.add(locked.key);
+    const assignedSchools = canonicalizeSchools(locked.schools);
+    return {
+      ...supervisor,
+      name: locked.name,
+      email: locked.email,
+      phone: supervisor.phone || locked.phone,
+      sourceAliases: supervisorSourceAliases(locked.name),
+      schools: assignedSchools,
+      assignedSchoolCount: assignedSchools.length,
+      monthlyGoal: assignedSchools.length || Number(supervisor.monthlyGoal || 1),
+      source: 'lista oficial travada'
+    };
+  });
+  LOCKED_SUPERVISOR_ASSIGNMENTS.forEach((locked) => {
+    if (usedKeys.has(locked.key)) return;
+    const assignedSchools = canonicalizeSchools(locked.schools);
+    normalized.push({
+      id: `sup-${locked.key}`,
+      name: locked.name,
+      email: locked.email,
+      phone: locked.phone,
+      visitSourceId: SUPERVISOR_VISIT_SOURCES[0].id,
+      visitSourceUrl: SUPERVISOR_VISIT_SOURCES[0].url,
+      visitSourceLabel: SUPERVISOR_VISIT_SOURCES[0].label,
+      visitSourcePrimary: true,
+      sourceAliases: supervisorSourceAliases(locked.name),
+      schools: assignedSchools,
+      assignedSchoolCount: assignedSchools.length,
+      monthlyGoal: assignedSchools.length || 1,
+      source: 'lista oficial travada'
+    });
+  });
+  return normalized;
+}
+
+function canonicalSupervisorName(value) {
+  const key = normalizeKey(value);
+  const locked = LOCKED_SUPERVISOR_ASSIGNMENTS.find((item) =>
+    key === normalizeKey(item.name) ||
+    key.includes(normalizeKey(item.key)) ||
+    supervisorSourceAliases(item.name).some((alias) => key === normalizeKey(alias) || key.includes(normalizeKey(alias)))
+  );
+  return locked ? locked.name : String(value || '').trim();
 }
 
 function canonicalSchoolName(value) {
@@ -493,36 +641,25 @@ function applyOfficialSchoolProfileDefaults(profile) {
 }
 
 function defaultSupervisors(schools) {
-  const supervisorContacts = [
-    { name: 'Daiane Aparecida de Oliveira Ribeiro', email: 'daiane.ribeiro@educacao.sp.gov.br', phone: '(15) 3526-6227', sourceAliases: supervisorSourceAliases('Daiane') },
-    { name: 'Edilene da Silva Almeida Oliveira', email: 'edilene.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6217', sourceAliases: supervisorSourceAliases('Edilene') },
-    { name: 'Magda Gisele Silva de Oliveira', email: 'magda.oliveira@educacao.sp.gov.br', phone: '(15) 3526-6232', sourceAliases: supervisorSourceAliases('Magda') },
-    { name: 'Marcio Nunes da Cruz', email: 'marcio.cruz@educacao.sp.gov.br', phone: '(15) 3526-6208', sourceAliases: supervisorSourceAliases('Marcio') },
-    { name: 'Maria Luiza Brizolla de Queiroz', email: 'maria.queiroz14@educacao.sp.gov.br', phone: '(15) 3526-6216', sourceAliases: supervisorSourceAliases('Maria') },
-    {
-      name: 'Adilson Fogaca',
-      email: 'adilson.fogaca@educacao.sp.gov.br',
-      phone: '(15) 3526-6224',
-      visitSourceId: SUPERVISOR_VISIT_SOURCES[0].id,
-      visitSourceUrl: SUPERVISOR_VISIT_SOURCES[0].url,
-      visitSourceLabel: SUPERVISOR_VISIT_SOURCES[0].label,
-      visitSourcePrimary: true,
-      sourceAliases: supervisorSourceAliases('Adilson')
-    }
-  ];
-  return supervisorContacts.map((supervisor, index) => ({
+  const canonicalizeSchools = lockedSupervisorSchools(schools);
+  return LOCKED_SUPERVISOR_ASSIGNMENTS.map((supervisor, index) => {
+    const assignedSchools = canonicalizeSchools(supervisor.schools);
+    return ({
     id: `sup-${index + 1}`,
-    ...supervisor,
-    visitSourceId: supervisor.visitSourceId || SUPERVISOR_VISIT_SOURCES[0].id,
-    visitSourceUrl: supervisor.visitSourceUrl || SUPERVISOR_VISIT_SOURCES[0].url,
-    visitSourceLabel: supervisor.visitSourceLabel || SUPERVISOR_VISIT_SOURCES[0].label,
-    visitSourcePrimary: supervisor.visitSourcePrimary ?? true,
-    schools: schools
-      .filter((_, schoolIndex) => schoolIndex % supervisorContacts.length === index)
-      .map((school) => school.name),
-    monthlyGoal: Math.max(1, schools.filter((_, schoolIndex) => schoolIndex % supervisorContacts.length === index).length),
-    source: 'teste'
-  }));
+    name: supervisor.name,
+    email: supervisor.email,
+    phone: supervisor.phone,
+    visitSourceId: SUPERVISOR_VISIT_SOURCES[0].id,
+    visitSourceUrl: SUPERVISOR_VISIT_SOURCES[0].url,
+    visitSourceLabel: SUPERVISOR_VISIT_SOURCES[0].label,
+    visitSourcePrimary: true,
+    sourceAliases: supervisorSourceAliases(supervisor.name),
+    schools: assignedSchools,
+    assignedSchoolCount: assignedSchools.length,
+    monthlyGoal: Math.max(1, assignedSchools.length),
+    source: 'lista oficial travada'
+  });
+  });
 }
 
 function defaultSupervisorVisits(supervisors) {
@@ -827,6 +964,9 @@ function createDefaults() {
     lastBackupAt: '',
     inventoryUpdatedAt: new Date().toISOString(),
     inventoryUpdatedBySchool: {},
+    settings: {
+      funAdsEnabled: false
+    },
     profile: {
       name: 'Jefferson',
       unit: 'URE Itapeva',
@@ -1072,7 +1212,11 @@ function mergeState(saved) {
     }))
     : [];
   const savedSupervisorVisits = Array.isArray(repaired.supervisorVisits)
-    ? repaired.supervisorVisits.map((item) => ({ ...item, school: canonicalSchoolName(item.school) || item.school }))
+    ? repaired.supervisorVisits.map((item) => ({
+      ...item,
+      supervisor: canonicalSupervisorName(item.supervisor) || item.supervisor,
+      school: canonicalSchoolName(item.school) || item.school
+    }))
     : [];
   return {
     ...base,
@@ -1081,6 +1225,10 @@ function mergeState(saved) {
     lastBackupAt,
     inventoryUpdatedAt,
     inventoryUpdatedBySchool,
+    settings: {
+      ...base.settings,
+      ...(repaired.settings || {})
+    },
     profile: { ...base.profile, ...(repaired.profile || {}) },
     users: normalizeDefaultUserNames(mergeUniqueBy(
       base.users,
@@ -1096,7 +1244,10 @@ function mergeState(saved) {
     tasks: savedTasks,
     calls: savedCalls,
     schools: mergedSchools,
-    supervisors: enrichSupervisorSources(mergeUniqueBy(base.supervisors, savedSupervisors, (item) => normalizeKey(item.email || item.name))),
+    supervisors: applyLockedSupervisorAssignments(
+      enrichSupervisorSources(mergeUniqueBy(base.supervisors, savedSupervisors, (item) => normalizeKey(item.email || item.name))),
+      mergedSchools
+    ),
     supervisorVisits: mergeUniqueBy(
       base.supervisorVisits,
       savedSupervisorVisits,
@@ -1153,7 +1304,11 @@ function mergeState(saved) {
 function loadState() {
   try {
     const current = localStorage.getItem(STORAGE_KEY);
-    if (current) return mergeState(JSON.parse(current));
+    if (current) {
+      const loaded = mergeState(JSON.parse(current));
+      rememberPersistedState(loaded);
+      return loaded;
+    }
     const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
     if (legacy) return mergeLegacyState(JSON.parse(legacy));
   } catch {
@@ -1162,11 +1317,42 @@ function loadState() {
   return createDefaults();
 }
 
+function comparableStateForPersistence(value) {
+  const { lastUpdatedAt, ...rest } = value || {};
+  return {
+    ...rest,
+    stateVersion: STATE_VERSION
+  };
+}
+
+function rememberPersistedState(value) {
+  try {
+    const comparable = comparableStateForPersistence(value);
+    lastSavedStateComparable = JSON.stringify(comparable);
+    lastSavedStatePayload = JSON.stringify({
+      ...value,
+      stateVersion: STATE_VERSION
+    });
+  } catch {
+    lastSavedStateComparable = '';
+    lastSavedStatePayload = '';
+  }
+}
+
 function saveState() {
+  if (typeof resetDerivedCache === 'function') resetDerivedCache();
+  const comparable = JSON.stringify(comparableStateForPersistence(state));
+  if (comparable === lastSavedStateComparable) return false;
+  const nextUpdatedAt = new Date().toISOString();
   state.stateVersion = STATE_VERSION;
-  state.lastUpdatedAt = new Date().toISOString();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  state.lastUpdatedAt = nextUpdatedAt;
+  const payload = JSON.stringify(state);
+  if (payload === lastSavedStatePayload) return false;
+  localStorage.setItem(STORAGE_KEY, payload);
+  lastSavedStateComparable = comparable;
+  lastSavedStatePayload = payload;
   if (typeof scheduleSupabaseAutoSave === 'function') scheduleSupabaseAutoSave();
+  return true;
 }
 
 function mergeLegacyState(saved) {

@@ -11,6 +11,7 @@ function renderAdminPage() {
     legacyRenderDiagnostics();
     legacyRenderUsers();
     legacyRenderAdminSchoolTools();
+    if (typeof renderFunAdsStatus === 'function') renderFunAdsStatus();
   } catch (error) {
     console.error('Falha ao carregar administracao', error);
     renderDeferredPlaceholders([

@@ -11,14 +11,14 @@ function schoolCardMarkup(school) {
   const snapshot = schoolOperationalSnapshot(school);
   const status = schoolCardStatus(school);
   return `
-    <article class="school-card-lite">
+    <article class="school-card-lite school-widget-style-card">
       <button class="school-card-lite-main" type="button" onclick="openSchoolRecord('${esc(school.name)}')">
         ${schoolAvatarMarkup(school, 'school-widget-avatar')}
         <span class="school-card-lite-copy">
           <strong>${esc(school.name)}</strong>
           <small>${esc(school.zone)} | CIE ${esc(school.cie || '--')}</small>
         </span>
-        <span class="diag-pill ${status.tone}">${esc(status.label)}</span>
+        <span class="school-card-lite-accent" aria-hidden="true"></span>
       </button>
       <div class="school-card-lite-foot">
         <span>Ficha ${esc(String(snapshot.completion))}%</span>

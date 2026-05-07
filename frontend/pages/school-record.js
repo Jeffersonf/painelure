@@ -22,11 +22,11 @@ function scheduleSchoolRecordDeferredRender(work) {
 
 function schoolRecordContext() {
   const sortedSchools = visibleSchools().slice().sort((a, b) => a.name.localeCompare(b.name));
-  const schoolNames = sortedSchools.map((item) => item.name);
-  if (!currentSchoolDetail || !schoolNames.includes(currentSchoolDetail)) {
-    currentSchoolDetail = schoolNames[0] || '';
+  const schoolByNameMap = new Map(sortedSchools.map((item) => [item.name, item]));
+  if (!currentSchoolDetail || !schoolByNameMap.has(currentSchoolDetail)) {
+    currentSchoolDetail = sortedSchools[0]?.name || '';
   }
-  const school = visibleSchools().find((item) => item.name === currentSchoolDetail);
+  const school = schoolByNameMap.get(currentSchoolDetail);
   return { sortedSchools, school };
 }
 
@@ -75,6 +75,13 @@ function renderSchoolDetailHeader(ctx) {
 
 function renderSchoolDetailCore(ctx) {
   const { school, profile, network, responsibleSupervisorText, totalUnits, alertUnits, defectUnits, completion, openCalls, plannedTasks } = ctx;
+  const decision = defectUnits > 0
+    ? { label: 'Prioridade de hoje', text: `Resolver ${defectUnits} unidade(s) com defeito antes de novas importacoes.`, tone: 'pill-danger' }
+    : openCalls.length > 0
+      ? { label: 'Prioridade de hoje', text: `Acompanhar ${openCalls.length} chamado(s) ativo(s) com a escola.`, tone: 'pill-warn' }
+      : completion < 70
+        ? { label: 'Prioridade de hoje', text: `Completar ficha da escola: ${completion}% preenchida.`, tone: 'pill-info' }
+        : { label: 'Prioridade de hoje', text: 'Unidade sem bloqueio operacional relevante agora.', tone: 'pill-ok' };
   const pageTitle = document.getElementById('schoolRecordTitle');
   const pageSubtitle = document.getElementById('schoolRecordSubtitle');
   if (pageTitle) pageTitle.textContent = school ? school.name : 'Pagina da escola';
@@ -98,6 +105,10 @@ function renderSchoolDetailCore(ctx) {
   `).join('');
 
   document.getElementById('schoolDetailExecutive').innerHTML = `
+    <div class="school-decision-strip">
+      <span class="diag-pill ${esc(decision.tone)}">${esc(decision.label)}</span>
+      <strong>${esc(decision.text)}</strong>
+    </div>
     <div class="school-record-info-list">
       <div class="school-record-info-row"><span>Municipio</span><strong>${esc(school.zone)}</strong></div>
       <div class="school-record-info-row"><span>Codigo CIE</span><strong>${esc(school.cie || network?.cie || '--')}</strong></div>
@@ -119,8 +130,8 @@ function renderSchoolDetailCore(ctx) {
 
 function renderSchoolDetailDeferred(ctx) {
   const { school, profile, network, openCalls, defectUnits, alertUnits, missingFields, networkGap } = ctx;
-  const inventoryRows = schoolInventoryRows(currentSchoolDetail);
-  const inventoryCategories = Object.values(schoolInventoryCategorySummary(currentSchoolDetail)).sort((a, b) => b.units - a.units);
+  const inventoryRows = ctx.inventoryRows;
+  const inventoryCategories = Object.values(ctx.inventoryCategorySummary).sort((a, b) => b.units - a.units);
 
   document.getElementById('schoolDetailActions').innerHTML = [
     defectUnits > 0
@@ -189,15 +200,22 @@ function renderSchoolDetail() {
     return;
   }
   const profile = currentSchoolProfile();
-  const assets = state.schoolAssets.filter((item) => item.school === currentSchoolDetail);
+  const cache = getDerivedCache();
+  const assets = schoolAssetLines(currentSchoolDetail);
   const openCalls = state.calls.filter((item) => item.school === currentSchoolDetail && item.status !== 'resolvido');
-  const plannedTasks = state.tasks.filter((item) => item.place === currentSchoolDetail || item.title.includes(currentSchoolDetail));
+  const plannedTasks = state.tasks.filter((item) => !item.done && (item.place === currentSchoolDetail || item.title.includes(currentSchoolDetail)));
   const network = schoolNetworkRecord(currentSchoolDetail);
-  const responsibleSupervisors = (state.supervisors || [])
-    .filter((supervisor) => (supervisor.schools || []).includes(currentSchoolDetail))
-    .map((supervisor) => supervisor.name);
+  const responsibleSupervisors = cache.supervisorsBySchool.get(currentSchoolDetail) || [];
   const alertUnits = assets.filter((item) => item.status !== 'ok').reduce((sum, item) => sum + schoolAssetUnits(item), 0);
   const defectUnits = assets.filter((item) => item.status === 'defeito').reduce((sum, item) => sum + schoolAssetUnits(item), 0);
+  const inventoryRows = schoolInventoryRows(currentSchoolDetail);
+  const inventoryCategorySummary = inventoryRows.reduce((acc, item) => {
+    if (!acc[item.category]) acc[item.category] = { category: item.category, units: 0, alertUnits: 0, items: 0 };
+    acc[item.category].units += item.units;
+    acc[item.category].alertUnits += item.alertUnits;
+    acc[item.category].items += 1;
+    return acc;
+  }, {});
   const ctx = {
     school,
     profile,
@@ -207,6 +225,8 @@ function renderSchoolDetail() {
     totalUnits: assets.reduce((sum, item) => sum + schoolAssetUnits(item), 0),
     alertUnits,
     defectUnits,
+    inventoryRows,
+    inventoryCategorySummary,
     completion: schoolProfileCompletion(currentSchoolDetail),
     missingFields: schoolMissingProfileFields(currentSchoolDetail),
     openCalls,
