@@ -1,7 +1,7 @@
 'use strict';
 
 let funAdsPopupTimer = null;
-const FUN_AD_LAYER_VERSION = '20260507-supervisor-sheet-2';
+const FUN_AD_LAYER_VERSION = '20260507-supervisor-sheet-3';
 const FUN_AD_SESSION_KEY = 'setechub_fun_ads_enabled';
 const FUN_AD_POPUPS = [
   {
@@ -2382,6 +2382,7 @@ function setupEventListeners() {
     renderAssets();
   });
 }
+
 
 
 

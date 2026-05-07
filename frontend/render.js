@@ -1745,6 +1745,8 @@ function supervisorSheetMetrics(item) {
   const assigned = Number(supervisor.assignedSchoolCount || item.assignedSchools?.length || supervisor.schools?.length || 0);
   const weeklyGoal = Number(supervisor.weeklyGoal || 0);
   const monthlyGoal = Number(supervisor.monthlyGoal || 0);
+  const weeklyGoalLabel = supervisor.weeklyGoalLabel || (weeklyGoal ? String(weeklyGoal) : '--');
+  const monthlyGoalLabel = supervisor.monthlyGoalLabel || (monthlyGoal ? String(monthlyGoal) : '--');
   const fallbackWeeklyVisits = Number.isFinite(Number(item.weeklyVisitFallback)) ? Number(item.weeklyVisitFallback) : 0;
   const weeklyVisits = supervisorWeeklyVisitsForView(supervisor, fallbackWeeklyVisits);
   const fallbackVisits = Number.isFinite(Number(item.monthlyVisitFallback)) ? Number(item.monthlyVisitFallback) : item.visits || 0;
@@ -1753,6 +1755,8 @@ function supervisorSheetMetrics(item) {
     assigned,
     weeklyGoal,
     monthlyGoal,
+    weeklyGoalLabel,
+    monthlyGoalLabel,
     weeklyVisits,
     monthlyVisits,
     pendingMonth: Math.max(0, monthlyGoal - monthlyVisits),
@@ -1826,6 +1830,8 @@ function renderSupervisors() {
       const assigned = Number(supervisor.assignedSchoolCount || item.assignedSchools.length || 0);
       const weeklyGoal = Number(supervisor.weeklyGoal || 0);
       const monthlyGoal = Number(supervisor.monthlyGoal || 0);
+      const weeklyGoalLabel = supervisor.weeklyGoalLabel || (weeklyGoal ? String(weeklyGoal) : '--');
+      const monthlyGoalLabel = supervisor.monthlyGoalLabel || (monthlyGoal ? String(monthlyGoal) : '--');
       const weeklyVisits = supervisorWeeklyVisitsForView(supervisor, localWeekCount);
       const monthlyVisits = supervisorMonthlyVisitsForView(supervisor, localCount);
       const weeklyIndicator = supervisorViewMonthIsCurrent() ? supervisor.weeklyIndicator || 'aviso' : supervisorIndicatorFromGoal(weeklyVisits, weeklyGoal);
@@ -1836,6 +1842,8 @@ function renderSupervisors() {
         assigned,
         weeklyGoal,
         monthlyGoal,
+        weeklyGoalLabel,
+        monthlyGoalLabel,
         currentWeek,
         weeklyVisits,
         monthlyVisits,
@@ -1867,11 +1875,11 @@ function renderSupervisors() {
                 </td>
                 <td>${esc(String(row.assigned || row.item.assignedSchools.length))}</td>
                 <td>
-                  <strong>${esc(String(row.weeklyVisits))}/${esc(String(row.weeklyGoal || '--'))}</strong>
+                  <strong>${esc(String(row.weeklyVisits))}/${esc(row.weeklyGoalLabel)}</strong>
                   <div class="supervisor-sheet-bar"><span style="width:${esc(String(Math.max(4, supervisorGoalPct(row.weeklyVisits, row.weeklyGoal))))}%"></span></div>
                 </td>
                 <td>
-                  <strong>${esc(String(row.monthlyVisits))}/${esc(String(row.monthlyGoal || '--'))}</strong>
+                  <strong>${esc(String(row.monthlyVisits))}/${esc(row.monthlyGoalLabel)}</strong>
                   <div class="supervisor-sheet-bar"><span style="width:${esc(String(Math.max(4, supervisorGoalPct(row.monthlyVisits, row.monthlyGoal))))}%"></span></div>
                 </td>
                 <td>${esc(String(row.currentWeek || '--'))}</td>
@@ -1922,10 +1930,10 @@ function renderSupervisors() {
               <span class="diag-pill ${supervisorIndicatorClass(monthlyIndicator)}">${esc(supervisorIndicatorText(monthlyIndicator))}</span>
             </div>
             <div class="school-overview-kpis supervisor-list-kpis">
-              <div><span>Mes</span><strong>${esc(String(metrics.monthlyVisits))}/${esc(String(metrics.monthlyGoal))}</strong></div>
-              <div><span>Semana</span><strong>${esc(String(metrics.weeklyVisits))}${metrics.weeklyGoal ? `/${esc(String(metrics.weeklyGoal))}` : ''}</strong></div>
+              <div><span>Mes</span><strong>${esc(String(metrics.monthlyVisits))}/${esc(metrics.monthlyGoalLabel)}</strong></div>
+              <div><span>Semana</span><strong>${esc(String(metrics.weeklyVisits))}/${esc(metrics.weeklyGoalLabel)}</strong></div>
               <div><span>Escolas</span><strong>${esc(String(metrics.assigned))}</strong></div>
-              <div><span>Faltam</span><strong>${esc(String(metrics.pendingMonth))}</strong></div>
+              <div><span>Faltam</span><strong>${esc(metrics.monthlyGoal ? String(metrics.pendingMonth) : '--')}</strong></div>
             </div>
           `;
         })()}
@@ -2218,6 +2226,7 @@ function renderSupervisorRecord() {
   const sheetMetrics = supervisorSheetMetrics({ ...selectedStat, monthlyVisitFallback: monthVisits.length, weeklyVisitFallback: selectedWeekVisits });
   const monthlyGoal = sheetMetrics.monthlyGoal;
   const weeklyGoal = sheetMetrics.weeklyGoal;
+  const weeklyGoalLabel = sheetMetrics.weeklyGoalLabel;
   const monthlyVisitCount = sheetMetrics.monthlyVisits;
   const weeklyVisitCount = sheetMetrics.weeklyVisits;
   const goalPct = monthlyGoal ? Math.min(100, Math.round((monthlyVisitCount / monthlyGoal) * 100)) : 0;
@@ -2271,7 +2280,7 @@ function renderSupervisorRecord() {
 
   document.getElementById('supervisorRecordMetrics').innerHTML = [
     { label: 'Escolas', value: String(sheetMetrics.assigned), note: 'Vindo da planilha' },
-    { label: 'Semana', value: weeklyGoal ? `${weeklyVisitCount}/${weeklyGoal}` : String(weeklyVisitCount), note: supervisorIndicatorText(weeklyIndicator) },
+    { label: 'Semana', value: `${weeklyVisitCount}/${weeklyGoalLabel}`, note: supervisorIndicatorText(weeklyIndicator) },
     { label: 'Visitadas', value: String(visitedSchoolSet.size), note: viewMonthLabel },
     { label: 'Faltantes', value: monthlyGoal ? String(sheetMetrics.pendingMonth) : '--', note: 'Meta mensal' },
     { label: 'Chamados', value: String(selectedStat.openCalls), note: 'Ativos vinculados' },
