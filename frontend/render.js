@@ -68,7 +68,6 @@ function renderDashboardHero() {
   const statsNode = document.getElementById('dashboardHeroStats');
   if (!title || !text || !actions || !scoreNode || !statsNode) return;
 
-  const health = dashboardHealth();
   const coverage = operationalCoverage();
   const focus = nextFocusTask();
   const template = dashboardTemplateForRole();
@@ -89,16 +88,11 @@ function renderDashboardHero() {
     <button class="btn ${item.tone === 'primary' ? 'btn-p' : 'btn-g'} btn-sm" type="button" onclick="${item.action}">${item.label}</button>
   `).join('');
 
-  scoreNode.innerHTML = `
-    <div>
-      <div class="sync-meta">Saúde operacional</div>
-      <strong>${esc(String(health.score))}%</strong>
-    </div>
-    <span class="diag-pill ${health.tone}">${esc(health.label)}</span>
-  `;
+  scoreNode.hidden = true;
+  scoreNode.innerHTML = '';
 
   statsNode.innerHTML = [
-    { label: template.metrics[0]?.label || 'Escolas', value: template.metrics[0]?.value ?? String(schools.length), tone: template.metrics[0]?.tone || 'pill-info' },
+    { label: template.metrics[0]?.label || 'Escolas', value: template.metrics[0]?.value ?? String(visibleSchools().length), tone: template.metrics[0]?.tone || 'pill-info' },
     { label: template.metrics[1]?.label || 'Inventário alerta', value: template.metrics[1]?.value ?? String(alertAssets), tone: template.metrics[1]?.tone || (alertAssets ? 'pill-danger' : 'pill-ok') },
     { label: template.metrics[2]?.label || 'Pendências', value: template.metrics[2]?.value ?? String(pendingItems), tone: template.metrics[2]?.tone || (pendingItems ? 'pill-info' : 'pill-ok') },
     { label: template.metrics[3]?.label || 'Cobertura fichas', value: template.metrics[3]?.value ?? `${coverage.profileCoverage}%`, tone: template.metrics[3]?.tone || (coverage.profileCoverage >= 65 ? 'pill-ok' : 'pill-warn') }
@@ -708,18 +702,7 @@ function dashboardCardRelevantForRole(page) {
 function renderPendingQueue() {
   const list = document.getElementById('pendingQueueList');
   if (!list) return;
-  const items = pendingQueueItems();
-  list.innerHTML = items.map((item) => `
-    <div class="setechub-item setechub-clickable" onclick="openSchoolRecord('${esc(item.school)}')">
-      <div class="setechub-head">
-        <div>
-          <strong>${esc(item.school)}</strong>
-          <div class="sync-meta">${esc(item.text)}</div>
-        </div>
-        <span class="diag-pill ${item.tone}">${esc(badgeText(item.type))}</span>
-      </div>
-    </div>
-  `).join('') || '<div class="sync-empty">Nenhuma pendência relevante na base neste momento.</div>';
+  list.innerHTML = '';
 }
 
 function renderSchoolCommandCenter() {
