@@ -1874,11 +1874,11 @@ function renderSupervisors() {
                   <strong>${esc(row.supervisor.name)}</strong>
                 </td>
                 <td>${esc(String(row.assigned || row.item.assignedSchools.length))}</td>
-                <td>
+                <td class="supervisor-goal-cell">
                   <strong>${esc(String(row.weeklyVisits))}/${esc(row.weeklyGoalLabel)}</strong>
                   <div class="supervisor-sheet-bar"><span style="width:${esc(String(Math.max(4, supervisorGoalPct(row.weeklyVisits, row.weeklyGoal))))}%"></span></div>
                 </td>
-                <td>
+                <td class="supervisor-goal-cell">
                   <strong>${esc(String(row.monthlyVisits))}/${esc(row.monthlyGoalLabel)}</strong>
                   <div class="supervisor-sheet-bar"><span style="width:${esc(String(Math.max(4, supervisorGoalPct(row.monthlyVisits, row.monthlyGoal))))}%"></span></div>
                 </td>
