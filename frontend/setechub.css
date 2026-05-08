@@ -4274,22 +4274,48 @@ textarea {
   grid-template-columns: 56px minmax(0, 1fr);
   gap: 16px;
   align-items: start;
-  padding: 18px;
-  border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 20%, var(--bd));
-  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 24%, var(--bd));
+  border-radius: 20px;
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 8%, transparent), transparent 34%),
-    rgba(255,255,255,.026);
+    radial-gradient(circle at 96% 0, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 18%, transparent), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.058), transparent 62%),
+    color-mix(in srgb, var(--sf-solid) 90%, transparent);
+  box-shadow: 0 10px 24px rgba(0,0,0,.11);
   overflow: hidden;
   position: relative;
-  transition: border-color .14s ease, background .14s ease;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.directory-widget::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.06), transparent 58%);
+}
+
+.directory-widget::before {
+  content: '';
+  position: absolute;
+  right: -22px;
+  top: -22px;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 19%, transparent), transparent 70%);
+  pointer-events: none;
 }
 
 .directory-widget:hover {
-  border-color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 34%, var(--bd));
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 42%, var(--bd));
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 11%, transparent), transparent 38%),
-    rgba(255,255,255,.038);
+    radial-gradient(circle at 96% 0, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 22%, transparent), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,.07), transparent 62%),
+    color-mix(in srgb, var(--sf2) 90%, transparent);
+  box-shadow: 0 12px 32px var(--sh, rgba(0,0,0,.28));
 }
 
 .directory-main {
@@ -4307,10 +4333,10 @@ textarea {
 
 .directory-name {
   display: block;
-  min-height: 17px;
+  min-height: 19px;
   overflow: hidden;
   color: var(--tx);
-  font-size: 15.5px;
+  font-size: 16px;
   font-weight: 850;
   line-height: 1.28;
   text-overflow: ellipsis;
@@ -4319,12 +4345,13 @@ textarea {
 
 .directory-role {
   min-height: 15px;
-  margin-top: 2px;
+  margin: 0 0 4px;
   overflow: hidden;
-  color: var(--mt);
-  font-size: 12.5px;
-  font-weight: 700;
+  color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 82%, var(--mt));
+  font-size: 10.5px;
+  font-weight: 900;
   line-height: 1.35;
+  text-transform: uppercase;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4355,10 +4382,10 @@ textarea {
   display: grid;
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 38%, transparent);
-  border-radius: 11px;
+  border-radius: 16px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 18%, transparent), color-mix(in srgb, var(--directory-avatar-b, var(--ac)) 10%, transparent)),
-    rgba(255,255,255,.035);
+    linear-gradient(135deg, color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 20%, transparent), color-mix(in srgb, var(--directory-avatar-b, var(--ac)) 11%, transparent)),
+    color-mix(in srgb, var(--sf-solid) 92%, transparent);
   color: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 84%, var(--tx));
   font-size: 12px;
   font-weight: 900;
@@ -4367,7 +4394,7 @@ textarea {
 
 .directory-contact-list {
   display: grid;
-  grid-template-rows: repeat(3, 30px);
+  grid-template-rows: repeat(3, 34px);
   gap: 8px;
 }
 
@@ -4377,9 +4404,20 @@ textarea {
   grid-template-columns: 78px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
-  min-height: 30px;
+  min-height: 34px;
   color: inherit;
   text-decoration: none;
+  padding: 0 9px;
+  border: 1px solid var(--bd2, rgba(255,255,255,.05));
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.directory-contact-line:hover {
+  transform: translateY(-1px);
+  border-color: var(--bd);
+  background: var(--sf2);
 }
 
 .directory-contact-line span {
@@ -4406,7 +4444,7 @@ textarea {
   min-width: 112px;
   align-items: center;
   justify-self: center;
-  padding: 0 9px;
+  padding: 0 10px;
   border: 1px solid color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 32%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--directory-avatar-a, var(--ac2)) 10%, rgba(255,255,255,.025));

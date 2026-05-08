@@ -1,7 +1,7 @@
 'use strict';
 
 let funAdsPopupTimer = null;
-const FUN_AD_LAYER_VERSION = '20260508-contact-role-first-1';
+const FUN_AD_LAYER_VERSION = '20260508-contact-finanza-1';
 const FUN_AD_SESSION_KEY = 'setechub_fun_ads_enabled';
 const FUN_AD_POPUPS = [
   {
