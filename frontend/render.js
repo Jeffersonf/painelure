@@ -1521,8 +1521,7 @@ function contactDisplayName(name) {
     .trim()
     .split(/\s+/)
     .filter(Boolean);
-  if (parts.length <= 2) return parts.join(' ') || 'Contato';
-  return `${parts[0]} ${parts[parts.length - 1]}`;
+  return parts.join(' ') || 'Contato';
 }
 
 function renderContactAvatar(item) {
@@ -1597,8 +1596,8 @@ function renderDirectoryContacts() {
         <div class="directory-main">
           <div class="setechub-head">
             <div>
-              <strong class="directory-name" title="${esc(item.name)}">${esc(contactDisplayName(item.name))}</strong>
               <div class="directory-role">${esc(item.role || 'Contato institucional')}</div>
+              <strong class="directory-name" title="${esc(item.name)}">${esc(contactDisplayName(item.name))}</strong>
             </div>
             <button class="directory-sector-pill" type="button" data-directory-filter="${esc(directoryFilterForContact(item))}">${esc(item.sector || 'Setor')}</button>
           </div>
