@@ -1521,7 +1521,8 @@ function contactDisplayName(name) {
     .trim()
     .split(/\s+/)
     .filter(Boolean);
-  return parts.slice(0, 2).join(' ') || 'Contato';
+  if (parts.length <= 2) return parts.join(' ') || 'Contato';
+  return `${parts[0]} ${parts[parts.length - 1]}`;
 }
 
 function renderContactAvatar(item) {
