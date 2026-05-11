@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090d">
+  <title>PainelURE 2.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-word"><span>Painel</span><strong>URE</strong></span>
+      <div class="brand-actions">
+        <button class="icon-btn" type="button" aria-label="Privacidade">◉</button>
+        <button class="icon-btn" type="button" aria-label="Tema">☾</button>
+      </div>
+    </div>
+
+    <label class="sidebar-search">
+      <span>⌕</span>
+      <input type="search" placeholder="Buscar... (Ctrl+K)">
+    </label>
+
+    <div class="nav-label">Menu</div>
+    <nav class="nav" aria-label="Navegacao principal">
+      <button class="nav-item active" type="button" data-page="dashboard"><span>📊</span>Painel</button>
+      <button class="nav-item" type="button" data-page="schools"><span>🏫</span>Escolas</button>
+      <button class="nav-item" type="button" data-page="network"><span>🌐</span>Redes e Câmeras</button>
+      <button class="nav-item" type="button" data-page="inventory"><span>💻</span>Inventário</button>
+      <button class="nav-item" type="button" data-page="ctc"><span>🛠️</span>Técnicos CTC</button>
+      <button class="nav-item" type="button" data-page="calls"><span>📥</span>Chamados</button>
+      <button class="nav-item" type="button" data-page="supervision"><span>🧭</span>Supervisão</button>
+      <button class="nav-item" type="button" data-page="contacts"><span>☎️</span>Contatos</button>
+      <button class="nav-item" type="button" data-page="calendar"><span>📅</span>Calendário URE</button>
+      <button class="nav-item" type="button" data-page="reports"><span>📈</span>Relatórios</button>
+      <button class="nav-item" type="button" data-page="profiles"><span>🧩</span>Perfis</button>
+      <button class="nav-item" type="button" data-page="quality"><span>✅</span>Qualidade</button>
+      <button class="nav-item" type="button" data-page="admin"><span>⚙️</span>Admin</button>
+    </nav>
+
+    <section class="sidebar-card">
+      <div class="sidebar-card-head">
+        <span>Atalhos fixos</span>
+      </div>
+      <div class="sidebar-shortcuts">
+        <button type="button" data-jump="schools" title="Escolas">🏫</button>
+        <button type="button" data-jump="network" title="Redes e Cameras">🌐</button>
+        <button type="button" data-jump="inventory" title="Inventario">💻</button>
+        <button type="button" data-jump="supervision" title="Supervisao">🧭</button>
+        <button type="button" data-jump="contacts" title="Contatos">☎️</button>
+        <button type="button" data-jump="calendar" title="Calendário">📅</button>
+      </div>
+    </section>
+
+    <div class="account">
+      <div class="account-meta">feito por jeffef.dev</div>
+      <div class="account-row">
+        <div class="avatar">JE</div>
+        <div>
+          <strong>Jefferson</strong>
+          <span>🛡️ <span id="accountRoleLabel">Administrador</span></span>
+        </div>
+        <small>▲</small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="page active" id="page-dashboard">
+      <header class="page-header">
+        <div>
+          <h1>Painel</h1>
+        <p>Centro do dia para consultar escolas, redes, inventário, visitas e agenda da URE.</p>
+        </div>
+        <div class="header-actions">
+          <button class="month-pill" type="button"><span>‹</span> Maio 2026 <span>›</span></button>
+        </div>
+      </header>
+
+      <button class="notice-card" type="button" data-jump="reports">
+        <span class="notice-icon">⏱</span>
+        <span>
+          <strong id="dashboardNoticeTitle">Base operacional carregada</strong>
+          <small id="dashboardNoticeNote">Escolas, supervisão, inventário e redes disponíveis para consulta. Calendário aguarda fonte oficial.</small>
+        </span>
+        <em>Relatórios</em>
+      </button>
+
+      <div class="manager-strip">
+        <div>
+          <strong>Página inicial da URE</strong>
+          <span id="dashboardSummary">consulta rápida • dados locais primeiro • fontes oficiais em segundo plano</span>
+        </div>
+      </div>
+
+      <section class="workbench widget">
+        <div class="widget-head">
+          <div>
+            <strong>🧭 Atalhos do PainelURE</strong>
+          </div>
+        </div>
+        <div class="shortcut-grid">
+          <button class="shortcut-card" type="button" data-jump="schools">
+            <span>🏫</span>
+            <strong>Escolas</strong>
+            <small id="shortcutSchoolsNote">Unidades, fichas e inventário por escola</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="network">
+            <span>🌐</span>
+            <strong>Redes e Câmeras</strong>
+            <small id="shortcutNetworkNote">Rede, IPs, DVR e infraestrutura</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="inventory">
+            <span>💻</span>
+            <strong>Inventário</strong>
+            <small id="shortcutInventoryNote">Equipamentos, status e alertas</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="supervision">
+            <span>🧭</span>
+            <strong>Supervisão</strong>
+            <small id="shortcutSupervisionNote">Metas, visitas e escolas vinculadas</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="contacts">
+            <span>☎️</span>
+            <strong>Contatos</strong>
+            <small id="shortcutContactsNote">Setores, nomes, emails e ramais</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="calendar">
+            <span>📅</span>
+            <strong>Calendário URE</strong>
+            <small id="shortcutCalendarNote">Eventos, carros oficiais e prazos</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="ctc">
+            <span>🛠️</span>
+            <strong>Técnicos CTC</strong>
+            <small id="shortcutCtcNote">Agenda técnica e chamados</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="reports">
+            <span>📌</span>
+            <strong>Relatórios</strong>
+            <small id="shortcutReportsNote">Resumo rápido para gestão</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="metric-grid">
+        <article class="metric-card glow-lime">
+          <span>🏫</span>
+          <small>Escolas</small>
+          <strong id="metricSchools">0</strong>
+          <em id="metricSchoolsNote">base regional</em>
+        </article>
+        <article class="metric-card glow-teal">
+          <span>🌐</span>
+          <small>Redes mapeadas</small>
+          <strong id="metricNetwork">0</strong>
+          <em id="metricNetworkNote">com dados de infraestrutura</em>
+        </article>
+        <article class="metric-card glow-amber">
+          <span>💻</span>
+          <small>Inventário</small>
+          <strong id="metricInventory">0</strong>
+          <em id="metricInventoryNote">linhas consolidadas</em>
+        </article>
+        <article class="metric-card glow-purple">
+          <span>🧭</span>
+          <small>Supervisão</small>
+          <strong id="metricSupervision">0</strong>
+          <em id="metricSupervisionNote">responsáveis ativos</em>
+        </article>
+        <article class="metric-card glow-red">
+          <span>📅</span>
+          <small>Agenda URE</small>
+          <strong id="metricCalendar">0</strong>
+          <em id="metricCalendarNote">fonte oficial pendente</em>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="box">
+          <div class="box-head">
+            <div>
+              <strong>Próximas decisões</strong>
+              <small>O que merece atenção hoje</small>
+            </div>
+          </div>
+          <div class="row-list" id="decisionRows"></div>
+        </article>
+
+        <article class="box">
+          <div class="box-head">
+            <div>
+              <strong>Agenda geral</strong>
+              <small>Calendário operacional da URE</small>
+            </div>
+            <button class="ghost-btn" type="button" data-jump="calendar">Ver</button>
+          </div>
+          <div class="row-list" id="agendaRows"></div>
+        </article>
+      </section>
+    </section>
+
+    <section class="page" id="page-schools">
+      <header class="page-header compact">
+        <div><h1>Escolas</h1><p>Consulta rápida das unidades, fichas e vínculos.</p></div>
+      </header>
+      <div class="school-grid" id="schoolGrid"></div>
+      <div class="school-detail" id="schoolDetail"></div>
+    </section>
+
+    <section class="page" id="page-network">
+      <header class="page-header compact">
+        <div><h1>Redes e Câmeras</h1><p>Infraestrutura, IPs e câmeras por escola.</p></div>
+      </header>
+      <div class="selector-panel">
+        <label>
+          <span>Escola</span>
+          <select id="networkSelect"></select>
+        </label>
+      </div>
+      <div class="network-layout" id="networkLayout"></div>
+    </section>
+
+    <section class="page" id="page-inventory">
+      <header class="page-header compact">
+        <div><h1>Inventário</h1><p>Equipamentos, status e alertas por escola.</p></div>
+      </header>
+      <div class="selector-panel">
+        <label>
+          <span>Escola</span>
+          <select id="inventorySelect"></select>
+        </label>
+      </div>
+      <div class="box">
+        <div class="box-head"><div><strong>Equipamentos em acompanhamento</strong><small>Status resumido para triagem</small></div></div>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-supervision">
+      <header class="page-header compact">
+        <div><h1>Supervisão</h1><p>Metas, visitas e escolas vinculadas.</p></div>
+      </header>
+      <div class="table-card">
+        <div class="table-head"><strong>Supervisores</strong><span>ordem alfabética</span></div>
+        <div id="supervisorRows"></div>
+      </div>
+      <div class="supervisor-detail" id="supervisorDetail"></div>
+    </section>
+
+    <section class="page" id="page-ctc">
+      <header class="page-header compact">
+        <div><h1>Técnicos CTC</h1><p>Agenda técnica, visitas e demandas.</p></div>
+      </header>
+      <div class="calendar-grid" id="ctcGrid"></div>
+    </section>
+
+    <section class="page" id="page-calls">
+      <header class="page-header compact">
+        <div><h1>Chamados</h1><p>Fila operacional e acompanhamento.</p></div>
+      </header>
+      <div class="calendar-grid" id="callsGrid"></div>
+    </section>
+
+    <section class="page" id="page-contacts">
+      <header class="page-header compact">
+        <div><h1>Contatos</h1><p>Nomes, cargos, setores e canais da URE.</p></div>
+      </header>
+      <div class="contact-tabs">
+        <button class="active" type="button" data-sector="Todos">Todos</button>
+        <button type="button" data-sector="Tecnologia">Tecnologia</button>
+        <button type="button" data-sector="Gabinete">Gabinete</button>
+        <button type="button" data-sector="Obras">Obras</button>
+        <button type="button" data-sector="Compras">Compras</button>
+        <button type="button" data-sector="Pagamento">Pagamento</button>
+        <button type="button" data-sector="RH">RH</button>
+        <button type="button" data-sector="Supervisão">Supervisão</button>
+        <button type="button" data-sector="Pedagógico">Pedagógico</button>
+      </div>
+      <div class="contact-grid" id="contactGrid"></div>
+    </section>
+
+    <section class="page" id="page-calendar">
+      <header class="page-header compact">
+        <div><h1>Calendário URE</h1><p>Eventos e recursos compartilhados da diretoria.</p></div>
+      </header>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+
+    <section class="page" id="page-reports">
+      <header class="page-header compact">
+        <div><h1>Relatórios</h1><p>Resumo rápido da operação.</p></div>
+      </header>
+      <div class="metric-grid" id="reportsGrid"></div>
+      <div class="box">
+        <div class="box-head"><div><strong>Resumo operacional</strong><small>Indicadores derivados da base carregada</small></div></div>
+        <div class="row-list" id="reportsList"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-profiles">
+      <header class="page-header compact">
+        <div><h1>Perfis</h1><p>Acessos por categoria de usuário.</p></div>
+      </header>
+      <div class="calendar-grid" id="profilesGrid"></div>
+    </section>
+
+    <section class="page" id="page-quality">
+      <header class="page-header compact">
+        <div><h1>Qualidade</h1><p>Checklist de publicação e riscos.</p></div>
+      </header>
+      <div class="calendar-grid" id="qualityGrid"></div>
+    </section>
+
+    <section class="page" id="page-admin">
+      <header class="page-header compact">
+        <div><h1>Admin</h1><p>Diagnóstico, perfil ativo e backups.</p></div>
+      </header>
+      <div class="box">
+        <div class="box-head"><div><strong>Perfil ativo e backup</strong><small>Controle local da versão em preparo</small></div></div>
+        <div class="admin-tools">
+          <label>
+            <span>Perfil ativo</span>
+            <select id="activeRoleSelect"></select>
+          </label>
+          <button class="ghost-btn" type="button" id="localSaveBtn">Salvar local</button>
+          <button class="ghost-btn" type="button" id="backupExportBtn">Exportar backup</button>
+          <label class="ghost-btn file-btn" for="backupImportInput">Importar backup</label>
+          <input id="backupImportInput" type="file" accept=".json" hidden>
+        </div>
+        <p class="sync-note" id="adminBackupMeta">Nenhuma ação de backup nesta sessão.</p>
+      </div>
+      <div class="calendar-grid" id="adminGrid"></div>
+    </section>
+  </main>
+
+  <nav class="mobile-nav" aria-label="Navegacao mobile">
+    <button class="active" type="button" data-page="dashboard">📊<span>Painel</span></button>
+    <button type="button" data-page="schools">🏫<span>Escolas</span></button>
+    <button type="button" data-page="network">🌐<span>Redes</span></button>
+    <button type="button" data-page="contacts">☎️<span>Contatos</span></button>
+  </nav>
+
+  <script src="./data/mock.js"></script>
+  <script src="./data/schools.js"></script>
+  <script src="./data/school-operational.js"></script>
+  <script src="./data/inventory.js"></script>
+  <script src="./data/supervision.js"></script>
+  <script src="./data/contacts.js"></script>
+  <script src="./data/governance.js"></script>
+  <script src="./data/operations.js"></script>
+  <script src="./data/sources.js"></script>
+  <script src="./modules/dom.js"></script>
+  <script src="./modules/data-store.js"></script>
+  <script src="./modules/csv.js"></script>
+  <script src="./modules/normalizers.js"></script>
+  <script src="./modules/source-loader.js"></script>
+  <script src="./modules/search.js"></script>
+  <script src="./modules/render.js"></script>
+  <script src="./modules/navigation.js"></script>
+  <script src="./modules/admin-tools.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+(function () {
+  const P = window.PainelURE = window.PainelURE || {};
+  P.seedData = P.seedData || {};
+
+  P.seedData.calendar = [
+    { label: "Apresentação da versão 1.0", value: "08/05/2026", note: "Versão oficial preservada na raiz do projeto.", tone: "ok" },
+    { label: "Construção do PainelURE 2.0", value: "em andamento", note: "Base separada em C:\\Users\\jeffe\\painelure2.", tone: "info" },
+    { label: "Fonte oficial do calendário", value: "pendente", note: "Definir planilha ou agenda antes de exibir eventos oficiais da URE.", tone: "warn" }
+  ];
+
+  P.seedData.profiles = [
+    { name: "Administrador", emoji: "🛡️", access: "Tudo", note: "Visão completa, fontes, qualidade e publicação." },
+    { name: "Supervisão", emoji: "🧭", access: "Escolas, supervisão, contatos e calendário", note: "Foco em metas, vínculos e acompanhamento." },
+    { name: "Técnicos CTC", emoji: "🛠️", access: "Escolas, inventário, redes e câmeras", note: "Consulta técnica e triagem de infraestrutura." },
+    { name: "SETEC", emoji: "🌐", access: "Redes, inventário, contatos e calendário", note: "Operação técnica e suporte regional." },
+    { name: "SEINTEC", emoji: "📡", access: "Redes, escolas e relatórios", note: "Consulta técnica e indicadores." },
+    { name: "Gabinete", emoji: "📌", access: "Painel, escolas, contatos e calendário", note: "Visão executiva e decisões rápidas." },
+    { name: "Pedagógico", emoji: "📚", access: "Escolas, supervisão e contatos", note: "Acompanhamento pedagógico sem campos técnicos restritos." },
+    { name: "Consulta", emoji: "👁️", access: "Painel, escolas e contatos", note: "Leitura simples, sem dados restritos." }
+  ];
+
+  P.seedData.quality = [
+    { label: "Base visual Finanza", status: "ok", note: "Shell, cards, sidebar e tipografia consolidados." },
+    { label: "Dados mockados", status: "ok", note: "Mock reduzido a estrutura vazia; seeds reais documentados." },
+    { label: "Credenciais", status: "ok", note: "Não há senha real em JS público do 2.0." },
+    { label: "Supervisão oficial", status: "ok", note: "Planilha de abril conectada e normalizada." },
+    { label: "Inventário por escola", status: "ok", note: "107 linhas sanitizadas importadas da base 1.0." },
+    { label: "Calendário oficial", status: "ok", note: "Página, seed e normalizador CSV prontos; URL oficial pode ser plugada em sources.js." },
+    { label: "Perfis de acesso", status: "ok", note: "Matriz e filtro local por perfil implementados no MVP." },
+    { label: "Publicação", status: "ok", note: "Checklist e backup prontos; 2.0 permanece fora do repositório por decisão." }
+  ];
+})();
