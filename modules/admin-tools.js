@@ -169,6 +169,18 @@
       if (meta) meta.textContent = active ? "Modo apresentação desativado." : "Modo apresentação ativado.";
     });
 
+    P.$("#backendPushBtn")?.addEventListener("click", () => {
+      const meta = P.$("#adminBackupMeta");
+      if (meta) meta.textContent = "Enviando estado atual ao backend...";
+      P.pushBackendData?.(P.$("#backendTokenInput")?.value || "")
+        .then(() => {
+          if (meta) meta.textContent = "Backend atualizado com o estado atual.";
+        })
+        .catch(error => {
+          if (meta) meta.textContent = `Falha ao enviar ao backend: ${error.message}`;
+        });
+    });
+
     applyRole();
     applyPrefs();
     renderSourceStatus();
@@ -249,6 +261,9 @@
     const statuses = P.sourceStatus?.length
       ? P.sourceStatus
       : Object.entries(P.sources || {}).map(([key, source]) => ({ key, status: source.url ? source.status || "configured" : "pending" }));
+    if (P.backendStatus) {
+      statuses.unshift({ key: "backend", status: P.backendStatus.ok ? "loaded" : "pending" });
+    }
     host.innerHTML = statuses.map(item => {
       const source = P.sources?.[item.key] || {};
       const label = source.label || item.key;

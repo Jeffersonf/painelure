@@ -126,6 +126,7 @@
 
   async function init() {
     bindTheme();
+    await P.loadBackendData?.();
     P.renderPage("dashboard");
     P.bindNavigation({
       onContactSector: sector => {

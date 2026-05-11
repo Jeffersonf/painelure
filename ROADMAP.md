@@ -502,6 +502,16 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.44
+
+- Backend inicial criado em Node sem dependências externas.
+- Backend passa a servir o frontend e a API local em `http://localhost:4173`.
+- Criados endpoints de healthcheck, leitura/gravação de dados e importação CSV.
+- Frontend passou a tentar carregar `/api/data` quando executado pelo backend.
+- Admin ganhou ação para enviar o estado atual ao backend.
+- Armazenamento local do backend fica em `server/storage/app-data.json`, fora do Git.
+- Criada documentação em `docs/backend.md`.
+
 ### 2.0.0-dev.43
 
 - Implementado pacote dos 10 passos de paridade v1/Finanza no limite do frontend estático.

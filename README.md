@@ -16,3 +16,22 @@ O Finanza e a referencia principal de usabilidade, ritmo visual, densidade e pol
 
 Abra `index.html` no navegador ou sirva a pasta com um servidor estatico.
 
+## Backend local
+
+```powershell
+npm start
+```
+
+Depois abra:
+
+```text
+http://localhost:4173
+```
+
+Se a porta estiver ocupada:
+
+```powershell
+$env:PORT='4174'; npm start
+```
+
+Documentacao: `docs/backend.md`.
