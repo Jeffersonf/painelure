@@ -148,6 +148,24 @@ async function initDatabase() {
       updated_at timestamptz not null default now()
     )
   `);
+  await pool.query(`
+    create table if not exists audit_events (
+      id text primary key,
+      user_id text references users(id) on delete set null,
+      actor_name text default '',
+      actor_role text default '',
+      action text not null,
+      entity text not null,
+      entity_id text,
+      detail text default '',
+      metadata jsonb not null default '{}'::jsonb,
+      created_at timestamptz not null default now()
+    )
+  `);
+  await pool.query("create index if not exists idx_snapshots_created_at on app_snapshots(created_at desc)");
+  await pool.query("create index if not exists idx_users_role on users(role)");
+  await pool.query("create index if not exists idx_audit_user_time on audit_events(user_id, created_at desc)");
+  await pool.query("create index if not exists idx_audit_entity on audit_events(entity, entity_id)");
   dbReady = true;
   dbError = "";
   await ensureBootstrapUser();

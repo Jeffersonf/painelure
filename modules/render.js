@@ -239,23 +239,11 @@
     const list = P.$("#userAccessList");
     if (list) {
       const pages = (P.ROLE_ACCESS?.[role] || P.ROLE_ACCESS?.Consulta || []).filter(page => !["profiles", "quality", "admin"].includes(page));
-      const labels = {
-        dashboard: ["📊", "Painel", "Visão inicial e atalhos"],
-        schools: ["🏫", "Escolas", "Unidades e detalhes"],
-        network: ["🌐", "Redes e câmeras", "Infraestrutura por escola"],
-        inventory: ["💻", "Inventário", "Equipamentos e alertas"],
-        ctc: ["🛠️", "Técnicos CTC", "Agenda técnica"],
-        calls: ["📥", "Chamados", "Fila operacional"],
-        supervision: ["🧭", "Supervisão", "Metas e vínculos"],
-        contacts: ["☎️", "Contatos", "Setores e ramais"],
-        calendar: ["📅", "Calendário URE", "Agenda institucional"],
-        reports: ["📈", "Relatórios", "Resumo operacional"]
-      };
       list.innerHTML = pages.map(page => {
-        const item = labels[page] || ["•", page, "Disponível para este perfil"];
+        const item = P.pageMeta(page);
         return `
           <button class="settings-row compact" type="button" data-jump="${page}">
-            <div><strong>${item[0]} ${item[1]}</strong><small>${item[2]}</small></div>
+            <div><strong>${item.icon} ${item.label}</strong><small>${item.note}</small></div>
             <span class="status-pill info">Abrir</span>
           </button>
         `;

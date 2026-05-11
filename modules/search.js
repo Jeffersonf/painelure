@@ -22,15 +22,20 @@
   function globalItems() {
     const data = P.getAppData();
     const pages = [
-      { page: "dashboard", title: "Painel", type: "Página", note: "Resumo operacional" },
-      { page: "schools", title: "Escolas", type: "Página", note: "Unidades e vínculos" },
-      { page: "network", title: "Redes e Câmeras", type: "Página", note: "Infraestrutura por escola" },
-      { page: "inventory", title: "Inventário", type: "Página", note: "Equipamentos por escola" },
-      { page: "supervision", title: "Supervisão", type: "Página", note: "Metas e visitas" },
-      { page: "contacts", title: "Contatos", type: "Página", note: "Setores e canais" },
-      { page: "calendar", title: "Calendário URE", type: "Página", note: "Agenda institucional" },
-      { page: "reports", title: "Relatórios", type: "Página", note: "Indicadores" }
-    ];
+      "dashboard",
+      "schools",
+      "network",
+      "inventory",
+      "supervision",
+      "contacts",
+      "calendar",
+      "ctc",
+      "calls",
+      "reports"
+    ].map(page => {
+      const meta = P.pageMeta(page);
+      return { page, title: meta.label, type: meta.type, note: meta.note };
+    });
     return [
       ...pages,
       ...(data.schools || []).map(item => ({ page: "schools", title: item.name, type: "Escola", note: `${item.city} | CIE ${item.cie}`, focus: item.name })),

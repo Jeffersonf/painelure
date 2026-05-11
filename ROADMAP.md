@@ -502,6 +502,15 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.50
+
+- Rota Supabase-first documentada como proxima etapa de DB online, sem depender de Render Free.
+- Criado `db/init.sql` com schema inicial versionado para Supabase/PostgreSQL.
+- Criado `docs/supabase.md` para manter a decisao preparada e pausada.
+- Backend alinhado ao schema com `audit_events` e indices iniciais.
+- Criado `modules/ui-catalog.js` para centralizar nomes, icones e notas das paginas.
+- Busca global e pagina Conta passaram a consumir o catalogo central, reduzindo duplicacao de UI.
+
 ### 2.0.0-dev.49
 
 - Backend ganhou tabela/camada de usuarios com fallback em `server/storage/users.json`.

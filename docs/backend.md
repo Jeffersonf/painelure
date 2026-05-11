@@ -107,7 +107,11 @@ O endpoint `GET /api/health` informa o modo ativo:
 
 ## Publicacao
 
-Para publicar com banco online:
+O backend ja esta pronto para PostgreSQL online, mas a ativacao oficial fica para uma etapa futura.
+
+Como o Render Free pode dormir e prejudicar a primeira abertura do painel, a direcao atual e priorizar Supabase antes de assumir uma API propria hospedada fora.
+
+Para publicar com banco online quando retomarmos:
 
 1. Criar um Postgres em um provedor como Supabase, Render, Railway ou Neon.
 2. Copiar a connection string para `DATABASE_URL`.
@@ -117,7 +121,9 @@ Para publicar com banco online:
 
 Tambem defina `PAINELURE_ADMIN_USER` e `PAINELURE_ADMIN_PASSWORD` no primeiro deploy para criar o administrador inicial.
 
-O GitHub Pages continua servindo bem a interface estatica, mas nao executa o backend Node. Para DB online real, precisamos de um host de backend separado.
+O GitHub Pages continua servindo bem a interface estatica, mas nao executa o backend Node. Para DB online real com API propria, precisamos de um host de backend separado.
+
+Ver tambem: `docs/supabase.md`.
 
 Se o frontend continuar no Pages, defina no HTML publicado:
 
