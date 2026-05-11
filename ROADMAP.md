@@ -502,6 +502,13 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.47
+
+- Conta ganhou upload de foto de perfil com armazenamento local no navegador.
+- Avatar da sidebar e da página Conta passam a usar a foto escolhida automaticamente.
+- Adicionada ação para remover foto e voltar às iniciais.
+- Próxima frente do roadmap: concluir paridade limpa de perfil/admin com Finanza e v1 antes de expandir módulos.
+
 ### 2.0.0-dev.46
 
 - Fontes `DM Sans` e `Syne` passaram a ser servidas localmente pelo projeto.
@@ -905,11 +912,12 @@ Não fazer:
 
 ## Próxima Decisão
 
-A próxima etapa recomendada é escolher uma fonte oficial por domínio para substituir os seeds atuais:
+A próxima etapa recomendada é fechar a paridade limpa de Conta/Admin antes de crescer novos módulos:
 
-- supervisão;
-- inventário;
-- redes e câmeras;
-- calendário URE.
+- definir quais usuários reais existirão no backend;
+- decidir se foto de perfil será local ou sincronizada;
+- separar permissões reais por perfil, como na v1;
+- manter Admin como central única de fontes, importações, backup e publicação;
+- validar fontes oficiais por domínio: supervisão, inventário, redes e câmeras, calendário URE.
 
 Depois disso, cada fonte entra pelo registro `data/sources.js`, passa por normalizador e só então alimenta os componentes.

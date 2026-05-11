@@ -56,7 +56,7 @@
     <div class="account">
       <div class="account-meta">feito por jeffef.dev</div>
       <button class="account-row" type="button" id="accountBtn" aria-expanded="false" aria-controls="accountPop">
-        <div class="avatar">JE</div>
+        <div class="avatar user-avatar" id="accountAvatar">JE</div>
         <div>
           <strong>Jefferson</strong>
           <span>🛡️ <span id="accountRoleLabel">Administrador</span></span>
@@ -287,7 +287,7 @@
       <div class="settings-shell">
         <section class="settings-section account-panel">
           <div class="account-hero">
-            <div class="avatar large">JE</div>
+            <div class="avatar large user-avatar" id="userAvatar">JE</div>
             <div>
               <small>Usuário local</small>
               <strong>Jefferson</strong>
@@ -301,6 +301,14 @@
           <div class="settings-row">
             <div><strong>Tema</strong><small>Alternância visual salva neste navegador.</small></div>
             <button class="ghost-btn" type="button" id="userThemeBtn">Alternar tema</button>
+          </div>
+          <div class="settings-row">
+            <div><strong>Foto de perfil</strong><small>Imagem salva neste navegador e usada na sidebar.</small></div>
+            <div class="settings-actions">
+              <label class="ghost-btn file-btn" for="avatarInput">Escolher</label>
+              <button class="ghost-btn" type="button" id="avatarRemoveBtn">Remover</button>
+              <input id="avatarInput" type="file" accept="image/*" hidden>
+            </div>
           </div>
           <div class="settings-row">
             <div><strong>Administração</strong><small>Backups, fontes oficiais, importações e modo apresentação.</small></div>

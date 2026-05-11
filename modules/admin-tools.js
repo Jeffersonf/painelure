@@ -3,6 +3,7 @@
   const ROLE_KEY = "painelure2_role";
   const PREF_KEY = "painelure2_prefs";
   const SOURCE_KEY = "painelure2_source_overrides";
+  const AVATAR_KEY = "painelure2_avatar";
 
   const ROLE_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
@@ -60,6 +61,14 @@
     btn.setAttribute("aria-expanded", String(open));
   }
 
+  function applyUserAvatar() {
+    const image = localStorage.getItem(AVATAR_KEY);
+    P.$all(".user-avatar").forEach(avatar => {
+      avatar.classList.toggle("has-photo", Boolean(image));
+      avatar.style.backgroundImage = image ? `url("${image}")` : "";
+    });
+  }
+
   function downloadJson(filename, data) {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -84,6 +93,24 @@
       userRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${role}</option>`).join("");
       userRoleSelect.addEventListener("change", () => applyRole(userRoleSelect.value));
     }
+
+    P.$("#avatarInput")?.addEventListener("change", event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        localStorage.setItem(AVATAR_KEY, reader.result);
+        applyUserAvatar();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    P.$("#avatarRemoveBtn")?.addEventListener("click", () => {
+      localStorage.removeItem(AVATAR_KEY);
+      const input = P.$("#avatarInput");
+      if (input) input.value = "";
+      applyUserAvatar();
+    });
 
     P.$("#backupExportBtn")?.addEventListener("click", () => {
       const payload = P.saveAppData();
@@ -196,6 +223,7 @@
     });
 
     applyRole();
+    applyUserAvatar();
     applyPrefs();
     renderSourceStatus();
   }
@@ -296,6 +324,7 @@
   P.applyRole = applyRole;
   P.closeAccountMenu = closeAccountMenu;
   P.toggleAccountMenu = toggleAccountMenu;
+  P.applyUserAvatar = applyUserAvatar;
   P.bindAdminTools = bindAdminTools;
   P.renderSourceStatus = renderSourceStatus;
   P.applyPrefs = applyPrefs;

@@ -267,6 +267,7 @@
       themeButton.dataset.bound = "true";
       themeButton.addEventListener("click", () => P.$("#themeBtn")?.click());
     }
+    P.applyUserAvatar?.();
   }
 
   function renderSchools(schools) {

@@ -547,6 +547,14 @@ select:focus-visible {
   color: #0d0f14;
   font-size: 12px;
   font-weight: 700;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.avatar.has-photo {
+  color: transparent;
+  text-shadow: none;
 }
 
 .avatar.large {
