@@ -1,6 +1,11 @@
 (function () {
   const P = window.PainelURE;
   const API_TIMEOUT = 900;
+  const API_BASE = String(window.PAINELURE_API_URL || "").replace(/\/+$/, "");
+
+  function apiPath(path) {
+    return API_BASE ? `${API_BASE}${path}` : `.${path}`;
+  }
 
   async function fetchJson(url, options = {}) {
     const controller = new AbortController();
@@ -17,7 +22,7 @@
   async function loadBackendData() {
     if (location.protocol === "file:") return null;
     try {
-      const payload = await fetchJson("./api/data");
+      const payload = await fetchJson(apiPath("/api/data"));
       const appData = payload?.data?.appData;
       if (appData) {
         P.setAppData({ ...(P.getAppData() || {}), ...appData });
@@ -33,7 +38,7 @@
   async function pushBackendData(token) {
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
-    return fetchJson("./api/data", {
+    return fetchJson(apiPath("/api/data"), {
       method: "PUT",
       headers,
       body: JSON.stringify({ appData: P.getAppData() }),

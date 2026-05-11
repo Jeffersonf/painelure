@@ -502,6 +502,18 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.48
+
+- Backend ganhou suporte opcional a PostgreSQL online via `DATABASE_URL`.
+- Modo local por JSON foi preservado como fallback de desenvolvimento.
+- Backend cria automaticamente `app_state` e `app_snapshots` no banco online.
+- `GET /api/health` agora informa modo de armazenamento, prontidao e origem dos dados.
+- Importacoes CSV e gravacao de dados passam pela mesma camada de persistencia.
+- Frontend ganhou `PAINELURE_API_URL` opcional para chamar API hospedada fora do GitHub Pages.
+- Backend ganhou `CORS_ORIGIN` para permitir frontend e API em dominios diferentes.
+- Documentacao do backend atualizada com variaveis, tabelas e caminho de publicacao.
+- Proxima frente: usuarios reais, sessoes persistentes, permissoes no backend e sincronizacao de avatar.
+
 ### 2.0.0-dev.47
 
 - Conta ganhou upload de foto de perfil com armazenamento local no navegador.

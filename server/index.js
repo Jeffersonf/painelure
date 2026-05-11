@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
+const { Pool } = require("pg");
 const { URL } = require("url");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -11,7 +12,18 @@ const STORAGE_DIR = path.join(__dirname, "storage");
 const DATA_FILE = path.join(STORAGE_DIR, "app-data.json");
 const PORT = Number(process.env.PORT || 4173);
 const ADMIN_KEY = process.env.PAINELURE_ADMIN_KEY || "";
+const DATABASE_URL = process.env.DATABASE_URL || "";
+const PGSSL = process.env.PGSSL || "true";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || "";
 const sessions = new Map();
+let dbReady = false;
+let dbError = "";
+const pool = DATABASE_URL
+  ? new Pool({
+      connectionString: DATABASE_URL,
+      ssl: PGSSL === "false" ? false : { rejectUnauthorized: false }
+    })
+  : null;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -34,6 +46,13 @@ function send(res, status, body, headers = {}) {
   res.writeHead(status, {
     "Content-Type": typeof body === "string" ? "text/plain; charset=utf-8" : "application/json; charset=utf-8",
     "Cache-Control": "no-store",
+    ...(CORS_ORIGIN
+      ? {
+          "Access-Control-Allow-Origin": CORS_ORIGIN,
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
+        }
+      : {}),
     ...headers
   });
   res.end(payload);
@@ -71,7 +90,16 @@ function currentStore() {
   return readJsonFile(DATA_FILE, null);
 }
 
-function saveStore(appData, source = "api") {
+function buildStore(appData, source = "api") {
+  return {
+    version: 1,
+    source,
+    updatedAt: new Date().toISOString(),
+    appData
+  };
+}
+
+function saveLocalStore(appData, source = "api") {
   const payload = {
     version: 1,
     source,
@@ -80,6 +108,85 @@ function saveStore(appData, source = "api") {
   };
   writeJsonFile(DATA_FILE, payload);
   return payload;
+}
+
+async function initDatabase() {
+  if (!pool) return false;
+  await pool.query(`
+    create table if not exists app_state (
+      id text primary key,
+      payload jsonb not null,
+      source text not null default 'api',
+      updated_at timestamptz not null default now()
+    )
+  `);
+  await pool.query(`
+    create table if not exists app_snapshots (
+      id text primary key,
+      payload jsonb not null,
+      source text not null default 'api',
+      created_at timestamptz not null default now()
+    )
+  `);
+  dbReady = true;
+  dbError = "";
+  return true;
+}
+
+async function readStore() {
+  if (!pool || !dbReady) return currentStore();
+  const result = await pool.query("select payload from app_state where id = $1", ["main"]);
+  return result.rows[0] ? result.rows[0].payload : null;
+}
+
+async function saveStore(appData, source = "api") {
+  const payload = buildStore(appData, source);
+  if (!pool || !dbReady) return saveLocalStore(appData, source);
+  await pool.query(
+    `
+      insert into app_state (id, payload, source, updated_at)
+      values ($1, $2, $3, now())
+      on conflict (id)
+      do update set payload = excluded.payload, source = excluded.source, updated_at = now()
+    `,
+    ["main", payload, source]
+  );
+  await pool.query(
+    "insert into app_snapshots (id, payload, source) values ($1, $2, $3)",
+    [crypto.randomUUID(), payload, source]
+  );
+  return payload;
+}
+
+async function storeStatus() {
+  if (!pool) {
+    const store = currentStore();
+    return {
+      mode: "arquivo-local",
+      ready: true,
+      updatedAt: store ? store.updatedAt : null,
+      source: store ? store.source : null,
+      error: null
+    };
+  }
+  if (!dbReady) {
+    return {
+      mode: "postgres",
+      ready: false,
+      updatedAt: null,
+      source: null,
+      error: dbError || "Banco ainda nao inicializado."
+    };
+  }
+  const result = await pool.query("select source, updated_at from app_state where id = $1", ["main"]);
+  const row = result.rows[0];
+  return {
+    mode: "postgres",
+    ready: true,
+    updatedAt: row ? row.updated_at.toISOString() : null,
+    source: row ? row.source : null,
+    error: null
+  };
 }
 
 function normalizeHeader(header) {
@@ -214,7 +321,12 @@ function serveStatic(req, res, urlPath) {
 
 async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/health") {
-    send(res, 200, { ok: true, name: "PainelURE API", time: new Date().toISOString() });
+    send(res, 200, {
+      ok: true,
+      name: "PainelURE API",
+      time: new Date().toISOString(),
+      storage: await storeStatus()
+    });
     return;
   }
 
@@ -231,14 +343,14 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "GET" && pathname === "/api/data") {
-    send(res, 200, { ok: true, data: currentStore() });
+    send(res, 200, { ok: true, data: await readStore(), storage: await storeStatus() });
     return;
   }
 
   if (req.method === "PUT" && pathname === "/api/data") {
     if (!requireAuth(req, res)) return;
     const body = JSON.parse(await readBody(req) || "{}");
-    send(res, 200, { ok: true, data: saveStore(body.appData || body, "api") });
+    send(res, 200, { ok: true, data: await saveStore(body.appData || body, "api"), storage: await storeStatus() });
     return;
   }
 
@@ -247,11 +359,16 @@ async function handleApi(req, res, pathname) {
     const type = pathname.split("/").pop();
     const rows = parseCsv(await readBody(req));
     const normalized = normalizeRows(type, rows);
-    const store = currentStore() || { appData: {} };
+    const store = await readStore() || { appData: {} };
     const appData = { ...(store.appData || {}) };
     if (type === "inventory") appData.schoolAssets = normalized;
     else appData[type] = normalized;
-    send(res, 200, { ok: true, rows: rows.length, data: saveStore(appData, `import:${type}`) });
+    send(res, 200, {
+      ok: true,
+      rows: rows.length,
+      data: await saveStore(appData, `import:${type}`),
+      storage: await storeStatus()
+    });
     return;
   }
 
@@ -260,6 +377,10 @@ async function handleApi(req, res, pathname) {
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
+  if (req.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
+    send(res, 204, "");
+    return;
+  }
   if (url.pathname.startsWith("/api/")) {
     handleApi(req, res, url.pathname).catch(error => {
       send(res, 500, { ok: false, error: error.message });
@@ -269,6 +390,15 @@ const server = http.createServer((req, res) => {
   serveStatic(req, res, url.pathname);
 });
 
-server.listen(PORT, () => {
-  console.log(`PainelURE 2.0 rodando em http://localhost:${PORT}`);
-});
+initDatabase()
+  .catch(error => {
+    dbReady = false;
+    dbError = error.message;
+    console.warn(`Banco online indisponivel: ${error.message}`);
+  })
+  .finally(() => {
+    server.listen(PORT, () => {
+      const mode = pool && dbReady ? "postgres" : "arquivo-local";
+      console.log(`PainelURE 2.0 rodando em http://localhost:${PORT} (${mode})`);
+    });
+  });
