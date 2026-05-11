@@ -711,6 +711,14 @@ select:focus-visible {
   border-color: rgba(200, 245, 90, .22);
 }
 
+[data-theme="light"] .shortcut-card:hover,
+[data-theme="light"] .school-card:hover,
+[data-theme="light"] .data-row:hover,
+[data-theme="light"] .contact-card:hover {
+  background: rgba(63, 125, 0, .055);
+  border-color: rgba(63, 125, 0, .2);
+}
+
 .shortcut-card span {
   font-size: 18px;
 }
@@ -753,29 +761,6 @@ select:focus-visible {
   box-shadow: 0 8px 20px rgba(0, 0, 0, .09);
   transition: border-color .15s, background .15s;
   contain: layout paint;
-}
-
-.school-card,
-.detail-widget,
-.contact-card,
-.table-row,
-.data-row,
-.linked-school,
-.metric-card,
-.shortcut-card {
-  content-visibility: auto;
-}
-
-.school-card,
-.detail-widget,
-.contact-card {
-  contain-intrinsic-size: auto 136px;
-}
-
-.data-row,
-.table-row,
-.linked-school {
-  contain-intrinsic-size: auto 68px;
 }
 
 .metric-card::before {
@@ -1155,6 +1140,14 @@ select:focus-visible {
 
 .table-row.active {
   background: rgba(200, 245, 90, .075);
+}
+
+[data-theme="light"] .table-row:hover {
+  background: rgba(63, 125, 0, .045);
+}
+
+[data-theme="light"] .table-row.active {
+  background: rgba(63, 125, 0, .075);
 }
 
 .table-row:last-child {

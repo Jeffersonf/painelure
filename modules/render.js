@@ -155,8 +155,8 @@
     const ctcVisits = data.ctcVisits?.length || 0;
     const officialSources = (P.sourceStatus || []).filter(item => item.status === "loaded").length;
     const sourceNote = officialSources
-      ? `${officialSources} fonte(s) oficial(is) atualizada(s) em segundo plano`
-      : "dados locais primeiro; fontes oficiais entram em segundo plano";
+      ? `${officialSources} fonte(s) atualizada(s)`
+      : "base local pronta para consulta";
 
     setText("#metricSchools", data.schools.length);
     setText("#metricSchoolsNote", "base regional");
@@ -167,19 +167,19 @@
     setText("#metricSupervision", data.supervisors.length);
     setText("#metricSupervisionNote", data.supervisors.length ? "responsáveis ativos" : "fonte pendente");
     setText("#metricCalendar", calendarCount);
-    setText("#metricCalendarNote", calendarCount ? "eventos carregados" : "fonte oficial pendente");
+    setText("#metricCalendarNote", calendarCount ? "eventos carregados" : "agenda preparada");
     setText("#dashboardSummary", `consulta rápida • ${data.schools.length} escolas • ${sourceNote}`);
-    setText("#dashboardNoticeTitle", calendarCount ? "Base operacional atualizada" : "Base operacional carregada");
+    setText("#dashboardNoticeTitle", calendarCount ? "Base operacional atualizada" : "Base operacional pronta");
     setText("#dashboardNoticeNote", calendarCount
       ? "Escolas, supervisão, inventário, redes e agenda disponíveis para consulta."
-      : "Escolas, supervisão, inventário e redes disponíveis para consulta. Calendário aguarda fonte oficial."
+      : "Escolas, supervisão, inventário, redes e contatos disponíveis para consulta."
     );
     setText("#shortcutSchoolsNote", `${data.schools.length} unidade(s) na base regional`);
     setText("#shortcutNetworkNote", missingNetwork ? `${missingNetwork} escola(s) ainda sem rede` : `${networkCount} rede(s) mapeada(s)`);
     setText("#shortcutInventoryNote", inventoryAlerts ? `${inventoryAlerts} alerta(s) para triagem` : `${data.schoolAssets.length} linha(s) consolidadas`);
     setText("#shortcutSupervisionNote", pendingVisits ? `${pendingVisits} visita(s) pendente(s)` : `${data.supervisors.length} responsável(is) ativos`);
     setText("#shortcutContactsNote", `${data.contacts.length} contato(s) organizado(s)`);
-    setText("#shortcutCalendarNote", calendarCount ? `${calendarCount} evento(s) carregado(s)` : "fonte oficial pendente");
+    setText("#shortcutCalendarNote", calendarCount ? `${calendarCount} evento(s) carregado(s)` : "agenda institucional");
     setText("#shortcutCtcNote", ctcVisits ? `${ctcVisits} compromisso(s) técnico(s)` : "agenda técnica preparada");
     setText("#shortcutReportsNote", openCalls ? `${openCalls} chamado(s) em acompanhamento` : "resumo rápido para gestão");
 
@@ -198,7 +198,7 @@
     const agenda = [
       calendarCount
         ? { icon: "📅", title: "Agenda com eventos", note: `${calendarCount} evento(s) carregado(s) para consulta.`, label: "Agenda", tone: "info", page: "calendar" }
-        : { icon: "📅", title: "Calendário oficial pendente", note: "Definir fonte antes de exibir eventos reais.", label: "Fonte", tone: "warn", page: "calendar" },
+        : { icon: "📅", title: "Calendário preparado", note: "Área pronta para a agenda institucional da URE.", label: "Agenda", tone: "info", page: "calendar" },
       ctcVisits
         ? { icon: "🛠️", title: "Visitas técnicas previstas", note: `${ctcVisits} compromisso(s) técnico(s) na base atual.`, label: "CTC", tone: "info", page: "ctc" }
         : { icon: "🛠️", title: "Agenda CTC pronta", note: "Área preparada para rotas e compromissos técnicos.", label: "CTC", tone: "info", page: "ctc" },
@@ -685,8 +685,8 @@
     list.innerHTML = [
       ["Supervisão", `${data.supervisors.length} supervisores com planilha oficial de abril conectada.`, "ok"],
       ["Inventário", `${data.schoolAssets.length} linhas sanitizadas, sem previews brutos da 1.0.`, "ok"],
-      ["Calendário", "Base criada; fonte oficial ainda pendente.", "warn"],
-      ["Publicação", "2.0 permanece fora do repositório oficial até decisão.", "warn"]
+      ["Calendário", "Estrutura pronta para a agenda institucional.", "info"],
+      ["Publicação", "2.0 publicado em repositório próprio e GitHub Pages.", "ok"]
     ].map(([title, note, status]) => `
       <div class="data-row" data-search="${P.searchText([title, note, status])}">
         <span class="row-icon">📈</span>

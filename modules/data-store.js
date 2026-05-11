@@ -17,7 +17,8 @@
     reports: [],
     adminChecks: []
   };
-  const STORAGE_KEY = "painelure2_state_v1";
+  const STORAGE_VERSION = 2;
+  const STORAGE_KEY = "painelure2_state_v2";
 
   function normalizeAppData(source = {}) {
     return {
@@ -47,7 +48,9 @@
     if (!P.appData) {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        if (saved?.appData) return setAppData({ ...(P.mockData || EMPTY_DATA), ...(P.seedData || {}), ...saved.appData });
+        if (saved?.version === STORAGE_VERSION && saved?.appData) {
+          return setAppData({ ...(P.mockData || EMPTY_DATA), ...(P.seedData || {}), ...saved.appData });
+        }
       } catch (error) {
         console.warn("[PainelURE] Estado local ignorado:", error);
       }
@@ -58,10 +61,15 @@
 
   function saveAppData() {
     const payload = {
+      version: STORAGE_VERSION,
       savedAt: new Date().toISOString(),
       appData: getAppData()
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.warn("[PainelURE] Estado local não salvo:", error);
+    }
     return payload;
   }
 
@@ -78,5 +86,6 @@
   P.getAppData = getAppData;
   P.saveAppData = saveAppData;
   P.importAppData = importAppData;
+  P.STORAGE_VERSION = STORAGE_VERSION;
   P.STORAGE_KEY = STORAGE_KEY;
 })();

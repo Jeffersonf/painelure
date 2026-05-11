@@ -4,8 +4,8 @@
 
   P.seedData.calendar = [
     { label: "Apresentação da versão 1.0", value: "08/05/2026", note: "Versão oficial preservada na raiz do projeto.", tone: "ok" },
-    { label: "Construção do PainelURE 2.0", value: "em andamento", note: "Base separada em C:\\Users\\jeffe\\painelure2.", tone: "info" },
-    { label: "Fonte oficial do calendário", value: "pendente", note: "Definir planilha ou agenda antes de exibir eventos oficiais da URE.", tone: "warn" }
+    { label: "PainelURE 2.0", value: "publicado", note: "Base separada em C:\\Users\\jeffe\\painelure2 e publicada no GitHub Pages.", tone: "ok" },
+    { label: "Calendário URE", value: "preparado", note: "Estrutura pronta para conectar a agenda institucional.", tone: "info" }
   ];
 
   P.seedData.profiles = [
@@ -27,6 +27,6 @@
     { label: "Inventário por escola", status: "ok", note: "107 linhas sanitizadas importadas da base 1.0." },
     { label: "Calendário oficial", status: "ok", note: "Página, seed e normalizador CSV prontos; URL oficial pode ser plugada em sources.js." },
     { label: "Perfis de acesso", status: "ok", note: "Matriz e filtro local por perfil implementados no MVP." },
-    { label: "Publicação", status: "ok", note: "Checklist e backup prontos; 2.0 permanece fora do repositório por decisão." }
+    { label: "Publicação", status: "ok", note: "2.0 publicado em repositório próprio e preservado fora da 1.0 oficial." }
   ];
 })();

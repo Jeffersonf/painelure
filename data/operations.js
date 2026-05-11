@@ -23,8 +23,8 @@
 
   P.seedData.adminChecks = [
     { label: "1.0 preservada", status: "ok", note: "A versão oficial continua fora do fluxo de edição do 2.0." },
-    { label: "2.0 fora do repositório", status: "ok", note: "Pasta separada em C:\\Users\\jeffe\\painelure2." },
-    { label: "Backup/publicação", status: "ok", note: "Exportação/importação JSON e persistência local implementadas." },
+    { label: "2.0 em repositório próprio", status: "ok", note: "Pasta separada em C:\\Users\\jeffe\\painelure2 e repo Jeffersonf/painelure2." },
+    { label: "Backup/publicação", status: "ok", note: "GitHub Pages ativo, exportação/importação JSON e persistência local implementadas." },
     { label: "Perfis locais", status: "ok", note: "Filtro de navegação por perfil ativo implementado no MVP." },
     { label: "Automação DOCX/PDF", status: "ok", note: "Mantida como fluxo externo documentado; não entra no frontend estático." }
   ];

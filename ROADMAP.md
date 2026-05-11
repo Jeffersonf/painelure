@@ -407,7 +407,7 @@ Critérios de aceite:
 
 ### Fase 8 - Calendário URE
 
-Status: concluída como base; fonte oficial pendente.
+Status: concluída como base; fonte oficial plugável.
 
 Objetivo: criar calendário geral da URE.
 
@@ -456,7 +456,7 @@ Critérios de aceite:
 
 ### Fase 10 - Publicação E Qualidade
 
-Status: concluída como checklist; publicação do 2.0 pendente por decisão.
+Status: concluída como checklist; publicação inicial realizada em repositório próprio.
 
 Objetivo: preparar versão estável para publicação.
 
@@ -501,6 +501,14 @@ Não fazer:
 - Misturar importação, normalização e renderização na mesma função grande.
 
 ## Changelog
+
+### 2.0.0-dev.36
+
+- Estado local foi versionado para impedir que dados antigos escondam atualizações novas.
+- Dashboard deixou de mostrar mensagens de obra/fonte pendente como alerta principal.
+- Publicação e governança foram atualizadas para refletir o repositório próprio no GitHub Pages.
+- Removido `content-visibility` dos cards e linhas interativas para reduzir sensação de travamento visual.
+- Tema claro recebeu estados de hover/linha ativa com contraste mais próximo do Finanza.
 
 ### 2.0.0-dev.35
 
