@@ -239,6 +239,26 @@
       <header class="page-header compact">
         <div><h1>Supervisão</h1><p>Metas, visitas e escolas vinculadas.</p></div>
       </header>
+      <div class="selector-panel supervisor-filters">
+        <label>
+          <span>Situação</span>
+          <select id="supervisorStatusFilter">
+            <option value="all">Todos</option>
+            <option value="ok">Meta ok</option>
+            <option value="warn">Com pendência</option>
+            <option value="danger">Crítico</option>
+          </select>
+        </label>
+        <label>
+          <span>Ordenação</span>
+          <select id="supervisorSortFilter">
+            <option value="name">Ordem alfabética</option>
+            <option value="pending">Mais pendentes</option>
+            <option value="schools">Mais escolas</option>
+          </select>
+        </label>
+        <p id="supervisorFilterSummary">Supervisores ativos na base.</p>
+      </div>
       <div class="table-card">
         <div class="table-head"><strong>Supervisores</strong><span>ordem alfabética</span></div>
         <div id="supervisorRows"></div>

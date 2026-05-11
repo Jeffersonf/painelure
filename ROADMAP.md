@@ -502,6 +502,13 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.54
+
+- Supervisão ganhou filtros por situação e ordenação por nome, pendências ou quantidade de escolas.
+- Detalhe do supervisor passou a mostrar atenção da carteira: escolas com alerta de inventário e fichas abaixo de 65%.
+- Escolas vinculadas ao supervisor agora exibem percentual de ficha e alertas relevantes.
+- Ações rápidas de email/telefone foram adicionadas ao detalhe do supervisor.
+
 ### 2.0.0-dev.53
 
 - Página de Escolas ganhou filtros discretos por município, status da ficha e alerta de inventário.

@@ -100,6 +100,33 @@
     if (summary) summary.textContent = `${visibleCount}/${cards.length} escola(s) visíveis.`;
   }
 
+  function supervisorTone(item) {
+    return item.pending > 6 ? "danger" : item.pending > 0 ? "warn" : "ok";
+  }
+
+  function applySupervisorFilters() {
+    const status = P.$("#supervisorStatusFilter")?.value || "all";
+    const rows = P.$all("#supervisorRows .supervisor-row");
+    let visibleCount = 0;
+    rows.forEach(row => {
+      const visible = status === "all" || row.dataset.status === status;
+      row.classList.toggle("filter-hidden", !visible);
+      if (visible) visibleCount++;
+    });
+    const summary = P.$("#supervisorFilterSummary");
+    if (summary) summary.textContent = `${visibleCount}/${rows.length} supervisor(es) visíveis.`;
+  }
+
+  function bindSupervisorFilters() {
+    [P.$("#supervisorStatusFilter"), P.$("#supervisorSortFilter")].forEach(select => {
+      if (!select || select.dataset.bound) return;
+      select.dataset.bound = "true";
+      select.addEventListener("change", () => {
+        P.renderSupervisors(P.getAppData().supervisors);
+      });
+    });
+  }
+
   function renderSchoolFilters(schools) {
     const citySelect = P.$("#schoolCityFilter");
     if (!citySelect) return;
@@ -710,11 +737,17 @@
       host.innerHTML = `<div class="empty-state">Nenhum supervisor carregado ainda.</div>`;
       return;
     }
-    const sorted = [...supervisors].sort((a, b) => a.name.localeCompare(b.name));
+    bindSupervisorFilters();
+    const sortMode = P.$("#supervisorSortFilter")?.value || "name";
+    const sorted = [...supervisors].sort((a, b) => {
+      if (sortMode === "pending") return Number(b.pending || 0) - Number(a.pending || 0) || a.name.localeCompare(b.name);
+      if (sortMode === "schools") return Number(b.schools || 0) - Number(a.schools || 0) || a.name.localeCompare(b.name);
+      return a.name.localeCompare(b.name);
+    });
     host.innerHTML = sorted.map((item, index) => {
-      const tone = item.pending > 6 ? "danger" : item.pending > 0 ? "warn" : "ok";
+      const tone = supervisorTone(item);
       return `
-      <button class="supervisor-row" type="button" data-supervisor-index="${index}" data-supervisor-key="${P.searchText([item.name])}" data-search="${P.searchText([item.name, item.email, item.phone, item.schools, item.week, item.month, item.pending])}">
+      <button class="supervisor-row" type="button" data-supervisor-index="${index}" data-supervisor-key="${P.searchText([item.name])}" data-status="${tone}" data-search="${P.searchText([item.name, item.email, item.phone, item.schools, item.week, item.month, item.pending])}">
         <div class="supervisor-person">
           <div class="school-avatar">${initials(item.name)}</div>
           <span>
@@ -737,6 +770,7 @@
         <span class="status-pill ${tone}">${item.pending ? `${item.pending} faltam` : "Verde"}</span>
       </button>
     `; }).join("");
+    applySupervisorFilters();
     host.querySelectorAll("[data-supervisor-index]").forEach(button => {
       button.addEventListener("click", () => {
         openSupervisorPage(sorted[Number(button.dataset.supervisorIndex)].name);
@@ -750,15 +784,21 @@
     const schools = supervisor.assignedSchools || [];
     const schoolCards = schools.map(name => {
       const school = findSchool(name);
+      const profilePct = schoolProfileCompletion(name);
+      const alerts = school ? inventoryAlertCount(school) : 0;
       return {
         name,
         city: school?.city || "Município não informado",
         cie: school?.cie || "CIE pendente",
         items: school?.items ?? 0,
-        status: school?.status || "info"
+        profilePct,
+        alerts,
+        status: alerts ? "warn" : profileStatusFromPct(profilePct)
       };
     });
     const status = supervisor.pending ? "warn" : "ok";
+    const alertSchools = schoolCards.filter(school => school.alerts).length;
+    const incompleteProfiles = schoolCards.filter(school => school.profilePct < 65).length;
     detail.innerHTML = `
       <article class="box">
         <div class="box-head">
@@ -795,6 +835,14 @@
           </article>
           <article class="detail-widget">
             <div>
+              <small>Atenções da carteira</small>
+              <strong>${alertSchools + incompleteProfiles}</strong>
+              <p>${alertSchools} escola(s) com alerta de inventário • ${incompleteProfiles} ficha(s) abaixo de 65%.</p>
+            </div>
+            <span class="status-pill ${alertSchools || incompleteProfiles ? "warn" : "ok"}">${alertSchools || incompleteProfiles ? "revisar" : "ok"}</span>
+          </article>
+          <article class="detail-widget">
+            <div>
               <small>Fonte</small>
               <strong>${supervisor.source || "Seed oficial"}</strong>
               <p>Dados normalizados antes de renderizar.</p>
@@ -807,11 +855,15 @@
             <button class="linked-school" type="button" data-school-jump="${school.name}" data-search="${P.searchText([school.name, school.city, school.cie])}">
               <span>
                 <strong>${school.name}</strong>
-                <small>${school.city} • ${school.cie}</small>
+                <small>${school.city} • ${school.cie} • ficha ${school.profilePct}%</small>
               </span>
-              <em class="status-pill ${statusClass(school.status)}">${school.items} item(ns)</em>
+              <em class="status-pill ${statusClass(school.status)}">${school.alerts ? `${school.alerts} alerta(s)` : `${school.items} item(ns)`}</em>
             </button>
           `).join("") : `<div class="empty-state">Nenhuma escola vinculada a este supervisor.</div>`}
+        </div>
+        <div class="detail-actions">
+          ${supervisor.email ? `<a class="ghost-btn" href="mailto:${supervisor.email}">Enviar email</a>` : ""}
+          ${supervisor.phone ? `<a class="ghost-btn" href="tel:${String(supervisor.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
         </div>
       </article>
     `;
