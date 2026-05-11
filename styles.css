@@ -30,6 +30,24 @@
     radial-gradient(ellipse 50% 40% at 15% 80%, rgba(167, 139, 250, .06) 0%, transparent 60%);
 }
 
+[data-theme="light"] {
+  --bg: #f5f7f0;
+  --bg2: #eef2e7;
+  --sf: rgba(255, 255, 255, .9);
+  --sf2: rgba(246, 249, 240, .86);
+  --sf-solid: #ffffff;
+  --bd: rgba(51, 64, 38, .16);
+  --bd2: rgba(51, 64, 38, .08);
+  --tx: #11150d;
+  --tx2: rgba(17, 21, 13, .78);
+  --mt: rgba(17, 21, 13, .52);
+  --sh: rgba(77, 92, 48, .14);
+  --grad-bg:
+    radial-gradient(ellipse 80% 55% at 50% -12%, rgba(200, 245, 90, .2) 0%, transparent 70%),
+    radial-gradient(ellipse 52% 42% at 88% 68%, rgba(90, 245, 200, .14) 0%, transparent 62%),
+    radial-gradient(ellipse 45% 36% at 10% 82%, rgba(167, 139, 250, .12) 0%, transparent 60%);
+}
+
 *,
 *::before,
 *::after {
@@ -120,7 +138,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   min-height: 32px;
   margin-bottom: 22px;
 }
@@ -129,7 +147,7 @@ select:focus-visible {
   display: inline-flex;
   align-items: center;
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0;
@@ -143,6 +161,7 @@ select:focus-visible {
 .brand-word strong {
   color: var(--tx);
   font-weight: 700;
+  margin-left: 1px;
 }
 
 .brand-actions {

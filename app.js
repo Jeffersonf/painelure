@@ -1,6 +1,7 @@
 (function () {
   const P = window.PainelURE;
   const renderedPages = new Set();
+  const THEME_KEY = "painelure2_theme";
 
   const PAGE_RENDERERS = {
     dashboard(data) {
@@ -81,7 +82,40 @@
     window.setTimeout(run, 1200);
   }
 
+  function applyTheme(theme) {
+    const selectedTheme = theme === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = selectedTheme;
+
+    const button = document.getElementById("themeBtn");
+    if (button) {
+      const light = selectedTheme === "light";
+      button.innerHTML = light ? "&#9728;" : "&#9790;";
+      button.setAttribute("aria-label", light ? "Usar tema escuro" : "Usar tema claro");
+      button.setAttribute("aria-pressed", String(light));
+    }
+
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute("content", selectedTheme === "light" ? "#f5f7f0" : "#08090d");
+    }
+  }
+
+  function bindTheme() {
+    applyTheme(localStorage.getItem(THEME_KEY) || "dark");
+
+    const button = document.getElementById("themeBtn");
+    if (!button) return;
+
+    button.addEventListener("click", () => {
+      const currentTheme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+      const nextTheme = currentTheme === "light" ? "dark" : "light";
+      localStorage.setItem(THEME_KEY, nextTheme);
+      applyTheme(nextTheme);
+    });
+  }
+
   async function init() {
+    bindTheme();
     P.renderPage("dashboard");
     P.bindNavigation({
       onContactSector: sector => {

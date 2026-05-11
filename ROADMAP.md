@@ -502,6 +502,13 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.34
+
+- Removido o botao de privacidade/esconder dados da barra lateral.
+- Tema claro passou a funcionar por tokens globais e persistencia em `localStorage`.
+- Botao de tema agora alterna claro/escuro e atualiza `theme-color`.
+- Tipografia da marca foi refinada para ficar mais contida no padrao Finanza.
+
 ### 2.0.0-dev.4
 
 - Iniciada a Fase 1 de organização modular.
