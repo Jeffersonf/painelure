@@ -25,6 +25,13 @@
       const pageButton = event.target.closest("[data-page]");
       if (pageButton) {
         setPage(pageButton.dataset.page);
+        P.closeAccountMenu?.();
+        return;
+      }
+
+      const accountButton = event.target.closest("#accountBtn");
+      if (accountButton) {
+        P.toggleAccountMenu?.();
         return;
       }
 
@@ -37,6 +44,7 @@
       const jumpButton = event.target.closest("[data-jump]");
       if (jumpButton) {
         setPage(jumpButton.dataset.jump);
+        P.closeAccountMenu?.();
         return;
       }
 
@@ -45,6 +53,10 @@
         P.$all("[data-sector]").forEach(tab => tab.classList.toggle("active", tab === sectorButton));
         onContactSector(sectorButton.dataset.sector);
       }
+    });
+
+    document.addEventListener("click", event => {
+      if (!event.target.closest(".account")) P.closeAccountMenu?.();
     });
 
     document.addEventListener("keydown", event => {

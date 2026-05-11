@@ -40,8 +40,24 @@
     if (userRoleSelect) userRoleSelect.value = role;
     const accountRole = P.$("#accountRoleLabel");
     if (accountRole) accountRole.textContent = role;
+    const adminAccountLine = P.$("#adminAccountLine");
+    if (adminAccountLine) adminAccountLine.textContent = `Jefferson • ${role}`;
     P.renderUser?.(P.getAppData?.() || {});
     if (typeof applyPrefs === "function") applyPrefs();
+  }
+
+  function closeAccountMenu() {
+    P.$("#accountPop")?.classList.remove("open");
+    P.$("#accountBtn")?.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleAccountMenu() {
+    const pop = P.$("#accountPop");
+    const btn = P.$("#accountBtn");
+    if (!pop || !btn) return;
+    const open = !pop.classList.contains("open");
+    pop.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", String(open));
   }
 
   function downloadJson(filename, data) {
@@ -278,6 +294,8 @@
   P.currentRole = currentRole;
   P.canAccess = canAccess;
   P.applyRole = applyRole;
+  P.closeAccountMenu = closeAccountMenu;
+  P.toggleAccountMenu = toggleAccountMenu;
   P.bindAdminTools = bindAdminTools;
   P.renderSourceStatus = renderSourceStatus;
   P.applyPrefs = applyPrefs;

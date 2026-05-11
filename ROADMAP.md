@@ -512,6 +512,8 @@ Não fazer:
 - Dashboard ficou mais enxuto com a remocao do bloco de metricas grandes.
 - Criadas paginas dedicadas para escola, supervisor e conta de usuario, com botao voltar no padrao do app.
 - Conta ganhou seletor de perfil sempre acessivel para recuperar o acesso de Administrador apos testes de permissao.
+- Perfil clicavel ganhou menu compacto inspirado no Finanza com Conta, Admin e troca de perfil.
+- Admin foi reorganizado em secoes estilo configuracoes do Finanza, mantendo funcoes relevantes da v1: permissoes, importacoes, backup, fontes e modo apresentacao.
 
 ### 2.0.0-dev.45
 

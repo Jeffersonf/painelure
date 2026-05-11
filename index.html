@@ -55,7 +55,7 @@
 
     <div class="account">
       <div class="account-meta">feito por jeffef.dev</div>
-      <button class="account-row" type="button" data-page="user">
+      <button class="account-row" type="button" id="accountBtn" aria-expanded="false" aria-controls="accountPop">
         <div class="avatar">JE</div>
         <div>
           <strong>Jefferson</strong>
@@ -63,6 +63,12 @@
         </div>
         <small>▲</small>
       </button>
+      <div class="account-pop" id="accountPop">
+        <button class="pop-item" type="button" data-page="user">⚙️ Conta e perfil</button>
+        <button class="pop-item" type="button" data-page="admin">🔐 Painel admin</button>
+        <div class="pop-div"></div>
+        <button class="pop-item danger" type="button" data-page="user">👤 Trocar perfil</button>
+      </div>
     </div>
   </aside>
 
@@ -324,57 +330,87 @@
 
     <section class="page" id="page-admin">
       <header class="page-header compact">
-        <div><h1>Admin</h1><p>Diagnóstico, perfil ativo e backups.</p></div>
+        <div><h1>Admin</h1><p>Controles globais, fontes oficiais e saúde do painel.</p></div>
       </header>
-      <div class="box">
-        <div class="box-head"><div><strong>Perfil ativo e backup</strong><small>Controle local da versão publicada</small></div></div>
-        <div class="admin-tools">
-          <label>
-            <span>Perfil ativo</span>
+      <div class="settings-shell admin-layout">
+        <section class="settings-section">
+          <div class="settings-title">Visão administrativa</div>
+          <div class="settings-row">
+            <div><strong>Conta atual</strong><small id="adminAccountLine">Jefferson • Administrador</small></div>
+            <span class="status-pill ok">Admin</span>
+          </div>
+          <div class="settings-row">
+            <div><strong>Perfil ativo</strong><small>Simula permissões como na v1, sem perder acesso pela página Conta.</small></div>
             <select id="activeRoleSelect"></select>
-          </label>
-          <button class="ghost-btn" type="button" id="localSaveBtn">Salvar local</button>
-          <button class="ghost-btn" type="button" id="backupExportBtn">Exportar backup</button>
-          <label class="ghost-btn file-btn" for="backupImportInput">Importar backup</label>
-          <input id="backupImportInput" type="file" accept=".json" hidden>
-        </div>
-        <p class="sync-note" id="adminBackupMeta">Nenhuma ação de backup nesta sessão.</p>
-      </div>
-      <div class="box admin-center">
-        <div class="box-head"><div><strong>Central de dados</strong><small>Fontes, importação e preferências locais</small></div></div>
-        <div class="admin-tools">
-          <label class="check-row"><input type="checkbox" data-pref-widget="shortcuts" checked><span>Atalhos do painel</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-widget="metrics" checked><span>Indicadores</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-widget="operations" checked><span>Decisões e agenda</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-shortcut="network" checked><span>Redes</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-shortcut="inventory" checked><span>Inventário</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-shortcut="ctc" checked><span>CTC</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-shortcut="calls" checked><span>Chamados</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-shortcut="calendar" checked><span>Calendário</span></label>
-          <label class="check-row"><input type="checkbox" data-pref-shortcut="reports" checked><span>Relatórios</span></label>
-          <label>
-            <span>Importar CSV para</span>
-            <select id="importTargetSelect">
-              <option value="schools">Escolas</option>
-              <option value="contacts">Contatos</option>
-              <option value="network">Redes e câmeras</option>
-              <option value="calendar">Calendário</option>
-              <option value="supervision">Supervisão</option>
-            </select>
-          </label>
-          <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
-          <input id="csvImportInput" type="file" accept=".csv,text/csv" hidden>
-          <label>
-            <span>URL calendário CSV</span>
-            <input id="calendarSourceInput" type="url" placeholder="https://.../pub?output=csv">
-          </label>
-          <button class="ghost-btn" type="button" id="saveCalendarSourceBtn">Salvar calendário</button>
-          <button class="ghost-btn" type="button" id="presentationModeBtn">Modo apresentação</button>
-          <button class="ghost-btn" type="button" id="resetLocalBtn">Limpar estado local</button>
-          <button class="ghost-btn" type="button" id="savePrefsBtn">Salvar preferências</button>
-          <button class="ghost-btn" type="button" id="reloadSourcesBtn">Atualizar fontes</button>
-        </div>
-        <div class="row-list compact" id="sourceStatusList"></div>
+          </div>
+          <div class="settings-row">
+            <div><strong>Publicação</strong><small>Base 2.0 separada da versão oficial 1.0.</small></div>
+            <button class="ghost-btn" type="button" id="reloadSourcesBtn">Atualizar fontes</button>
+          </div>
+        </section>
+        <section class="settings-section">
+          <div class="settings-title">Backup local</div>
+          <div class="settings-row">
+            <div><strong>Estado do painel</strong><small id="adminBackupMeta">Nenhuma ação de backup nesta sessão.</small></div>
+            <div class="settings-actions">
+              <button class="ghost-btn" type="button" id="localSaveBtn">Salvar local</button>
+              <button class="ghost-btn" type="button" id="backupExportBtn">Exportar</button>
+              <label class="ghost-btn file-btn" for="backupImportInput">Importar</label>
+              <input id="backupImportInput" type="file" accept=".json" hidden>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div><strong>Limpeza local</strong><small>Remove alterações salvas neste navegador.</small></div>
+            <button class="ghost-btn" type="button" id="resetLocalBtn">Limpar estado</button>
+          </div>
+        </section>
+        <section class="settings-section">
+          <div class="settings-title">Importações da base</div>
+          <div class="settings-row">
+            <div><strong>CSV normalizado</strong><small>Fluxo herdado da v1, mas tratado antes de renderizar.</small></div>
+            <div class="settings-actions">
+              <select id="importTargetSelect">
+                <option value="schools">Escolas</option>
+                <option value="contacts">Contatos</option>
+                <option value="network">Redes e câmeras</option>
+                <option value="calendar">Calendário</option>
+                <option value="supervision">Supervisão</option>
+              </select>
+              <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
+              <input id="csvImportInput" type="file" accept=".csv,text/csv" hidden>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div><strong>Calendário oficial</strong><small>URL pública CSV para agenda institucional.</small></div>
+            <div class="settings-actions wide">
+              <input id="calendarSourceInput" type="url" placeholder="https://.../pub?output=csv">
+              <button class="ghost-btn" type="button" id="saveCalendarSourceBtn">Salvar</button>
+            </div>
+          </div>
+        </section>
+        <section class="settings-section">
+          <div class="settings-title">Preferências e apresentação</div>
+          <div class="settings-row">
+            <div><strong>Modo apresentação</strong><small>Oculta áreas administrativas em demonstrações.</small></div>
+            <button class="ghost-btn" type="button" id="presentationModeBtn">Alternar</button>
+          </div>
+          <div class="admin-tools compact">
+            <label class="check-row"><input type="checkbox" data-pref-widget="shortcuts" checked><span>Atalhos</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-widget="metrics" checked><span>Indicadores</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-widget="operations" checked><span>Decisões</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-shortcut="network" checked><span>Redes</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-shortcut="inventory" checked><span>Inventário</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-shortcut="ctc" checked><span>CTC</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-shortcut="calls" checked><span>Chamados</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-shortcut="calendar" checked><span>Calendário</span></label>
+            <label class="check-row"><input type="checkbox" data-pref-shortcut="reports" checked><span>Relatórios</span></label>
+            <button class="ghost-btn" type="button" id="savePrefsBtn">Salvar preferências</button>
+          </div>
+        </section>
+        <section class="settings-section span-2">
+          <div class="settings-title">Fontes oficiais</div>
+          <div class="settings-list" id="sourceStatusList"></div>
+        </section>
       </div>
       <div class="calendar-grid" id="adminGrid"></div>
     </section>

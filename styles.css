@@ -513,6 +513,7 @@ select:focus-visible {
   margin-top: auto;
   padding-top: 18px;
   border-top: 1px solid var(--bd);
+  position: relative;
 }
 
 .account-meta {
@@ -576,6 +577,55 @@ select:focus-visible {
 
 .account-row:hover strong {
   color: var(--ac);
+}
+
+.account-pop {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 140;
+  display: none;
+  padding: 8px;
+  border: 1px solid var(--bd);
+  border-radius: 16px;
+  background: var(--sf-solid);
+  box-shadow: 0 18px 44px var(--sh);
+}
+
+.account-pop.open {
+  display: grid;
+  gap: 3px;
+}
+
+.pop-item {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--tx);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.pop-item:hover {
+  background: var(--sf2);
+}
+
+.pop-item.danger {
+  color: var(--warn);
+}
+
+.pop-div {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--bd);
 }
 
 .main {
@@ -1490,6 +1540,14 @@ select:focus-visible {
   gap: 16px;
 }
 
+.settings-shell.admin-layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.settings-section.span-2 {
+  grid-column: 1 / -1;
+}
+
 .settings-section {
   overflow: hidden;
   border: 1px solid var(--bd);
@@ -1586,6 +1644,27 @@ select:focus-visible {
   color: var(--tx);
   padding: 0 12px;
   font-weight: 700;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.settings-actions.wide {
+  flex: 1 1 360px;
+}
+
+.settings-actions input[type="url"] {
+  min-width: min(420px, 100%);
+  flex: 1 1 280px;
+}
+
+.admin-tools.compact {
+  padding: 14px 20px 18px;
 }
 
 .detail-actions {
