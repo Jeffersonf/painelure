@@ -232,8 +232,9 @@
     const role = P.currentRole?.() || "Administrador";
     const profile = (data.profiles || []).find(item => P.normalize(item.name) === P.normalize(role));
     setText("#userRoleSummary", role);
-    setText("#userRolePill", role);
     setText("#userAccessSummary", profile?.note || "Perfil local de acesso ao painel.");
+    const userRoleSelect = P.$("#userRoleSelect");
+    if (userRoleSelect) userRoleSelect.value = role;
 
     const list = P.$("#userAccessList");
     if (list) {

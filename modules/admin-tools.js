@@ -36,8 +36,11 @@
     if (activeId && !canAccess(activeId, role)) P.setPage("dashboard");
     const roleSelect = P.$("#activeRoleSelect");
     if (roleSelect) roleSelect.value = role;
+    const userRoleSelect = P.$("#userRoleSelect");
+    if (userRoleSelect) userRoleSelect.value = role;
     const accountRole = P.$("#accountRoleLabel");
     if (accountRole) accountRole.textContent = role;
+    P.renderUser?.(P.getAppData?.() || {});
     if (typeof applyPrefs === "function") applyPrefs();
   }
 
@@ -58,6 +61,12 @@
       roleSelect.dataset.bound = "true";
       roleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${role}</option>`).join("");
       roleSelect.addEventListener("change", () => applyRole(roleSelect.value));
+    }
+    const userRoleSelect = P.$("#userRoleSelect");
+    if (userRoleSelect && !userRoleSelect.dataset.bound) {
+      userRoleSelect.dataset.bound = "true";
+      userRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${role}</option>`).join("");
+      userRoleSelect.addEventListener("change", () => applyRole(userRoleSelect.value));
     }
 
     P.$("#backupExportBtn")?.addEventListener("click", () => {

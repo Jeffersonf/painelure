@@ -1577,6 +1577,17 @@ select:focus-visible {
   line-height: 1.35;
 }
 
+.settings-row select {
+  min-height: 36px;
+  min-width: 170px;
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  background: var(--sf2);
+  color: var(--tx);
+  padding: 0 12px;
+  font-weight: 700;
+}
+
 .detail-actions {
   display: flex;
   flex-wrap: wrap;
