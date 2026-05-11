@@ -85,6 +85,29 @@
     window.setTimeout(run, 1200);
   }
 
+  function loadBackendInBackground() {
+    if (!P.loadBackendData) return;
+
+    const run = () => {
+      P.loadBackendData()
+        .then(payload => {
+          if (payload?.data?.appData) {
+            refreshRenderedPages();
+          }
+        })
+        .catch(error => {
+          console.warn("[PainelURE] Backend carregando em segundo plano:", error);
+        });
+    };
+
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(run, { timeout: 1600 });
+      return;
+    }
+
+    window.setTimeout(run, 300);
+  }
+
   function applyTheme(theme) {
     const selectedTheme = theme === "light" ? "light" : "dark";
     document.documentElement.dataset.theme = selectedTheme;
@@ -124,9 +147,8 @@
     });
   }
 
-  async function init() {
+  function init() {
     bindTheme();
-    await P.loadBackendData?.();
     P.renderPage("dashboard");
     P.bindNavigation({
       onContactSector: sector => {
@@ -137,6 +159,7 @@
     P.bindAdminTools();
     P.bindSearch();
     P.restoreInitialPage() || P.setPage("dashboard");
+    loadBackendInBackground();
     loadSourcesInBackground();
   }
 

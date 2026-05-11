@@ -3,6 +3,7 @@
 :root {
   --font-ui: "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: "Syne", "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-money: "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --ac: #c8f55a;
   --ac2: #5af5c8;
   --fut: #a78bfa;
@@ -23,7 +24,7 @@
   --r: 20px;
   --r-lg: 28px;
   --r-pill: 99px;
-  --blur: 12px;
+  --blur: 14px;
   --grad-bg:
     radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200, 245, 90, .08) 0%, transparent 70%),
     radial-gradient(ellipse 60% 50% at 85% 70%, rgba(90, 245, 200, .06) 0%, transparent 60%),
@@ -166,11 +167,13 @@ select:focus-visible {
 .brand-word {
   display: inline-flex;
   align-items: center;
+  gap: 0;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0;
+  padding-top: 1px;
   white-space: nowrap;
 }
 
@@ -507,7 +510,7 @@ select:focus-visible {
 .main {
   width: calc(100% - 236px);
   margin-left: 236px;
-  padding: 22px 36px 44px;
+  padding: 28px 36px 44px;
 }
 
 .page {
@@ -741,7 +744,7 @@ select:focus-visible {
 .box-head strong,
 .table-head strong {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -870,7 +873,7 @@ select:focus-visible {
 
 .metric-card strong {
   margin-top: 6px;
-  font-family: var(--font-ui);
+  font-family: var(--font-money);
   font-size: 22px;
   font-weight: 700;
   line-height: 1;

@@ -502,6 +502,14 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.45
+
+- Carregamento visual corrigido para preservar a fonte oficial antes de exibir texto.
+- Primeiro render voltou a acontecer imediatamente, sem aguardar backend ou fontes oficiais.
+- Backend continua disponivel, mas carrega em segundo plano e nao interfere na sensacao visual.
+- Controles visiveis de envio ao backend foram removidos do Admin para manter o painel limpo.
+- Tokens de fonte, blur, logo, espacamento do conteudo e numeros foram realinhados ao padrao Finanza sem criar uma camada extra de CSS.
+
 ### 2.0.0-dev.44
 
 - Backend inicial criado em Node sem dependências externas.
