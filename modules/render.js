@@ -127,6 +127,12 @@
     });
   }
 
+  function bindSimpleSelect(select, handler) {
+    if (!select || select.dataset.bound) return;
+    select.dataset.bound = "true";
+    select.addEventListener("change", handler);
+  }
+
   function renderSchoolFilters(schools) {
     const citySelect = P.$("#schoolCityFilter");
     if (!citySelect) return;
@@ -276,6 +282,10 @@
           <em class="status-pill info">${contact.sector}</em>
           <div class="contact-line"><span>Email</span><strong>${contact.email}</strong></div>
           <div class="contact-line"><span>Ramal</span><strong>${contact.phone}</strong></div>
+          <div class="contact-actions">
+            ${contact.email ? `<a class="ghost-btn" href="mailto:${contact.email}">Email</a>` : ""}
+            ${contact.phone ? `<a class="ghost-btn" href="tel:${String(contact.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
+          </div>
         </div>
       </article>
     `;
@@ -933,32 +943,79 @@
   function renderCtc(visits) {
     const grid = P.$("#ctcGrid");
     if (!grid) return;
-    grid.innerHTML = visits.length ? visits.map(visit => `
+    const ownerFilter = P.$("#ctcOwnerFilter");
+    const schoolFilter = P.$("#ctcSchoolFilter");
+    const owners = [...new Set(visits.map(visit => visit.owner).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const schools = [...new Set(visits.map(visit => visit.place).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    setSelectOptions(ownerFilter, [{ value: "all", label: "Todos" }, ...owners.map(owner => ({ value: P.searchText([owner]), label: owner }))], ownerFilter?.value || "all");
+    setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
+    bindSimpleSelect(ownerFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindSimpleSelect(schoolFilter, () => renderCtc(P.getAppData().ctcVisits));
+
+    const selectedOwner = ownerFilter?.value || "all";
+    const selectedSchool = schoolFilter?.value || "all";
+    const visible = visits.filter(visit => {
+      const ownerOk = selectedOwner === "all" || P.searchText([visit.owner]) === selectedOwner;
+      const schoolOk = selectedSchool === "all" || P.searchText([visit.place]) === selectedSchool;
+      return ownerOk && schoolOk;
+    });
+    const summary = P.$("#ctcFilterSummary");
+    if (summary) summary.textContent = `${visible.length}/${visits.length} visita(s) visíveis.`;
+
+    grid.innerHTML = visible.length ? visible.map(visit => `
       <article class="detail-widget" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
         <div>
           <small>${visit.date} • ${visit.time}</small>
           <strong>🛠️ ${visit.owner}</strong>
           <p>${visit.place} • ${visit.objective}</p>
         </div>
-        <span class="status-pill info">CTC</span>
+        <div class="detail-actions">
+          <button class="ghost-btn" type="button" data-open-school="${visit.place}">Abrir escola</button>
+        </div>
       </article>
     `).join("") : `<div class="empty-state">Nenhuma visita CTC carregada.</div>`;
+    grid.querySelectorAll("[data-open-school]").forEach(button => {
+      button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
+    });
   }
 
   function renderCalls(calls) {
     const grid = P.$("#callsGrid");
     if (!grid) return;
+    const statusFilter = P.$("#callStatusFilter");
+    const schoolFilter = P.$("#callSchoolFilter");
     const tone = status => status === "resolvido" ? "ok" : status === "em_rota" ? "info" : "warn";
-    grid.innerHTML = calls.length ? calls.map(call => `
+    const schools = [...new Set(calls.map(call => call.school).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
+    bindSimpleSelect(statusFilter, () => renderCalls(P.getAppData().calls));
+    bindSimpleSelect(schoolFilter, () => renderCalls(P.getAppData().calls));
+
+    const selectedStatus = statusFilter?.value || "all";
+    const selectedSchool = schoolFilter?.value || "all";
+    const visible = calls.filter(call => {
+      const statusOk = selectedStatus === "all" || call.status === selectedStatus;
+      const schoolOk = selectedSchool === "all" || P.searchText([call.school]) === selectedSchool;
+      return statusOk && schoolOk;
+    });
+    const summary = P.$("#callFilterSummary");
+    if (summary) summary.textContent = `${visible.length}/${calls.length} chamado(s) visíveis.`;
+
+    grid.innerHTML = visible.length ? visible.map(call => `
       <article class="detail-widget" data-search="${P.searchText([call.title, call.school, call.status, call.note])}">
         <div>
           <small>${call.school}</small>
           <strong>${call.title}</strong>
           <p>${call.note}</p>
         </div>
-        <span class="status-pill ${tone(call.status)}">${call.status.replace("_", " ")}</span>
+        <div class="detail-actions">
+          <span class="status-pill ${tone(call.status)}">${call.status.replace("_", " ")}</span>
+          <button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>
+        </div>
       </article>
     `).join("") : `<div class="empty-state">Nenhum chamado carregado.</div>`;
+    grid.querySelectorAll("[data-open-school]").forEach(button => {
+      button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
+    });
   }
 
   function renderReports(data) {
@@ -966,11 +1023,16 @@
     const list = P.$("#reportsList");
     if (!grid || !list) return;
     const alerts = Object.values(data.schoolInventoryMetrics || {}).reduce((sum, item) => sum + Number(item.alerts || 0), 0);
+    const networkCount = Object.keys(data.networkData || {}).length;
+    const pendingVisits = (data.supervisors || []).reduce((sum, item) => sum + Number(item.pending || 0), 0);
+    const linkedUsers = (data.users || []).filter(user => user.contactSync === "linked").length;
     const metrics = [
       { icon: "🏫", label: "Escolas", value: String(data.schools.length), note: "base regional", tone: "glow-lime" },
       { icon: "💻", label: "Inventário", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
       { icon: "⚠️", label: "Alertas", value: String(alerts), note: "manutenção/defeito", tone: "glow-amber" },
-      { icon: "🧭", label: "Supervisão", value: String(data.supervisors.length), note: "responsáveis", tone: "glow-purple" }
+      { icon: "🌐", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
+      { icon: "🧭", label: "Pendências", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
+      { icon: "👤", label: "Usuários", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
     ];
     grid.innerHTML = metrics.map(item => `
       <article class="metric-card ${item.tone}">
@@ -983,6 +1045,8 @@
     list.innerHTML = [
       ["Supervisão", `${data.supervisors.length} supervisores com planilha oficial de abril conectada.`, "ok"],
       ["Inventário", `${data.schoolAssets.length} linhas sanitizadas, sem previews brutos da 1.0.`, "ok"],
+      ["Redes e câmeras", `${networkCount}/${data.schools.length} escola(s) com infraestrutura mapeada.`, networkCount === data.schools.length ? "ok" : "warn"],
+      ["Chamados", `${data.calls.length} chamado(s) operacionais em acompanhamento.`, data.calls.some(call => call.status !== "resolvido") ? "warn" : "ok"],
       ["Calendário", "Estrutura pronta para a agenda institucional.", "info"],
       ["Publicação", "2.0 publicado em repositório próprio e GitHub Pages.", "ok"]
     ].map(([title, note, status]) => `

@@ -277,6 +277,17 @@
       <header class="page-header compact">
         <div><h1>Técnicos CTC</h1><p>Agenda técnica, visitas e demandas.</p></div>
       </header>
+      <div class="selector-panel operation-filters">
+        <label>
+          <span>Técnico</span>
+          <select id="ctcOwnerFilter"></select>
+        </label>
+        <label>
+          <span>Escola</span>
+          <select id="ctcSchoolFilter"></select>
+        </label>
+        <p id="ctcFilterSummary">Visitas técnicas carregadas.</p>
+      </div>
       <div class="calendar-grid" id="ctcGrid"></div>
     </section>
 
@@ -284,6 +295,22 @@
       <header class="page-header compact">
         <div><h1>Chamados</h1><p>Fila operacional e acompanhamento.</p></div>
       </header>
+      <div class="selector-panel operation-filters">
+        <label>
+          <span>Status</span>
+          <select id="callStatusFilter">
+            <option value="all">Todos</option>
+            <option value="aberto">Aberto</option>
+            <option value="em_rota">Em rota</option>
+            <option value="resolvido">Resolvido</option>
+          </select>
+        </label>
+        <label>
+          <span>Escola</span>
+          <select id="callSchoolFilter"></select>
+        </label>
+        <p id="callFilterSummary">Chamados carregados.</p>
+      </div>
       <div class="calendar-grid" id="callsGrid"></div>
     </section>
 

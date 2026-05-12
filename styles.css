@@ -1293,8 +1293,14 @@ select:focus-visible {
   margin-bottom: 14px;
 }
 
+.operation-filters {
+  align-items: end;
+  margin-bottom: 14px;
+}
+
 .school-filters p,
-.supervisor-filters p {
+.supervisor-filters p,
+.operation-filters p {
   align-self: center;
   margin: 0;
   color: var(--mt);
@@ -1991,6 +1997,13 @@ select:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .mobile-nav {

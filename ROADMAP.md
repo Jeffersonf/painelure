@@ -502,6 +502,14 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.55
+
+- Técnicos CTC ganhou filtros por técnico e por escola, mantendo a consulta leve.
+- Chamados ganhou filtros por status e por escola, com ação direta para abrir a escola relacionada.
+- Contatos ganharam ações rápidas de email e ligação, usando o mesmo botão discreto do restante da v2.
+- Relatórios passaram a mostrar redes mapeadas, pendências de supervisão e usuários vinculados a contatos.
+- Resumo operacional passou a destacar redes/câmeras e chamados além de supervisão e inventário.
+
 ### 2.0.0-dev.54
 
 - Supervisão ganhou filtros por situação e ordenação por nome, pendências ou quantidade de escolas.
