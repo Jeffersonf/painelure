@@ -7,6 +7,8 @@
     const configured = String(window.PAINELURE_API_URL || "").replace(/\/+$/, "");
     if (configured) return configured;
     if (location.hostname.endsWith("github.io")) return RENDER_API;
+    if ((location.hostname === "localhost" || location.hostname === "127.0.0.1") && location.port !== "4173") return RENDER_API;
+    if (location.protocol === "file:") return RENDER_API;
     return "";
   }
 
