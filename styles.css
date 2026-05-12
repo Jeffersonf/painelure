@@ -1151,6 +1151,7 @@ select:focus-visible {
 }
 
 .contact-card.focused,
+.data-row.focused,
 .detail-widget.focused {
   border-color: rgba(200, 245, 90, .72);
   background:

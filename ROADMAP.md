@@ -502,6 +502,13 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.57
+
+- Busca global passou a encontrar itens de inventário, visitas CTC e eventos do calendário.
+- Resultados de inventário abrem a escola correta no inventário e destacam a linha encontrada.
+- Resultados CTC e calendário agora abrem a página correta e focam o card encontrado.
+- Destaque de busca foi unificado para cards e linhas de dados.
+
 ### 2.0.0-dev.56
 
 - Busca global passou a focar contatos encontrados, abrindo a categoria correta e destacando o card.

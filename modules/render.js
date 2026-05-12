@@ -298,6 +298,54 @@
     });
   }
 
+  function focusInventoryAsset(key, schoolName = "") {
+    P.setPage?.("inventory");
+    requestAnimationFrame(() => {
+      const select = P.$("#inventorySelect");
+      const filter = P.$("#inventoryFilterInput");
+      const status = P.$("#inventoryStatusSelect");
+      if (select && schoolName) select.value = schoolName;
+      if (filter) filter.value = "";
+      if (status) status.value = "";
+      renderInventory(P.getAppData());
+      const target = P.$(`[data-inventory-key="${key}"]`);
+      if (!target) return;
+      P.$all(".data-row.focused").forEach(row => row.classList.remove("focused"));
+      target.classList.add("focused");
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => target.classList.remove("focused"), 1800);
+    });
+  }
+
+  function focusCtcVisit(key) {
+    P.setPage?.("ctc");
+    requestAnimationFrame(() => {
+      const owner = P.$("#ctcOwnerFilter");
+      const school = P.$("#ctcSchoolFilter");
+      if (owner) owner.value = "all";
+      if (school) school.value = "all";
+      renderCtc(P.getAppData().ctcVisits);
+      const target = P.$(`[data-ctc-key="${key}"]`);
+      if (!target) return;
+      P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
+      target.classList.add("focused");
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => target.classList.remove("focused"), 1800);
+    });
+  }
+
+  function focusCalendarItem(key) {
+    P.setPage?.("calendar");
+    requestAnimationFrame(() => {
+      const target = P.$(`[data-calendar-key="${key}"]`);
+      if (!target) return;
+      P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
+      target.classList.add("focused");
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => target.classList.remove("focused"), 1800);
+    });
+  }
+
   function contactCard(contact) {
     const photo = contact.photo || "";
     return `
@@ -732,7 +780,7 @@
         <div class="box-head"><div><strong>Itens da escola</strong><small>${selectedAssets.length} linha(s) do inventário</small></div></div>
         <div class="row-list">
           ${selectedAssets.map(asset => `
-            <div class="data-row" data-search="${P.searchText([asset.school, asset.name, asset.sourceName, asset.notes, asset.status])}">
+            <div class="data-row" data-inventory-key="${P.searchText([asset.school, asset.sourceName || asset.name, asset.notes])}" data-search="${P.searchText([asset.school, asset.name, asset.sourceName, asset.notes, asset.status])}">
               <span class="row-icon">💻</span>
               <span><strong>${asset.sourceName || asset.name}</strong><small>${asset.notes || asset.name}</small></span>
               <em class="status-pill ${assetTone(asset.status)}">${assetUnits(asset)} • ${assetStatusLabel(asset.status)}</em>
@@ -926,7 +974,7 @@
       return;
     }
     grid.innerHTML = calendar.map(item => `
-      <article class="detail-widget" data-search="${P.searchText([item.label, item.value, item.note])}">
+      <article class="detail-widget" data-calendar-key="${P.searchText([item.label, item.value])}" data-search="${P.searchText([item.label, item.value, item.note])}">
         <div>
           <small>${item.label}</small>
           <strong>${item.value}</strong>
@@ -990,7 +1038,7 @@
     if (summary) summary.textContent = `${visible.length}/${visits.length} visita(s) visíveis.`;
 
     grid.innerHTML = visible.length ? visible.map(visit => `
-      <article class="detail-widget" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
+      <article class="detail-widget" data-ctc-key="${P.searchText([visit.owner, visit.date, visit.time, visit.place])}" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
         <div>
           <small>${visit.date} • ${visit.time}</small>
           <strong>🛠️ ${visit.owner}</strong>
@@ -1129,6 +1177,9 @@
   P.focusSupervisorInList = focusSupervisorInList;
   P.focusContact = focusContact;
   P.focusCall = focusCall;
+  P.focusInventoryAsset = focusInventoryAsset;
+  P.focusCtcVisit = focusCtcVisit;
+  P.focusCalendarItem = focusCalendarItem;
   P.renderSchools = renderSchools;
   P.renderNetworkOptions = renderNetworkOptions;
   P.renderInventory = renderInventory;
