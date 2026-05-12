@@ -76,6 +76,10 @@
     });
   }
 
+  async function loadBackendHealth() {
+    return fetchJson(apiPath("/api/health"), { timeoutMs: 4000 });
+  }
+
   async function loadBackendSources() {
     return fetchJson(apiPath("/api/sources"), { timeoutMs: 4000 });
   }
@@ -108,6 +112,7 @@
   P.loginBackend = loginBackend;
   P.loadBackendUser = loadBackendUser;
   P.updateBackendUser = updateBackendUser;
+  P.loadBackendHealth = loadBackendHealth;
   P.loadBackendSources = loadBackendSources;
   P.saveBackendSources = saveBackendSources;
   P.loadBackendSnapshots = loadBackendSnapshots;

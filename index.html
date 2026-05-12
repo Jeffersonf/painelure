@@ -457,6 +457,20 @@
           </div>
         </section>
         <section class="settings-section">
+          <div class="settings-title">Backend online</div>
+          <div class="settings-row">
+            <div><strong>Status da API</strong><small id="backendStatusLine">Aguardando verificação.</small></div>
+            <button class="ghost-btn" type="button" id="backendHealthBtn">Verificar</button>
+          </div>
+          <div class="settings-row">
+            <div><strong>Estado online</strong><small>Carrega ou envia o estado atual para a API configurada.</small></div>
+            <div class="settings-actions">
+              <button class="ghost-btn" type="button" id="backendPullBtn">Carregar</button>
+              <button class="ghost-btn" type="button" id="backendPushBtn">Enviar</button>
+            </div>
+          </div>
+        </section>
+        <section class="settings-section">
           <div class="settings-title">Importações da base</div>
           <div class="settings-row">
             <div><strong>CSV normalizado</strong><small>Fluxo herdado da v1, mas tratado antes de renderizar.</small></div>
@@ -502,6 +516,14 @@
         <section class="settings-section span-2">
           <div class="settings-title">Fontes oficiais</div>
           <div class="settings-list" id="sourceStatusList"></div>
+        </section>
+        <section class="settings-section">
+          <div class="settings-title">Snapshots online</div>
+          <div class="settings-list" id="backendSnapshotList"></div>
+        </section>
+        <section class="settings-section">
+          <div class="settings-title">Auditoria online</div>
+          <div class="settings-list" id="backendAuditList"></div>
         </section>
       </div>
       <div class="calendar-grid" id="adminGrid"></div>

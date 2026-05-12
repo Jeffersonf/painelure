@@ -5,6 +5,7 @@
   const SOURCE_KEY = "painelure2_source_overrides";
   const AVATAR_KEY = "painelure2_avatar";
   const AVATAR_PREFIX = "painelure2_avatar_";
+  let backendToken = sessionStorage.getItem("painelure2_backend_token") || "";
 
   const ROLE_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
@@ -87,6 +88,21 @@
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function ensureBackendToken() {
+    if (backendToken) return backendToken;
+    const key = window.prompt("Chave administrativa da API, se houver:");
+    if (!key) return "";
+    const result = await P.loginBackend?.({ key });
+    backendToken = result?.token || "";
+    if (backendToken) sessionStorage.setItem("painelure2_backend_token", backendToken);
+    return backendToken;
+  }
+
+  function setAdminMeta(message) {
+    const meta = P.$("#adminBackupMeta");
+    if (meta) meta.textContent = message;
   }
 
   function bindAdminTools() {
@@ -218,6 +234,38 @@
       if (meta) meta.textContent = "Estado local limpo. Recarregue a página para voltar aos dados base.";
     });
 
+    P.$("#backendHealthBtn")?.addEventListener("click", () => {
+      refreshBackendPanel();
+    });
+
+    P.$("#backendPullBtn")?.addEventListener("click", () => {
+      setAdminMeta("Carregando estado online...");
+      P.loadBackendData?.()
+        .then(payload => {
+          if (payload?.data?.appData) {
+            P.renderApp?.();
+            applyRole();
+            setAdminMeta("Estado online carregado.");
+          } else {
+            setAdminMeta("API respondeu, mas ainda não há estado online salvo.");
+          }
+          refreshBackendPanel();
+        })
+        .catch(error => setAdminMeta(`Falha ao carregar estado online: ${error.message}`));
+    });
+
+    P.$("#backendPushBtn")?.addEventListener("click", async () => {
+      try {
+        setAdminMeta("Enviando estado atual para a API...");
+        const token = await ensureBackendToken();
+        await P.pushBackendData?.(token);
+        setAdminMeta("Estado atual enviado para a API.");
+        refreshBackendPanel();
+      } catch (error) {
+        setAdminMeta(`Falha ao enviar estado online: ${error.message}`);
+      }
+    });
+
     P.$("#savePrefsBtn")?.addEventListener("click", () => {
       savePrefs(readPrefsFromControls());
       const payload = P.saveAppData();
@@ -264,6 +312,7 @@
     applyUserAvatar();
     applyPrefs();
     renderSourceStatus();
+    refreshBackendPanel();
   }
 
   function defaultPrefs() {
@@ -356,6 +405,57 @@
     }).join("");
   }
 
+  async function refreshBackendPanel() {
+    const statusLine = P.$("#backendStatusLine");
+    const snapshotHost = P.$("#backendSnapshotList");
+    const auditHost = P.$("#backendAuditList");
+
+    try {
+      const health = await P.loadBackendHealth?.();
+      const storage = health?.storage || {};
+      if (statusLine) {
+        statusLine.textContent = `${storage.mode || "API"} • ${storage.ready ? "pronta" : "indisponível"}${storage.updatedAt ? ` • ${new Date(storage.updatedAt).toLocaleString("pt-BR")}` : ""}`;
+      }
+    } catch (error) {
+      if (statusLine) statusLine.textContent = `API indisponível: ${error.message}`;
+      if (snapshotHost) snapshotHost.innerHTML = `<div class="settings-row compact"><div><strong>Sem conexão</strong><small>Snapshots aparecem quando a API estiver acessível.</small></div></div>`;
+      if (auditHost) auditHost.innerHTML = `<div class="settings-row compact"><div><strong>Sem conexão</strong><small>Auditoria aparece quando a API estiver acessível.</small></div></div>`;
+      return;
+    }
+
+    try {
+      const token = backendToken || "";
+      const snapshots = await P.loadBackendSnapshots?.(token, 6);
+      const items = snapshots?.snapshots || [];
+      if (snapshotHost) {
+        snapshotHost.innerHTML = items.length ? items.map(item => `
+          <div class="settings-row compact" data-search="${P.searchText([item.source, item.createdAt])}">
+            <div><strong>${item.source || "snapshot"}</strong><small>${item.createdAt ? new Date(item.createdAt).toLocaleString("pt-BR") : item.id}</small></div>
+            <span class="status-pill info">histórico</span>
+          </div>
+        `).join("") : `<div class="settings-row compact"><div><strong>Nenhum snapshot</strong><small>O primeiro aparece após salvar estado online.</small></div></div>`;
+      }
+    } catch (error) {
+      if (snapshotHost) snapshotHost.innerHTML = `<div class="settings-row compact"><div><strong>Snapshots protegidos</strong><small>Use Enviar ou configure a chave para listar.</small></div></div>`;
+    }
+
+    try {
+      const token = backendToken || "";
+      const audit = await P.loadBackendAudit?.(token, 6);
+      const events = audit?.events || [];
+      if (auditHost) {
+        auditHost.innerHTML = events.length ? events.map(event => `
+          <div class="settings-row compact" data-search="${P.searchText([event.action, event.entity, event.detail, event.actorName])}">
+            <div><strong>${event.action} • ${event.entity}</strong><small>${event.detail || event.actorName || event.createdAt}</small></div>
+            <span class="status-pill info">log</span>
+          </div>
+        `).join("") : `<div class="settings-row compact"><div><strong>Nenhum evento</strong><small>Logs aparecem após ações administrativas online.</small></div></div>`;
+      }
+    } catch (error) {
+      if (auditHost) auditHost.innerHTML = `<div class="settings-row compact"><div><strong>Auditoria protegida</strong><small>Use a chave administrativa para listar eventos.</small></div></div>`;
+    }
+  }
+
   P.ROLE_ACCESS = ROLE_ACCESS;
   P.currentRole = currentRole;
   P.canAccess = canAccess;
@@ -365,5 +465,6 @@
   P.applyUserAvatar = applyUserAvatar;
   P.bindAdminTools = bindAdminTools;
   P.renderSourceStatus = renderSourceStatus;
+  P.refreshBackendPanel = refreshBackendPanel;
   P.applyPrefs = applyPrefs;
 })();

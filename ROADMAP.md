@@ -502,6 +502,13 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.60
+
+- Admin ganhou bloco de Backend online com verificação de API, carregar estado e enviar estado atual.
+- Admin passou a listar snapshots e auditoria quando a API estiver disponível.
+- Cliente passou a expor `loadBackendHealth` para o painel administrativo.
+- Fluxo protegido usa chave administrativa em sessão quando a API exigir token.
+
 ### 2.0.0-dev.59
 
 - Backend ganhou persistencia de fontes oficiais em arquivo local ou Postgres.
