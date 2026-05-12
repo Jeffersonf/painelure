@@ -41,8 +41,8 @@
       ...(data.schools || []).map(item => ({ page: "schools", title: item.name, type: "Escola", note: `${item.city} | CIE ${item.cie}`, focus: item.name })),
       ...Object.keys(data.networkData || {}).map(name => ({ page: "network", title: name, type: "Rede", note: "Infraestrutura e câmeras", focus: name })),
       ...(data.supervisors || []).map(item => ({ page: "supervision", title: item.name, type: "Supervisão", note: item.email || `${item.schools} escola(s)`, focus: item.name })),
-      ...(data.contacts || []).map(item => ({ page: "contacts", title: item.name, type: item.sector, note: item.role || item.email })),
-      ...(data.calls || []).map(item => ({ page: "calls", title: item.title, type: "Chamado", note: item.school || item.status }))
+      ...(data.contacts || []).map(item => ({ page: "contacts", title: item.name, type: item.sector, note: item.role || item.email, focus: item.name, sector: item.sector })),
+      ...(data.calls || []).map(item => ({ page: "calls", title: item.title, type: "Chamado", note: item.school || item.status, focus: item.title }))
     ].filter(item => !P.canAccess || P.canAccess(item.page));
   }
 
@@ -66,7 +66,7 @@
       .filter(item => searchText([item.title, item.type, item.note]).includes(query))
       .slice(0, 8);
     host.innerHTML = results.length ? results.map(item => `
-      <button type="button" data-global-page="${item.page}" data-global-focus="${item.focus || ""}">
+      <button type="button" data-global-page="${item.page}" data-global-focus="${item.focus || ""}" data-global-sector="${item.sector || ""}">
         <span>${item.type}</span>
         <strong>${item.title}</strong>
         <small>${item.note || ""}</small>
@@ -121,11 +121,14 @@
       if (result) {
         const page = result.dataset.globalPage;
         const focus = result.dataset.globalFocus;
+        const sector = result.dataset.globalSector;
         P.setPage?.(page);
         requestAnimationFrame(() => {
           if (focus && page === "schools") P.focusSchool?.(focus);
           if (focus && page === "network") P.focusNetworkSchool?.(focus);
           if (focus && page === "supervision") P.focusSupervisor?.(focus);
+          if (focus && page === "contacts") P.focusContact?.(focus, sector);
+          if (focus && page === "calls") P.focusCall?.(focus);
         });
         clearSearch();
         return;

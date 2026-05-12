@@ -1150,6 +1150,14 @@ select:focus-visible {
     var(--sf);
 }
 
+.contact-card.focused,
+.detail-widget.focused {
+  border-color: rgba(200, 245, 90, .72);
+  background:
+    linear-gradient(160deg, rgba(200, 245, 90, .08), transparent 58%),
+    var(--sf);
+}
+
 .school-detail {
   margin-top: 16px;
 }

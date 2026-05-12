@@ -271,10 +271,37 @@
     });
   }
 
+  function focusContact(name, sector = "Todos") {
+    P.setPage?.("contacts");
+    requestAnimationFrame(() => {
+      const selectedSector = sector || "Todos";
+      P.$all("[data-sector]").forEach(tab => tab.classList.toggle("active", tab.dataset.sector === selectedSector));
+      renderContacts(P.getAppData().contacts, selectedSector);
+      const target = P.$(`[data-contact-key="${P.searchText([name])}"]`);
+      if (!target) return;
+      P.$all(".contact-card.focused").forEach(card => card.classList.remove("focused"));
+      target.classList.add("focused");
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => target.classList.remove("focused"), 1800);
+    });
+  }
+
+  function focusCall(title) {
+    P.setPage?.("calls");
+    requestAnimationFrame(() => {
+      const target = P.$(`[data-call-key="${P.searchText([title])}"]`);
+      if (!target) return;
+      P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
+      target.classList.add("focused");
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => target.classList.remove("focused"), 1800);
+    });
+  }
+
   function contactCard(contact) {
     const photo = contact.photo || "";
     return `
-      <article class="contact-card" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone])}">
+      <article class="contact-card" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone])}">
         <div class="contact-avatar${photo ? " has-photo" : ""}"${photo ? ` style="background-image:url('${photo}')"` : ""}>${initials(contact.name)}</div>
         <div>
           <small>${contact.role}</small>
@@ -1001,7 +1028,7 @@
     if (summary) summary.textContent = `${visible.length}/${calls.length} chamado(s) visíveis.`;
 
     grid.innerHTML = visible.length ? visible.map(call => `
-      <article class="detail-widget" data-search="${P.searchText([call.title, call.school, call.status, call.note])}">
+      <article class="detail-widget" data-call-key="${P.searchText([call.title])}" data-search="${P.searchText([call.title, call.school, call.status, call.note])}">
         <div>
           <small>${call.school}</small>
           <strong>${call.title}</strong>
@@ -1100,6 +1127,8 @@
   P.focusInventorySchool = focusInventorySchool;
   P.focusSupervisor = focusSupervisor;
   P.focusSupervisorInList = focusSupervisorInList;
+  P.focusContact = focusContact;
+  P.focusCall = focusCall;
   P.renderSchools = renderSchools;
   P.renderNetworkOptions = renderNetworkOptions;
   P.renderInventory = renderInventory;

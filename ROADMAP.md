@@ -502,6 +502,12 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.56
+
+- Busca global passou a focar contatos encontrados, abrindo a categoria correta e destacando o card.
+- Busca global passou a focar chamados encontrados, levando direto ao card do chamado.
+- Cards focados em contatos e chamados agora usam o mesmo destaque discreto dos cards de escola.
+
 ### 2.0.0-dev.55
 
 - Técnicos CTC ganhou filtros por técnico e por escola, mantendo a consulta leve.
