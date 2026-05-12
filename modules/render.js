@@ -125,12 +125,25 @@
         P.renderSupervisors(P.getAppData().supervisors);
       });
     });
+    bindResetButton(P.$("#supervisorFilterReset"), () => {
+      const status = P.$("#supervisorStatusFilter");
+      const sort = P.$("#supervisorSortFilter");
+      if (status) status.value = "all";
+      if (sort) sort.value = "name";
+      P.renderSupervisors(P.getAppData().supervisors);
+    });
   }
 
   function bindSimpleSelect(select, handler) {
     if (!select || select.dataset.bound) return;
     select.dataset.bound = "true";
     select.addEventListener("change", handler);
+  }
+
+  function bindResetButton(button, handler) {
+    if (!button || button.dataset.bound) return;
+    button.dataset.bound = "true";
+    button.addEventListener("click", handler);
   }
 
   function renderSchoolFilters(schools) {
@@ -147,6 +160,14 @@
       if (!select || select.dataset.bound) return;
       select.dataset.bound = "true";
       select.addEventListener("change", applySchoolFilters);
+    });
+    bindResetButton(P.$("#schoolFilterReset"), () => {
+      if (citySelect) citySelect.value = "all";
+      const profile = P.$("#schoolProfileFilter");
+      const inventory = P.$("#schoolInventoryFilter");
+      if (profile) profile.value = "all";
+      if (inventory) inventory.value = "all";
+      applySchoolFilters();
     });
   }
 
@@ -731,6 +752,11 @@
       statusSelect.dataset.bound = "true";
       statusSelect.addEventListener("change", () => renderInventory(P.getAppData()));
     }
+    bindResetButton(P.$("#inventoryFilterReset"), () => {
+      if (filterInput) filterInput.value = "";
+      if (statusSelect) statusSelect.value = "";
+      renderInventory(P.getAppData());
+    });
     const selectedSchool = select?.value || assets[0].school;
     const query = P.normalize(filterInput?.value || "");
     const statusFilter = statusSelect?.value || "";
@@ -1026,6 +1052,11 @@
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
     bindSimpleSelect(ownerFilter, () => renderCtc(P.getAppData().ctcVisits));
     bindSimpleSelect(schoolFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindResetButton(P.$("#ctcFilterReset"), () => {
+      if (ownerFilter) ownerFilter.value = "all";
+      if (schoolFilter) schoolFilter.value = "all";
+      renderCtc(P.getAppData().ctcVisits);
+    });
 
     const selectedOwner = ownerFilter?.value || "all";
     const selectedSchool = schoolFilter?.value || "all";
@@ -1048,7 +1079,7 @@
           <button class="ghost-btn" type="button" data-open-school="${visit.place}">Abrir escola</button>
         </div>
       </article>
-    `).join("") : `<div class="empty-state">Nenhuma visita CTC carregada.</div>`;
+    `).join("") : `<div class="empty-state">${visits.length ? "Nenhuma visita CTC com esses filtros." : "Nenhuma visita CTC carregada."}</div>`;
     grid.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });
@@ -1064,6 +1095,11 @@
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
     bindSimpleSelect(statusFilter, () => renderCalls(P.getAppData().calls));
     bindSimpleSelect(schoolFilter, () => renderCalls(P.getAppData().calls));
+    bindResetButton(P.$("#callFilterReset"), () => {
+      if (statusFilter) statusFilter.value = "all";
+      if (schoolFilter) schoolFilter.value = "all";
+      renderCalls(P.getAppData().calls);
+    });
 
     const selectedStatus = statusFilter?.value || "all";
     const selectedSchool = schoolFilter?.value || "all";
@@ -1087,7 +1123,7 @@
           <button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>
         </div>
       </article>
-    `).join("") : `<div class="empty-state">Nenhum chamado carregado.</div>`;
+    `).join("") : `<div class="empty-state">${calls.length ? "Nenhum chamado com esses filtros." : "Nenhum chamado carregado."}</div>`;
     grid.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });

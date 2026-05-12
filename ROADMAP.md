@@ -502,6 +502,12 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.58
+
+- Filtros de Escolas, Inventário, Supervisão, Técnicos CTC e Chamados ganharam ação rápida de limpar.
+- Estados vazios de CTC e Chamados agora diferenciam base vazia de filtro sem resultado.
+- Controles de filtro continuam usando `selector-panel` e `ghost-btn`, sem criar padrão visual paralelo.
+
 ### 2.0.0-dev.57
 
 - Busca global passou a encontrar itens de inventário, visitas CTC e eventos do calendário.

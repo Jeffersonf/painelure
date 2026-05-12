@@ -1307,6 +1307,11 @@ select:focus-visible {
   margin-bottom: 14px;
 }
 
+.filter-reset {
+  min-height: 44px;
+  align-self: end;
+}
+
 .school-filters p,
 .supervisor-filters p,
 .operation-filters p {
