@@ -63,6 +63,54 @@ Se o frontend ficar no GitHub Pages e a API no Render, `CORS_ORIGIN` precisa apo
 9. Criar os usuarios reais no Admin.
 10. Definir se a publicacao oficial abre pelo GitHub Pages ou pelo proprio Render.
 
+## Checklist De Execucao
+
+### Supabase
+
+- [ ] Criar projeto.
+- [ ] Copiar a connection string PostgreSQL.
+- [ ] Trocar `[YOUR-PASSWORD]` pela senha real.
+- [ ] Executar `db/init.sql` no SQL Editor, se quiser criar schema manualmente.
+- [ ] Guardar a URL em local seguro, nunca no Git.
+
+### Render
+
+- [ ] New > Blueprint.
+- [ ] Selecionar o repositorio `painelure2`.
+- [ ] Confirmar servico `painelure2-api`.
+- [ ] Configurar `DATABASE_URL`.
+- [ ] Configurar `PAINELURE_ADMIN_KEY`.
+- [ ] Configurar `PAINELURE_ADMIN_USER`.
+- [ ] Configurar `PAINELURE_ADMIN_PASSWORD`.
+- [ ] Configurar `CORS_ORIGIN=https://jeffersonf.github.io`.
+- [ ] Aguardar deploy.
+
+### Testes
+
+```powershell
+Invoke-RestMethod https://painelure2-api.onrender.com/api/health
+Invoke-RestMethod https://painelure2-api.onrender.com/health
+```
+
+Resultado esperado:
+
+```json
+{
+  "ok": true,
+  "storage": {
+    "mode": "postgres",
+    "ready": true
+  }
+}
+```
+
+Login inicial:
+
+```powershell
+$body = @{ username = "SEU_USUARIO"; password = "SUA_SENHA" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "https://painelure2-api.onrender.com/api/auth/login" -ContentType "application/json" -Body $body
+```
+
 ## Frontend No GitHub Pages
 
 O arquivo `config.js` aponta automaticamente para:

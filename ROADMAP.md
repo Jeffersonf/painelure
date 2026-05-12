@@ -508,6 +508,7 @@ Não fazer:
 - `render.yaml` passou a declarar `healthCheckPath: /api/health`.
 - Backend ganhou alias `GET /health`, mantendo compatibilidade com o padrao usado no Finanza.
 - Guia de deploy passou a explicar o fluxo GitHub Pages + Render API.
+- Guia de deploy ganhou checklist de execucao Supabase/Render e comandos de health/login.
 
 ### 2.0.0-dev.65
 
