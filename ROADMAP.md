@@ -1100,6 +1100,14 @@ Não fazer:
 - Criada navegação básica entre páginas.
 - Criados tokens visuais iniciais.
 
+### 2.0.0-dev.31
+
+- Criada auditoria de fundamentos em `docs/fundamentos-audit.md`.
+- Comparados perfis, escopo, seguranca backend, paridade de paginas, fontes oficiais, performance e visual entre v1 e v2.
+- Confirmado que a camada visual de escopo por usuario entrou na v2.
+- Registrado risco principal restante: `/api/data` ainda precisa aplicar escopo por usuario no backend.
+- Definida ordem recomendada para as proximas fases: backend scoped data, dashboard por perfil, supervisao rica, detalhe de escola, redes/credenciais, inventario, contatos, calendario, performance e QA visual.
+
 ## Próxima Decisão
 
 A próxima etapa recomendada é fechar a paridade limpa de Conta/Admin antes de crescer novos módulos:
