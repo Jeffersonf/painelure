@@ -122,7 +122,7 @@
       if (!select || select.dataset.bound) return;
       select.dataset.bound = "true";
       select.addEventListener("change", () => {
-        P.renderSupervisors(P.getAppData().supervisors);
+        P.renderSupervisors(P.visibleSupervisors?.() || P.getAppData().supervisors);
       });
     });
     bindResetButton(P.$("#supervisorFilterReset"), () => {
@@ -130,7 +130,7 @@
       const sort = P.$("#supervisorSortFilter");
       if (status) status.value = "all";
       if (sort) sort.value = "name";
-      P.renderSupervisors(P.getAppData().supervisors);
+      P.renderSupervisors(P.visibleSupervisors?.() || P.getAppData().supervisors);
     });
   }
 
@@ -232,6 +232,10 @@
   }
 
   function openSchoolPage(name) {
+    if (P.canViewSchool && !P.canViewSchool(name)) {
+      P.setPage?.("schools");
+      return;
+    }
     const school = findSchool(name);
     if (!school) return;
     const title = P.$("#schoolDetailTitle");
@@ -257,6 +261,10 @@
   }
 
   function focusNetworkSchool(name) {
+    if (P.canViewSchool && !P.canViewSchool(name)) {
+      P.setPage?.("schools");
+      return;
+    }
     P.setPage?.("network");
     requestAnimationFrame(() => {
       const select = P.$("#networkSelect");
@@ -272,6 +280,10 @@
   }
 
   function openSupervisorPage(name) {
+    if (P.canViewSupervisor && !P.canViewSupervisor(name)) {
+      P.setPage?.("supervision");
+      return;
+    }
     const supervisor = (P.getAppData().supervisors || []).find(item => P.normalize(item.name) === P.normalize(name));
     if (!supervisor) return;
     const title = P.$("#supervisorDetailTitle");
@@ -393,6 +405,7 @@
   }
 
   function dashboardRow(item, compact = false) {
+    if (P.canAccess && !P.canAccess(item.page)) return "";
     return `
       <button class="data-row${compact ? " compact" : ""}" type="button" data-jump="${item.page}" data-search="${P.searchText([item.title, item.note, item.label])}">
         <span class="row-icon">${item.icon}</span>
@@ -654,8 +667,8 @@
         <div class="detail-actions">
           ${profile?.email ? `<a class="ghost-btn" href="mailto:${profile.email}">Enviar email</a>` : ""}
           ${profile?.phone ? `<a class="ghost-btn" href="tel:${profile.phone.replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
-          <button class="ghost-btn" type="button" data-open-network="${school.name}" ${network ? "" : "disabled"}>Abrir redes</button>
-          <button class="ghost-btn" type="button" data-open-inventory="${school.name}">Abrir inventário</button>
+          ${!P.canAccess || P.canAccess("network") ? `<button class="ghost-btn" type="button" data-open-network="${school.name}" ${network ? "" : "disabled"}>Abrir redes</button>` : ""}
+          ${!P.canAccess || P.canAccess("inventory") ? `<button class="ghost-btn" type="button" data-open-inventory="${school.name}">Abrir inventário</button>` : ""}
           <button class="ghost-btn" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
         </div>
       </article>
@@ -672,6 +685,10 @@
   }
 
   function focusInventorySchool(name) {
+    if (P.canViewSchool && !P.canViewSchool(name)) {
+      P.setPage?.("schools");
+      return;
+    }
     P.setPage?.("inventory");
     requestAnimationFrame(() => {
       const select = P.$("#inventorySelect");

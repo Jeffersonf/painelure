@@ -20,7 +20,7 @@
   }
 
   function globalItems() {
-    const data = P.getAppData();
+    const data = P.scopedData?.(P.getAppData()) || P.getAppData();
     const pages = [
       "dashboard",
       "schools",

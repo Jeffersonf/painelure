@@ -54,7 +54,7 @@
     const renderer = PAGE_RENDERERS[id];
     if (!renderer) return;
     if (!options.force && renderedPages.has(id)) return;
-    const data = P.getAppData();
+    const data = P.scopedData?.(P.getAppData()) || P.getAppData();
     renderer(data);
     renderedPages.add(id);
   }

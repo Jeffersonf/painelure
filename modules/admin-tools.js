@@ -22,9 +22,17 @@
     return P.onlineUser?.()?.role || localStorage.getItem(ROLE_KEY) || P.displayUser?.().role || "Administrador";
   }
 
+  function accessForRole(role) {
+    const exact = ROLE_ACCESS[role];
+    if (exact) return exact;
+    const target = P.normalize ? P.normalize(role) : String(role || "").toLowerCase().trim();
+    const key = Object.keys(ROLE_ACCESS).find(item => (P.normalize ? P.normalize(item) : item.toLowerCase()) === target);
+    return ROLE_ACCESS[key] || ROLE_ACCESS.Consulta;
+  }
+
   function canAccess(page, role = currentRole()) {
     if (["user", "school-detail", "supervisor-detail"].includes(page)) return true;
-    return (ROLE_ACCESS[role] || ROLE_ACCESS.Consulta).includes(page);
+    return accessForRole(role).includes(page);
   }
 
   function applyRole(role = currentRole()) {
@@ -164,6 +172,7 @@
     applyRole(user.role || "Consulta");
     applyUserAvatar();
     P.renderPage?.("user", { force: true });
+    P.renderApp?.();
   }
 
   async function submitLogin(username, password) {
@@ -178,6 +187,7 @@
       return result.user;
     }
     showPinChange(false);
+    P.renderApp?.();
     return result.user;
   }
 
@@ -223,6 +233,7 @@
         applyUserAvatar();
         P.renderPage?.("user", { force: true });
         showPinChange(Boolean(user.preferences?.forcePinChange));
+        if (!user.preferences?.forcePinChange) P.renderApp?.();
       }
       return user || null;
     } catch (error) {
