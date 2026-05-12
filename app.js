@@ -162,6 +162,7 @@
       }
     });
     P.bindAdminTools();
+    P.restoreBackendSession?.();
     P.bindSearch();
     P.restoreInitialPage() || P.setPage("dashboard");
     loadBackendInBackground();

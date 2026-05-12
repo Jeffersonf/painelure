@@ -105,6 +105,28 @@
     if (meta) meta.textContent = message;
   }
 
+  async function restoreBackendSession() {
+    if (!backendToken || !P.loadBackendUser) return null;
+    try {
+      const payload = await P.loadBackendUser(backendToken);
+      const user = payload?.user;
+      if (user) {
+        P.setOnlineUser?.(user);
+        localStorage.setItem(ROLE_KEY, user.role || "Consulta");
+        applyRole(user.role || "Consulta");
+        applyUserAvatar();
+        P.renderPage?.("user", { force: true });
+      }
+      return user || null;
+    } catch (error) {
+      backendToken = "";
+      sessionStorage.removeItem("painelure2_backend_token");
+      P.clearOnlineUser?.();
+      applyRole(P.activeUser?.()?.role || "Administrador");
+      return null;
+    }
+  }
+
   function bindAdminTools() {
     applySourceOverrides();
     const roleSelect = P.$("#activeRoleSelect");
@@ -640,6 +662,7 @@
   P.toggleAccountMenu = toggleAccountMenu;
   P.applyUserAvatar = applyUserAvatar;
   P.bindAdminTools = bindAdminTools;
+  P.restoreBackendSession = restoreBackendSession;
   P.renderSourceStatus = renderSourceStatus;
   P.renderSourceEditor = renderSourceEditor;
   P.refreshBackendPanel = refreshBackendPanel;

@@ -508,6 +508,7 @@ Não fazer:
 - Login online passa a assumir o perfil ativo e atualizar a navegação por permissões.
 - Logout online volta para o usuário local ativo, mantendo o fallback da v1.
 - Backend ganhou `POST /api/auth/logout` e o cliente passou a encerrar a sessão no servidor.
+- Token salvo na aba agora é validado com `/api/auth/me` ao iniciar, restaurando ou limpando a sessão online.
 - Avatar passa a considerar o usuário online e pode ser persistido no backend quando houver sessão.
 - Corrigida a prioridade da rota `/api/users/me` para permitir atualização do próprio perfil sem permissão administrativa.
 
