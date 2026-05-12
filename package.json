@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/index.js",
     "check": "node scripts/check-js.js",
-    "seed:online": "node scripts/seed-online.js"
+    "seed:online": "node scripts/seed-online.js",
+    "pins:reset-online": "node scripts/reset-online-pins.js"
   },
   "engines": {
     "node": ">=18"

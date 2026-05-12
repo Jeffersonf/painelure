@@ -105,6 +105,73 @@
     if (meta) meta.textContent = message;
   }
 
+  function setAuthenticated(authenticated) {
+    document.body.classList.toggle("is-authenticated", Boolean(authenticated));
+  }
+
+  function showLoginStatus(message) {
+    const status = P.$("#loginStatus");
+    if (status) status.textContent = message;
+  }
+
+  function showPinChange(required = true) {
+    const loginForm = P.$("#loginForm");
+    const pinForm = P.$("#pinChangeForm");
+    if (loginForm) loginForm.hidden = required;
+    if (pinForm) pinForm.hidden = !required;
+    setAuthenticated(!required);
+  }
+
+  function activateOnlineUser(token, user) {
+    backendToken = token;
+    sessionStorage.setItem("painelure2_backend_token", backendToken);
+    P.setOnlineUser?.(user);
+    localStorage.setItem(ROLE_KEY, user.role || "Consulta");
+    applyRole(user.role || "Consulta");
+    applyUserAvatar();
+    P.renderPage?.("user", { force: true });
+  }
+
+  async function submitLogin(username, password) {
+    if (!username || !password) throw new Error("Informe usuário e PIN.");
+    const result = await P.loginBackend?.({ username, password });
+    if (!result?.token || !result?.user) throw new Error("Login não retornou usuário.");
+    activateOnlineUser(result.token, result.user);
+    if (result.user.preferences?.forcePinChange) {
+      showPinChange(true);
+      showLoginStatus("Troque o PIN inicial para continuar.");
+      return result.user;
+    }
+    showPinChange(false);
+    return result.user;
+  }
+
+  async function submitPinChange() {
+    const pin = P.$("#newPinInput")?.value || "";
+    const confirm = P.$("#confirmPinInput")?.value || "";
+    if (pin.length < 4) throw new Error("Use um PIN com pelo menos 4 dígitos.");
+    if (pin === "1234") throw new Error("Escolha um PIN diferente do inicial.");
+    if (pin !== confirm) throw new Error("A confirmação do PIN não confere.");
+    const user = P.onlineUser?.();
+    if (!backendToken || !user) throw new Error("Sessão online não encontrada.");
+    const preferences = {
+      ...(user.preferences || {}),
+      forcePinChange: false,
+      pinChangedAt: new Date().toISOString()
+    };
+    const payload = await P.updateBackendUser?.(backendToken, { password: pin, preferences });
+    const nextUser = payload?.user || { ...user, preferences };
+    P.setOnlineUser?.(nextUser);
+    P.$("#newPinInput").value = "";
+    P.$("#confirmPinInput").value = "";
+    showPinChange(false);
+    showLoginStatus("PIN atualizado.");
+    applyRole(nextUser.role || "Consulta");
+    applyUserAvatar();
+    P.renderApp?.();
+    return nextUser;
+  }
+
   async function restoreBackendSession() {
     if (!backendToken || !P.loadBackendUser) return null;
     try {
@@ -116,6 +183,7 @@
         applyRole(user.role || "Consulta");
         applyUserAvatar();
         P.renderPage?.("user", { force: true });
+        showPinChange(Boolean(user.preferences?.forcePinChange));
       }
       return user || null;
     } catch (error) {
@@ -123,6 +191,7 @@
       sessionStorage.removeItem("painelure2_backend_token");
       P.clearOnlineUser?.();
       applyRole(P.activeUser?.()?.role || "Administrador");
+      setAuthenticated(false);
       return null;
     }
   }
@@ -164,24 +233,47 @@
       });
     }
 
+    P.$("#loginSubmitBtn")?.addEventListener("click", async () => {
+      try {
+        const username = P.$("#loginUserInput")?.value.trim();
+        const pin = P.$("#loginPinInput")?.value || "";
+        await submitLogin(username, pin);
+        const pinInput = P.$("#loginPinInput");
+        if (pinInput) pinInput.value = "";
+      } catch (error) {
+        showLoginStatus(`Falha no login: ${error.message}`);
+      }
+    });
+
+    ["#loginUserInput", "#loginPinInput"].forEach(selector => {
+      P.$(selector)?.addEventListener("keydown", event => {
+        if (event.key === "Enter") P.$("#loginSubmitBtn")?.click();
+      });
+    });
+
+    P.$("#pinChangeSubmitBtn")?.addEventListener("click", async () => {
+      try {
+        await submitPinChange();
+      } catch (error) {
+        showLoginStatus(`Falha ao trocar PIN: ${error.message}`);
+      }
+    });
+
+    ["#newPinInput", "#confirmPinInput"].forEach(selector => {
+      P.$(selector)?.addEventListener("keydown", event => {
+        if (event.key === "Enter") P.$("#pinChangeSubmitBtn")?.click();
+      });
+    });
+
     P.$("#onlineLoginBtn")?.addEventListener("click", async () => {
       const username = P.$("#onlineLoginInput")?.value.trim();
       const password = P.$("#onlinePasswordInput")?.value || "";
       const summary = P.$("#onlineSessionSummary");
       try {
-        if (!username || !password) throw new Error("Informe usuário e senha.");
-        const result = await P.loginBackend?.({ username, password });
-        if (!result?.token || !result?.user) throw new Error("Login não retornou usuário.");
-        backendToken = result.token;
-        sessionStorage.setItem("painelure2_backend_token", backendToken);
-        P.setOnlineUser?.(result.user);
-        localStorage.setItem(ROLE_KEY, result.user.role || "Consulta");
+        const user = await submitLogin(username, password);
         const passwordInput = P.$("#onlinePasswordInput");
         if (passwordInput) passwordInput.value = "";
-        applyRole(result.user.role || "Consulta");
-        applyUserAvatar();
-        P.renderPage?.("user", { force: true });
-        if (summary) summary.textContent = `${result.user.username || result.user.name} conectado ao backend.`;
+        if (summary) summary.textContent = `${user.username || user.name} conectado ao backend.`;
       } catch (error) {
         if (summary) summary.textContent = `Falha no login online: ${error.message}`;
       }
@@ -196,6 +288,9 @@
       applyRole(localUser?.role || "Administrador");
       applyUserAvatar();
       P.renderPage?.("user", { force: true });
+      setAuthenticated(false);
+      if (P.$("#loginForm")) P.$("#loginForm").hidden = false;
+      if (P.$("#pinChangeForm")) P.$("#pinChangeForm").hidden = true;
     });
 
     P.$("#restoreAdminBtn")?.addEventListener("click", async () => {

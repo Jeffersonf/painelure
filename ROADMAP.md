@@ -502,6 +502,14 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.68
+
+- Criada tela de login antes do painel, no fluxo visual inspirado no Finanza.
+- Login online passa a usar usuário + PIN.
+- Usuários com `forcePinChange=true` ficam bloqueados na troca de PIN antes de acessar o painel.
+- Seed online passou a criar usuários novos com PIN inicial `1234` e troca obrigatória.
+- Criado script `npm run pins:reset-online` para resetar todos os usuários para PIN `1234`.
+
 ### 2.0.0-dev.67
 
 - Criado script `npm run seed:online` para popular o backend Render/Supabase com dados da v2.

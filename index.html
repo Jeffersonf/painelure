@@ -17,6 +17,39 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <span class="brand-word login-brand"><span>Painel</span><strong>URE</strong></span>
+      <div id="loginForm">
+        <h1>Entrar</h1>
+        <p>Acesse com seu usuário e PIN inicial.</p>
+        <label>
+          <span>Usuário</span>
+          <input id="loginUserInput" type="text" autocomplete="username" placeholder="seu.usuario">
+        </label>
+        <label>
+          <span>PIN</span>
+          <input id="loginPinInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="1234">
+        </label>
+        <button class="primary-btn" type="button" id="loginSubmitBtn">Entrar</button>
+      </div>
+      <div id="pinChangeForm" hidden>
+        <h1>Novo PIN</h1>
+        <p>Troque o PIN inicial para continuar.</p>
+        <label>
+          <span>Novo PIN</span>
+          <input id="newPinInput" type="password" inputmode="numeric" autocomplete="new-password" placeholder="mínimo 4 dígitos">
+        </label>
+        <label>
+          <span>Confirmar PIN</span>
+          <input id="confirmPinInput" type="password" inputmode="numeric" autocomplete="new-password" placeholder="repita o PIN">
+        </label>
+        <button class="primary-btn" type="button" id="pinChangeSubmitBtn">Salvar PIN</button>
+      </div>
+      <small id="loginStatus">PIN inicial padrão: 1234</small>
+    </div>
+  </section>
+
   <aside class="sidebar">
     <div class="brand">
       <span class="brand-word"><span>Painel</span><strong>URE</strong></span>

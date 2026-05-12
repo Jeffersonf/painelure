@@ -135,9 +135,20 @@ O script:
 - cria ou atualiza usuarios online a partir de `data/users.js`;
 - envia o estado atual da v2 para `/api/data`;
 - salva fontes oficiais em `/api/sources`;
-- grava senhas iniciais dos usuarios criados em `server/storage/online-users-seed.json`.
+- usa PIN inicial `1234` para usuarios criados;
+- marca `forcePinChange=true`, exigindo troca de PIN no primeiro acesso;
+- grava os usuarios criados em `server/storage/online-users-seed.json`.
 
 `server/storage/*.json` fica fora do Git.
+
+Para resetar todos os usuarios online para o PIN inicial `1234` e exigir nova troca:
+
+```powershell
+$env:P2_API_URL="https://painelure2-api.onrender.com"
+$env:P2_ADMIN_USER="jefferson"
+$env:P2_ADMIN_PASSWORD="SENHA_ADMIN_ATUAL"
+npm run pins:reset-online
+```
 
 ## Frontend No GitHub Pages
 

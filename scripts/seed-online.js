@@ -1,6 +1,5 @@
 "use strict";
 
-const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
@@ -80,9 +79,8 @@ async function login() {
   return payload.token;
 }
 
-function passwordFor(user) {
-  const base = `${user.username || user.login || user.name}:${Date.now()}:${crypto.randomUUID()}`;
-  return crypto.createHash("sha256").update(base).digest("base64url").slice(0, 14);
+function initialPin() {
+  return env("P2_INITIAL_PIN", "1234");
 }
 
 async function seedUsers(token, users) {
@@ -111,7 +109,7 @@ async function seedUsers(token, users) {
       continue;
     }
 
-    const password = passwordFor(seed);
+    const password = initialPin();
     const payload = await request("/api/users", {
       method: "POST",
       headers,
@@ -120,7 +118,12 @@ async function seedUsers(token, users) {
         password,
         name: seed.name,
         role: seed.role,
-        contactId: seed.contactId || ""
+        contactId: seed.contactId || "",
+        preferences: {
+          ...(seed.preferences || {}),
+          forcePinChange: true,
+          initialPinIssuedAt: new Date().toISOString()
+        }
       })
     });
     created += 1;
