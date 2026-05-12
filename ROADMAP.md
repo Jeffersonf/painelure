@@ -502,6 +502,13 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.66
+
+- Frontend ganhou `config.js` para apontar automaticamente GitHub Pages para `https://painelure2-api.onrender.com`.
+- `render.yaml` passou a declarar `healthCheckPath: /api/health`.
+- Backend ganhou alias `GET /health`, mantendo compatibilidade com o padrao usado no Finanza.
+- Guia de deploy passou a explicar o fluxo GitHub Pages + Render API.
+
 ### 2.0.0-dev.65
 
 - Conferida a arquitetura do Finanza: API Node no Render com PostgreSQL externo, principalmente Supabase.

@@ -63,6 +63,24 @@ Se o frontend ficar no GitHub Pages e a API no Render, `CORS_ORIGIN` precisa apo
 9. Criar os usuarios reais no Admin.
 10. Definir se a publicacao oficial abre pelo GitHub Pages ou pelo proprio Render.
 
+## Frontend No GitHub Pages
+
+O arquivo `config.js` aponta automaticamente para:
+
+```text
+https://painelure2-api.onrender.com
+```
+
+quando o painel estiver rodando em `github.io`.
+
+Em desenvolvimento local, `config.js` deixa `PAINELURE_API_URL` vazio. Assim o frontend usa a API do mesmo servidor local (`./api/...`) quando voce roda:
+
+```powershell
+npm start
+```
+
+Se o nome do servico no Render mudar, atualize `config.js`.
+
 ## Plano De Migracao
 
 Fase 1:

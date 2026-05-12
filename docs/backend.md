@@ -50,6 +50,7 @@ Use `CORS_ORIGIN` quando o frontend estiver no GitHub Pages e o backend em outro
 ## Endpoints
 
 - `GET /api/health`
+- `GET /health`
 - `GET /api/data`
 - `PUT /api/data`
 - `POST /api/import/:tipo`

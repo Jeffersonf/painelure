@@ -784,7 +784,7 @@ function serveStatic(req, res, urlPath) {
 }
 
 async function handleApi(req, res, pathname) {
-  if (req.method === "GET" && pathname === "/api/health") {
+  if (req.method === "GET" && (pathname === "/api/health" || pathname === "/health")) {
     send(res, 200, {
       ok: true,
       name: "PainelURE API",
@@ -942,11 +942,12 @@ async function handleApi(req, res, pathname) {
 
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  if (req.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
+  const isApiRoute = url.pathname.startsWith("/api/") || url.pathname === "/health";
+  if (req.method === "OPTIONS" && isApiRoute) {
     send(res, 204, "");
     return;
   }
-  if (url.pathname.startsWith("/api/")) {
+  if (isApiRoute) {
     handleApi(req, res, url.pathname).catch(error => {
       send(res, 500, { ok: false, error: error.message });
     });
