@@ -1732,7 +1732,8 @@ select:focus-visible {
 }
 
 .user-create-actions input,
-.user-create-actions select {
+.user-create-actions select,
+.backend-user-actions select {
   min-height: 38px;
   min-width: 150px;
   border: 1px solid var(--bd);

@@ -291,6 +291,27 @@
       }
     });
 
+    const backendUserList = P.$("#backendUserList");
+    if (backendUserList && !backendUserList.dataset.bound) {
+      backendUserList.dataset.bound = "true";
+      backendUserList.addEventListener("click", async event => {
+        const button = event.target.closest("[data-save-backend-user]");
+        if (!button) return;
+        const row = button.closest("[data-user-id]");
+        if (!row) return;
+        try {
+          const token = await ensureBackendToken();
+          const role = row.querySelector("[data-user-role]")?.value || "Consulta";
+          const contactId = row.querySelector("[data-user-contact]")?.value || "";
+          await P.updateBackendUserById?.(token, row.dataset.userId, { role, contactId });
+          setAdminMeta("Usuário online atualizado.");
+          refreshBackendPanel();
+        } catch (error) {
+          setAdminMeta(`Falha ao atualizar usuário online: ${error.message}`);
+        }
+      });
+    }
+
     P.$("#savePrefsBtn")?.addEventListener("click", () => {
       savePrefs(readPrefsFromControls());
       const payload = P.saveAppData();
@@ -551,11 +572,22 @@
       const token = backendToken || "";
       const payload = await P.loadBackendUsers?.(token);
       const users = payload?.users || [];
+      const roleOptions = Object.keys(ROLE_ACCESS);
+      const contacts = P.getAppData().contacts || [];
       if (userHost) {
         userHost.innerHTML = users.length ? users.map(user => `
-          <div class="settings-row compact" data-search="${P.searchText([user.name, user.username, user.role])}">
+          <div class="settings-row compact" data-user-id="${user.id}" data-search="${P.searchText([user.name, user.username, user.role])}">
             <div><strong>${user.name}</strong><small>${user.username} • ${user.role}${user.contactId ? ` • contato ${user.contactId}` : ""}</small></div>
-            <span class="status-pill info">online</span>
+            <div class="settings-actions backend-user-actions">
+              <select data-user-role>
+                ${roleOptions.map(role => `<option value="${role}"${role === user.role ? " selected" : ""}>${role}</option>`).join("")}
+              </select>
+              <select data-user-contact>
+                <option value="">Sem contato</option>
+                ${contacts.map(contact => `<option value="${contact.id}"${contact.id === user.contactId ? " selected" : ""}>${contact.name}</option>`).join("")}
+              </select>
+              <button class="ghost-btn" type="button" data-save-backend-user>Salvar</button>
+            </div>
           </div>
         `).join("") : `<div class="settings-row compact"><div><strong>Nenhum usuário online</strong><small>Crie o primeiro usuário acima ou configure bootstrap no .env.</small></div></div>`;
       }

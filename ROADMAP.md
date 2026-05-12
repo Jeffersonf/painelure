@@ -286,7 +286,7 @@ Objetivo: transformar a página de escolas em uma área de consulta forte.
 
 Entregas:
 
-- Lista de escolas com busca e filtros. Busca concluída; filtros pendentes.
+- Lista de escolas com busca e filtros por município, ficha e inventário. Concluído.
 - Card de escola no padrão Finanza. Iniciado.
 - Página/detalhe da escola. Iniciado.
 - Inventário por escola. Iniciado.
@@ -501,6 +501,12 @@ Não fazer:
 - Misturar importação, normalização e renderização na mesma função grande.
 
 ## Changelog
+
+### 2.0.0-dev.63
+
+- Admin online passou a permitir editar função e vínculo de contato dos usuários cadastrados no backend.
+- A listagem de usuários online reutiliza os selects compactos do painel, sem criar componente visual paralelo.
+- Roadmap corrigiu a Fase 3 para registrar os filtros de escolas como concluídos.
 
 ### 2.0.0-dev.62
 
