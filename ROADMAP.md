@@ -502,6 +502,14 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.69
+
+- Backend passou a registrar `lastLoginAt` nas preferências do usuário a cada login.
+- Admin de usuários online mostra status de PIN inicial/trocado e último login.
+- Admin ganhou reset individual de PIN para `1234` com troca obrigatória.
+- Conta bloqueia troca local de perfil para usuários online não administradores.
+- Tela de login ganhou orientação de recuperação de PIN.
+
 ### 2.0.0-dev.68
 
 - Criada tela de login antes do painel, no fluxo visual inspirado no Finanza.

@@ -481,6 +481,12 @@
     if (logoutButton) logoutButton.hidden = !online;
     const userRoleSelect = P.$("#userRoleSelect");
     if (userRoleSelect) userRoleSelect.value = role;
+    const localControlsLocked = Boolean(online && role !== "Administrador");
+    [P.$("#activeUserSelect"), userRoleSelect, P.$("#restoreAdminBtn")].forEach(control => {
+      if (!control) return;
+      control.disabled = localControlsLocked;
+      control.hidden = localControlsLocked;
+    });
 
     const list = P.$("#userAccessList");
     if (list) {

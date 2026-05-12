@@ -801,8 +801,13 @@ async function handleApi(req, res, pathname) {
     if (username && password) {
       const user = await findUserByUsername(username);
       if (user && verifyPassword(password, user.password_hash)) {
-        const token = createSession(user);
-        send(res, 200, { ok: true, token, user: publicUser(user) });
+        const preferences = {
+          ...(user.preferences || {}),
+          lastLoginAt: new Date().toISOString()
+        };
+        const updatedUser = await updateUser(user.id, { preferences });
+        const token = createSession({ ...user, preferences });
+        send(res, 200, { ok: true, token, user: updatedUser });
       } else {
         send(res, 401, { ok: false, error: "Usuario ou senha invalidos." });
       }

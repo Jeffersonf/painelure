@@ -461,6 +461,29 @@
     if (backendUserList && !backendUserList.dataset.bound) {
       backendUserList.dataset.bound = "true";
       backendUserList.addEventListener("click", async event => {
+        const resetButton = event.target.closest("[data-reset-backend-pin]");
+        if (resetButton) {
+          const row = resetButton.closest("[data-user-id]");
+          const user = (P.backendUsersCache || []).find(item => item.id === row?.dataset.userId);
+          if (!row || !user) return;
+          try {
+            const token = await ensureBackendToken();
+            await P.updateBackendUserById?.(token, row.dataset.userId, {
+              password: "1234",
+              preferences: {
+                ...(user.preferences || {}),
+                forcePinChange: true,
+                initialPinIssuedAt: new Date().toISOString()
+              }
+            });
+            setAdminMeta(`PIN de ${user.name} resetado para 1234.`);
+            refreshBackendPanel();
+          } catch (error) {
+            setAdminMeta(`Falha ao resetar PIN: ${error.message}`);
+          }
+          return;
+        }
+
         const button = event.target.closest("[data-save-backend-user]");
         if (!button) return;
         const row = button.closest("[data-user-id]");
@@ -738,13 +761,18 @@
       const token = backendToken || "";
       const payload = await P.loadBackendUsers?.(token);
       const users = payload?.users || [];
+      P.backendUsersCache = users;
       const roleOptions = Object.keys(ROLE_ACCESS);
       const contacts = P.getAppData().contacts || [];
       if (userHost) {
-        userHost.innerHTML = users.length ? users.map(user => `
-          <div class="settings-row compact" data-user-id="${user.id}" data-search="${P.searchText([user.name, user.username, user.role])}">
-            <div><strong>${user.name}</strong><small>${user.username} • ${user.role}${user.contactId ? ` • contato ${user.contactId}` : ""}</small></div>
+        userHost.innerHTML = users.length ? users.map(user => {
+          const pinPending = Boolean(user.preferences?.forcePinChange);
+          const lastLogin = user.preferences?.lastLoginAt ? new Date(user.preferences.lastLoginAt).toLocaleString("pt-BR") : "sem login registrado";
+          return `
+          <div class="settings-row compact backend-user-row" data-user-id="${user.id}" data-search="${P.searchText([user.name, user.username, user.role, lastLogin])}">
+            <div><strong>${user.name}</strong><small>${user.username} • ${user.role} • ${lastLogin}</small></div>
             <div class="settings-actions backend-user-actions">
+              <span class="status-pill ${pinPending ? "warn" : "ok"}">${pinPending ? "PIN inicial" : "PIN alterado"}</span>
               <select data-user-role>
                 ${roleOptions.map(role => `<option value="${role}"${role === user.role ? " selected" : ""}>${role}</option>`).join("")}
               </select>
@@ -752,10 +780,12 @@
                 <option value="">Sem contato</option>
                 ${contacts.map(contact => `<option value="${contact.id}"${contact.id === user.contactId ? " selected" : ""}>${contact.name}</option>`).join("")}
               </select>
+              <button class="ghost-btn" type="button" data-reset-backend-pin>PIN 1234</button>
               <button class="ghost-btn" type="button" data-save-backend-user>Salvar</button>
             </div>
           </div>
-        `).join("") : `<div class="settings-row compact"><div><strong>Nenhum usuário online</strong><small>Crie o primeiro usuário acima ou configure bootstrap no .env.</small></div></div>`;
+        `;
+        }).join("") : `<div class="settings-row compact"><div><strong>Nenhum usuário online</strong><small>Crie o primeiro usuário acima ou configure bootstrap no .env.</small></div></div>`;
       }
     } catch (error) {
       if (userHost) userHost.innerHTML = `<div class="settings-row compact"><div><strong>Usuários protegidos</strong><small>Use a chave administrativa para listar usuários.</small></div></div>`;
