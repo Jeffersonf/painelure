@@ -106,6 +106,7 @@
   }
 
   function setAuthenticated(authenticated) {
+    document.documentElement.classList.remove("auth-pending");
     document.body.classList.toggle("is-authenticated", Boolean(authenticated));
   }
 
@@ -114,12 +115,24 @@
     if (status) status.textContent = message;
   }
 
+  function friendlyAuthError(error) {
+    const message = String(error?.message || error || "");
+    if (/HTTP 401|invalido|invalid/i.test(message)) return "Nome ou PIN incorretos.";
+    if (/HTTP 405|method/i.test(message)) return "API nao encontrada nesta pagina. Atualize e tente novamente.";
+    if (/aborted|network|failed to fetch/i.test(message)) return "Nao foi possivel conectar ao servidor.";
+    return message || "Nao foi possivel entrar.";
+  }
+
   function showPinChange(required = true) {
     const loginForm = P.$("#loginForm");
     const pinForm = P.$("#pinChangeForm");
     if (loginForm) loginForm.hidden = required;
     if (pinForm) pinForm.hidden = !required;
     setAuthenticated(!required);
+    window.setTimeout(() => {
+      const target = required ? P.$("#newPinInput") : P.$("#loginUserInput");
+      target?.focus?.();
+    }, 0);
   }
 
   async function logoutOnline() {
@@ -134,7 +147,12 @@
     setAuthenticated(false);
     if (P.$("#loginForm")) P.$("#loginForm").hidden = false;
     if (P.$("#pinChangeForm")) P.$("#pinChangeForm").hidden = true;
-    showLoginStatus("Sessão encerrada.");
+    showLoginStatus("Sessao encerrada.");
+    const userInput = P.$("#loginUserInput");
+    const pinInput = P.$("#loginPinInput");
+    if (userInput) userInput.value = "";
+    if (pinInput) pinInput.value = "";
+    window.setTimeout(() => userInput?.focus?.(), 0);
     P.closeAccountMenu?.();
   }
 
@@ -149,9 +167,10 @@
   }
 
   async function submitLogin(username, password) {
-    if (!username || !password) throw new Error("Informe usuário e PIN.");
+    showLoginStatus("");
+    if (!username || !password) throw new Error("Informe nome e PIN.");
     const result = await P.loginBackend?.({ username, password });
-    if (!result?.token || !result?.user) throw new Error("Login não retornou usuário.");
+    if (!result?.token || !result?.user) throw new Error("Login nao retornou usuario.");
     activateOnlineUser(result.token, result.user);
     if (result.user.preferences?.forcePinChange) {
       showPinChange(true);
@@ -165,11 +184,12 @@
   async function submitPinChange() {
     const pin = P.$("#newPinInput")?.value || "";
     const confirm = P.$("#confirmPinInput")?.value || "";
-    if (pin.length < 4) throw new Error("Use um PIN com pelo menos 4 dígitos.");
+    showLoginStatus("");
+    if (pin.length < 4) throw new Error("Use um PIN com pelo menos 4 digitos.");
     if (pin === "1234") throw new Error("Escolha um PIN diferente do inicial.");
-    if (pin !== confirm) throw new Error("A confirmação do PIN não confere.");
+    if (pin !== confirm) throw new Error("Os PINs nao conferem.");
     const user = P.onlineUser?.();
-    if (!backendToken || !user) throw new Error("Sessão online não encontrada.");
+    if (!backendToken || !user) throw new Error("Sessao online nao encontrada.");
     const preferences = {
       ...(user.preferences || {}),
       forcePinChange: false,
@@ -181,7 +201,7 @@
     P.$("#newPinInput").value = "";
     P.$("#confirmPinInput").value = "";
     showPinChange(false);
-    showLoginStatus("PIN atualizado.");
+    showLoginStatus("");
     applyRole(nextUser.role || "Consulta");
     applyUserAvatar();
     P.renderApp?.();
@@ -189,7 +209,10 @@
   }
 
   async function restoreBackendSession() {
-    if (!backendToken || !P.loadBackendUser) return null;
+    if (!backendToken || !P.loadBackendUser) {
+      document.documentElement.classList.remove("auth-pending");
+      return null;
+    }
     try {
       const payload = await P.loadBackendUser(backendToken);
       const user = payload?.user;
@@ -209,6 +232,8 @@
       applyRole(P.activeUser?.()?.role || "Administrador");
       setAuthenticated(false);
       return null;
+    } finally {
+      document.documentElement.classList.remove("auth-pending");
     }
   }
 
@@ -257,7 +282,7 @@
         const pinInput = P.$("#loginPinInput");
         if (pinInput) pinInput.value = "";
       } catch (error) {
-        showLoginStatus(`Falha no login: ${error.message}`);
+        showLoginStatus(friendlyAuthError(error));
       }
     });
 
@@ -271,7 +296,7 @@
       try {
         await submitPinChange();
       } catch (error) {
-        showLoginStatus(`Falha ao trocar PIN: ${error.message}`);
+        showLoginStatus(friendlyAuthError(error));
       }
     });
 

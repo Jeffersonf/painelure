@@ -10,6 +10,9 @@
       if (localStorage.getItem("painelure2_theme") === "light") {
         document.documentElement.dataset.theme = "light";
       }
+      if (sessionStorage.getItem("painelure2_backend_token")) {
+        document.documentElement.classList.add("auth-pending");
+      }
     } catch (error) {}
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>

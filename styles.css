@@ -138,6 +138,10 @@ body.is-authenticated .login-screen {
   display: none;
 }
 
+html.auth-pending .login-screen {
+  visibility: hidden;
+}
+
 body::before {
   content: "";
   position: fixed;
