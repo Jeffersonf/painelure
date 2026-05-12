@@ -22,6 +22,10 @@ Render fica fora do caminho principal por enquanto, porque o plano gratuito pode
 - Usuarios, estado do app e snapshots ja possuem estrutura inicial.
 - Usuarios agora possuem `contact_id` para vincular perfil de acesso a uma pessoa da base de Contatos.
 - Avatar/foto deve ser tratado como dado do contato vinculado: quando o usuario troca a foto no perfil, a foto do contato tambem muda.
+- Fontes oficiais podem ser persistidas via `official_sources`.
+- Importacoes ficam registradas em `import_runs`.
+- Operacoes administrativas ficam preparadas em `audit_events`.
+- Endpoints de snapshots, auditoria e fontes ja estao expostos pela API Node.
 
 ## Quando retomarmos
 
@@ -32,7 +36,8 @@ Render fica fora do caminho principal por enquanto, porque o plano gratuito pode
    - API propria mantendo `pg`.
 4. Definir Storage para avatar.
 5. Migrar Conta/Admin para usuario online.
-6. So depois publicar como fluxo oficial.
+6. Ligar o painel Admin aos endpoints `/api/sources`, `/api/snapshots` e `/api/audit`.
+7. So depois publicar como fluxo oficial.
 
 ## Regra
 

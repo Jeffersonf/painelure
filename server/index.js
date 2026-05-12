@@ -8,8 +8,26 @@ const { Pool } = require("pg");
 const { URL } = require("url");
 
 const ROOT = path.resolve(__dirname, "..");
+
+function loadEnvFile() {
+  const file = path.join(ROOT, ".env");
+  if (!fs.existsSync(file)) return;
+  fs.readFileSync(file, "utf8").split(/\r?\n/).forEach(line => {
+    const clean = line.trim();
+    if (!clean || clean.startsWith("#")) return;
+    const index = clean.indexOf("=");
+    if (index === -1) return;
+    const key = clean.slice(0, index).trim();
+    const value = clean.slice(index + 1).trim().replace(/^["']|["']$/g, "");
+    if (key && process.env[key] === undefined) process.env[key] = value;
+  });
+}
+
+loadEnvFile();
+
 const STORAGE_DIR = path.join(__dirname, "storage");
 const DATA_FILE = path.join(STORAGE_DIR, "app-data.json");
+const SOURCES_FILE = path.join(STORAGE_DIR, "sources.json");
 const USERS_FILE = path.join(STORAGE_DIR, "users.json");
 const PORT = Number(process.env.PORT || 4173);
 const ADMIN_KEY = process.env.PAINELURE_ADMIN_KEY || "";
@@ -97,6 +115,10 @@ function currentUsers() {
   return readJsonFile(USERS_FILE, []);
 }
 
+function currentSources() {
+  return readJsonFile(SOURCES_FILE, {});
+}
+
 function buildStore(appData, source = "api") {
   return {
     version: 1,
@@ -151,6 +173,27 @@ async function initDatabase() {
   `);
   await pool.query("alter table users add column if not exists contact_id text");
   await pool.query(`
+    create table if not exists official_sources (
+      key text primary key,
+      label text not null,
+      type text not null default 'csv',
+      url text not null default '',
+      status text not null default 'pending',
+      metadata jsonb not null default '{}'::jsonb,
+      updated_at timestamptz not null default now()
+    )
+  `);
+  await pool.query(`
+    create table if not exists import_runs (
+      id text primary key,
+      source_key text,
+      rows_count int not null default 0,
+      status text not null default 'ok',
+      detail text default '',
+      created_at timestamptz not null default now()
+    )
+  `);
+  await pool.query(`
     create table if not exists audit_events (
       id text primary key,
       user_id text references users(id) on delete set null,
@@ -166,6 +209,7 @@ async function initDatabase() {
   `);
   await pool.query("create index if not exists idx_snapshots_created_at on app_snapshots(created_at desc)");
   await pool.query("create index if not exists idx_users_role on users(role)");
+  await pool.query("create index if not exists idx_import_runs_created_at on import_runs(created_at desc)");
   await pool.query("create index if not exists idx_audit_user_time on audit_events(user_id, created_at desc)");
   await pool.query("create index if not exists idx_audit_entity on audit_events(entity, entity_id)");
   dbReady = true;
@@ -197,6 +241,139 @@ async function saveStore(appData, source = "api") {
     [crypto.randomUUID(), payload, source]
   );
   return payload;
+}
+
+async function listSnapshots(limit = 20) {
+  if (pool && dbReady) {
+    const result = await pool.query(
+      "select id, source, created_at from app_snapshots order by created_at desc limit $1",
+      [Math.max(1, Math.min(Number(limit) || 20, 100))]
+    );
+    return result.rows.map(row => ({
+      id: row.id,
+      source: row.source,
+      createdAt: row.created_at.toISOString()
+    }));
+  }
+  const store = currentStore();
+  return store ? [{ id: "local-current", source: store.source || "local", createdAt: store.updatedAt }] : [];
+}
+
+async function listOfficialSources() {
+  if (pool && dbReady) {
+    const result = await pool.query("select key, label, type, url, status, metadata, updated_at from official_sources order by key");
+    return result.rows.map(row => ({
+      key: row.key,
+      label: row.label,
+      type: row.type,
+      url: row.url,
+      status: row.status,
+      metadata: row.metadata || {},
+      updatedAt: row.updated_at.toISOString()
+    }));
+  }
+  return Object.entries(currentSources()).map(([key, source]) => ({ key, ...source }));
+}
+
+async function saveOfficialSources(sources) {
+  const entries = Object.entries(sources || {}).map(([key, source]) => ({
+    key,
+    label: String(source.label || key),
+    type: String(source.type || "csv"),
+    url: String(source.url || ""),
+    status: String(source.status || (source.url ? "configured" : "pending")),
+    metadata: source.metadata || {}
+  }));
+  if (pool && dbReady) {
+    const client = await pool.connect();
+    try {
+      await client.query("begin");
+      for (const source of entries) {
+        await client.query(
+          `
+            insert into official_sources (key, label, type, url, status, metadata, updated_at)
+            values ($1, $2, $3, $4, $5, $6, now())
+            on conflict (key)
+            do update set label = excluded.label, type = excluded.type, url = excluded.url,
+              status = excluded.status, metadata = excluded.metadata, updated_at = now()
+          `,
+          [source.key, source.label, source.type, source.url, source.status, source.metadata]
+        );
+      }
+      await client.query("commit");
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    } finally {
+      client.release();
+    }
+  } else {
+    writeJsonFile(SOURCES_FILE, entries.reduce((acc, source) => {
+      acc[source.key] = {
+        label: source.label,
+        type: source.type,
+        url: source.url,
+        status: source.status,
+        metadata: source.metadata
+      };
+      return acc;
+    }, {}));
+  }
+  return listOfficialSources();
+}
+
+async function recordImportRun(sourceKey, rowsCount, status = "ok", detail = "") {
+  if (pool && dbReady) {
+    await pool.query(
+      "insert into import_runs (id, source_key, rows_count, status, detail) values ($1, $2, $3, $4, $5)",
+      [crypto.randomUUID(), sourceKey, rowsCount, status, detail]
+    );
+  }
+}
+
+async function audit(req, action, entity, entityId = "", detail = "", metadata = {}) {
+  const session = currentSession(req);
+  const user = session?.userId ? await findUserById(session.userId) : null;
+  const event = {
+    id: crypto.randomUUID(),
+    user_id: user?.id || null,
+    actor_name: user?.name || (session ? "Sessao admin" : ""),
+    actor_role: user?.role || session?.role || "",
+    action,
+    entity,
+    entity_id: entityId,
+    detail,
+    metadata
+  };
+  if (pool && dbReady) {
+    await pool.query(
+      `
+        insert into audit_events
+          (id, user_id, actor_name, actor_role, action, entity, entity_id, detail, metadata)
+        values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `,
+      [event.id, event.user_id, event.actor_name, event.actor_role, action, entity, entityId, detail, metadata]
+    );
+  }
+}
+
+async function listAuditEvents(limit = 50) {
+  if (!pool || !dbReady) return [];
+  const result = await pool.query(
+    "select id, actor_name, actor_role, action, entity, entity_id, detail, metadata, created_at from audit_events order by created_at desc limit $1",
+    [Math.max(1, Math.min(Number(limit) || 50, 200))]
+  );
+  return result.rows.map(row => ({
+    id: row.id,
+    actorName: row.actor_name,
+    actorRole: row.actor_role,
+    action: row.action,
+    entity: row.entity,
+    entityId: row.entity_id,
+    detail: row.detail,
+    metadata: row.metadata || {},
+    createdAt: row.created_at.toISOString()
+  }));
 }
 
 async function storeStatus() {
@@ -431,7 +608,38 @@ function firstValue(row, keys, fallback = "") {
   return fallback;
 }
 
+function initialsFromName(name) {
+  return String(name || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0])
+    .join("")
+    .toUpperCase() || "UR";
+}
+
+function numberFrom(row, keys, fallback = 0) {
+  const raw = firstValue(row, keys, "");
+  if (!raw) return fallback;
+  const value = Number(raw.replace(/\./g, "").replace(",", "."));
+  return Number.isFinite(value) ? value : fallback;
+}
+
 function normalizeRows(type, rows) {
+  if (type === "schools") {
+    return rows.map(row => {
+      const name = firstValue(row, ["escola", "nome", "unidade", "name"], "Escola sem nome");
+      return {
+        name,
+        city: firstValue(row, ["municipio", "cidade", "city"], ""),
+        cie: firstValue(row, ["cie", "codigo", "codigo_cie"], ""),
+        initials: firstValue(row, ["iniciais", "initials"], initialsFromName(name)),
+        fiche: numberFrom(row, ["ficha", "ficha_pct", "percentual"], 0),
+        items: numberFrom(row, ["itens", "items", "inventario"], 0),
+        status: firstValue(row, ["status"], "ok").toLowerCase().includes("aten") ? "warn" : "ok"
+      };
+    });
+  }
   if (type === "contacts") {
     return rows.map(row => ({
       name: firstValue(row, ["nome", "name", "contato", "responsavel"], "Sem nome"),
@@ -458,6 +666,56 @@ function normalizeRows(type, rows) {
         sourceName: firstValue(row, ["nome_original", "descricao", "patrimonio", "modelo"], ""),
         notes: firstValue(row, ["observacao", "observacoes", "nota", "quantidade", "qtd"], ""),
         status: status.includes("defeito") ? "defeito" : status.includes("manut") ? "manutencao" : "ok"
+      };
+    });
+  }
+  if (type === "network") {
+    function pushUnique(target, value) {
+      if (value && !target.includes(value)) target.push(value);
+    }
+    return rows.reduce((acc, row) => {
+      const school = firstValue(row, ["escola", "unidade", "nome", "school"], "Escola sem nome");
+      const entry = acc[school] || {
+        network: [],
+        ips: [],
+        cameras: [],
+        credentials: ["Acesso restrito", "Nao publicado no frontend estatico", "Solicitar ao CTC, SETEC ou SEINTEC"]
+      };
+      pushUnique(entry.network, firstValue(row, ["rede", "network", "gateway", "wifi"], ""));
+      pushUnique(entry.ips, firstValue(row, ["ip", "ips", "cie", "banda"], ""));
+      pushUnique(entry.cameras, firstValue(row, ["camera", "cameras", "dvr"], ""));
+      acc[school] = entry;
+      return acc;
+    }, {});
+  }
+  if (type === "supervision") {
+    const stats = new Map();
+    rows.forEach(row => {
+      const name = firstValue(row, ["nome_do_supervisor", "supervisor", "nome"], "Supervisor");
+      const schools = Object.entries(row)
+        .filter(([key]) => key.startsWith("escola_visitada") || key.startsWith("escolas_visitadas"))
+        .map(([, value]) => String(value || "").trim())
+        .filter(Boolean);
+      const item = stats.get(name) || { name, visits: 0, schools: new Set() };
+      schools.forEach(school => item.schools.add(school));
+      item.visits += schools.length || 1;
+      stats.set(name, item);
+    });
+    return [...stats.values()].map(item => {
+      const schoolCount = item.schools.size;
+      const monthlyGoal = Math.max(3, schoolCount * 3);
+      return {
+        name: item.name,
+        email: "",
+        phone: "",
+        schools: schoolCount,
+        assignedSchools: [...item.schools],
+        week: "0/3",
+        month: `${item.visits}/${monthlyGoal}`,
+        pending: Math.max(0, monthlyGoal - item.visits),
+        visits: item.visits,
+        visitedSchools: schoolCount,
+        source: "Importacao backend"
       };
     });
   }
@@ -588,6 +846,36 @@ async function handleApi(req, res, pathname) {
     return;
   }
 
+  if (req.method === "GET" && pathname === "/api/sources") {
+    send(res, 200, { ok: true, sources: await listOfficialSources() });
+    return;
+  }
+
+  if (req.method === "PUT" && pathname === "/api/sources") {
+    if (!requireAuth(req, res)) return;
+    if (!isAdminRequest(req)) {
+      send(res, 403, { ok: false, error: "Apenas administrador pode alterar fontes." });
+      return;
+    }
+    const body = JSON.parse(await readBody(req) || "{}");
+    const sources = await saveOfficialSources(body.sources || body);
+    await audit(req, "update", "sources", "official", "Fontes oficiais atualizadas.", { count: sources.length });
+    send(res, 200, { ok: true, sources });
+    return;
+  }
+
+  if (req.method === "GET" && pathname === "/api/snapshots") {
+    if (!requireAuth(req, res)) return;
+    send(res, 200, { ok: true, snapshots: await listSnapshots(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
+    return;
+  }
+
+  if (req.method === "GET" && pathname === "/api/audit") {
+    if (!requireAuth(req, res)) return;
+    send(res, 200, { ok: true, events: await listAuditEvents(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/api/data") {
     send(res, 200, { ok: true, data: await readStore(), storage: await storeStatus() });
     return;
@@ -596,7 +884,9 @@ async function handleApi(req, res, pathname) {
   if (req.method === "PUT" && pathname === "/api/data") {
     if (!requireAuth(req, res)) return;
     const body = JSON.parse(await readBody(req) || "{}");
-    send(res, 200, { ok: true, data: await saveStore(body.appData || body, "api"), storage: await storeStatus() });
+    const data = await saveStore(body.appData || body, "api");
+    await audit(req, "update", "app_state", "main", "Estado do app atualizado.", {});
+    send(res, 200, { ok: true, data, storage: await storeStatus() });
     return;
   }
 
@@ -608,7 +898,11 @@ async function handleApi(req, res, pathname) {
     const store = await readStore() || { appData: {} };
     const appData = { ...(store.appData || {}) };
     if (type === "inventory") appData.schoolAssets = normalized;
+    else if (type === "network") appData.networkData = normalized;
+    else if (type === "supervision") appData.supervisors = normalized;
     else appData[type] = normalized;
+    await recordImportRun(type, rows.length, "ok", `${type} importado`);
+    await audit(req, "import", type, type, "CSV importado pelo backend.", { rows: rows.length });
     send(res, 200, {
       ok: true,
       rows: rows.length,

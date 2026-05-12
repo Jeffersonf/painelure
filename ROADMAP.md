@@ -502,6 +502,16 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.59
+
+- Backend ganhou persistencia de fontes oficiais em arquivo local ou Postgres.
+- API passou a expor `/api/sources`, `/api/snapshots` e `/api/audit`.
+- Importacao backend passou a normalizar escolas, redes/cameras e supervisao alem de contatos, calendario e inventario.
+- Schema SQL ganhou `official_sources` e `import_runs`.
+- Backend passou a registrar auditoria para gravacoes, fontes e importacoes quando houver Postgres.
+- Criado `.env.example` e carregamento local automatico de `.env`.
+- Documentacao de backend/Supabase foi atualizada para o fluxo online.
+
 ### 2.0.0-dev.58
 
 - Filtros de Escolas, Inventário, Supervisão, Técnicos CTC e Chamados ganharam ação rápida de limpar.

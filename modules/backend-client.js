@@ -76,9 +76,40 @@
     });
   }
 
+  async function loadBackendSources() {
+    return fetchJson(apiPath("/api/sources"), { timeoutMs: 4000 });
+  }
+
+  async function saveBackendSources(token, sources) {
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetchJson(apiPath("/api/sources"), {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ sources }),
+      timeoutMs: 4000
+    });
+  }
+
+  async function loadBackendSnapshots(token, limit = 20) {
+    const headers = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetchJson(apiPath(`/api/snapshots?limit=${encodeURIComponent(limit)}`), { headers, timeoutMs: 4000 });
+  }
+
+  async function loadBackendAudit(token, limit = 50) {
+    const headers = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetchJson(apiPath(`/api/audit?limit=${encodeURIComponent(limit)}`), { headers, timeoutMs: 4000 });
+  }
+
   P.loadBackendData = loadBackendData;
   P.pushBackendData = pushBackendData;
   P.loginBackend = loginBackend;
   P.loadBackendUser = loadBackendUser;
   P.updateBackendUser = updateBackendUser;
+  P.loadBackendSources = loadBackendSources;
+  P.saveBackendSources = saveBackendSources;
+  P.loadBackendSnapshots = loadBackendSnapshots;
+  P.loadBackendAudit = loadBackendAudit;
 })();

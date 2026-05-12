@@ -58,14 +58,21 @@ Use `CORS_ORIGIN` quando o frontend estiver no GitHub Pages e o backend em outro
 - `GET /api/users`
 - `POST /api/users`
 - `PUT /api/users/me`
+- `GET /api/sources`
+- `PUT /api/sources`
+- `GET /api/snapshots`
+- `GET /api/audit`
 
 Tipos de importacao iniciais:
 
 - `contacts`
 - `calendar`
 - `inventory`
+- `schools`
+- `network`
+- `supervision`
 
-Outros tipos aceitam CSV bruto por enquanto e devem ganhar normalizadores no backend conforme a fonte oficial for definida.
+Esses tipos ja possuem normalizadores minimos no backend. A regra continua: fonte oficial entra como CSV, e o backend normaliza antes de salvar o estado.
 
 ## Armazenamento
 
@@ -93,6 +100,26 @@ app_snapshots
 `app_snapshots` guarda historico simples de cada gravacao/importacao para facilitar recuperacao futura.
 
 `users` guarda usuarios, perfis, avatar e preferencias sincronizaveis.
+
+`official_sources` guarda URLs oficiais e metadados de fontes CSV.
+
+`import_runs` registra importacoes executadas pelo backend.
+
+`audit_events` registra operacoes administrativas, como importacao, alteracao de fonte e gravacao do estado.
+
+## Supabase/Postgres
+
+Para preparar um banco online:
+
+1. Copie `.env.example` para `.env` local, sem commitar.
+2. Crie o projeto no Supabase ou Neon.
+3. Rode `db/init.sql` no SQL Editor, ou deixe o backend criar as tabelas ao iniciar.
+4. Configure `DATABASE_URL`, `PAINELURE_ADMIN_KEY`, `PAINELURE_ADMIN_USER` e `PAINELURE_ADMIN_PASSWORD`.
+5. Rode `npm start` e confira `GET /api/health`.
+
+O primeiro usuario administrador e criado automaticamente se `PAINELURE_ADMIN_USER` e `PAINELURE_ADMIN_PASSWORD` estiverem definidos e ainda nao houver usuarios.
+
+O servidor carrega `.env` automaticamente em desenvolvimento local. Em hospedagem online, prefira variaveis configuradas no painel do provedor.
 
 O endpoint `GET /api/health` informa o modo ativo:
 
