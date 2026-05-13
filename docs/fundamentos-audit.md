@@ -303,6 +303,8 @@ V2 esta mais proxima do Finanza que a v1, mas ainda existem riscos:
 - Admin reduziu excesso visual com secoes dobraveis, estado salvo no navegador e Backend online aberto por padrao;
 - Todas as paginas operacionais principais agora seguem leitura "resumo primeiro, lista depois", reaproveitando componentes existentes;
 - Detalhes de Escola e Supervisor agora tambem abrem por decisao rapida antes do contexto;
+- Resumos operacionais agora usam grid responsivo para reduzir altura e melhorar densidade visual;
+- Fontes locais usam carregamento bloqueante para reduzir flash de fonte no refresh;
 - algumas tabelas e filtros ainda parecem sistema tecnico;
 - o login esta melhor, mas ainda nao e copia perfeita da v1 nem tao refinado quanto Finanza;
 - headings e tamanhos precisam ser consistentes por tipo de tela.

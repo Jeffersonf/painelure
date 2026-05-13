@@ -502,6 +502,12 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.83
+
+- Resumos operacionais passaram de coluna longa para grid responsivo, reduzindo altura e aproximando a densidade do Finanza.
+- Fontes locais passaram para `font-display: block` para reduzir a piscada de fonte padrao antes da fonte oficial carregar.
+- QA visual inicial focou em estabilidade de refresh e leitura compacta das paginas principais.
+
 ### 2.0.0-dev.82
 
 - Detalhe da escola passou a abrir com decisoes rapidas: proxima acao, responsavel direto e risco operacional.
