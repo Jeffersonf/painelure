@@ -514,7 +514,11 @@
   function renderSummaryRows(selector, rows) {
     const host = P.$(selector);
     if (!host) return;
-    host.innerHTML = rows.map(row => `
+    host.innerHTML = summaryRowsMarkup(rows);
+  }
+
+  function summaryRowsMarkup(rows) {
+    return rows.map(row => `
       <div class="data-row compact" data-search="${P.searchText([row.title, row.note, row.label])}">
         <span class="row-icon">${row.icon}</span>
         <span><strong>${row.title}</strong><small>${row.note}</small></span>
@@ -709,6 +713,12 @@
     const contacts = (data.contacts || []).filter(contact => ["Tecnologia", "Supervisão", "Gabinete"].includes(contact.sector)).slice(0, 3);
     const networkStatus = network ? "Mapeada" : "Pendente";
     const profileNote = missingProfile.length ? `Pendências: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
+    const hasAttention = missingProfile.length || totals.alertUnits || metrics.alerts || !network || calls.length;
+    const decisionRows = [
+      { icon: "\u{1F4CC}", title: "Proxima acao", note: followUpText(missingProfile, totals.alertUnits || metrics.alerts, network, calls.length), label: hasAttention ? "revisar" : "ok", tone: hasAttention ? "warn" : "ok" },
+      { icon: "\u{1F3AF}", title: "Responsavel direto", note: supervisor ? `${supervisor.name} acompanha ${supervisor.schools || supervisor.assignedSchools?.length || 0} escola(s).` : "Escola ainda sem supervisor vinculado.", label: supervisor ? "supervisao" : "pendente", tone: supervisor ? "info" : "warn" },
+      { icon: "\u{1F4BB}", title: "Risco operacional", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) em manutencao/defeito.` : "Inventario sem alerta resumido.", label: totals.alertUnits || metrics.alerts ? "atencao" : "ok", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok" }
+    ];
     const quickFacts = [
       { icon: "\u{1F3EB}", title: "Ficha e contato", note: `${profilePct}% preenchida | ${profile?.phone || "telefone pendente"} | ${profile?.email || "email pendente"}`, label: profilePct >= 65 ? "OK" : "Ficha", tone: profileStatusFromPct(profilePct), page: "schools" },
       supervisor ? { icon: "\u{1F3AF}", title: "Supervisao", note: `${supervisor.name} | semana ${supervisor.week} | mes ${supervisor.month}`, label: supervisor.pending ? "Meta" : "OK", tone: supervisor.pending ? "warn" : "ok", page: "supervision" } : null,
@@ -731,6 +741,9 @@
             <small>${school.city} • CIE ${school.cie}</small>
           </div>
           <span class="status-pill ${profileStatusFromPct(profilePct)}">${profilePct}% ficha</span>
+        </div>
+        <div class="row-list compact">
+          ${summaryRowsMarkup(decisionRows)}
         </div>
         <div class="network-layout">
           <article class="detail-widget profile-wide">
@@ -835,6 +848,14 @@
     detail.querySelector("[data-open-supervisor]")?.addEventListener("click", event => {
       focusSupervisor(event.currentTarget.dataset.openSupervisor);
     });
+  }
+
+  function followUpText(missingProfile, alertCount, network, callCount) {
+    if (alertCount) return "Prioridade: conferir inventario com manutencao ou defeito.";
+    if (callCount) return "Acompanhar chamados vinculados antes de encerrar a escola.";
+    if (missingProfile.length) return `Completar ficha: ${missingProfile.slice(0, 3).join(", ")}.`;
+    if (!network) return "Mapear rede e cameras para completar a base tecnica.";
+    return "Escola sem pendencia resumida no painel.";
   }
 
   function focusInventorySchool(name) {
@@ -1163,6 +1184,11 @@
     const attentionCards = schoolCards
       .filter(school => school.alerts || school.profilePct < 65)
       .slice(0, 5);
+    const supervisorDecisionRows = [
+      { icon: "\u{1F3AF}", title: `Semana ${week.done}/${week.total}`, note: week.missing ? `${week.missing} visita(s) para fechar a semana.` : "Meta semanal concluida.", label: `${week.pct}%`, tone: week.missing ? "warn" : "ok" },
+      { icon: "\u{1F4C5}", title: `Mes ${month.done}/${month.total}`, note: month.missing ? `${month.missing} visita(s) para fechar o mes.` : "Meta mensal concluida.", label: `${month.pct}%`, tone: month.missing ? "warn" : "ok" },
+      { icon: "\u{1F4CC}", title: "Carteira em atencao", note: alertSchools || incompleteProfiles ? `${alertSchools} escola(s) com inventario e ${incompleteProfiles} ficha(s) para revisar.` : "Carteira sem alerta resumido.", label: alertSchools || incompleteProfiles ? "revisar" : "ok", tone: alertSchools || incompleteProfiles ? "warn" : "ok" }
+    ];
     detail.innerHTML = `
       <article class="box">
         <div class="box-head">
@@ -1171,6 +1197,9 @@
             <small>${supervisor.email || "email não informado"} • ${supervisor.phone || "telefone não informado"}</small>
           </div>
           <span class="status-pill ${status}">${supervisor.pending ? "Acompanhar" : "Meta ok"}</span>
+        </div>
+        <div class="row-list compact">
+          ${summaryRowsMarkup(supervisorDecisionRows)}
         </div>
         <div class="network-layout">
           <article class="detail-widget">
@@ -1213,18 +1242,6 @@
             </div>
             <span class="status-pill info">CSV</span>
           </article>
-        </div>
-        <div class="row-list">
-          <button class="data-row compact" type="button" data-jump="supervision">
-            <span class="row-icon">&#127919;</span>
-            <span><strong>Semana ${week.done}/${week.total}</strong><small>${week.missing ? `${week.missing} visita(s) para fechar a semana.` : "Meta semanal concluida."}</small></span>
-            <em class="status-pill ${week.missing ? "warn" : "ok"}">${week.pct}%</em>
-          </button>
-          <button class="data-row compact" type="button" data-jump="supervision">
-            <span class="row-icon">&#128197;</span>
-            <span><strong>Mes ${month.done}/${month.total}</strong><small>${month.missing ? `${month.missing} visita(s) para fechar o mes.` : "Meta mensal concluida."}</small></span>
-            <em class="status-pill ${month.missing ? "warn" : "ok"}">${month.pct}%</em>
-          </button>
         </div>
         ${attentionCards.length ? `
         <div class="row-list">

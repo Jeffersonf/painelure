@@ -302,6 +302,7 @@ V2 esta mais proxima do Finanza que a v1, mas ainda existem riscos:
 - paginas internas ainda misturam densidade de dashboard com detalhe operacional;
 - Admin reduziu excesso visual com secoes dobraveis, estado salvo no navegador e Backend online aberto por padrao;
 - Todas as paginas operacionais principais agora seguem leitura "resumo primeiro, lista depois", reaproveitando componentes existentes;
+- Detalhes de Escola e Supervisor agora tambem abrem por decisao rapida antes do contexto;
 - algumas tabelas e filtros ainda parecem sistema tecnico;
 - o login esta melhor, mas ainda nao e copia perfeita da v1 nem tao refinado quanto Finanza;
 - headings e tamanhos precisam ser consistentes por tipo de tela.

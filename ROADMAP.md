@@ -502,6 +502,13 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.82
+
+- Detalhe da escola passou a abrir com decisoes rapidas: proxima acao, responsavel direto e risco operacional.
+- Detalhe do supervisor passou a abrir com resumo de semana, mes e carteira em atencao.
+- `summaryRowsMarkup` centraliza o markup dos resumos, reduzindo duplicacao nos detalhes e nas paginas.
+- As telas de detalhe ficaram mais proximas do padrao Finanza: acao primeiro, contexto depois.
+
 ### 2.0.0-dev.81
 
 - Tecnicos CTC ganhou resumo de visitas, tecnicos, escolas atendidas e dias de agenda.
