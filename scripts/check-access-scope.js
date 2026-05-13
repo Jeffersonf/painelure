@@ -18,7 +18,7 @@ const DATA_FILES = [
   "operations.js",
   "sources.js"
 ];
-const MODULE_FILES = ["search.js", "data-store.js", "access-scope.js"];
+const MODULE_FILES = ["search.js", "data-store.js", "access-scope.js", "render.js"];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -47,6 +47,16 @@ function loadPainel() {
 function withUser(P, user, callback) {
   P.onlineUser = () => user;
   P.activeUser = () => user;
+  P.displayUser = () => ({
+    ...user,
+    login: user.login || user.username || "",
+    shortName: user.name || user.username || ""
+  });
+  P.contactForUser = () => ({
+    id: user.contactId || user.contact_id || "",
+    name: user.contactName || user.name || "",
+    email: user.email || ""
+  });
   P.currentRole = () => user.role;
   callback(P.scopedData(P.getAppData()));
 }
@@ -119,6 +129,28 @@ function run() {
   withUser(P, { name: "Admin", role: "Administrador" }, scoped => {
     assert(scoped.users.length === data.users.length, "Administrador deve receber usuarios.");
     assert(hasCredentials(scoped.networkData), "Administrador deve receber credenciais.");
+  });
+
+  withUser(P, { name: "Ana Silva", username: "ana.silva", email: "ana@educacao.sp.gov.br", role: "Pedagogico" }, () => {
+    const calendar = [
+      { label: "Compartilhado", value: "01/05/2026", note: "Evento geral" },
+      { label: "Pessoal Ana", value: "2026-05-02", scope: "personal", owner: "Ana Silva" },
+      { label: "Pessoal Bruno", value: "03/05/2026", scope: "personal", owner: "Bruno" },
+      { label: "Pessoal sem dono", value: "04/05/2026", type: "personal" },
+      { label: "Atribuido Ana", value: "05/05/2026", assignee: "ana.silva" },
+      { label: "Compartilhado com dono", value: "06/05/2026", scope: "shared", owner: "Gabinete" },
+      { label: "Email de outro usuario", value: "07/05/2026", scope: "personal", ownerEmail: "bruno@educacao.sp.gov.br" }
+    ];
+    const personalTitles = P.calendarByMode(calendar, "personal").map(item => item.label);
+    const sharedTitles = P.calendarByMode(calendar, "shared").map(item => item.label);
+    assert(personalTitles.includes("Pessoal Ana"), "Agenda pessoal deve mostrar evento proprio por nome.");
+    assert(personalTitles.includes("Atribuido Ana"), "Agenda pessoal deve mostrar evento proprio por login/assignee.");
+    assert(!personalTitles.includes("Pessoal Bruno"), "Agenda pessoal nao deve mostrar evento de outro usuario.");
+    assert(!personalTitles.includes("Pessoal sem dono"), "Agenda pessoal nao deve mostrar evento pessoal sem dono.");
+    assert(!personalTitles.includes("Email de outro usuario"), "Agenda pessoal nao deve casar apenas pelo dominio do email.");
+    assert(sharedTitles.includes("Compartilhado"), "Agenda compartilhada deve mostrar evento sem dono pessoal.");
+    assert(sharedTitles.includes("Compartilhado com dono"), "Agenda compartilhada deve respeitar escopo compartilhado mesmo com responsavel.");
+    assert(!sharedTitles.includes("Pessoal Ana"), "Agenda compartilhada nao deve mostrar evento pessoal do usuario.");
   });
 
   assertAccess(P, "Administrador", ["admin", "network", "inventory", "profiles"], []);

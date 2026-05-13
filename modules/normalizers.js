@@ -170,12 +170,23 @@
   }
 
   function normalizeCalendarRows(rows) {
-    return rows.map(row => ({
-      label: firstValue(row, ["titulo", "evento", "label", "nome"], "Evento"),
-      value: firstValue(row, ["data", "quando", "date", "value"], "sem data"),
-      note: firstValue(row, ["observacao", "descricao", "local", "note"], ""),
-      tone: firstValue(row, ["status", "tipo", "tone"], "info")
-    }));
+    return rows.map(row => {
+      const type = firstValue(row, ["tipo", "type", "categoria"], "");
+      const scope = firstValue(row, ["escopo", "scope", "visibilidade"], "");
+      return {
+        label: firstValue(row, ["titulo", "evento", "label", "nome"], "Evento"),
+        value: firstValue(row, ["data", "quando", "date", "value"], "sem data"),
+        note: firstValue(row, ["observacao", "descricao", "local", "note"], ""),
+        tone: firstValue(row, ["status", "tone"], type || "info"),
+        type,
+        scope,
+        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "user"], ""),
+        assignee: firstValue(row, ["atribuido", "assignee", "destinatario"], ""),
+        contactId: firstValue(row, ["contact_id", "id_contato", "contato_id"], ""),
+        ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id"], ""),
+        ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email"], "")
+      };
+    });
   }
 
   P.normalizers = {

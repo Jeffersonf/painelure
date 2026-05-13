@@ -20,16 +20,16 @@ Objetivo: deixar claro o que ainda falta para a v2 herdar o que importa da v1 se
 - [x] Criar calendario pessoal por usuario/perfil.
 - [x] Permitir alternar entre agenda geral e agenda pessoal sem confundir o usuario.
 - [ ] Definir fonte oficial do calendario em `data/sources.js`.
-- [ ] Garantir que eventos pessoais respeitem login e escopo.
+- [x] Garantir que eventos pessoais respeitem login e escopo.
 
 ### Supervisao
 
-- [ ] Refazer painel do supervisor para ficar equivalente ao valor operacional da v1.
-- [ ] Supervisor deve ver somente suas escolas, seus indicadores e seus registros.
-- [ ] Tela de supervisores precisa ficar mais proxima da v1 em utilidade, mas com visual Finanza.
-- [ ] Detalhe do supervisor precisa destacar meta semanal, meta mensal, escolas vinculadas, pendencias e avisos de dado errado/faltando.
-- [ ] Validar que busca global nao mostra outro supervisor para perfil Supervisao.
-- [ ] Validar que links internos nao abrem escola fora da carteira do supervisor.
+- [x] Refazer painel do supervisor para ficar equivalente ao valor operacional da v1.
+- [x] Supervisor deve ver somente suas escolas, seus indicadores e seus registros.
+- [x] Tela de supervisores precisa ficar mais proxima da v1 em utilidade, mas com visual Finanza.
+- [x] Detalhe do supervisor precisa destacar meta semanal, meta mensal, escolas vinculadas, pendencias e avisos de dado errado/faltando.
+- [x] Validar que busca global nao mostra outro supervisor para perfil Supervisao.
+- [x] Validar que links internos nao abrem escola fora da carteira do supervisor.
 
 ### Tecnicos CTC
 
@@ -55,6 +55,7 @@ Objetivo: deixar claro o que ainda falta para a v2 herdar o que importa da v1 se
 - [x] Transformar categorias em blocos mais legiveis.
 - [x] Separar resumo, alertas e lista de itens.
 - [x] Destacar manutencao/defeito sem poluir a tela inteira.
+- [x] Criar topo operacional com escola, prioridades, itens OK e categorias.
 - [ ] Validar origem dos dados e normalizacao antes de crescer a interface.
 
 ## Proximo Foco Visual
@@ -84,15 +85,15 @@ Objetivo: deixar claro o que ainda falta para a v2 herdar o que importa da v1 se
 
 ## Perfis E Escopo
 
-- [ ] Administrador ve base completa.
-- [ ] Supervisor ve apenas propria carteira.
-- [ ] Supervisor nao ve outro supervisor.
-- [ ] Supervisor nao abre escola fora da carteira.
-- [ ] SETEC/SEINTEC/CTC ve dados tecnicos liberados.
-- [ ] Gabinete nao recebe credenciais tecnicas.
-- [ ] Consulta ve apenas escolas e contatos.
-- [ ] Backend `/api/data` devolve payload recortado por perfil.
-- [ ] Busca global respeita o mesmo escopo.
+- [x] Administrador ve base completa.
+- [x] Supervisor ve apenas propria carteira.
+- [x] Supervisor nao ve outro supervisor.
+- [x] Supervisor nao abre escola fora da carteira.
+- [x] SETEC/SEINTEC/CTC ve dados tecnicos liberados.
+- [x] Gabinete nao recebe credenciais tecnicas.
+- [x] Consulta ve apenas escolas e contatos.
+- [x] Backend `/api/data` devolve payload recortado por perfil.
+- [x] Busca global respeita o mesmo escopo.
 
 ## Dados Esperados
 

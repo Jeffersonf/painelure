@@ -259,6 +259,7 @@ V2:
 - carregamento em segundo plano existe;
 - backend tem `official_sources`;
 - Supabase/Postgres online ja esta ativo.
+- calendario ja separa recorte compartilhado/pessoal e evento pessoal so aparece quando responsavel/usuario/assignee bate com a identidade ativa.
 
 Pendente:
 
@@ -305,7 +306,7 @@ V2 esta mais proxima do Finanza que a v1, mas ainda existem riscos:
 - Detalhes de Escola e Supervisor agora tambem abrem por decisao rapida antes do contexto;
 - Resumos operacionais agora usam grid responsivo para reduzir altura e melhorar densidade visual;
 - Fontes locais usam carregamento bloqueante para reduzir flash de fonte no refresh;
-- Calendario ganhou primeira versao visual mensal com recorte compartilhado/pessoal;
+- Calendario ganhou primeira versao visual mensal com recorte compartilhado/pessoal e escopo pessoal por login;
 - algumas tabelas e filtros ainda parecem sistema tecnico;
 - o login esta melhor, mas ainda nao e copia perfeita da v1 nem tao refinado quanto Finanza;
 - headings e tamanhos precisam ser consistentes por tipo de tela.
@@ -319,16 +320,15 @@ Regras para proximas mudancas:
 
 ## Ordem Recomendada de Execucao
 
-1. Backend scoped data.
-2. Dashboard por perfil.
+1. Conta/Admin com usuarios reais, sessao, avatar e permissoes finais.
+2. Escola detalhe como pagina operacional principal da unidade.
 3. Supervisao rica da v1 no visual Finanza.
-4. Escola detalhe com blocos realmente uteis da v1.
-5. Redes/cameras com camada de credenciais protegida.
-6. Inventario: qualidade e alertas sem interface pesada.
-7. Contatos: regras por perfil e importacao oficial.
-8. Calendario oficial.
-9. Performance: lazy loading real de modulos/dados.
-10. QA visual pagina por pagina.
+4. CTC mais operacional, ligado a escola, inventario, redes e chamados.
+5. Inventario: origem, qualidade e alertas sem interface pesada.
+6. Contatos: regras por perfil e importacao oficial.
+7. Calendario oficial em `data/sources.js`.
+8. Performance: lazy loading real de modulos/dados.
+9. QA visual pagina por pagina.
 
 ## Checklist de Aceite
 

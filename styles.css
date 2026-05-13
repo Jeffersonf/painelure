@@ -308,17 +308,27 @@ select:focus-visible {
   min-height: 48px;
   border: 1px solid color-mix(in srgb, var(--bd) 84%, transparent);
   border-radius: 10px;
-  background: rgba(255, 255, 255, .035);
+  background: var(--sf2);
   color: var(--tx);
   padding: 0 14px;
   outline: none;
   font-size: 14px;
   font-weight: 800;
+  caret-color: var(--ac);
 }
 
 .login-card input:focus {
   border-color: color-mix(in srgb, var(--ac2) 38%, var(--bd));
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--ac2) 10%, transparent);
+}
+
+.login-card input:-webkit-autofill,
+.login-card input:-webkit-autofill:hover,
+.login-card input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--tx);
+  caret-color: var(--ac);
+  box-shadow: 0 0 0 1000px var(--sf2) inset;
+  transition: background-color 9999s ease-out 0s;
 }
 
 .primary-btn {
@@ -337,6 +347,13 @@ select:focus-visible {
 .primary-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(200, 245, 90, .16);
+}
+
+.primary-btn:disabled {
+  cursor: wait;
+  opacity: .72;
+  transform: none;
+  box-shadow: none;
 }
 
 .login-card small {
@@ -1490,6 +1507,15 @@ select:focus-visible {
   white-space: nowrap;
 }
 
+.school-foot em {
+  flex: 0 0 auto;
+  color: var(--ac);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .school-scoreboard {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1751,6 +1777,92 @@ select:focus-visible {
   min-height: 132px;
 }
 
+.inventory-hero {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(200, 245, 90, .18);
+  border-radius: 20px;
+  background:
+    linear-gradient(160deg, rgba(200, 245, 90, .055), transparent 62%),
+    var(--sf);
+}
+
+.inventory-hero-main small,
+.inventory-hero-main strong,
+.inventory-hero-main p {
+  display: block;
+}
+
+.inventory-hero-main small {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.inventory-hero-main strong {
+  margin-top: 5px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.inventory-hero-main p {
+  margin: 5px 0 0;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inventory-hero-score {
+  display: grid;
+  grid-template-columns: repeat(3, 86px);
+  gap: 8px;
+}
+
+.inventory-hero-score span {
+  min-height: 58px;
+  display: grid;
+  align-content: center;
+  padding: 8px 10px;
+  border: 1px solid var(--bd2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.inventory-hero-score strong,
+.inventory-hero-score small {
+  display: block;
+}
+
+.inventory-hero-score strong {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.inventory-hero-score small {
+  margin-top: 5px;
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.inventory-priority {
+  grid-column: span 2;
+}
+
+.inventory-category-alert {
+  border-color: rgba(245, 200, 90, .24);
+  background:
+    linear-gradient(160deg, rgba(245, 200, 90, .045), transparent 56%),
+    var(--sf);
+}
+
 .detail-widget small {
   color: var(--mt);
   font-size: 11px;
@@ -1827,11 +1939,11 @@ select:focus-visible {
 
 .supervisor-row {
   width: 100%;
-  min-height: 78px;
+  min-height: 82px;
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(260px, .9fr) auto;
+  grid-template-columns: minmax(250px, 1.1fr) minmax(130px, .55fr) minmax(250px, .9fr) auto;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   padding: 13px 18px;
   border: 0;
   border-bottom: 1px solid var(--bd2);
@@ -1889,6 +2001,22 @@ select:focus-visible {
   font-size: 11px;
 }
 
+.supervisor-row-summary strong,
+.supervisor-row-summary small {
+  display: block;
+}
+
+.supervisor-row-summary strong {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.supervisor-row-summary small {
+  margin-top: 4px;
+  color: var(--mt);
+  font-size: 11px;
+}
+
 .supervisor-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1928,8 +2056,270 @@ select:focus-visible {
   background: linear-gradient(90deg, var(--ac), var(--ac2));
 }
 
+.supervision-source,
+.supervision-focus {
+  margin: 12px;
+  border: 1px solid var(--bd);
+  border-radius: 18px;
+  background:
+    linear-gradient(160deg, rgba(200, 245, 90, .045), transparent 58%),
+    var(--sf);
+}
+
+.supervision-source {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, auto) 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.supervision-source span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .045);
+}
+
+.supervision-source strong,
+.supervision-source small {
+  display: block;
+}
+
+.supervision-source strong {
+  font-size: 12px;
+}
+
+.supervision-source small {
+  color: var(--mt);
+  font-size: 11px;
+}
+
+.supervision-focus {
+  display: grid;
+  grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr);
+  gap: 12px;
+  padding: 14px;
+}
+
+.supervision-focus > div:first-child strong,
+.supervision-focus > div:first-child small {
+  display: block;
+}
+
+.supervision-focus > div:first-child strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+
+.supervision-focus > div:first-child small {
+  margin-top: 4px;
+  color: var(--mt);
+  font-size: 12px;
+}
+
+.supervision-focus-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.supervision-focus-list button {
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--bd2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .025);
+  color: var(--tx);
+  cursor: pointer;
+  text-align: left;
+}
+
+.supervision-focus-list button > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(200, 245, 90, .1);
+  color: var(--ac);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.supervision-focus-list strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .supervisor-detail {
   margin-top: 16px;
+}
+
+.supervisor-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding: 18px;
+  border: 1px solid rgba(200, 245, 90, .18);
+  border-radius: 22px;
+  background:
+    linear-gradient(160deg, rgba(200, 245, 90, .06), transparent 62%),
+    var(--sf);
+}
+
+.supervisor-hero-warn {
+  border-color: rgba(245, 200, 90, .24);
+  background:
+    linear-gradient(160deg, rgba(245, 200, 90, .05), transparent 62%),
+    var(--sf);
+}
+
+.supervisor-hero-danger {
+  border-color: rgba(245, 112, 90, .28);
+  background:
+    linear-gradient(160deg, rgba(245, 112, 90, .055), transparent 62%),
+    var(--sf);
+}
+
+.supervisor-hero-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.supervisor-hero-main .eyebrow {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.supervisor-hero-main strong,
+.supervisor-hero-main p {
+  display: block;
+}
+
+.supervisor-hero-main strong {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.05;
+}
+
+.supervisor-hero-main p {
+  margin: 6px 0 0;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.supervisor-hero-status {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.supervisor-hero-status small {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.supervisor-score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.supervisor-score-card {
+  min-height: 132px;
+  padding: 16px;
+  border: 1px solid var(--bd);
+  border-radius: 20px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .025), transparent 55%),
+    var(--sf);
+}
+
+.supervisor-score-card.ok { border-color: rgba(74, 222, 128, .18); }
+.supervisor-score-card.warn { border-color: rgba(245, 200, 90, .24); }
+.supervisor-score-card.info { border-color: rgba(90, 245, 200, .2); }
+
+.score-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.score-card-head small,
+.score-card-head span {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.supervisor-score-card strong {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--font-money);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.supervisor-score-card i {
+  display: block;
+  height: 7px;
+  overflow: hidden;
+  margin-top: 14px;
+  border-radius: 99px;
+  background: var(--sf2);
+}
+
+.supervisor-score-card i::before {
+  content: "";
+  display: block;
+  width: var(--pct);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ac), var(--ac2));
+}
+
+.supervisor-score-card p {
+  margin: 10px 0 0;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.supervisor-workbench {
+  display: grid;
+  grid-template-columns: minmax(320px, .85fr) minmax(0, 1.15fr);
+  gap: 14px;
+}
+
+.supervisor-linked-grid {
+  padding: 14px;
+  margin-top: 0;
+}
+
+.supervisor-actions {
+  margin-top: 14px;
 }
 
 .detail-page-header {
@@ -2461,6 +2851,16 @@ select:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .supervisor-score-grid,
+  .supervisor-workbench,
+  .inventory-hero {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .supervision-focus {
+    grid-template-columns: 1fr;
+  }
+
   .table-row {
     grid-template-columns: 1fr 1fr;
   }
@@ -2547,8 +2947,26 @@ select:focus-visible {
   .shortcut-grid,
   .metric-grid,
   .school-grid,
-  .contact-grid {
+  .contact-grid,
+  .supervisor-score-grid,
+  .supervisor-workbench,
+  .supervision-focus-list,
+  .inventory-hero,
+  .inventory-hero-score {
     grid-template-columns: 1fr;
+  }
+
+  .inventory-priority {
+    grid-column: auto;
+  }
+
+  .supervisor-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .supervisor-hero-status {
+    justify-items: start;
   }
 
   .manager-strip,

@@ -127,6 +127,7 @@
   function friendlyAuthError(error) {
     const message = String(error?.message || error || "");
     if (/HTTP 401|invalido|invalid/i.test(message)) return "Nome ou PIN incorretos.";
+    if (/reinicie o servidor local/i.test(message)) return "Servidor local antigo detectado. Feche o terminal antigo e rode npm start na pasta painelure2.";
     if (/HTTP 405|method/i.test(message)) return "API nao encontrada nesta pagina. Atualize e tente novamente.";
     if (/aborted|network|failed to fetch/i.test(message)) return "Nao foi possivel conectar ao servidor.";
     return message || "Nao foi possivel entrar.";
@@ -297,7 +298,12 @@
     }
 
     P.$("#loginSubmitBtn")?.addEventListener("click", async () => {
+      const button = P.$("#loginSubmitBtn");
       try {
+        if (button) {
+          button.disabled = true;
+          button.textContent = "Entrando...";
+        }
         const username = P.$("#loginUserInput")?.value.trim();
         const pin = P.$("#loginPinInput")?.value || "";
         await submitLogin(username, pin);
@@ -305,6 +311,11 @@
         if (pinInput) pinInput.value = "";
       } catch (error) {
         showLoginStatus(friendlyAuthError(error));
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = "Entrar";
+        }
       }
     });
 

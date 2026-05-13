@@ -514,6 +514,29 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.90
+
+- Inventario ganhou topo operacional por escola, com prioridade, itens OK e categorias visiveis antes da lista.
+- Categorias de inventario com alerta passaram a ter destaque visual discreto no padrao Finanza.
+- Cards de escola agora exibem a proxima acao diretamente no rodape, reduzindo a leitura secundaria.
+- Mantida a separacao entre telas de Redes e Inventario para evitar vazamento de componentes.
+
+### 2.0.0-dev.89
+
+- Supervisao foi refeita como tela operacional, com resumo de semana, mes, carteira e acompanhamento.
+- Lista de supervisores ganhou bloco de prioridade do dia, status acionavel, progresso semanal/mensal e densidade visual no padrao Finanza.
+- Detalhe do supervisor passou a destacar meta semanal, meta mensal, escolas vinculadas, pendencias e aviso de dado errado/faltando.
+- Links internos continuam abrindo apenas escolas da carteira quando o usuario logado e supervisor.
+- Checklist foi atualizado marcando a paridade principal de supervisao como concluida.
+
+### 2.0.0-dev.88
+
+- Agenda pessoal passou a respeitar identidade ativa por `owner`, `user`, `assignee`, email, login e contato vinculado.
+- Alternancia de agenda agora rerenderiza com dados escopados, sem voltar para a base completa local.
+- Normalizadores de calendario preservam `scope`, `type`, responsavel e identificadores para fonte oficial futura.
+- Teste automatico passou a cobrir agenda pessoal, agenda compartilhada e isolamento de evento pessoal sem responsavel.
+- Auditoria e checklist foram atualizados para refletir o escopo ja fechado no frontend/backend.
+
 ### 2.0.0-dev.85
 
 - Cards de escola foram redesenhados como widgets de decisao, com placar de ficha, itens e alertas.

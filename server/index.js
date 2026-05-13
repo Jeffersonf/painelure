@@ -835,12 +835,23 @@ function normalizeRows(type, rows) {
     }));
   }
   if (type === "calendar") {
-    return rows.map(row => ({
-      label: firstValue(row, ["titulo", "evento", "label", "nome"], "Evento"),
-      value: firstValue(row, ["data", "quando", "date", "value"], "sem data"),
-      note: firstValue(row, ["observacao", "descricao", "local", "note"], ""),
-      tone: firstValue(row, ["status", "tipo", "tone"], "info")
-    }));
+    return rows.map(row => {
+      const eventType = firstValue(row, ["tipo", "type", "categoria"], "");
+      const scope = firstValue(row, ["escopo", "scope", "visibilidade"], "");
+      return {
+        label: firstValue(row, ["titulo", "evento", "label", "nome"], "Evento"),
+        value: firstValue(row, ["data", "quando", "date", "value"], "sem data"),
+        note: firstValue(row, ["observacao", "descricao", "local", "note"], ""),
+        tone: firstValue(row, ["status", "tone"], eventType || "info"),
+        type: eventType,
+        scope,
+        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "user"], ""),
+        assignee: firstValue(row, ["atribuido", "assignee", "destinatario"], ""),
+        contactId: firstValue(row, ["contact_id", "id_contato", "contato_id"], ""),
+        ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id"], ""),
+        ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email"], "")
+      };
+    });
   }
   if (type === "inventory") {
     return rows.map(row => {
@@ -947,6 +958,13 @@ function requireAuth(req, res) {
   return false;
 }
 
+function requireAdmin(req, res, message = "Apenas administrador pode executar esta acao.") {
+  if (!requireAuth(req, res)) return false;
+  if (isAdminRequest(req)) return true;
+  send(res, 403, { ok: false, error: message });
+  return false;
+}
+
 function safeStaticPath(urlPath) {
   const requested = urlPath === "/" ? "/index.html" : decodeURIComponent(urlPath);
   const file = path.resolve(ROOT, `.${requested}`);
@@ -1019,17 +1037,13 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "GET" && pathname === "/api/users") {
-    if (!requireAuth(req, res)) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode listar usuarios.")) return;
     send(res, 200, { ok: true, users: await listUsers() });
     return;
   }
 
   if (req.method === "POST" && pathname === "/api/users") {
-    if (!requireAuth(req, res)) return;
-    if (!isAdminRequest(req)) {
-      send(res, 403, { ok: false, error: "Apenas administrador pode criar usuarios." });
-      return;
-    }
+    if (!requireAdmin(req, res, "Apenas administrador pode criar usuarios.")) return;
     const body = JSON.parse(await readBody(req) || "{}");
     send(res, 201, { ok: true, user: await createUser(body) });
     return;
@@ -1048,11 +1062,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "PUT" && pathname.startsWith("/api/users/")) {
-    if (!requireAuth(req, res)) return;
-    if (!isAdminRequest(req)) {
-      send(res, 403, { ok: false, error: "Apenas administrador pode editar usuarios." });
-      return;
-    }
+    if (!requireAdmin(req, res, "Apenas administrador pode editar usuarios.")) return;
     const id = decodeURIComponent(pathname.split("/").pop());
     const body = JSON.parse(await readBody(req) || "{}");
     const user = await updateUser(id, body);
@@ -1067,11 +1077,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "PUT" && pathname === "/api/sources") {
-    if (!requireAuth(req, res)) return;
-    if (!isAdminRequest(req)) {
-      send(res, 403, { ok: false, error: "Apenas administrador pode alterar fontes." });
-      return;
-    }
+    if (!requireAdmin(req, res, "Apenas administrador pode alterar fontes.")) return;
     const body = JSON.parse(await readBody(req) || "{}");
     const sources = await saveOfficialSources(body.sources || body);
     await audit(req, "update", "sources", "official", "Fontes oficiais atualizadas.", { count: sources.length });
@@ -1080,19 +1086,19 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "GET" && pathname === "/api/snapshots") {
-    if (!requireAuth(req, res)) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode listar snapshots.")) return;
     send(res, 200, { ok: true, snapshots: await listSnapshots(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
     return;
   }
 
   if (req.method === "GET" && pathname === "/api/audit") {
-    if (!requireAuth(req, res)) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode listar auditoria.")) return;
     send(res, 200, { ok: true, events: await listAuditEvents(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
     return;
   }
 
   if (req.method === "GET" && pathname === "/api/imports") {
-    if (!requireAuth(req, res)) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode listar importacoes.")) return;
     send(res, 200, { ok: true, imports: await listImportRuns(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
     return;
   }
@@ -1104,7 +1110,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "PUT" && pathname === "/api/data") {
-    if (!requireAuth(req, res)) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode gravar o estado online.")) return;
     const body = JSON.parse(await readBody(req) || "{}");
     const data = await saveStore(body.appData || body, "api");
     await audit(req, "update", "app_state", "main", "Estado do app atualizado.", {});
@@ -1113,7 +1119,7 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "POST" && pathname.startsWith("/api/import/")) {
-    if (!requireAuth(req, res)) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode importar CSV.")) return;
     const type = pathname.split("/").pop();
     const rows = parseCsv(await readBody(req));
     const normalized = normalizeRows(type, rows);
