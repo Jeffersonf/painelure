@@ -465,6 +465,11 @@ function canAccessData(page, user = null) {
   return accessForRole(user?.role || "Consulta").includes(page);
 }
 
+function canViewCredentials(user = null) {
+  const role = normalizeText(user?.role || "Consulta");
+  return ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => role.includes(item));
+}
+
 function supervisorForUser(appData = {}, user = null) {
   if (!user || !isSupervisorRole(user.role)) return null;
   const userKeys = [user.name, user.username, user.contactName, user.supervisorName]
@@ -492,6 +497,14 @@ function scopeAppDataForUser(appData = {}, user = null) {
   );
   const schoolScopedItems = (items, field = "school") => supervisorScope ? bySchoolField(items, field) : items;
   const schoolScopedObject = source => supervisorScope ? objectBySchool(source) : source;
+  const networkScopedObject = source => {
+    const scoped = schoolScopedObject(source || {});
+    if (canViewCredentials(user)) return scoped;
+    return Object.fromEntries(Object.entries(scoped).map(([school, item]) => {
+      const { credentials, ...safeItem } = item || {};
+      return [school, safeItem];
+    }));
+  };
   const schools = supervisorScope
     ? (appData.schools || []).filter(school => allowed.has(normalizeText(school.name)))
     : (appData.schools || []);
@@ -502,7 +515,7 @@ function scopeAppDataForUser(appData = {}, user = null) {
     ...appData,
     schools: canAccessData("schools", user) ? schools : [],
     supervisors: canAccessData("supervision", user) ? supervisors : [],
-    networkData: canAccessData("network", user) ? schoolScopedObject(appData.networkData || {}) : {},
+    networkData: canAccessData("network", user) ? networkScopedObject(appData.networkData || {}) : {},
     schoolInventoryMetrics: canAccessData("inventory", user) ? schoolScopedObject(appData.schoolInventoryMetrics || {}) : {},
     schoolProfiles: canAccessData("schools", user) ? schoolScopedItems(appData.schoolProfiles || []) : [],
     schoolAssets: canAccessData("inventory", user) ? schoolScopedItems(appData.schoolAssets || []) : [],

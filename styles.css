@@ -1395,6 +1395,11 @@ select:focus-visible {
   gap: 12px;
 }
 
+.school-top .status-pill {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
 .school-avatar {
   width: 46px;
   height: 46px;

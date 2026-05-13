@@ -38,6 +38,11 @@
     return roleAccess(role).includes(page);
   }
 
+  function canViewCredentials(role = P.currentRole?.()) {
+    const key = normalized(role);
+    return ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => key.includes(item));
+  }
+
   function isSupervisorUser(user = activeIdentity()) {
     return isSupervisorRole(user?.role);
   }
@@ -125,12 +130,20 @@
       admin: canAccessData("admin", role)
     };
     const schoolScopedObject = source => supervisorScope ? filterObjectBySchool(source, allowed) : source;
+    const networkScopedObject = source => {
+      const scoped = schoolScopedObject(source || {});
+      if (canViewCredentials(role)) return scoped;
+      return Object.fromEntries(Object.entries(scoped).map(([school, item]) => {
+        const { credentials, ...safeItem } = item || {};
+        return [school, safeItem];
+      }));
+    };
     const schoolScopedItems = (items, field = "school") => supervisorScope ? filterBySchoolField(items, allowed, field) : items;
     return {
       ...data,
       schools: byAccess.schools ? schools : [],
       supervisors: byAccess.supervision ? supervisors : [],
-      networkData: byAccess.network ? schoolScopedObject(data.networkData || {}) : {},
+      networkData: byAccess.network ? networkScopedObject(data.networkData || {}) : {},
       schoolInventoryMetrics: byAccess.inventory ? schoolScopedObject(data.schoolInventoryMetrics || {}) : {},
       schoolProfiles: byAccess.schools ? schoolScopedItems(data.schoolProfiles || []) : [],
       schoolAssets: byAccess.inventory ? schoolScopedItems(data.schoolAssets || []) : [],
@@ -152,6 +165,7 @@
   P.DATA_ACCESS = ACCESS;
   P.roleAccess = roleAccess;
   P.canAccessData = canAccessData;
+  P.canViewCredentials = canViewCredentials;
   P.isSupervisorRole = isSupervisorRole;
   P.isSupervisorUser = isSupervisorUser;
   P.supervisorForCurrentUser = supervisorForCurrentUser;

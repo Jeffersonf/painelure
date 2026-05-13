@@ -25,8 +25,7 @@
   }
 
   function canViewCredentials() {
-    const role = currentRoleKey();
-    return ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => role.includes(item));
+    return P.canViewCredentials ? P.canViewCredentials() : ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => currentRoleKey().includes(item));
   }
 
   function dashboardProfile(data, context) {
@@ -81,6 +80,13 @@
         : "Escolas, supervisao, inventario, redes e contatos disponiveis para consulta.",
       shortcuts: null
     };
+  }
+
+  function supervisionMonthNote() {
+    const selected = P.selectedMonthKey?.() || "";
+    const official = P.sources?.supervision?.monthKey || "";
+    if (!official || selected === official) return "";
+    return `Fonte oficial carregada para ${P.selectedMonthLabel?.(official) || official}.`;
   }
 
   function initials(name) {
@@ -151,6 +157,7 @@
     const city = P.$("#schoolCityFilter")?.value || "all";
     const profile = P.$("#schoolProfileFilter")?.value || "all";
     const inventory = P.$("#schoolInventoryFilter")?.value || "all";
+    const network = P.$("#schoolNetworkFilter")?.value || "all";
     const cards = P.$all("#schoolGrid .school-card");
     let visibleCount = 0;
 
@@ -160,7 +167,8 @@
       const inventoryOk = inventory === "all"
         || (inventory === "alerts" && Number(card.dataset.inventoryAlerts || 0) > 0)
         || (inventory === "ok" && Number(card.dataset.inventoryAlerts || 0) === 0);
-      const visible = cityOk && profileOk && inventoryOk;
+      const networkOk = network === "all" || card.dataset.networkStatus === network;
+      const visible = cityOk && profileOk && inventoryOk && networkOk;
       card.classList.toggle("filter-hidden", !visible);
       if (visible) visibleCount++;
     });
@@ -225,7 +233,7 @@
       ...cities.map(city => ({ value: P.searchText([city]), label: city }))
     ], currentCity);
 
-    [citySelect, P.$("#schoolProfileFilter"), P.$("#schoolInventoryFilter")].forEach(select => {
+    [citySelect, P.$("#schoolProfileFilter"), P.$("#schoolInventoryFilter"), P.$("#schoolNetworkFilter")].forEach(select => {
       if (!select || select.dataset.bound) return;
       select.dataset.bound = "true";
       select.addEventListener("change", applySchoolFilters);
@@ -234,8 +242,10 @@
       if (citySelect) citySelect.value = "all";
       const profile = P.$("#schoolProfileFilter");
       const inventory = P.$("#schoolInventoryFilter");
+      const network = P.$("#schoolNetworkFilter");
       if (profile) profile.value = "all";
       if (inventory) inventory.value = "all";
+      if (network) network.value = "all";
       applySchoolFilters();
     });
   }
@@ -502,7 +512,7 @@
 
     setText("#dashboardSummary", `${monthLabel} - ${profile.title} - ${sourceNote}`);
     setText("#dashboardNoticeTitle", profile.notice);
-    setText("#dashboardNoticeNote", profile.noticeNote);
+    setText("#dashboardNoticeNote", [profile.noticeNote, supervisionMonthNote()].filter(Boolean).join(" "));
     setText("#shortcutSchoolsNote", profile.shortcuts?.schools || `${data.schools.length} unidade(s) na base regional`);
     setText("#shortcutNetworkNote", profile.shortcuts?.network || (missingNetwork ? `${missingNetwork} escola(s) ainda sem rede` : `${networkCount} rede(s) mapeada(s)`));
     setText("#shortcutInventoryNote", profile.shortcuts?.inventory || (inventoryAlerts ? `${inventoryAlerts} alerta(s) para triagem` : `${data.schoolAssets.length} linha(s) consolidadas`));
@@ -616,20 +626,25 @@
       const metrics = data.schoolInventoryMetrics?.[school.name] || { items: school.items || 0, alerts: school.alerts || 0 };
       const alertCount = inventoryAlertCount(school);
       const profileStatus = profileStatusFromPct(profilePct);
+      const network = data.networkData?.[school.name];
+      const networkStatus = network ? "mapped" : "pending";
+      const supervisor = supervisorForSchool(school.name);
       const note = missing.length ? `pendente: ${missing.slice(0, 2).join(", ")}` : firstNote(profile?.notes) || "ficha escolar completa";
       return `
-        <button class="school-card" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([school.city])}" data-profile-status="${profileStatus}" data-inventory-alerts="${alertCount}" data-search="${P.searchText([school.name, school.city, school.cie, school.initials, profile?.director, profile?.email, profile?.phone])}">
+        <button class="school-card" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([school.city])}" data-profile-status="${profileStatus}" data-inventory-alerts="${alertCount}" data-network-status="${networkStatus}" data-search="${P.searchText([school.name, school.city, school.cie, school.initials, profile?.director, profile?.email, profile?.phone, supervisor?.name])}">
           <div class="school-top">
             <div class="school-avatar">${school.initials}</div>
             <div>
               <h2>${school.name}</h2>
               <p>${school.city} | CIE ${school.cie}</p>
             </div>
+            <span class="status-pill ${network ? "info" : "warn"}">${network ? "rede" : "sem rede"}</span>
           </div>
           <div class="school-meta">
             <span>${profilePct}% ficha</span>
             <span>${metrics.items || 0} item(ns)</span>
-            <span>${profile?.phone || "telefone pendente"}</span>
+            <span>${alertCount ? `${alertCount} alerta(s)` : "inventario ok"}</span>
+            <span>${supervisor?.name || "sem supervisor"}</span>
           </div>
           <p class="school-note">${note}</p>
           <div class="school-foot">
@@ -981,12 +996,13 @@
     }
     bindSupervisorFilters();
     const sortMode = P.$("#supervisorSortFilter")?.value || "name";
+    const sourceNote = supervisionMonthNote();
     const sorted = [...supervisors].sort((a, b) => {
       if (sortMode === "pending") return Number(b.pending || 0) - Number(a.pending || 0) || a.name.localeCompare(b.name);
       if (sortMode === "schools") return Number(b.schools || 0) - Number(a.schools || 0) || a.name.localeCompare(b.name);
       return a.name.localeCompare(b.name);
     });
-    host.innerHTML = sorted.map((item, index) => {
+    host.innerHTML = `${sourceNote ? `<div class="data-row compact"><span class="row-icon">&#128197;</span><span><strong>Fonte de supervisao</strong><small>${sourceNote}</small></span><em class="status-pill info">oficial</em></div>` : ""}${sorted.map((item, index) => {
       const tone = supervisorTone(item);
       return `
       <button class="supervisor-row" type="button" data-supervisor-index="${index}" data-supervisor-key="${P.searchText([item.name])}" data-status="${tone}" data-search="${P.searchText([item.name, item.email, item.phone, item.schools, item.week, item.month, item.pending])}">
@@ -1011,7 +1027,7 @@
         </div>
         <span class="status-pill ${tone}">${item.pending ? `${item.pending} faltam` : "Verde"}</span>
       </button>
-    `; }).join("");
+    `; }).join("")}`;
     applySupervisorFilters();
     host.querySelectorAll("[data-supervisor-index]").forEach(button => {
       button.addEventListener("click", () => {

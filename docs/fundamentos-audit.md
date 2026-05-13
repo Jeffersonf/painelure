@@ -102,6 +102,7 @@ Risco principal ja tratado:
 
 - `GET /api/data` deixou de ser publico e agora exige sessao.
 - O payload passa por recorte de perfil antes de sair do backend.
+- Credenciais de redes/cameras deixam de sair no payload para perfis fora de Administrador, SETEC, SEINTEC e Tecnicos CTC.
 
 Isso era aceitavel enquanto a v2 era prototipo estatico, mas agora que temos login por perfil, o ideal e:
 
@@ -202,7 +203,7 @@ V2:
 
 Pendente:
 
-- backend deve filtrar dados sensiveis.
+- validar se todos os perfis tecnicos devem ver credenciais ou se sera criada permissao separada.
 
 ### Inventario
 

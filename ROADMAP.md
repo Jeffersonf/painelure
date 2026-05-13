@@ -502,6 +502,14 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.73
+
+- Backend passou a remover credenciais de redes/cameras do payload de perfis nao autorizados.
+- Escopo local tambem remove credenciais antes da renderizacao quando o perfil nao e tecnico autorizado.
+- Mes padrao passou a respeitar a fonte oficial de supervisao configurada.
+- Tela de Supervisao passou a avisar quando o mes selecionado difere da fonte oficial carregada.
+- Escolas ganharam filtro por rede mapeada/pendente e cards mais uteis com supervisor, inventario e status de rede.
+
 ### 2.0.0-dev.72
 
 - Dashboard passou a adaptar resumo, aviso e atalhos ao perfil ativo.

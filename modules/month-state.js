@@ -33,7 +33,7 @@
       const saved = localStorage.getItem(MONTH_KEY);
       if (parseMonthKey(saved)) return saved;
     } catch (error) {}
-    return "2026-05";
+    return parseMonthKey(P.sources?.supervision?.monthKey) ? P.sources.supervision.monthKey : "2026-05";
   }
 
   function selectedMonth() {
