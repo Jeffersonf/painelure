@@ -90,7 +90,7 @@ Dados de paginas sem permissao deixam de ser enviados no payload, incluindo `use
 
 ### Pendente
 
-Auditar se cada perfil acima esta exatamente como a regra institucional desejada. A base agora suporta recorte por categoria, mas a matriz final de negocio ainda pode ser refinada.
+Auditar se cada perfil acima esta exatamente como a regra institucional desejada. A base agora suporta recorte por categoria, tem teste automatico cobrindo os perfis atuais, mas a matriz final de negocio ainda pode ser refinada.
 
 ## 2. Seguranca Backend
 
@@ -107,8 +107,8 @@ Risco principal ja tratado:
 Isso era aceitavel enquanto a v2 era prototipo estatico, mas agora que temos login por perfil, o ideal e:
 
 - definir se dados de credenciais/redes ficam totalmente liberados para SETEC/SEINTEC/CTC ou se terao uma permissao menor separada;
-- criar testes automatizados de escopo por perfil;
-- registrar no Admin qual perfil ve cada fonte.
+- ampliar os testes quando a matriz institucional mudar;
+- manter no Admin a leitura clara de dominio, responsavel, mes, cadencia e sensibilidade de cada fonte.
 
 ### Recomendacao
 
@@ -144,7 +144,7 @@ V2:
 Pendente:
 
 - validar a matriz institucional final antes de travar as mensagens de cada perfil;
-- criar testes automaticos de escopo quando as prioridades 1 e 2 forem liberadas.
+- manter testes automaticos atualizados sempre que um perfil mudar.
 
 ### Escolas
 
@@ -159,6 +159,7 @@ V2:
 - lista e detalhe existem;
 - agora recebem escopo;
 - detalhe ganhou fila de proximos acompanhamentos com ficha, inventario, rede e chamados conforme permissao.
+- detalhe ganhou mapa rapido operacional com ficha/contato, supervisao, rede, inventario e chamados.
 
 Pendente:
 

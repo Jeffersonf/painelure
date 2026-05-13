@@ -502,6 +502,14 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.74
+
+- `npm run check` passou a rodar teste automatico de escopo por perfil.
+- Teste de escopo cobre Administrador, Supervisao, Tecnicos CTC, SETEC, SEINTEC, Gabinete, Pedagogico e Consulta.
+- Fontes oficiais ganharam metadados de dominio, responsavel, cadencia, mes e sensibilidade.
+- Admin de fontes passou a exibir metadados operacionais, nao apenas URL/status.
+- Detalhe da escola ganhou mapa rapido com ficha, supervisao, rede, inventario e chamados no padrao de linhas do painel.
+
 ### 2.0.0-dev.73
 
 - Backend passou a remover credenciais de redes/cameras do payload de perfis nao autorizados.

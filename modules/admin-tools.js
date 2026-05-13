@@ -740,6 +740,58 @@
     }).join("");
   }
 
+  function sourceMetaLine(source, compact = false) {
+    const meta = source.metadata || {};
+    return [
+      compact ? null : (meta.domain || source.label),
+      meta.owner && `resp. ${meta.owner}`,
+      meta.cadence && `cadencia ${meta.cadence}`,
+      (meta.monthKey || source.monthKey) && `mes ${P.selectedMonthLabel?.(meta.monthKey || source.monthKey) || meta.monthKey || source.monthKey}`,
+      meta.sensitive && (compact ? "dados sensiveis" : `sensivel: ${meta.sensitive}`)
+    ].filter(Boolean).join(" | ");
+  }
+
+  function renderSourceEditor() {
+    const host = P.$("#sourceEditorList");
+    if (!host) return;
+    const overrides = loadSourceOverrides();
+    host.innerHTML = Object.entries(P.sources || {}).map(([key, source]) => {
+      const value = overrides[key] ?? source.url ?? "";
+      const metaLine = sourceMetaLine(source) || `${source.status || "pending"} | ${source.type || "csv"}`;
+      return `
+        <div class="settings-row source-editor-row" data-search="${P.searchText([key, source.label, value, metaLine])}">
+          <div><strong>${source.label || key}</strong><small>${metaLine}</small></div>
+          <input type="url" data-source-url="${key}" value="${value}" placeholder="https://.../pub?output=csv">
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderSourceStatus() {
+    const host = P.$("#sourceStatusList");
+    if (!host) return;
+    const statuses = P.sourceStatus?.length
+      ? P.sourceStatus
+      : Object.entries(P.sources || {}).map(([key, source]) => ({ key, status: source.url ? source.status || "configured" : "pending" }));
+    host.innerHTML = statuses.map(item => {
+      const source = P.sources?.[item.key] || {};
+      const label = source.label || item.key;
+      const ok = item.status === "loaded" || item.status === "official";
+      const status = item.status === "skipped" || item.status === "pending" ? "pendente" : item.status;
+      const detail = [
+        source.url ? "fonte configurada" : "sem URL configurada",
+        sourceMetaLine(source, true)
+      ].filter(Boolean).join(" | ");
+      return `
+        <div class="data-row compact" data-search="${P.searchText([label, status, detail])}">
+          <span class="row-icon">&#8635;</span>
+          <span><strong>${label}</strong><small>${detail}</small></span>
+          <em class="status-pill ${ok ? "ok" : "info"}">${status}</em>
+        </div>
+      `;
+    }).join("");
+  }
+
   async function refreshBackendPanel() {
     const statusLine = P.$("#backendStatusLine");
     const snapshotHost = P.$("#backendSnapshotList");

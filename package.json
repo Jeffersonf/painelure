@@ -5,7 +5,7 @@
   "description": "PainelURE 2.0 frontend estatico com backend local evoluivel.",
   "scripts": {
     "start": "node server/index.js",
-    "check": "node scripts/check-js.js",
+    "check": "node scripts/check-js.js && node scripts/check-access-scope.js",
     "seed:online": "node scripts/seed-online.js",
     "pins:reset-online": "node scripts/reset-online-pins.js"
   },

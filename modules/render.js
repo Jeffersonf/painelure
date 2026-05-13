@@ -679,6 +679,13 @@
     const contacts = (data.contacts || []).filter(contact => ["Tecnologia", "Supervisão", "Gabinete"].includes(contact.sector)).slice(0, 3);
     const networkStatus = network ? "Mapeada" : "Pendente";
     const profileNote = missingProfile.length ? `Pendências: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
+    const quickFacts = [
+      { icon: "\u{1F3EB}", title: "Ficha e contato", note: `${profilePct}% preenchida | ${profile?.phone || "telefone pendente"} | ${profile?.email || "email pendente"}`, label: profilePct >= 65 ? "OK" : "Ficha", tone: profileStatusFromPct(profilePct), page: "schools" },
+      supervisor ? { icon: "\u{1F3AF}", title: "Supervisao", note: `${supervisor.name} | semana ${supervisor.week} | mes ${supervisor.month}`, label: supervisor.pending ? "Meta" : "OK", tone: supervisor.pending ? "warn" : "ok", page: "supervision" } : null,
+      network ? { icon: "\u{1F310}", title: "Rede e cameras", note: [network.network?.[0], network.ips?.[0], network.cameras?.[0]].filter(Boolean).join(" | "), label: "Rede", tone: "info", page: "network" } : { icon: "\u{1F310}", title: "Rede e cameras", note: "Sem dados tecnicos vinculados.", label: "Pendente", tone: "warn", page: "network" },
+      { icon: "\u{1F4BB}", title: "Inventario", note: `${totals.lines || metrics.items || 0} linha(s) | ${totals.alertUnits || metrics.alerts || 0} alerta(s)`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "OK", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", page: "inventory" },
+      calls.length ? { icon: "\u{1F4E5}", title: "Chamados", note: calls.map(call => call.title).slice(0, 3).join(" | "), label: "Fila", tone: "warn", page: "calls" } : null
+    ].filter(Boolean).filter(item => !P.canAccess || P.canAccess(item.page));
     const followUps = [
       missingProfile.length ? { icon: "\u{1F4DD}", title: "Completar ficha", note: `Campos pendentes: ${missingProfile.slice(0, 5).join(", ")}.`, label: "Ficha", tone: "warn", page: "schools" } : null,
       totals.alertUnits || metrics.alerts ? { icon: "\u{1F4BB}", title: "Conferir inventario", note: `${totals.alertUnits || metrics.alerts} unidade(s) em manutencao ou defeito.`, label: "Invent.", tone: "warn", page: "inventory" } : null,
@@ -760,6 +767,15 @@
             </div>
             <span class="status-pill info">URE</span>
           </article>
+        </div>
+        <div class="row-list compact">
+          ${quickFacts.map(item => `
+            <button class="data-row compact" type="button" data-jump="${item.page}" data-search="${P.searchText([item.title, item.note, item.label])}">
+              <span class="row-icon">${item.icon}</span>
+              <span><strong>${item.title}</strong><small>${item.note}</small></span>
+              <em class="status-pill ${item.tone}">${item.label}</em>
+            </button>
+          `).join("")}
         </div>
         ${followUps.length ? `
         <div class="row-list">
