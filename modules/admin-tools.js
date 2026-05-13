@@ -259,6 +259,7 @@
 
   function bindAdminTools() {
     applySourceOverrides();
+    bindAdminCollapsibles();
     const roleSelect = P.$("#activeRoleSelect");
     if (roleSelect && !roleSelect.dataset.bound) {
       roleSelect.dataset.bound = "true";
@@ -625,6 +626,26 @@
     renderSourceEditor();
     renderSourceStatus();
     refreshBackendPanel();
+  }
+
+  function bindAdminCollapsibles() {
+    P.$all("[data-admin-collapsible]").forEach((section, index) => {
+      const title = section.querySelector(".settings-title");
+      if (!title || title.dataset.bound) return;
+      title.dataset.bound = "true";
+      section.classList.toggle("is-collapsed", section.dataset.adminOpen !== "true" && index > 0);
+      const button = document.createElement("button");
+      button.className = "settings-toggle";
+      button.type = "button";
+      button.textContent = section.classList.contains("is-collapsed") ? "Abrir" : "Fechar";
+      button.addEventListener("click", event => {
+        event.stopPropagation();
+        const collapsed = section.classList.toggle("is-collapsed");
+        button.textContent = collapsed ? "Abrir" : "Fechar";
+      });
+      title.appendChild(button);
+      title.addEventListener("click", () => button.click());
+    });
   }
 
   function defaultPrefs() {

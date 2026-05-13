@@ -492,7 +492,7 @@
         <div><h1>Admin</h1><p>Controles globais, fontes oficiais e saúde do painel.</p></div>
       </header>
       <div class="settings-shell admin-layout">
-        <section class="settings-section">
+        <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">Visão administrativa</div>
           <div class="settings-row">
             <div><strong>Conta atual</strong><small id="adminAccountLine">Jefferson • Administrador</small></div>
@@ -507,7 +507,7 @@
             <button class="ghost-btn" type="button" id="reloadSourcesBtn">Atualizar fontes</button>
           </div>
         </section>
-        <section class="settings-section">
+        <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">Backup local</div>
           <div class="settings-row">
             <div><strong>Estado do painel</strong><small id="adminBackupMeta">Nenhuma ação de backup nesta sessão.</small></div>
@@ -523,7 +523,7 @@
             <button class="ghost-btn" type="button" id="resetLocalBtn">Limpar estado</button>
           </div>
         </section>
-        <section class="settings-section">
+        <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">Backend online</div>
           <div class="settings-row">
             <div><strong>Status da API</strong><small id="backendStatusLine">Aguardando verificação.</small></div>
@@ -537,7 +537,7 @@
             </div>
           </div>
         </section>
-        <section class="settings-section">
+        <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">Importações da base</div>
           <div class="settings-row">
             <div><strong>CSV normalizado</strong><small>Fluxo herdado da v1, mas tratado antes de renderizar.</small></div>
@@ -580,7 +580,7 @@
             <button class="ghost-btn" type="button" id="savePrefsBtn">Salvar preferências</button>
           </div>
         </section>
-        <section class="settings-section span-2">
+        <section class="settings-section span-2" data-admin-collapsible>
           <div class="settings-title">Fontes oficiais</div>
           <div class="settings-list" id="sourceEditorList"></div>
           <div class="settings-row">
@@ -592,19 +592,19 @@
           </div>
           <div class="settings-list" id="sourceStatusList"></div>
         </section>
-        <section class="settings-section">
+        <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">Snapshots online</div>
           <div class="settings-list" id="backendSnapshotList"></div>
         </section>
-        <section class="settings-section">
+        <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">Auditoria online</div>
           <div class="settings-list" id="backendAuditList"></div>
         </section>
-        <section class="settings-section span-2">
+        <section class="settings-section span-2" data-admin-collapsible>
           <div class="settings-title">Histórico de importações</div>
           <div class="settings-list" id="backendImportList"></div>
         </section>
-        <section class="settings-section span-2">
+        <section class="settings-section span-2" data-admin-collapsible>
           <div class="settings-title">Usuários online</div>
           <div class="settings-row">
             <div><strong>Novo usuário</strong><small>Cria usuário no backend quando a API estiver configurada.</small></div>

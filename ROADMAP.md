@@ -502,6 +502,12 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.77
+
+- Admin passou a usar secoes dobraveis para reduzir excesso visual.
+- Primeira secao administrativa fica aberta; blocos pesados podem ser expandidos sob demanda.
+- O painel Admin se aproxima do padrao "resumo primeiro, acao depois" inspirado no Finanza.
+
 ### 2.0.0-dev.76
 
 - Backend ganhou endpoint `/api/imports` para listar importacoes registradas.

@@ -1854,12 +1854,40 @@ select:focus-visible {
 }
 
 .settings-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 18px 20px;
   border-bottom: 1px solid var(--bd2);
   color: var(--tx);
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 700;
+}
+
+.settings-section[data-admin-collapsible] .settings-title {
+  cursor: pointer;
+}
+
+.settings-toggle {
+  border: 1px solid var(--bd);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .035);
+  color: var(--mt);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.settings-section.is-collapsed > :not(.settings-title) {
+  display: none;
+}
+
+.settings-section.is-collapsed .settings-title {
+  border-bottom: 0;
 }
 
 .account-hero {
