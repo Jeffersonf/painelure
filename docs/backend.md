@@ -43,6 +43,8 @@ Se `PAINELURE_ADMIN_USER` e `PAINELURE_ADMIN_PASSWORD` forem definidos, o backen
 
 Se `DATABASE_URL` nao for definida, o backend usa arquivo local automaticamente.
 
+Em desenvolvimento local sem `DATABASE_URL` e sem usuario salvo, o backend cria automaticamente os usuarios seed da v2 com PIN inicial `1234` e troca obrigatoria de PIN. Isso deixa `npm start` testavel localmente sem depender do banco online.
+
 Use `PGSSL=false` apenas em banco local sem SSL. Em provedores online, deixe `PGSSL=true`.
 
 Use `CORS_ORIGIN` quando o frontend estiver no GitHub Pages e o backend em outro dominio.

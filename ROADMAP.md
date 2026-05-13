@@ -528,6 +528,12 @@ Não fazer:
 - Eventos pessoais sao separados por `scope`/`type`/responsavel quando a fonte trouxer esses campos.
 - Checklist passou a marcar a primeira versao da agenda visual compartilhada/pessoal.
 
+### 2.0.0-dev.87
+
+- Backend local em modo arquivo passou a criar usuarios seed da v2 quando a base local esta vazia.
+- Login local via `npm start` agora aceita os mesmos primeiros nomes com PIN inicial `1234`.
+- Documentado o comportamento local em `docs/backend.md`.
+
 ### 2.0.0-dev.84
 
 - Criado checklist oficial da versao em `docs/qa-checklist.md`.

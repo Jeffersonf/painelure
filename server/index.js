@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
+const vm = require("vm");
 const { Pool } = require("pg");
 const { URL } = require("url");
 
@@ -115,6 +116,47 @@ function readJsonFile(file, fallback = null) {
 function writeJsonFile(file, data) {
   ensureStorage();
   fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+}
+
+function loadFrontendSeedData() {
+  const files = [
+    "data/mock.js",
+    "data/schools.js",
+    "data/school-profiles.js",
+    "data/school-operational.js",
+    "data/inventory.js",
+    "data/supervision.js",
+    "data/contacts.js",
+    "data/users.js",
+    "data/governance.js",
+    "data/operations.js"
+  ];
+  const context = { window: { PainelURE: { seedData: {} } } };
+  context.PainelURE = context.window.PainelURE;
+  files.forEach(file => {
+    const fullPath = path.join(ROOT, file);
+    if (!fs.existsSync(fullPath)) return;
+    vm.runInNewContext(fs.readFileSync(fullPath, "utf8"), context, { filename: file });
+  });
+  return context.window.PainelURE.seedData || {};
+}
+
+async function seedLocalUsersFromFrontend() {
+  if (pool || currentUsers().length) return false;
+  const seed = loadFrontendSeedData();
+  const users = (seed.users || []).map(user => ({
+    id: user.id || crypto.randomUUID(),
+    username: String(user.username || user.login || user.name || "").trim().toLowerCase(),
+    name: String(user.name || user.username || "Usuario").trim(),
+    role: String(user.role || "Consulta").trim(),
+    contact_id: String(user.contactId || user.contact_id || "").trim(),
+    password_hash: hashPassword("1234"),
+    avatar: user.avatar || "",
+    preferences: { ...(user.preferences || {}), forcePinChange: true, seededLocal: true }
+  })).filter(user => user.username);
+  if (!users.length) return false;
+  await saveLocalUsers(users);
+  return true;
 }
 
 function currentStore() {
@@ -675,6 +717,7 @@ async function updateUser(id, patch) {
 }
 
 async function ensureBootstrapUser() {
+  if (!pool && !ADMIN_USER && !ADMIN_PASSWORD && await seedLocalUsersFromFrontend()) return null;
   if (!ADMIN_USER || !ADMIN_PASSWORD) return null;
   if (await countUsers()) return null;
   return createUser({
