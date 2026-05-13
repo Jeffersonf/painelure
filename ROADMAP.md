@@ -502,6 +502,12 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.78
+
+- Seções dobráveis do Admin passaram a salvar estado no navegador.
+- Visão administrativa e Backend online ficam abertas por padrão.
+- Botões das seções passaram para linguagem mais discreta: Ver/Ocultar.
+
 ### 2.0.0-dev.77
 
 - Admin passou a usar secoes dobraveis para reduzir excesso visual.

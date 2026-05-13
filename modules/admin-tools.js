@@ -5,6 +5,7 @@
   const SOURCE_KEY = "painelure2_source_overrides";
   const AVATAR_KEY = "painelure2_avatar";
   const AVATAR_PREFIX = "painelure2_avatar_";
+  const ADMIN_COLLAPSE_KEY = "painelure2_admin_sections";
   let backendToken = sessionStorage.getItem("painelure2_backend_token") || "";
 
   const ROLE_ACCESS = {
@@ -629,19 +630,35 @@
   }
 
   function bindAdminCollapsibles() {
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(ADMIN_COLLAPSE_KEY) || "{}") || {};
+    } catch (error) {
+      saved = {};
+    }
     P.$all("[data-admin-collapsible]").forEach((section, index) => {
       const title = section.querySelector(".settings-title");
       if (!title || title.dataset.bound) return;
       title.dataset.bound = "true";
-      section.classList.toggle("is-collapsed", section.dataset.adminOpen !== "true" && index > 0);
+      const key = P.normalize?.(title.childNodes[0]?.textContent || title.textContent || `secao-${index}`) || `secao-${index}`;
+      const defaultOpen = section.dataset.adminOpen === "true" || index === 0;
+      const open = Object.prototype.hasOwnProperty.call(saved, key) ? saved[key] : defaultOpen;
+      section.classList.toggle("is-collapsed", !open);
       const button = document.createElement("button");
       button.className = "settings-toggle";
       button.type = "button";
-      button.textContent = section.classList.contains("is-collapsed") ? "Abrir" : "Fechar";
+      button.setAttribute("aria-expanded", String(open));
+      button.textContent = section.classList.contains("is-collapsed") ? "Ver" : "Ocultar";
       button.addEventListener("click", event => {
         event.stopPropagation();
         const collapsed = section.classList.toggle("is-collapsed");
-        button.textContent = collapsed ? "Abrir" : "Fechar";
+        const nextOpen = !collapsed;
+        button.setAttribute("aria-expanded", String(nextOpen));
+        button.textContent = collapsed ? "Ver" : "Ocultar";
+        saved[key] = nextOpen;
+        try {
+          localStorage.setItem(ADMIN_COLLAPSE_KEY, JSON.stringify(saved));
+        } catch (error) {}
       });
       title.appendChild(button);
       title.addEventListener("click", () => button.click());

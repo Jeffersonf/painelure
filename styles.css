@@ -1873,13 +1873,18 @@ select:focus-visible {
 .settings-toggle {
   border: 1px solid var(--bd);
   border-radius: 999px;
-  background: rgba(255, 255, 255, .035);
-  color: var(--mt);
+  background: rgba(255, 255, 255, .04);
+  color: var(--tx);
   font: inherit;
   font-size: 11px;
   font-weight: 800;
   padding: 6px 10px;
   cursor: pointer;
+}
+
+.settings-toggle:hover {
+  border-color: rgba(200, 245, 90, .28);
+  background: rgba(200, 245, 90, .08);
 }
 
 .settings-section.is-collapsed > :not(.settings-title) {
