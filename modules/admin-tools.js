@@ -756,10 +756,26 @@
     }).join("");
   }
 
+  function formatDateTime(value) {
+    return value ? new Date(value).toLocaleString("pt-BR") : "data indisponivel";
+  }
+
+  function auditTitle(event) {
+    const action = {
+      create: "Criou",
+      update: "Atualizou",
+      import: "Importou",
+      login: "Entrou",
+      logout: "Saiu"
+    }[event.action] || event.action || "Evento";
+    return `${action} ${event.entity || "registro"}`;
+  }
+
   async function refreshBackendPanel() {
     const statusLine = P.$("#backendStatusLine");
     const snapshotHost = P.$("#backendSnapshotList");
     const auditHost = P.$("#backendAuditList");
+    const importHost = P.$("#backendImportList");
     const userHost = P.$("#backendUserList");
 
     try {
@@ -788,6 +804,7 @@
       if (statusLine) statusLine.textContent = `API indisponível: ${error.message}`;
       if (snapshotHost) snapshotHost.innerHTML = `<div class="settings-row compact"><div><strong>Sem conexão</strong><small>Snapshots aparecem quando a API estiver acessível.</small></div></div>`;
       if (auditHost) auditHost.innerHTML = `<div class="settings-row compact"><div><strong>Sem conexão</strong><small>Auditoria aparece quando a API estiver acessível.</small></div></div>`;
+      if (importHost) importHost.innerHTML = `<div class="settings-row compact"><div><strong>Sem conexão</strong><small>Importações aparecem quando a API estiver acessível.</small></div></div>`;
       if (userHost) userHost.innerHTML = `<div class="settings-row compact"><div><strong>Sem conexão</strong><small>Usuários online aparecem quando a API estiver acessível.</small></div></div>`;
       return;
     }
@@ -799,8 +816,8 @@
       if (snapshotHost) {
         snapshotHost.innerHTML = items.length ? items.map(item => `
           <div class="settings-row compact" data-search="${P.searchText([item.source, item.createdAt])}">
-            <div><strong>${item.source || "snapshot"}</strong><small>${item.createdAt ? new Date(item.createdAt).toLocaleString("pt-BR") : item.id}</small></div>
-            <span class="status-pill info">histórico</span>
+            <div><strong>${item.source || "Snapshot do estado"}</strong><small>Salvo em ${formatDateTime(item.createdAt)}${item.id ? ` | ${item.id}` : ""}</small></div>
+            <span class="status-pill info">backup</span>
           </div>
         `).join("") : `<div class="settings-row compact"><div><strong>Nenhum snapshot</strong><small>O primeiro aparece após salvar estado online.</small></div></div>`;
       }
@@ -814,14 +831,30 @@
       const events = audit?.events || [];
       if (auditHost) {
         auditHost.innerHTML = events.length ? events.map(event => `
-          <div class="settings-row compact" data-search="${P.searchText([event.action, event.entity, event.detail, event.actorName])}">
-            <div><strong>${event.action} • ${event.entity}</strong><small>${event.detail || event.actorName || event.createdAt}</small></div>
+          <div class="settings-row compact" data-search="${P.searchText([event.action, event.entity, event.detail, event.actorName, event.actorRole])}">
+            <div><strong>${auditTitle(event)}</strong><small>${event.detail || "Sem detalhe"} | ${event.actorName || "sistema"} ${event.actorRole ? `(${event.actorRole})` : ""} | ${formatDateTime(event.createdAt)}</small></div>
             <span class="status-pill info">log</span>
           </div>
         `).join("") : `<div class="settings-row compact"><div><strong>Nenhum evento</strong><small>Logs aparecem após ações administrativas online.</small></div></div>`;
       }
     } catch (error) {
       if (auditHost) auditHost.innerHTML = `<div class="settings-row compact"><div><strong>Auditoria protegida</strong><small>Use a chave administrativa para listar eventos.</small></div></div>`;
+    }
+
+    try {
+      const token = backendToken || "";
+      const payload = await P.loadBackendImports?.(token, 8);
+      const imports = payload?.imports || [];
+      if (importHost) {
+        importHost.innerHTML = imports.length ? imports.map(item => `
+          <div class="settings-row compact" data-search="${P.searchText([item.sourceKey, item.detail, item.status, item.rowsCount])}">
+            <div><strong>${item.sourceKey || "importacao"}</strong><small>${item.rowsCount || 0} linha(s) | ${item.detail || "sem detalhe"} | ${formatDateTime(item.createdAt)}</small></div>
+            <span class="status-pill ${item.status === "ok" ? "ok" : "warn"}">${item.status || "registro"}</span>
+          </div>
+        `).join("") : `<div class="settings-row compact"><div><strong>Nenhuma importação online</strong><small>As importações feitas pela API aparecem aqui.</small></div></div>`;
+      }
+    } catch (error) {
+      if (importHost) importHost.innerHTML = `<div class="settings-row compact"><div><strong>Importações protegidas</strong><small>Use a chave administrativa para listar importações.</small></div></div>`;
     }
 
     try {

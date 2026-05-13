@@ -341,6 +341,22 @@ async function recordImportRun(sourceKey, rowsCount, status = "ok", detail = "")
   }
 }
 
+async function listImportRuns(limit = 20) {
+  if (!pool || !dbReady) return [];
+  const result = await pool.query(
+    "select id, source_key, rows_count, status, detail, created_at from import_runs order by created_at desc limit $1",
+    [Math.max(1, Math.min(Number(limit) || 20, 100))]
+  );
+  return result.rows.map(row => ({
+    id: row.id,
+    sourceKey: row.source_key,
+    rowsCount: Number(row.rows_count || 0),
+    status: row.status,
+    detail: row.detail,
+    createdAt: row.created_at.toISOString()
+  }));
+}
+
 async function audit(req, action, entity, entityId = "", detail = "", metadata = {}) {
   const session = currentSession(req);
   const user = session?.userId ? await findUserById(session.userId) : null;
@@ -1029,6 +1045,12 @@ async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/audit") {
     if (!requireAuth(req, res)) return;
     send(res, 200, { ok: true, events: await listAuditEvents(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
+    return;
+  }
+
+  if (req.method === "GET" && pathname === "/api/imports") {
+    if (!requireAuth(req, res)) return;
+    send(res, 200, { ok: true, imports: await listImportRuns(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
     return;
   }
 

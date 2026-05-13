@@ -156,6 +156,12 @@
     return fetchJson(apiPath(`/api/audit?limit=${encodeURIComponent(limit)}`), { headers, timeoutMs: 4000 });
   }
 
+  async function loadBackendImports(token, limit = 20) {
+    const headers = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetchJson(apiPath(`/api/imports?limit=${encodeURIComponent(limit)}`), { headers, timeoutMs: 4000 });
+  }
+
   P.loadBackendData = loadBackendData;
   P.pushBackendData = pushBackendData;
   P.loginBackend = loginBackend;
@@ -170,4 +176,5 @@
   P.saveBackendSources = saveBackendSources;
   P.loadBackendSnapshots = loadBackendSnapshots;
   P.loadBackendAudit = loadBackendAudit;
+  P.loadBackendImports = loadBackendImports;
 })();

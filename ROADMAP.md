@@ -502,6 +502,12 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.76
+
+- Backend ganhou endpoint `/api/imports` para listar importacoes registradas.
+- Admin passou a exibir historico de importacoes online junto de snapshots e auditoria.
+- Snapshots e auditoria ficaram mais legiveis, com texto orientado a acao, autor e data.
+
 ### 2.0.0-dev.75
 
 - Admin principal passou a mostrar diagnosticos de API, fontes oficiais e escopo ativo.
