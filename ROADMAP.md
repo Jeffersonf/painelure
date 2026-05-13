@@ -78,6 +78,18 @@ Antes de importar novas funcionalidades da 1.0, a prioridade da 2.0 é estabiliz
 4. Páginas internas com componentes unificados.
 5. Importação controlada de funcionalidades reais.
 
+Checklist operacional da versao: [`docs/qa-checklist.md`](docs/qa-checklist.md).
+
+Pendencias criticas registradas no checklist:
+
+- agenda com calendario compartilhado e pessoal;
+- painel do supervisor no nivel funcional da v1;
+- tela de supervisores mais util e fiel as regras da v1;
+- tela CTC mais completa que a versao atual da v2;
+- tela de escolas menos crua e mais proxima do Finanza;
+- tela de inventario redesenhada para triagem real;
+- QA visual fino em `school-card`, `contact-card`, `detail-widget` e `supervisor-row`.
+
 ## Regras De Código
 
 1. Não empilhar CSS.
@@ -507,6 +519,13 @@ Não fazer:
 - Resumos operacionais passaram de coluna longa para grid responsivo, reduzindo altura e aproximando a densidade do Finanza.
 - Fontes locais passaram para `font-display: block` para reduzir a piscada de fonte padrao antes da fonte oficial carregar.
 - QA visual inicial focou em estabilidade de refresh e leitura compacta das paginas principais.
+
+### 2.0.0-dev.84
+
+- Criado checklist oficial da versao em `docs/qa-checklist.md`.
+- Registradas pendencias da v1 que ainda precisam entrar melhor na v2: agenda, supervisao, CTC, escolas e inventario.
+- Registrado proximo foco visual: `school-card`, `contact-card`, `detail-widget` e `supervisor-row`.
+- Roadmap passou a apontar o checklist como trilho operacional da versao.
 
 ### 2.0.0-dev.82
 
