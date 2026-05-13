@@ -46,7 +46,7 @@ Objetivo: deixar claro o que ainda falta para a v2 herdar o que importa da v1 se
 - [x] Separar melhor: ficha, inventario, supervisao, rede e chamados.
 - [x] Reduzir texto secundario nos cards.
 - [x] Criar estados visuais claros: ok, atencao, pendente, critico.
-- [ ] Detalhe da escola precisa virar a principal pagina operacional da unidade.
+- [x] Detalhe da escola precisa virar a principal pagina operacional da unidade.
 
 ### Inventario
 

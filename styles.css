@@ -1555,6 +1555,92 @@ select:focus-visible {
   align-items: center;
 }
 
+.school-operational-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin: 14px 18px 0;
+  padding: 16px;
+  border: 1px solid rgba(200, 245, 90, .18);
+  border-radius: 18px;
+  background:
+    linear-gradient(160deg, rgba(200, 245, 90, .05), transparent 62%),
+    var(--sf);
+}
+
+.school-operational-warn {
+  border-color: rgba(245, 200, 90, .24);
+  background:
+    linear-gradient(160deg, rgba(245, 200, 90, .045), transparent 58%),
+    var(--sf);
+}
+
+.school-operational-info {
+  border-color: rgba(90, 245, 200, .2);
+}
+
+.school-operational-hero small,
+.school-operational-hero strong,
+.school-operational-hero p {
+  display: block;
+}
+
+.school-operational-hero small {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.school-operational-hero strong {
+  margin-top: 5px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.school-operational-hero p {
+  margin: 5px 0 0;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.school-operational-score {
+  display: grid;
+  grid-template-columns: repeat(4, 86px);
+  gap: 8px;
+}
+
+.school-operational-score span {
+  min-height: 58px;
+  display: grid;
+  align-content: center;
+  padding: 8px 10px;
+  border: 1px solid var(--bd2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .025);
+}
+
+.school-operational-score strong,
+.school-operational-score small {
+  display: block;
+}
+
+.school-operational-score strong {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.school-operational-score small {
+  margin-top: 5px;
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .progress {
   width: 72px;
   height: 5px;
@@ -2853,7 +2939,8 @@ select:focus-visible {
 
   .supervisor-score-grid,
   .supervisor-workbench,
-  .inventory-hero {
+  .inventory-hero,
+  .school-operational-hero {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -2952,7 +3039,9 @@ select:focus-visible {
   .supervisor-workbench,
   .supervision-focus-list,
   .inventory-hero,
-  .inventory-hero-score {
+  .inventory-hero-score,
+  .school-operational-hero,
+  .school-operational-score {
     grid-template-columns: 1fr;
   }
 

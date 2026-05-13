@@ -742,8 +742,10 @@
     const networkStatus = network ? "Mapeada" : "Pendente";
     const profileNote = missingProfile.length ? `PendÃªncias: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
     const hasAttention = missingProfile.length || totals.alertUnits || metrics.alerts || !network || calls.length;
+    const mainAction = followUpText(missingProfile, totals.alertUnits || metrics.alerts, network, calls.length);
+    const schoolTone = totals.alertUnits || metrics.alerts ? "warn" : (!network || profilePct < 65 || calls.length ? "info" : "ok");
     const decisionRows = [
-      { icon: "\u{1F4CC}", title: "Proxima acao", note: followUpText(missingProfile, totals.alertUnits || metrics.alerts, network, calls.length), label: hasAttention ? "revisar" : "ok", tone: hasAttention ? "warn" : "ok" },
+      { icon: "\u{1F4CC}", title: "Proxima acao", note: mainAction, label: hasAttention ? "revisar" : "ok", tone: hasAttention ? "warn" : "ok" },
       { icon: "\u{1F3AF}", title: "Responsavel direto", note: supervisor ? `${supervisor.name} acompanha ${supervisor.schools || supervisor.assignedSchools?.length || 0} escola(s).` : "Escola ainda sem supervisor vinculado.", label: supervisor ? "supervisao" : "pendente", tone: supervisor ? "info" : "warn" },
       { icon: "\u{1F4BB}", title: "Risco operacional", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) em manutencao/defeito.` : "Inventario sem alerta resumido.", label: totals.alertUnits || metrics.alerts ? "atencao" : "ok", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok" }
     ];
@@ -770,6 +772,19 @@
           </div>
           <span class="status-pill ${profileStatusFromPct(profilePct)}">${profilePct}% ficha</span>
         </div>
+        <section class="school-operational-hero school-operational-${schoolTone}">
+          <div>
+            <small>Acao principal</small>
+            <strong>${mainAction}</strong>
+            <p>${supervisor ? `Supervisor: ${supervisor.name}` : "Sem supervisor vinculado"} | ${network ? "rede mapeada" : "rede pendente"}</p>
+          </div>
+          <div class="school-operational-score">
+            <span><strong>${profilePct}%</strong><small>ficha</small></span>
+            <span><strong>${totals.lines || metrics.items || 0}</strong><small>inventario</small></span>
+            <span><strong>${totals.alertUnits || metrics.alerts || 0}</strong><small>alertas</small></span>
+            <span><strong>${calls.length}</strong><small>chamados</small></span>
+          </div>
+        </section>
         <div class="row-list compact">
           ${summaryRowsMarkup(decisionRows)}
         </div>

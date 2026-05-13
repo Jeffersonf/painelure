@@ -514,6 +514,12 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.91
+
+- Detalhe da escola ganhou bloco operacional com acao principal, supervisor, rede e placar de ficha, inventario, alertas e chamados.
+- Pagina da escola passou a comunicar prioridade antes dos widgets detalhados.
+- Checklist marcou o detalhe da escola como pagina operacional principal da unidade.
+
 ### 2.0.0-dev.90
 
 - Inventario ganhou topo operacional por escola, com prioridade, itens OK e categorias visiveis antes da lista.
