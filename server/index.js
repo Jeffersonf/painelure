@@ -528,20 +528,31 @@ function canViewCredentials(user = null) {
   return ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => role.includes(item));
 }
 
+function identityKeys(values = [], includeFirstName = true) {
+  return [...new Set(values.flatMap(value => {
+    const key = normalizeText(value);
+    if (!key) return [];
+    const emailName = key.includes("@") ? key.split("@")[0] : "";
+    const firstName = key.split(/\s+/)[0] || "";
+    return [key, emailName, includeFirstName ? firstName : ""].filter(Boolean);
+  }))];
+}
+
+function uniqueFirstNameMatch(supervisors, userKeys) {
+  const firstNames = userKeys.filter(key => key && !key.includes(".") && !key.includes("@") && !key.includes(" "));
+  if (!firstNames.length) return null;
+  const matches = supervisors.filter(supervisor => firstNames.includes(normalizeText(supervisor.name).split(/\s+/)[0]));
+  return matches.length === 1 ? matches[0] : null;
+}
+
 function supervisorForUser(appData = {}, user = null) {
   if (!user || !isSupervisorRole(user.role)) return null;
-  const userKeys = [user.name, user.username, user.contactName, user.supervisorName]
-    .map(normalizeText)
-    .filter(Boolean);
-  return (appData.supervisors || []).find(supervisor => {
-    const supervisorKeys = [supervisor.name, supervisor.email, supervisor.login, supervisor.username]
-      .map(value => {
-        const normalized = normalizeText(value);
-        return normalized.includes("@") ? normalized.split("@")[0] : normalized;
-      })
-      .filter(Boolean);
+  const supervisors = appData.supervisors || [];
+  const userKeys = identityKeys([user.name, user.username, user.email, user.contactName, user.supervisorName]);
+  return supervisors.find(supervisor => {
+    const supervisorKeys = identityKeys([supervisor.name, supervisor.email, supervisor.login, supervisor.username], false);
     return supervisorKeys.some(key => userKeys.includes(key));
-  }) || null;
+  }) || uniqueFirstNameMatch(supervisors, userKeys);
 }
 
 function scopeAppDataForUser(appData = {}, user = null) {

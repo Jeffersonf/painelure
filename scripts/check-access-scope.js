@@ -85,6 +85,11 @@ function run() {
     assert(!P.canViewSchool("EE Bairro Boa Vista Intervales"), "Supervisor nao deve abrir escola fora da carteira.");
   });
 
+  withUser(P, { name: "Magda", username: "magda", role: "Supervisao" }, scoped => {
+    assert(scoped.schools.length === magda.assignedSchools.length, "Supervisor com login curto deve ver escolas vinculadas.");
+    assert(scoped.supervisors.length === 1 && scoped.supervisors[0].name === magda.name, "Supervisor com login curto deve ver o proprio nome completo.");
+  });
+
   withUser(P, { name: "Consulta", role: "Consulta" }, scoped => {
     assert(scoped.schools.length === data.schools.length, "Consulta deve receber escolas.");
     assert(scoped.contacts.length === data.contacts.length, "Consulta deve receber contatos.");

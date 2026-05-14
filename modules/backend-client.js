@@ -28,6 +28,21 @@
     return base ? `${base}${path}` : `.${path}`;
   }
 
+  function preserveSupervisorScope(existing, incoming) {
+    if (!P.isSupervisorUser?.() || !incoming) return incoming;
+    const scopedLocal = P.scopedData?.(existing);
+    if (!scopedLocal?.supervisors?.length) return incoming;
+    const needsSupervisor = !Array.isArray(incoming.supervisors) || incoming.supervisors.length === 0;
+    const needsSchools = !Array.isArray(incoming.schools) || incoming.schools.length === 0;
+    if (!needsSupervisor && !needsSchools) return incoming;
+    return {
+      ...incoming,
+      schools: needsSchools ? scopedLocal.schools || [] : incoming.schools,
+      supervisors: needsSupervisor ? scopedLocal.supervisors || [] : incoming.supervisors,
+      schoolProfiles: needsSchools ? scopedLocal.schoolProfiles || [] : incoming.schoolProfiles
+    };
+  }
+
   async function fetchJson(url, options = {}) {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs || API_TIMEOUT);
@@ -63,7 +78,8 @@
       const payload = await fetchApi("/api/data", { headers, timeoutMs: 12000 });
       const appData = payload?.data?.appData;
       if (appData) {
-        P.setAppData({ ...(P.getAppData() || {}), ...appData });
+        const existing = P.getAppData() || {};
+        P.setAppData({ ...existing, ...preserveSupervisorScope(existing, appData) });
         P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt || "" };
       }
       return payload;

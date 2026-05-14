@@ -79,19 +79,20 @@
     const selectedUser = arguments.length ? user : onlineUser() || user;
     user = selectedUser;
     const contact = contactForUser(user);
+    const supervisor = arguments.length ? null : P.supervisorForCurrentUser?.();
     return {
       id: user?.id || "",
-      name: contact?.name || user?.name || "Usuario",
-      shortName: user?.name || contact?.name || "Usuario",
+      name: supervisor?.name || contact?.name || user?.name || "Usuario",
+      shortName: user?.name || supervisor?.name || contact?.name || "Usuario",
       role: user?.role || "Consulta",
       login: user?.login || user?.username || "",
       contactId: contact?.id || user?.contactId || "",
-      contactRole: contact?.role || "",
-      sector: contact?.sector || "",
-      email: contact?.email || user?.email || "",
-      phone: contact?.phone || contact?.ramal || "",
+      contactRole: contact?.role || (supervisor ? "Supervisor Educacional" : ""),
+      sector: contact?.sector || (supervisor ? "Supervisao" : ""),
+      email: contact?.email || user?.email || supervisor?.email || "",
+      phone: contact?.phone || contact?.ramal || supervisor?.phone || "",
       photo: contact?.photo || user?.avatar || "",
-      linked: Boolean(contact)
+      linked: Boolean(contact || supervisor)
     };
   }
 

@@ -51,18 +51,33 @@
     return normalized(user?.supervisorName || user?.contactName || user?.name || user?.login || user?.username);
   }
 
+  function identityKeys(values = [], includeFirstName = true) {
+    return [...new Set(values.flatMap(value => {
+      const key = normalized(value);
+      if (!key) return [];
+      const emailName = key.includes("@") ? key.split("@")[0] : "";
+      const firstName = key.split(/\s+/)[0] || "";
+      return [key, emailName, includeFirstName ? firstName : ""].filter(Boolean);
+    }))];
+  }
+
+  function uniqueFirstNameMatch(supervisors, userKeys) {
+    const firstNames = userKeys.filter(key => key && !key.includes(".") && !key.includes("@") && !key.includes(" "));
+    if (!firstNames.length) return null;
+    const matches = supervisors.filter(supervisor => firstNames.includes(normalized(supervisor.name).split(/\s+/)[0]));
+    return matches.length === 1 ? matches[0] : null;
+  }
+
   function supervisorForCurrentUser(data = P.getAppData?.()) {
     const user = activeIdentity();
     if (!user || !isSupervisorUser(user)) return null;
-    const userKey = supervisorIdentityKey(user);
-    if (!userKey) return null;
-    return (data?.supervisors || []).find(supervisor => {
-      const values = [supervisor.name, supervisor.email, supervisor.login, supervisor.username];
-      return values.some(value => {
-        const key = normalized(value);
-        return key === userKey || (key && userKey && key.split("@")[0] === userKey);
-      });
-    }) || null;
+    const supervisors = data?.supervisors || [];
+    const userKeys = identityKeys([user.supervisorName, user.contactName, user.name, user.email, user.login, user.username]);
+    if (!userKeys.length) return null;
+    return supervisors.find(supervisor => {
+      const supervisorKeys = identityKeys([supervisor.name, supervisor.email, supervisor.login, supervisor.username], false);
+      return supervisorKeys.some(key => userKeys.includes(key));
+    }) || uniqueFirstNameMatch(supervisors, userKeys);
   }
 
   function assignedSchoolsForCurrentUser(data = P.getAppData?.()) {
