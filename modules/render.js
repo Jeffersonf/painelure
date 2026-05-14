@@ -206,12 +206,17 @@
 
   function applySupervisorFilters() {
     const status = P.$("#supervisorStatusFilter")?.value || "all";
-    const rows = P.$all("#supervisorRows .supervisor-row");
+    const rows = P.$all("#supervisorRows .supervisor-row, #supervisorRows .supervisor-sheet-row");
+    const selectorRows = P.$all("#supervisorRows [data-supervisor-selector]");
     let visibleCount = 0;
     rows.forEach(row => {
       const visible = status === "all" || row.dataset.status === status;
       row.classList.toggle("filter-hidden", !visible);
       if (visible) visibleCount++;
+    });
+    selectorRows.forEach(row => {
+      const visible = status === "all" || row.dataset.status === status;
+      row.classList.toggle("filter-hidden", !visible);
     });
     const summary = P.$("#supervisorFilterSummary");
     if (summary) summary.textContent = `${visibleCount}/${rows.length} supervisor(es) visiveis.`;
@@ -683,7 +688,26 @@
       return;
     }
     const data = P.getAppData();
-    grid.innerHTML = schools.map(school => {
+    const cityCounts = schools.reduce((acc, school) => {
+      acc[school.city] = (acc[school.city] || 0) + 1;
+      return acc;
+    }, {});
+    const cityOrder = Object.entries(cityCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    grid.innerHTML = `
+      <section class="schools-finanza-overview">
+        <article class="schools-hero-card">
+          <div>
+            <span class="eyebrow">🏫 Escolas</span>
+            <strong>${schools.length} unidades na base</strong>
+            <p>Ficha, supervisao, inventario e rede no mesmo ponto de consulta.</p>
+          </div>
+          <div class="schools-city-stack">
+            ${cityOrder.slice(0, 4).map(([city, count]) => `<span><strong>${count}</strong><small>${city}</small></span>`).join("")}
+          </div>
+        </article>
+      </section>
+      <section class="school-finanza-grid">
+        ${schools.map(school => {
       const profile = schoolProfile(school.name);
       const profilePct = schoolProfileCompletion(school.name);
       const missing = schoolMissingProfileFields(school.name);
@@ -698,29 +722,40 @@
       const note = followUpText(missing, alertCount, network, 0);
       const actionLabel = alertCount ? "Conferir inventario" : (!network ? "Mapear rede" : (profileStatus !== "ok" ? "Completar ficha" : "Abrir unidade"));
       return `
-        <button class="school-card school-card-${cardTone}" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([school.city])}" data-profile-status="${profileStatus}" data-inventory-alerts="${alertCount}" data-network-status="${networkStatus}" data-search="${P.searchText([school.name, school.city, school.cie, school.initials, profile?.director, profile?.email, profile?.phone, supervisor?.name])}">
-          <div class="school-top">
-            <div class="school-avatar">${school.initials}</div>
-            <div>
+        <button class="school-card school-card-${cardTone} school-finanza-card" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([school.city])}" data-profile-status="${profileStatus}" data-inventory-alerts="${alertCount}" data-network-status="${networkStatus}" data-search="${P.searchText([school.name, school.city, school.cie, school.initials, profile?.director, profile?.email, profile?.phone, supervisor?.name])}">
+          <div class="school-finanza-main">
+            <div class="school-avatar">🏫</div>
+            <div class="school-title-block">
               <h2>${school.name}</h2>
-              <p>${school.city} | CIE ${school.cie}</p>
+              <p>${school.city} · CIE ${school.cie}</p>
             </div>
             <span class="status-pill ${cardTone}">${cardLabel}</span>
           </div>
-          <div class="school-scoreboard">
+          <div class="school-finanza-body">
+            <div>
+              <small>Supervisor</small>
+              <strong>${supervisor?.name || "Nao vinculado"}</strong>
+            </div>
+            <div>
+              <small>Status da unidade</small>
+              <strong>${note}</strong>
+            </div>
+          </div>
+          <div class="school-finanza-metrics">
             <span><strong>${profilePct}%</strong><small>ficha</small></span>
             <span><strong>${metrics.items || 0}</strong><small>itens</small></span>
-            <span><strong>${alertCount || 0}</strong><small>manut./defeito</small></span>
+            <span><strong>${alertCount || 0}</strong><small>manut.</small></span>
+            <span><strong>${network ? "sim" : "nao"}</strong><small>rede</small></span>
           </div>
-          <p class="school-note">${note}</p>
-          <div class="school-foot">
-            <span>${supervisor?.name || "sem supervisor"}</span>
+          <div class="school-finanza-foot">
             <em>${actionLabel}</em>
             <div class="progress" aria-label="Ficha ${profilePct}%"><i style="width:${profilePct}%"></i></div>
           </div>
         </button>
       `;
-    }).join("");
+        }).join("")}
+      </section>
+    `;
     renderSchoolFilters(schools);
     applySchoolFilters();
     grid.querySelectorAll("[data-school-name]").forEach(button => {
@@ -1198,134 +1233,147 @@
       if (sortMode === "schools") return Number(b.schools || 0) - Number(a.schools || 0) || a.name.localeCompare(b.name);
       return a.name.localeCompare(b.name);
     });
+    const totals = sorted.reduce((acc, item) => {
+      const { week, month, pending, schools } = supervisorProgress(item);
+      acc.schools += schools;
+      acc.weekDone += week.done;
+      acc.weekTotal += week.total;
+      acc.monthDone += month.done;
+      acc.monthTotal += month.total;
+      acc.pending += pending;
+      return acc;
+    }, { schools: 0, weekDone: 0, weekTotal: 0, monthDone: 0, monthTotal: 0, pending: 0 });
+    const coverage = totals.monthTotal ? Math.round((totals.monthDone / totals.monthTotal) * 100) : 0;
     host.innerHTML = `
-      ${sourceNote ? `<div class="supervision-source"><span>Fonte</span><strong>Supervisao</strong><small>${sourceNote}</small></div>` : ""}
-      ${sorted.map((item, index) => {
-        const { week, month, schools } = supervisorProgress(item);
-        const meta = supervisorStatusMeta(item);
-        return `
-        <button class="supervisor-row" type="button" data-supervisor-index="${index}" data-supervisor-key="${P.searchText([item.name])}" data-status="${meta.tone}" data-search="${P.searchText([item.name, item.email, item.phone, item.schools, item.week, item.month, item.pending])}">
-          <div class="supervisor-person">
-            <div class="school-avatar">${initials(item.name)}</div>
-            <span>
-              <strong>${item.name}</strong>
-              <small>${schools} escola(s) | ${item.email || item.phone || "contato pendente"}</small>
-            </span>
-          </div>
-          <div class="supervisor-row-summary">
-            <strong>${meta.title}</strong>
-            <small>${meta.action}</small>
-          </div>
-          <div class="supervisor-metrics">
-            <div class="bar-stat" style="--pct:${week.pct}%">
-              <small>Semana</small>
-              <span>${item.week}</span>
-              <i></i>
+      <section class="supervision-v1-shell">
+        <div class="supervision-v1-metrics">
+          <article><span>&#129517;</span><small>Supervisores</small><strong>${sorted.length}</strong></article>
+          <article><span>&#127979;</span><small>Escolas</small><strong>${totals.schools}</strong></article>
+          <article><span>&#9989;</span><small>Visitas</small><strong>${totals.monthDone}/${totals.monthTotal || 0}</strong></article>
+          <article><span>&#127919;</span><small>Cobertura</small><strong>${coverage}%</strong></article>
+        </div>
+        ${sourceNote ? `<div class="supervision-source"><span>&#128197;</span><strong>Fonte de supervisao</strong><small>${sourceNote}</small></div>` : ""}
+        <div class="supervision-v1-layout">
+          <article class="supervision-v1-table box">
+            <div class="box-head"><div><strong>Supervisores</strong><small>Mes, semana, carteira e cobertura.</small></div></div>
+            <div class="supervisor-sheet-table-wrap">
+              <table class="supervisor-sheet-table">
+                <thead><tr><th>Supervisor</th><th>Escolas</th><th>Semana</th><th>Mes</th><th>Cobertura</th><th></th></tr></thead>
+                <tbody>
+                  ${sorted.map((item, index) => {
+                    const { week, month, pending, schools } = supervisorProgress(item);
+                    const pct = month.total ? Math.round((month.done / month.total) * 100) : 0;
+                    return `<tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${pending ? "warn" : "ok"}" data-search="${P.searchText([item.name, item.email, item.phone, item.week, item.month])}">
+                      <td><strong>${item.name}</strong><small>${item.email || item.phone || "contato pendente"}</small></td>
+                      <td>${schools}</td>
+                      <td><span>${item.week}</span><i style="--pct:${week.pct}%"></i></td>
+                      <td><span>${item.month}</span><i style="--pct:${month.pct}%"></i></td>
+                      <td><em class="status-pill ${pending ? "warn" : "ok"}">${pct}%</em></td>
+                      <td><button class="ghost-btn" type="button">Abrir</button></td>
+                    </tr>`;
+                  }).join("")}
+                </tbody>
+              </table>
             </div>
-            <div class="bar-stat" style="--pct:${month.pct}%">
-              <small>Mes</small>
-              <span>${item.month}</span>
-              <i></i>
+          </article>
+          <aside class="supervision-v1-selector box">
+            <div class="box-head"><div><strong>Carteiras</strong><small>Atalho rapido como na v1.</small></div></div>
+            <div class="row-list compact">
+              ${sorted.map((item, index) => {
+                const { month, pending, schools } = supervisorProgress(item);
+                return `<button class="data-row compact" type="button" data-supervisor-selector="${index}" data-status="${pending ? "warn" : "ok"}" data-search="${P.searchText([item.name, item.email])}">
+                  <span class="row-icon">&#129517;</span>
+                  <span><strong>${item.name}</strong><small>${schools} escola(s) | ${month.done}/${month.total || 0} visitas</small></span>
+                  <em class="status-pill ${pending ? "warn" : "ok"}">${pending ? `${pending} faltam` : "ok"}</em>
+                </button>`;
+              }).join("")}
             </div>
-          </div>
-          <span class="status-pill ${meta.tone}">${meta.label}</span>
-        </button>
-      `; }).join("")}`;
+          </aside>
+        </div>
+      </section>`;
     applySupervisorFilters();
-    host.querySelectorAll("[data-supervisor-index]").forEach(button => {
+    host.querySelectorAll("[data-supervisor-index], [data-supervisor-selector]").forEach(button => {
       button.addEventListener("click", () => {
-        openSupervisorPage(sorted[Number(button.dataset.supervisorIndex)].name);
+        const index = Number(button.dataset.supervisorIndex || button.dataset.supervisorSelector);
+        openSupervisorPage(sorted[index].name);
       });
     });
   }
+
   function renderSupervisorDetail(supervisor, target = "#supervisorDetailPageBody") {
     const detail = P.$(target);
     if (!detail || !supervisor) return;
     const schools = supervisor.assignedSchools || [];
     const schoolCards = schools.map(name => {
       const school = findSchool(name);
-      const profilePct = schoolProfileCompletion(name);
       const alerts = school ? inventoryAlertCount(school) : 0;
-      const missingFields = schoolMissingProfileFields(name).slice(0, 3);
+      const profilePct = schoolProfileCompletion(name);
       return {
         name,
         city: school?.city || "Municipio nao informado",
         cie: school?.cie || "CIE pendente",
         items: school?.items ?? 0,
-        profilePct,
-        missingFields,
         alerts,
+        profilePct,
         status: alerts ? "warn" : profileStatusFromPct(profilePct)
       };
     });
     const { week, month, pending, schools: schoolCount } = supervisorProgress(supervisor);
-    const meta = supervisorStatusMeta(supervisor);
+    const visitedCount = Math.min(month.done, schoolCards.length);
+    const visited = new Set(schoolCards.slice(0, visitedCount).map(item => item.name));
+    const weekCount = Math.max(4, Math.ceil((month.total || schoolCards.length * 3 || 12) / Math.max(schoolCards.length || 1, 1)));
+    const weeks = Array.from({ length: weekCount }, (_, index) => index + 1);
     const completedMessage = pending ? `${pending} visita(s) ainda faltam no mes.` : "Meta mensal concluida.";
     detail.innerHTML = `
-      <article class="supervisor-hero supervisor-hero-${meta.tone}">
-        <div class="supervisor-hero-main">
-          <div class="school-avatar large">${initials(supervisor.name)}</div>
-          <div>
-            <span class="eyebrow">Supervisor</span>
-            <strong>${supervisor.name}</strong>
-            <p>${supervisor.email || "email nao informado"} ${supervisor.phone ? ` | ${supervisor.phone}` : ""}</p>
+      <section class="supervisor-record-v1">
+        <article class="supervisor-record-hero box">
+          <div class="supervisor-record-id">
+            <div class="school-avatar large">${initials(supervisor.name)}</div>
+            <div><span class="eyebrow">&#129517; Supervisor</span><strong>${supervisor.name}</strong><p>${supervisor.email || "email nao informado"}${supervisor.phone ? ` | ${supervisor.phone}` : ""}</p></div>
           </div>
-        </div>
-        <div class="supervisor-hero-status">
-          <span class="status-pill ${meta.tone}">${meta.label}</span>
-          <small>${meta.action}</small>
-        </div>
-      </article>
+          <div class="supervisor-record-goal"><strong>${month.pct}%</strong><span class="status-pill ${pending ? "warn" : "ok"}">${pending ? "em andamento" : "meta ok"}</span></div>
+        </article>
 
-      <section class="supervisor-score-grid">
-        <article class="supervisor-score-card ${week.missing ? "warn" : "ok"}">
-          <div class="score-card-head"><small>Meta semanal</small><span>${week.pct}%</span></div>
-          <strong>${supervisor.week}</strong>
-          <i style="--pct:${week.pct}%"></i>
-          <p>${week.missing ? `${week.missing} visita(s) para fechar a semana.` : "Semana concluida."}</p>
-        </article>
-        <article class="supervisor-score-card ${month.missing ? "warn" : "ok"}">
-          <div class="score-card-head"><small>Meta mensal</small><span>${month.pct}%</span></div>
-          <strong>${supervisor.month}</strong>
-          <i style="--pct:${month.pct}%"></i>
-          <p>${completedMessage}</p>
-        </article>
-        <article class="supervisor-score-card info">
-          <div class="score-card-head"><small>Carteira</small><span>${schoolCount}</span></div>
-          <strong>${schoolCards.length}</strong>
-          <i style="--pct:${schoolCards.length ? 100 : 0}%"></i>
-          <p>${schoolCards.length} escola(s) vinculada(s) na base oficial.</p>
-        </article>
-        <article class="supervisor-score-card info">
-          <div class="score-card-head"><small>Contato</small><span>URE</span></div>
-          <strong>${supervisor.phone ? "Ramal" : "Email"}</strong>
-          <i style="--pct:100%"></i>
-          <p>${supervisor.phone || supervisor.email || "Contato nao informado na base."}</p>
-        </article>
-      </section>
+        <section class="supervisor-score-grid">
+          <article class="supervisor-score-card ${week.missing ? "warn" : "ok"}"><div class="score-card-head"><small>Meta semanal</small><span>${week.pct}%</span></div><strong>${supervisor.week}</strong><i style="--pct:${week.pct}%"></i><p>${week.missing ? `${week.missing} visita(s) para fechar a semana.` : "Semana concluida."}</p></article>
+          <article class="supervisor-score-card ${month.missing ? "warn" : "ok"}"><div class="score-card-head"><small>Meta mensal</small><span>${month.pct}%</span></div><strong>${supervisor.month}</strong><i style="--pct:${month.pct}%"></i><p>${completedMessage}</p></article>
+          <article class="supervisor-score-card info"><div class="score-card-head"><small>Escolas</small><span>${schoolCount}</span></div><strong>${schoolCards.length}</strong><i style="--pct:${schoolCards.length ? 100 : 0}%"></i><p>Carteira vinculada ao supervisor.</p></article>
+          <article class="supervisor-score-card info"><div class="score-card-head"><small>Visitas importadas</small><span>base</span></div><strong>${month.done}</strong><i style="--pct:${month.pct}%"></i><p>Dados oficiais do recorte atual.</p></article>
+        </section>
 
-      <section class="supervisor-workbench">
-        <article class="box supervisor-school-box">
-          <div class="box-head"><div><strong>Escolas da carteira</strong><small>Clique para abrir a unidade e conferir ficha, inventario e rede.</small></div></div>
-          <div class="linked-school-grid supervisor-linked-grid">
-            ${schoolCards.length ? schoolCards.map(school => `
-              <button class="linked-school" type="button" data-school-jump="${school.name}" data-search="${P.searchText([school.name, school.city, school.cie])}">
-                <span>
-                  <strong>${school.name}</strong>
-                  <small>${school.city} | ${school.cie} | ficha ${school.profilePct}%</small>
-                </span>
-                <em class="status-pill ${statusClass(school.status)}">${school.alerts ? `${school.alerts} manut./defeito` : `${school.items} item(ns)`}</em>
-              </button>
-            `).join("") : `<div class="empty-state">Nenhuma escola vinculada a este supervisor.</div>`}
+        <article class="box supervisor-matrix-box">
+          <div class="box-head"><div><strong>Matriz semanal</strong><small>Modelo da v1: semanas por escola vinculada.</small></div></div>
+          <div class="supervisor-weekly-matrix-wrap">
+            <table class="supervisor-weekly-matrix">
+              <thead><tr><th>Escola</th>${weeks.map(weekNumber => `<th>Semana ${weekNumber}</th>`).join("")}</tr></thead>
+              <tbody>
+                ${schoolCards.map((school, schoolIndex) => `<tr>
+                  <td class="week-col"><strong>${school.name}</strong><span>${school.city} | ${school.cie}</span></td>
+                  ${weeks.map((weekNumber, weekIndex) => {
+                    const estimated = (schoolIndex + (weekIndex * schoolCards.length)) < month.done;
+                    return `<td class="${estimated ? "visited" : "matrix-wait"}"><strong>${estimated ? "1" : "0"}</strong><span class="matrix-cell-icon">${estimated ? "&#9989;" : "&#9203;"}</span><small>${estimated ? "visita" : "aguarda"}</small></td>`;
+                  }).join("")}
+                </tr>`).join("")}
+              </tbody>
+            </table>
           </div>
         </article>
-      </section>
 
-      <div class="detail-actions supervisor-actions">
-        ${supervisor.email ? `<a class="ghost-btn" href="mailto:${supervisor.email}">Enviar email</a>` : ""}
-        ${supervisor.phone ? `<a class="ghost-btn" href="tel:${String(supervisor.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
-        <button class="ghost-btn" type="button" data-jump="contacts">Abrir contatos</button>
-      </div>
+        <section class="supervisor-record-columns">
+          <article class="box"><div class="box-head"><div><strong>Escolas visitadas</strong><small>Com visita no recorte atual.</small></div></div><div class="row-list compact">
+            ${schoolCards.filter(school => visited.has(school.name)).map(school => `<button class="data-row compact" type="button" data-school-jump="${school.name}"><span class="row-icon">&#9989;</span><span><strong>${school.name}</strong><small>${school.city} | ficha ${school.profilePct}%</small></span><em class="status-pill ok">visitada</em></button>`).join("") || `<div class="empty-state">Nenhuma escola visitada no mes atual.</div>`}
+          </div></article>
+          <article class="box"><div class="box-head"><div><strong>Escolas pendentes</strong><small>Sem visita suficiente no recorte.</small></div></div><div class="row-list compact">
+            ${schoolCards.filter(school => !visited.has(school.name)).map(school => `<button class="data-row compact" type="button" data-school-jump="${school.name}"><span class="row-icon">&#129517;</span><span><strong>${school.name}</strong><small>${school.city} | ${school.alerts ? `${school.alerts} manut./defeito` : `${school.items} item(ns)`}</small></span><em class="status-pill warn">pendente</em></button>`).join("") || `<div class="empty-state">Todas as escolas vinculadas possuem visita.</div>`}
+          </div></article>
+        </section>
+
+        <div class="detail-actions supervisor-actions">
+          ${supervisor.email ? `<a class="ghost-btn" href="mailto:${supervisor.email}">Enviar email</a>` : ""}
+          ${supervisor.phone ? `<a class="ghost-btn" href="tel:${String(supervisor.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
+          <button class="ghost-btn" type="button" data-jump="contacts">Abrir contatos</button>
+        </div>
+      </section>
     `;
     detail.querySelectorAll("[data-school-jump]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.schoolJump));
