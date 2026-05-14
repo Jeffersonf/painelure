@@ -495,12 +495,49 @@ function visibleNavigationPages() {
   return pages;
 }
 
+function identityKeys(values = [], includeFirstName = true) {
+  return [...new Set(values.flatMap((value) => {
+    const key = normalizeKey(value);
+    if (!key) return [];
+    const emailName = key.includes('@') ? key.split('@')[0] : '';
+    const firstName = key.split(/\s+/)[0] || '';
+    return [key, emailName, includeFirstName ? firstName : ''].filter(Boolean);
+  }))];
+}
+
+function supervisorIdentityKeys(supervisor, includeFirstName = false) {
+  return identityKeys([
+    supervisor?.name,
+    supervisor?.email,
+    supervisor?.login,
+    supervisor?.username,
+    ...(supervisor?.sourceAliases || [])
+  ], includeFirstName);
+}
+
+function uniqueSupervisorFirstNameMatch(supervisors, userKeys) {
+  const firstNames = userKeys.filter((key) => key && !key.includes('.') && !key.includes('@') && !key.includes(' '));
+  if (!firstNames.length) return null;
+  const matches = supervisors.filter((supervisor) =>
+    firstNames.includes(normalizeKey(supervisor.name).split(/\s+/)[0])
+  );
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function supervisorForUser(user = currentUser()) {
+  if (!user || user.role !== 'supervisor') return null;
+  const supervisors = state.supervisors || [];
+  const userKeys = identityKeys([user.supervisorName, user.name, user.login, user.email, user.username]);
+  if (!userKeys.length) return null;
+  return supervisors.find((supervisor) =>
+    supervisorIdentityKeys(supervisor, false).some((key) => userKeys.includes(key))
+  ) || uniqueSupervisorFirstNameMatch(supervisors, userKeys);
+}
+
 function assignedSchoolsForCurrentUser() {
   const user = currentUser();
   if (!user || user.role !== 'supervisor') return state.schools.map((item) => item.name);
-  const supervisor = (state.supervisors || []).find((item) =>
-    normalizeKey(item.name) === normalizeKey(user.supervisorName || user.name || user.login)
-  );
+  const supervisor = supervisorForUser(user);
   return supervisor?.schools || [];
 }
 
@@ -518,12 +555,8 @@ function sortSupervisorsByName(supervisors) {
 
 function visibleSupervisors() {
   if (!isSupervisorUser()) return sortSupervisorsByName(state.supervisors);
-  const user = currentUser();
-  return sortSupervisorsByName(
-    (state.supervisors || []).filter((supervisor) =>
-      normalizeKey(supervisor.name) === normalizeKey(user?.supervisorName || user?.name || user?.login)
-    )
-  );
+  const supervisor = supervisorForUser();
+  return supervisor ? [supervisor] : [];
 }
 
 function canViewSchool(name) {
@@ -533,8 +566,8 @@ function canViewSchool(name) {
 
 function canViewSupervisor(name) {
   if (!isSupervisorUser()) return true;
-  const user = currentUser();
-  return normalizeKey(name) === normalizeKey(user?.supervisorName || user?.name || user?.login);
+  const supervisor = supervisorForUser();
+  return Boolean(supervisor && normalizeKey(name) === normalizeKey(supervisor.name));
 }
 
 function defaultPageForUser() {
@@ -651,11 +684,13 @@ function applyAccessControl() {
 
 function updateIdentity() {
   const user = currentUser() || state.users?.[0] || { name: state.profile.name, role: 'admin', pin: state.profile.pin };
-  document.getElementById('uName').textContent = user.name;
+  const supervisor = supervisorForUser(user);
+  const displayUser = supervisor ? { ...user, name: supervisor.name, email: user.email || supervisor.email } : user;
+  document.getElementById('uName').textContent = displayUser.name;
   document.getElementById('uRole').textContent = roleDisplay(user.role);
-  setAvatarNode(document.getElementById('uAvatar'), user);
-  setAvatarNode(document.getElementById('profilePhotoPreview'), user);
-  document.getElementById('profileName').value = user.name;
+  setAvatarNode(document.getElementById('uAvatar'), displayUser);
+  setAvatarNode(document.getElementById('profilePhotoPreview'), displayUser);
+  document.getElementById('profileName').value = displayUser.name;
   document.getElementById('profilePin').value = user.pin || '';
   syncMonthControls();
   applyAccessControl();
