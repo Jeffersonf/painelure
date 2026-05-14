@@ -781,155 +781,116 @@
     const contacts = (data.contacts || []).filter(contact => ["tecnologia", "supervisao", "gabinete"].includes(P.normalize(contact.sector))).slice(0, 3);
     const networkStatus = network ? "Mapeada" : "Pendente";
     const profileNote = missingProfile.length ? `Pendencias: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
-    const hasAttention = missingProfile.length || totals.alertUnits || metrics.alerts || !network || calls.length;
     const mainAction = followUpText(missingProfile, totals.alertUnits || metrics.alerts, network, calls.length);
     const schoolTone = totals.alertUnits || metrics.alerts ? "warn" : (!network || profilePct < 65 || calls.length ? "info" : "ok");
-    const decisionRows = [
-      { icon: "\u{1F4CC}", title: "Proxima acao", note: mainAction, label: hasAttention ? "revisar" : "ok", tone: hasAttention ? "warn" : "ok" },
-      { icon: "\u{1F3AF}", title: "Responsavel direto", note: supervisor ? `${supervisor.name} acompanha ${supervisor.schools || supervisor.assignedSchools?.length || 0} escola(s).` : "Escola ainda sem supervisor vinculado.", label: supervisor ? "supervisao" : "pendente", tone: supervisor ? "info" : "warn" },
-      { icon: "\u{1F4BB}", title: "Inventario", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) em manutencao/defeito.` : "Inventario sem manutencao/defeito.", label: totals.alertUnits || metrics.alerts ? "atencao" : "ok", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok" }
+    const inventoryPreview = assets.slice(0, 6);
+    const networkItems = [
+      { title: "Rede", value: network?.network?.[0] || "Sem informacao" },
+      { title: "IPs", value: network?.ips?.[0] || "Sem IP cadastrado" },
+      { title: "Cameras", value: network?.cameras?.[0] || "Sem camera cadastrada" }
     ];
-    const quickFacts = [
-      { icon: "\u{1F3EB}", title: "Ficha e contato", note: `${profilePct}% preenchida | ${profile?.phone || "telefone pendente"} | ${profile?.email || "email pendente"}`, label: profilePct >= 65 ? "OK" : "Ficha", tone: profileStatusFromPct(profilePct), page: "schools" },
-      supervisor ? { icon: "\u{1F3AF}", title: "Supervisao", note: `${supervisor.name} | semana ${supervisor.week} | mes ${supervisor.month}`, label: supervisor.pending ? "Meta" : "OK", tone: supervisor.pending ? "warn" : "ok", page: "supervision" } : null,
-      network ? { icon: "\u{1F310}", title: "Rede e cameras", note: [network.network?.[0], network.ips?.[0], network.cameras?.[0]].filter(Boolean).join(" | "), label: "Rede", tone: "info", page: "network" } : { icon: "\u{1F310}", title: "Rede e cameras", note: "Sem dados tecnicos vinculados.", label: "Pendente", tone: "warn", page: "network" },
-      { icon: "\u{1F4BB}", title: "Inventario", note: `${totals.lines || metrics.items || 0} linha(s) | ${totals.alertUnits || metrics.alerts || 0} manut./defeito`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "OK", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", page: "inventory" },
-      calls.length ? { icon: "\u{1F4E5}", title: "Chamados", note: calls.map(call => call.title).slice(0, 3).join(" | "), label: "Fila", tone: "warn", page: "calls" } : null
-    ].filter(Boolean).filter(item => !P.canAccess || P.canAccess(item.page));
-    const followUps = [
-      missingProfile.length ? { icon: "\u{1F4DD}", title: "Completar ficha", note: `Campos pendentes: ${missingProfile.slice(0, 5).join(", ")}.`, label: "Ficha", tone: "warn", page: "schools" } : null,
-      totals.alertUnits || metrics.alerts ? { icon: "\u{1F4BB}", title: "Conferir inventario", note: `${totals.alertUnits || metrics.alerts} unidade(s) em manutencao ou defeito.`, label: "Invent.", tone: "warn", page: "inventory" } : null,
-      !network ? { icon: "\u{1F310}", title: "Mapear rede e cameras", note: "Sem bloco tecnico vinculado a esta escola.", label: "Rede", tone: "warn", page: "network" } : null,
-      calls.length ? { icon: "\u{1F4E5}", title: "Acompanhar chamados", note: calls.map(call => call.title).slice(0, 2).join(" - "), label: "Fila", tone: "info", page: "calls" } : null
-    ].filter(Boolean).filter(item => !P.canAccess || P.canAccess(item.page));
     detail.innerHTML = `
-      <article class="box">
-        <div class="box-head school-detail-head">
-          <div class="school-avatar large">${school.initials}</div>
-          <div>
-            <strong>${school.name}</strong>
-            <small>${school.city} | CIE ${school.cie}</small>
+      <section class="school-profile-page school-profile-${schoolTone}">
+        <article class="school-profile-hero">
+          <div class="school-profile-title">
+            <div class="school-avatar large">🏫</div>
+            <div>
+              <span class="eyebrow">${school.city} · CIE ${school.cie}</span>
+              <strong>${school.name}</strong>
+              <p>${mainAction}</p>
+            </div>
           </div>
-          <span class="status-pill ${profileStatusFromPct(profilePct)}">${profilePct}% ficha</span>
-        </div>
-        <section class="school-operational-hero school-operational-${schoolTone}">
-          <div>
-            <small>Acao principal</small>
-            <strong>${mainAction}</strong>
-            <p>${supervisor ? `Supervisor: ${supervisor.name}` : "Sem supervisor vinculado"} | ${network ? "rede mapeada" : "rede pendente"}</p>
+          <div class="school-profile-owner">
+            <small>Supervisor</small>
+            <strong>${supervisor?.name || "Nao vinculado"}</strong>
+            <span class="status-pill ${supervisor ? "info" : "warn"}">${supervisor ? "supervisao" : "pendente"}</span>
           </div>
-          <div class="school-operational-score">
-            <span><strong>${profilePct}%</strong><small>ficha</small></span>
-            <span><strong>${totals.lines || metrics.items || 0}</strong><small>inventario</small></span>
-            <span><strong>${totals.alertUnits || metrics.alerts || 0}</strong><small>manut./defeito</small></span>
-            <span><strong>${calls.length}</strong><small>chamados</small></span>
-          </div>
+        </article>
+
+        <section class="school-profile-metrics">
+          <article><span>📋</span><small>Ficha</small><strong>${profilePct}%</strong><i style="--pct:${profilePct}%"></i></article>
+          <article><span>💻</span><small>Inventario</small><strong>${totals.lines || metrics.items || 0}</strong><i style="--pct:100%"></i></article>
+          <article><span>🛠️</span><small>Manutencao</small><strong>${totals.alertUnits || metrics.alerts || 0}</strong><i style="--pct:${totals.alertUnits || metrics.alerts ? 100 : 0}%"></i></article>
+          <article><span>🌐</span><small>Rede</small><strong>${networkStatus}</strong><i style="--pct:${network ? 100 : 0}%"></i></article>
+          <article><span>📥</span><small>Chamados</small><strong>${calls.length}</strong><i style="--pct:${calls.length ? 100 : 0}%"></i></article>
         </section>
-        <div class="row-list compact">
-          ${summaryRowsMarkup(decisionRows)}
-        </div>
-        <div class="network-layout">
-          <article class="detail-widget profile-wide">
-            <div>
-              <small>Ficha escolar</small>
-              <strong>${profilePct}% preenchida</strong>
-              <p>${profileNote}</p>
+
+        <section class="school-profile-grid">
+          <article class="box school-profile-card wide">
+            <div class="box-head"><div><strong>Ficha escolar</strong><small>Dados principais da unidade.</small></div><span class="status-pill ${profileStatusFromPct(profilePct)}">${profilePct}%</span></div>
+            <div class="school-profile-fields">
+              <span><small>Direcao</small><strong>${profile?.director || "Nao informada"}</strong></span>
+              <span><small>Vice-direcao</small><strong>${profile?.viceDirector || "Nao informada"}</strong></span>
+              <span><small>GOE</small><strong>${profile?.goe || "Nao informado"}</strong></span>
+              <span><small>Telefone</small><strong>${profile?.phone || "Pendente"}</strong></span>
+              <span><small>Email</small><strong>${profile?.email || "Pendente"}</strong></span>
+              <span><small>Endereco</small><strong>${profile?.address || "Nao informado"}</strong></span>
             </div>
-            <span class="status-pill ${profileStatusFromPct(profilePct)}">cadastro</span>
+            <p class="school-profile-note">${profileNote}</p>
           </article>
-          <article class="detail-widget">
-            <div>
-              <small>Direcao</small>
-              <strong>${profile?.director || "Nao informada"}</strong>
-              <p>${[profile?.viceDirector && `Vice: ${profile.viceDirector}`, profile?.goe && `GOE: ${profile.goe}`].filter(Boolean).join(" | ") || "Equipe gestora pendente na ficha."}</p>
+
+          <article class="box school-profile-card">
+            <div class="box-head"><div><strong>Supervisao</strong><small>Recorte oficial importado.</small></div></div>
+            <div class="school-profile-stack">
+              <span><small>Responsavel</small><strong>${supervisor?.name || "Nao vinculado"}</strong></span>
+              <span><small>Semana</small><strong>${supervisor?.week || "0/3"}</strong></span>
+              <span><small>Mes</small><strong>${supervisor?.month || "0/12"}</strong></span>
             </div>
-            <span class="status-pill ${profile?.director ? "ok" : "warn"}">gestao</span>
+            <button class="ghost-btn block" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
           </article>
-          <article class="detail-widget">
-            <div>
-              <small>Contato da escola</small>
-              <strong>${profile?.phone || "Telefone pendente"}</strong>
-              <p>${[profile?.email, profile?.address].filter(Boolean).join(" | ") || "Email e endereco ainda nao informados."}</p>
+
+          <article class="box school-profile-card">
+            <div class="box-head"><div><strong>Rede e cameras</strong><small>Infraestrutura vinculada.</small></div><span class="status-pill ${network ? "info" : "warn"}">${networkStatus}</span></div>
+            <div class="school-profile-stack">
+              ${networkItems.map(item => `<span><small>${item.title}</small><strong>${item.value}</strong></span>`).join("")}
             </div>
-            <span class="status-pill ${profile?.phone || profile?.email ? "info" : "warn"}">contato</span>
+            ${!P.canAccess || P.canAccess("network") ? `<button class="ghost-btn block" type="button" data-open-network="${school.name}" ${network ? "" : "disabled"}>Abrir redes</button>` : ""}
           </article>
-          <article class="detail-widget">
-            <div>
-              <small>Inventario</small>
-              <strong>${totals.lines || metrics.items} linha(s)</strong>
-              <p>${totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} unidade(s) em manutencao ou defeito.` : "Sem manutencao/defeito registrado."}</p>
+
+          <article class="box school-profile-card wide">
+            <div class="box-head"><div><strong>Inventario</strong><small>Resumo consolidado da escola.</small></div><span class="status-pill ${totals.alertUnits || metrics.alerts ? "warn" : "ok"}">${totals.alertUnits || metrics.alerts ? "revisar" : "ok"}</span></div>
+            <div class="school-inventory-preview">
+              ${inventoryPreview.length ? inventoryPreview.map(asset => `<button class="data-row compact" type="button" data-open-inventory="${school.name}">
+                <span class="row-icon">💻</span>
+                <span><strong>${asset.name}</strong><small>${asset.description || `${asset.quantity || 0} unidade(s)`}</small></span>
+                <em class="status-pill ${statusClass(asset.status)}">${asset.status || "base"}</em>
+              </button>`).join("") : `<div class="empty-state">Sem linhas de inventario para esta escola.</div>`}
             </div>
-            <span class="status-pill ${totals.alertUnits || metrics.alerts ? "warn" : "ok"}">${totals.alertUnits || metrics.alerts ? "revisar" : "ok"}</span>
+            ${!P.canAccess || P.canAccess("inventory") ? `<button class="ghost-btn block" type="button" data-open-inventory="${school.name}">Abrir inventario completo</button>` : ""}
           </article>
-          <article class="detail-widget">
-            <div>
-              <small>Redes e cameras</small>
-              <strong>${networkStatus}</strong>
-              <p>${network ? [network.network?.[0], network.cameras?.[0]].filter(Boolean).join(" | ") : "Sem dados tecnicos vinculados."}</p>
+
+          <article class="box school-profile-card">
+            <div class="box-head"><div><strong>Chamados</strong><small>Fila vinculada a escola.</small></div><span class="status-pill ${calls.length ? "warn" : "ok"}">${calls.length}</span></div>
+            <div class="school-profile-stack">
+              ${calls.length ? calls.slice(0, 4).map(call => `<span><small>${call.status || "Chamado"}</small><strong>${call.title}</strong></span>`).join("") : `<span><small>Status</small><strong>Sem chamados vinculados</strong></span>`}
             </div>
-            <span class="status-pill ${network ? "info" : "warn"}">${network ? "CTC" : "pendente"}</span>
           </article>
-          <article class="detail-widget">
-            <div>
-              <small>Supervisao</small>
-              <strong>${supervisor?.name || "Nao vinculada"}</strong>
-              <p>${supervisor ? `${supervisor.week} na semana | ${supervisor.month} no mes.` : "Aguardando v?nculo oficial."}</p>
+
+          <article class="box school-profile-card">
+            <div class="box-head"><div><strong>Contatos URE</strong><small>Apoio rapido.</small></div></div>
+            <div class="school-profile-stack">
+              ${contacts.length ? contacts.map(contact => `<span><small>${contact.sector}</small><strong>${contact.name}</strong></span>`).join("") : `<span><small>Base</small><strong>Sem contato sugerido</strong></span>`}
             </div>
-            <span class="status-pill info">oficial</span>
           </article>
-          <article class="detail-widget">
-            <div>
-              <small>Chamados</small>
-              <strong>${calls.length}</strong>
-              <p>${calls.length ? calls.map(call => call.title).slice(0, 2).join(" | ") : "Sem chamado vinculado na base atual."}</p>
-            </div>
-            <span class="status-pill ${calls.length ? "warn" : "ok"}">${calls.length ? "fila" : "ok"}</span>
-          </article>
-          <article class="detail-widget">
-            <div>
-              <small>Contatos uteis</small>
-              <strong>${contacts.length}</strong>
-              <p>${contacts.map(contact => `${contact.sector}: ${contact.name}`).join(" | ")}</p>
-            </div>
-            <span class="status-pill info">URE</span>
-          </article>
-        </div>
-        <div class="row-list compact">
-          ${quickFacts.map(item => `
-            <button class="data-row compact" type="button" data-jump="${item.page}" data-search="${P.searchText([item.title, item.note, item.label])}">
-              <span class="row-icon">${item.icon}</span>
-              <span><strong>${item.title}</strong><small>${item.note}</small></span>
-              <em class="status-pill ${item.tone}">${item.label}</em>
-            </button>
-          `).join("")}
-        </div>
-        ${followUps.length ? `
-        <div class="row-list">
-          ${followUps.map(item => `
-            <button class="data-row compact" type="button" data-jump="${item.page}" data-search="${P.searchText([item.title, item.note])}">
-              <span class="row-icon">${item.icon}</span>
-              <span><strong>${item.title}</strong><small>${item.note}</small></span>
-              <em class="status-pill ${item.tone}">${item.label}</em>
-            </button>
-          `).join("")}
-        </div>` : ""}
-        <div class="detail-actions">
+        </section>
+
+        <div class="detail-actions school-profile-actions">
           ${profile?.email ? `<a class="ghost-btn" href="mailto:${profile.email}">Enviar email</a>` : ""}
-          ${profile?.phone ? `<a class="ghost-btn" href="tel:${profile.phone.replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
+          ${profile?.phone ? `<a class="ghost-btn" href="tel:${String(profile.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
           ${!P.canAccess || P.canAccess("network") ? `<button class="ghost-btn" type="button" data-open-network="${school.name}" ${network ? "" : "disabled"}>Abrir redes</button>` : ""}
           ${!P.canAccess || P.canAccess("inventory") ? `<button class="ghost-btn" type="button" data-open-inventory="${school.name}">Abrir inventario</button>` : ""}
           <button class="ghost-btn" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
         </div>
-      </article>
+      </section>
     `;
-    detail.querySelector("[data-open-network]")?.addEventListener("click", event => {
-      focusNetworkSchool(event.currentTarget.dataset.openNetwork);
+    detail.querySelectorAll("[data-open-network]").forEach(button => {
+      button.addEventListener("click", event => focusNetworkSchool(event.currentTarget.dataset.openNetwork));
     });
-    detail.querySelector("[data-open-inventory]")?.addEventListener("click", event => {
-      focusInventorySchool(event.currentTarget.dataset.openInventory);
+    detail.querySelectorAll("[data-open-inventory]").forEach(button => {
+      button.addEventListener("click", event => focusInventorySchool(event.currentTarget.dataset.openInventory));
     });
-    detail.querySelector("[data-open-supervisor]")?.addEventListener("click", event => {
-      focusSupervisor(event.currentTarget.dataset.openSupervisor);
+    detail.querySelectorAll("[data-open-supervisor]").forEach(button => {
+      button.addEventListener("click", event => focusSupervisor(event.currentTarget.dataset.openSupervisor));
     });
   }
 
