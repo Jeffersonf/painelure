@@ -287,10 +287,10 @@
     const networkMapped = schools.filter(school => data.networkData?.[school.name]).length;
     const linkedSupervision = schools.filter(school => supervisorForSchool(school.name)).length;
     const rows = [
-      { icon: "ES", title: "Base escolar", note: `${total} escola(s) em ${cities || 0} municipio(s).`, label: `${total}`, tone: "info" },
-      { icon: "FI", title: "Fichas escolares", note: `${completeProfiles}/${total} ficha(s) com dados principais preenchidos.`, label: total && completeProfiles === total ? "ok" : "revisar", tone: total && completeProfiles === total ? "ok" : "warn" },
-      { icon: "IN", title: "Inventario", note: inventoryAlerts ? `${inventoryAlerts} unidade(s) fora de OK.` : "Inventario sem manutencao/defeito neste recorte.", label: inventoryAlerts ? "atencao" : "ok", tone: inventoryAlerts ? "warn" : "ok" },
-      { icon: "RE", title: "Redes e supervisao", note: `${networkMapped}/${total} rede(s) mapeada(s) e ${linkedSupervision}/${total} escola(s) com supervisor.`, label: networkMapped === total && linkedSupervision === total ? "ok" : "base", tone: networkMapped === total && linkedSupervision === total ? "ok" : "info" }
+      { icon: "🏫", title: "Base escolar", note: `${total} escola(s) em ${cities || 0} municipio(s).`, label: `${total}`, tone: "info" },
+      { icon: "📋", title: "Fichas escolares", note: `${completeProfiles}/${total} ficha(s) com dados principais preenchidos.`, label: total && completeProfiles === total ? "ok" : "revisar", tone: total && completeProfiles === total ? "ok" : "warn" },
+      { icon: "💻", title: "Inventario", note: inventoryAlerts ? `${inventoryAlerts} unidade(s) fora de OK.` : "Inventario sem manutencao/defeito neste recorte.", label: inventoryAlerts ? "atencao" : "ok", tone: inventoryAlerts ? "warn" : "ok" },
+      { icon: "🌐", title: "Redes e supervisao", note: `${networkMapped}/${total} rede(s) mapeada(s) e ${linkedSupervision}/${total} escola(s) com supervisor.`, label: networkMapped === total && linkedSupervision === total ? "ok" : "base", tone: networkMapped === total && linkedSupervision === total ? "ok" : "info" }
     ];
     renderSummaryRows("#schoolSummaryRows", rows);
   }
@@ -929,10 +929,10 @@
   function renderNetworkOperationalSummary(networkData, selectedName, selectedData) {
     const names = Object.keys(networkData || {});
     const rows = [
-      { icon: "RE", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
-      { icon: "IP", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
-      { icon: "CM", title: "Cameras", note: `${selectedData?.cameras?.length || 0} informacao(oes) de cameras disponiveis.`, label: selectedData?.cameras?.length ? "ok" : "base", tone: selectedData?.cameras?.length ? "ok" : "info" },
-      { icon: "AD", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais tecnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
+      { icon: "🌐", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
+      { icon: "🔢", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
+      { icon: "📹", title: "Cameras", note: `${selectedData?.cameras?.length || 0} informacao(oes) de cameras disponiveis.`, label: selectedData?.cameras?.length ? "ok" : "base", tone: selectedData?.cameras?.length ? "ok" : "info" },
+      { icon: "🔐", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais tecnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
     ];
     renderSummaryRows("#networkSummaryRows", rows);
   }
@@ -953,15 +953,15 @@
     const supervisor = supervisorForSchool(selectedName);
     const credentialItems = data.credentials || [];
     const widgets = [
-      ["Informacoes sobre redes", data.network || [], "RE", "info", "Publico CTC"],
-      ["Informacoes sobre IPs", data.ips || [], "IP", "info", "Publico CTC"],
-      ["Informacoes sobre cameras", data.cameras || [], "CM", "info", "Publico CTC"],
-      ["Credenciais", data.credentials || [], "AD", "warn", "Restrito"]
+      ["Informacoes sobre redes", data.network || [], "🌐", "info", "Publico CTC"],
+      ["Informacoes sobre IPs", data.ips || [], "🔢", "info", "Publico CTC"],
+      ["Informacoes sobre cameras", data.cameras || [], "📹", "info", "Publico CTC"],
+      ["Credenciais", data.credentials || [], "🔐", "warn", "Restrito"]
     ].filter(([, items]) => items.length);
     if (credentialItems.length && !canViewCredentials()) {
       const credentialIndex = widgets.findIndex(([title]) => title === "Credenciais");
       if (credentialIndex >= 0) {
-        widgets[credentialIndex] = ["Credenciais protegidas", ["Disponivel apenas para Administrador, SETEC, SEINTEC e Tecnicos CTC."], "\u{1F510}", "warn", "Restrito"];
+        widgets[credentialIndex] = ["Credenciais protegidas", ["Disponivel apenas para Administrador, SETEC, SEINTEC e Tecnicos CTC."], "🔐", "warn", "Restrito"];
       }
     }
 
@@ -1123,7 +1123,7 @@
         <div class="row-list">
           ${selectedAssets.map(asset => `
             <div class="data-row" data-inventory-key="${P.searchText([asset.school, asset.sourceName || asset.name, asset.notes])}" data-search="${P.searchText([asset.school, asset.name, asset.sourceName, asset.notes, asset.status])}">
-              <span class="row-icon">IN</span>
+              <span class="row-icon">💻</span>
               <span><strong>${asset.sourceName || asset.name}</strong><small>${asset.notes || asset.name}</small></span>
               <em class="status-pill ${assetTone(asset.status)}">${assetUnits(asset)} | ${assetStatusLabel(asset.status)}</em>
             </div>
@@ -1688,12 +1688,12 @@
     const pendingVisits = (data.supervisors || []).reduce((sum, item) => sum + Number(item.pending || 0), 0);
     const linkedUsers = (data.users || []).filter(user => user.contactSync === "linked").length;
     const metrics = [
-      { icon: "ES", label: "Escolas", value: String(data.schools.length), note: "base regional", tone: "glow-lime" },
-      { icon: "IN", label: "Inventario", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
-      { icon: "!", label: "Alertas", value: String(alerts), note: "manutencao/defeito", tone: "glow-amber" },
-      { icon: "RE", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
-      { icon: "SV", label: "Pendencias", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
-      { icon: "US", label: "Usuarios", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
+      { icon: "🏫", label: "Escolas", value: String(data.schools.length), note: "base regional", tone: "glow-lime" },
+      { icon: "💻", label: "Inventario", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
+      { icon: "⚠️", label: "Alertas", value: String(alerts), note: "manutencao/defeito", tone: "glow-amber" },
+      { icon: "🌐", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
+      { icon: "🧭", label: "Pendencias", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
+      { icon: "👤", label: "Usuarios", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
     ];
     grid.innerHTML = metrics.map(item => `
       <article class="metric-card ${item.tone}">
