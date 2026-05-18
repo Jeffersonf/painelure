@@ -833,6 +833,81 @@ function parseCsv(text) {
   });
 }
 
+function setCookieJar(jar, response) {
+  const setCookies = typeof response.headers.getSetCookie === "function"
+    ? response.headers.getSetCookie()
+    : String(response.headers.get("set-cookie") || "").split(/,(?=\s*[^;,=\s]+=[^;,]+)/).filter(Boolean);
+  setCookies.forEach(cookie => {
+    const pair = String(cookie || "").split(";")[0];
+    const index = pair.indexOf("=");
+    if (index > 0) jar.set(pair.slice(0, index).trim(), pair.slice(index + 1).trim());
+  });
+}
+
+function cookieHeader(jar) {
+  return [...jar.entries()].map(([key, value]) => `${key}=${value}`).join("; ");
+}
+
+async function fetchWithCookieJar(url, jar, options = {}, redirectLimit = 8) {
+  const response = await fetch(url, {
+    ...options,
+    redirect: "manual",
+    headers: {
+      ...(options.headers || {}),
+      ...(jar.size ? { Cookie: cookieHeader(jar) } : {})
+    }
+  });
+  setCookieJar(jar, response);
+  if ([301, 302, 303, 307, 308].includes(response.status) && response.headers.get("location") && redirectLimit > 0) {
+    const nextUrl = new URL(response.headers.get("location"), url).toString();
+    return fetchWithCookieJar(nextUrl, jar, options, redirectLimit - 1);
+  }
+  return response;
+}
+
+function assertAllowedSharePointUrl(url) {
+  const parsed = new URL(url);
+  if (parsed.hostname !== "seesp-my.sharepoint.com") {
+    throw new Error("Apenas links seesp-my.sharepoint.com sao aceitos.");
+  }
+  return parsed;
+}
+
+function sharePointListApiFromPage(pageUrl, html = "") {
+  const parsed = assertAllowedSharePointUrl(pageUrl);
+  const contextListUrl = html.match(/"listUrl":"([^"]+)"/)?.[1]?.replace(/\\\//g, "/");
+  const direct = parsed.pathname.match(/^(.*)\/Lists\/([^/]+)\/AllItems\.aspx$/i);
+  const listPath = contextListUrl || (direct ? `${decodeURIComponent(direct[1])}/Lists/${decodeURIComponent(direct[2])}` : "");
+  if (!listPath) throw new Error("Nao foi possivel identificar a lista do SharePoint.");
+  const sitePath = listPath.split("/Lists/")[0];
+  const escapedListPath = listPath.replace(/'/g, "''");
+  const query = new URLSearchParams({ "$top": "5000", "$expand": "FieldValuesAsText" });
+  return `${parsed.origin}${sitePath}/_api/web/GetList('${escapedListPath}')/items?${query}`;
+}
+
+async function fetchSharePointListRows(sourceUrl) {
+  assertAllowedSharePointUrl(sourceUrl);
+  const jar = new Map();
+  const pageResponse = await fetchWithCookieJar(sourceUrl, jar, {
+    headers: { Accept: "text/html,application/xhtml+xml" }
+  });
+  const pageHtml = await pageResponse.text();
+  if (!pageResponse.ok) throw new Error(`SharePoint respondeu ${pageResponse.status} ao abrir o link.`);
+  if (/Sign in to your account/i.test(pageHtml)) {
+    throw new Error("O link do SharePoint abriu tela de login. Use um link compartilhado anonimo da lista.");
+  }
+  const apiUrl = sharePointListApiFromPage(pageResponse.url, pageHtml);
+  const apiResponse = await fetchWithCookieJar(apiUrl, jar, {
+    headers: { Accept: "application/json;odata=nometadata" }
+  });
+  const text = await apiResponse.text();
+  if (!apiResponse.ok) {
+    throw new Error(`SharePoint API respondeu ${apiResponse.status}: ${text.slice(0, 180)}`);
+  }
+  const payload = JSON.parse(text);
+  return Array.isArray(payload.value) ? payload.value : [];
+}
+
 function firstValue(row, keys, fallback = "") {
   for (const key of keys) {
     if (row[key] !== undefined && String(row[key]).trim()) return String(row[key]).trim();
@@ -1134,6 +1209,13 @@ async function handleApi(req, res, pathname) {
 
   if (req.method === "GET" && pathname === "/api/sources") {
     send(res, 200, { ok: true, sources: await listOfficialSources() });
+    return;
+  }
+
+  if (req.method === "GET" && pathname === "/api/sharepoint-list") {
+    const sourceUrl = new URL(req.url, `http://${req.headers.host}`).searchParams.get("url") || "";
+    const rows = await fetchSharePointListRows(sourceUrl);
+    send(res, 200, { ok: true, rows, rowsCount: rows.length });
     return;
   }
 

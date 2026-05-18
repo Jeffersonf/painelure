@@ -48,7 +48,8 @@
   }
 
   function normalizeRowKeys(row) {
-    return Object.entries(row || {}).reduce((acc, [key, value]) => {
+    const textFields = row?.FieldValuesAsText || row?.fieldvaluesastext || {};
+    return Object.entries({ ...(row || {}), ...(textFields || {}) }).reduce((acc, [key, value]) => {
       const normalized = normalizeHeader(key);
       if (normalized) acc[normalized] = value;
       return acc;
@@ -102,7 +103,8 @@
     const listName = decodeURIComponent(match[2]);
     const listPath = `${decodeURIComponent(sitePath)}/Lists/${listName}`.replace(/'/g, "''");
     const query = new URLSearchParams({
-      "$top": "5000"
+      "$top": "5000",
+      "$expand": "FieldValuesAsText"
     });
     return `${parsed.origin}${sitePath}/_api/web/GetList('${listPath}')/items?${query}`;
   }
@@ -114,8 +116,39 @@
     return [];
   }
 
+  function sharePointProxyUrl(url) {
+    const configured = String(window.PAINELURE_API_URL || "").replace(/\/+$/, "");
+    const renderApi = "https://painelure2-api.onrender.com";
+    const host = location.hostname;
+    const localStatic = (host === "localhost" || host === "127.0.0.1") && location.port !== "4173";
+    const base = configured || (host.endsWith("github.io") || localStatic || location.protocol === "file:" ? renderApi : "");
+    const path = `/api/sharepoint-list?url=${encodeURIComponent(url)}`;
+    return base ? `${base}${path}` : path;
+  }
+
+  async function fetchSharePointViaProxy(url, options = {}) {
+    const timeoutMs = options.timeoutMs || 15000;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+    let response;
+    try {
+      response = await fetch(sharePointProxyUrl(url), { cache: "no-store", signal: controller.signal });
+    } finally {
+      window.clearTimeout(timeout);
+    }
+    if (!response.ok) throw new Error(`Proxy SharePoint falhou: ${response.status}`);
+    const payload = await response.json();
+    if (!payload.ok) throw new Error(payload.error || "SharePoint nao retornou dados.");
+    return (payload.rows || []).map(normalizeRowKeys);
+  }
+
   async function fetchSharePointList(url, options = {}) {
     if (!url) throw new Error("Fonte SharePoint nao configurada.");
+    try {
+      return await fetchSharePointViaProxy(url, options);
+    } catch (proxyError) {
+      console.warn("[PainelURE] Proxy SharePoint falhou, tentando direto:", proxyError);
+    }
     const timeoutMs = options.timeoutMs || 9000;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
@@ -130,7 +163,12 @@
     } finally {
       window.clearTimeout(timeout);
     }
-    if (!response.ok) throw new Error(`Erro ao carregar SharePoint: ${response.status}`);
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error("SharePoint negou acesso. Entre na conta autorizada e tente Atualizar novamente.");
+      }
+      throw new Error(`Erro ao carregar SharePoint: ${response.status}`);
+    }
     return unwrapSharePointItems(await response.json()).map(normalizeRowKeys);
   }
 

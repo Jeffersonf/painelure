@@ -7,7 +7,7 @@
   <title>PainelURE 2.0</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "local-data-fix-20260518";
+      window.PAINELURE_BUILD = "sharepoint-cars-refresh-20260518";
       const buildKey = "painelure2_build";
       const previousBuild = localStorage.getItem(buildKey);
       if (previousBuild && previousBuild !== window.PAINELURE_BUILD && !sessionStorage.getItem(`${buildKey}_reloaded`)) {
@@ -33,7 +33,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=local-data-fix-20260518">
+  <link rel="stylesheet" href="./styles.css?v=sharepoint-cars-refresh-20260518">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -411,7 +411,9 @@
           <select id="carStatusFilter"></select>
         </label>
         <button class="ghost-btn filter-reset" type="button" id="carFilterReset">Limpar</button>
+        <button class="ghost-btn" type="button" id="carRefreshBtn">Atualizar</button>
         <p id="carFilterSummary">Agendamentos de carros carregados.</p>
+        <p id="carSourceStatus">Fonte: SharePoint ReservasVeiculos.</p>
       </div>
       <article class="box summary-box">
         <div class="box-head"><div><strong>Resumo dos carros</strong><small>Agenda puxada da base de carros e do calendario</small></div></div>
@@ -700,22 +702,22 @@
   <script src="./data/users.js?v=school-detail-edit-20260515"></script>
   <script src="./data/governance.js?v=school-detail-edit-20260515"></script>
   <script src="./data/operations.js?v=school-detail-edit-20260515"></script>
-  <script src="./data/sources.js?v=cars-sharepoint-20260518"></script>
+  <script src="./data/sources.js?v=sharepoint-cars-refresh-20260518"></script>
   <script src="./modules/dom.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/ui-catalog.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/data-store.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/identity.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/access-scope.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/month-state.js?v=school-detail-edit-20260515"></script>
-  <script src="./modules/csv.js?v=cars-sharepoint-20260518"></script>
-  <script src="./modules/normalizers.js?v=cars-sharepoint-20260518"></script>
-  <script src="./modules/source-loader.js?v=cars-sharepoint-20260518"></script>
+  <script src="./modules/csv.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./modules/normalizers.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./modules/source-loader.js?v=sharepoint-cars-refresh-20260518"></script>
   <script src="./config.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/backend-client.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/search.js?v=school-detail-edit-20260515"></script>
-  <script src="./modules/render.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/render.js?v=sharepoint-cars-refresh-20260518"></script>
   <script src="./modules/navigation.js?v=school-detail-edit-20260515"></script>
-  <script src="./modules/admin-tools.js?v=local-data-fix-20260518"></script>
+  <script src="./modules/admin-tools.js?v=sharepoint-cars-refresh-20260518"></script>
   <script src="./app.js?v=school-detail-edit-20260515"></script>
 </body>
 </html>

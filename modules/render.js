@@ -1441,7 +1441,7 @@
 
   function carStatusTone(status) {
     const key = P.normalize(status || "");
-    if (["cancelado", "cancelada", "bloqueado", "indisponivel"].some(item => key.includes(item))) return "danger";
+    if (["cancelado", "cancelada", "bloqueado", "indisponivel", "recusado", "reprovado"].some(item => key.includes(item))) return "danger";
     if (["pendente", "aguardando", "solicitado"].some(item => key.includes(item))) return "warn";
     if (["uso", "rota", "andamento"].some(item => key.includes(item))) return "info";
     return "ok";
@@ -1504,7 +1504,6 @@
 
   function calendarWithOperationalFallback(calendar, data = P.getAppData()) {
     const base = [...(calendar || [])];
-    if (base.length) return base;
     const carItems = carBookings(data).map(item => ({
       label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
       value: item.date,
@@ -1515,6 +1514,19 @@
       type: "carro",
       source: "cars"
     }));
+    if (base.length) {
+      const seen = new Set(base.map(item => P.searchText([item.label, item.value, item.date, item.time, item.note])));
+      return [...base, ...carItems.filter(item => {
+        const key = P.searchText([item.label, item.value, item.date, item.time, item.note]);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })].sort((a, b) => {
+        const dateA = calendarDate({ value: a.date || a.value })?.getTime() || Number.MAX_SAFE_INTEGER;
+        const dateB = calendarDate({ value: b.date || b.value })?.getTime() || Number.MAX_SAFE_INTEGER;
+        return dateA - dateB || String(a.time || "").localeCompare(String(b.time || ""));
+      });
+    }
     const ctcItems = (data.ctcVisits || []).map(item => ({
       label: `CTC - ${item.place || item.owner || "visita tecnica"}`,
       value: item.date,
@@ -1550,6 +1562,29 @@
       if (statusFilter) statusFilter.value = "all";
       renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
     });
+    const refreshButton = P.$("#carRefreshBtn");
+    const sourceStatus = P.$("#carSourceStatus");
+    if (refreshButton && !refreshButton.dataset.bound) {
+      refreshButton.dataset.bound = "true";
+      refreshButton.addEventListener("click", async () => {
+        const original = refreshButton.textContent;
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Atualizando...";
+        if (sourceStatus) sourceStatus.textContent = "Atualizando a lista ReservasVeiculos no SharePoint...";
+        try {
+          const result = await P.refreshSource?.("cars");
+          P.renderSourceStatus?.();
+          const rows = result?.rows?.length || 0;
+          if (sourceStatus) sourceStatus.textContent = `SharePoint atualizado: ${rows} item(ns) lido(s) de ReservasVeiculos.`;
+          renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
+        } catch (error) {
+          if (sourceStatus) sourceStatus.textContent = error?.message || "Nao foi possivel atualizar o SharePoint.";
+        } finally {
+          refreshButton.disabled = false;
+          refreshButton.textContent = original || "Atualizar";
+        }
+      });
+    }
     const vehicleValue = vehicleFilter?.value || "all";
     const statusValue = statusFilter?.value || "all";
     const visible = bookings.filter(item => {
@@ -1562,6 +1597,12 @@
     const calendarLinked = visible.filter(item => item.source === "calendar").length;
     const summary = P.$("#carFilterSummary");
     if (summary) summary.textContent = `${visible.length}/${bookings.length} agendamento(s) visiveis no mes.`;
+    if (sourceStatus && !sourceStatus.textContent.includes("Atualizando")) {
+      const status = (P.sourceStatus || []).find(item => item.key === "cars");
+      if (status?.status === "loaded") sourceStatus.textContent = `Fonte SharePoint carregada: ${status.rows?.length || 0} item(ns) de ReservasVeiculos.`;
+      else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "SharePoint nao carregado.";
+      else sourceStatus.textContent = P.sources?.cars?.url ? "Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar." : "Fonte de carros nao configurada.";
+    }
     renderSummaryRows("#carSummaryRows", [
       { icon: "&#128663;", title: "Agendamentos", note: `${visible.length} reserva(s) no filtro atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
       { icon: "&#9989;", title: "Reservados", note: `${reserved} carro(s) confirmado(s) ou reservado(s).`, label: `${reserved}`, tone: reserved ? "ok" : "info" },
@@ -1583,6 +1624,16 @@
       total: visible.filter(item => item.vehicle === vehicle).length,
       pending: visible.filter(item => item.vehicle === vehicle && carStatusTone(item.status) === "warn").length
     }));
+    const carCalendar = visible.map(item => ({
+      label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
+      value: item.date,
+      date: item.date,
+      time: item.time,
+      note: `${item.time || "Horario a definir"} | ${item.requester || "Solicitante nao informado"} | ${item.status || "pendente"}`,
+      tone: carStatusTone(item.status),
+      type: "carro",
+      scope: "shared"
+    }));
     grid.innerHTML = `
       <article class="cars-hero car-command">
         <div>
@@ -1598,6 +1649,9 @@
       </article>
       <section class="car-resource-strip">
         ${vehicleLoad.map(item => `<span><strong>${item.vehicle}</strong><small>${item.total} agenda(s)${item.pending ? ` | ${item.pending} pendente(s)` : ""}</small></span>`).join("")}
+      </section>
+      <section class="car-calendar-shell">
+        ${calendarBoardMarkup(carCalendar)}
       </section>
       <section class="car-day-list">
         ${Object.entries(byDate).map(([date, items]) => `
