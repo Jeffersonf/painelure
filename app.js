@@ -100,7 +100,7 @@
     const run = () => {
       let token = "";
       try {
-        token = sessionStorage.getItem("painelure2_backend_token") || "";
+        token = localStorage.getItem("painelure2_backend_token") || sessionStorage.getItem("painelure2_backend_token") || "";
       } catch (error) {}
       if (!token) return;
       P.loadBackendData(token)
@@ -129,7 +129,7 @@
     const button = document.getElementById("themeBtn");
     if (button) {
       const light = selectedTheme === "light";
-      button.textContent = light ? "🌙" : "☀️";
+      button.innerHTML = light ? "&#127769;" : "&#9728;&#65039;";
       button.setAttribute("aria-label", light ? "Usar tema escuro" : "Usar tema claro");
       button.setAttribute("aria-pressed", String(light));
     }

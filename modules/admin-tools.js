@@ -6,7 +6,8 @@
   const AVATAR_KEY = "painelure2_avatar";
   const AVATAR_PREFIX = "painelure2_avatar_";
   const ADMIN_COLLAPSE_KEY = "painelure2_admin_sections";
-  let backendToken = sessionStorage.getItem("painelure2_backend_token") || "";
+  const TOKEN_KEY = "painelure2_backend_token";
+  let backendToken = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || "";
 
   const ROLE_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
@@ -15,6 +16,7 @@
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
+    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
     Pedagógico: ["dashboard", "schools", "supervision", "contacts", "cars", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
@@ -105,7 +107,10 @@
     if (!key) return "";
     const result = await P.loginBackend?.({ key });
     backendToken = result?.token || "";
-    if (backendToken) sessionStorage.setItem("painelure2_backend_token", backendToken);
+    if (backendToken) {
+      localStorage.setItem(TOKEN_KEY, backendToken);
+      sessionStorage.setItem(TOKEN_KEY, backendToken);
+    }
     return backendToken;
   }
 
@@ -148,7 +153,8 @@
   async function logoutOnline() {
     if (backendToken) await P.logoutBackend?.(backendToken).catch(() => {});
     backendToken = "";
-    sessionStorage.removeItem("painelure2_backend_token");
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
     P.clearOnlineUser?.();
     const localUser = P.activeUser?.();
     applyRole(localUser?.role || "Administrador");
@@ -168,7 +174,8 @@
 
   function activateOnlineUser(token, user) {
     backendToken = token;
-    sessionStorage.setItem("painelure2_backend_token", backendToken);
+    localStorage.setItem(TOKEN_KEY, backendToken);
+    sessionStorage.setItem(TOKEN_KEY, backendToken);
     P.setOnlineUser?.(user);
     localStorage.setItem(ROLE_KEY, user.role || "Consulta");
     applyRole(user.role || "Consulta");
@@ -229,14 +236,29 @@
   }
 
   async function restoreBackendSession() {
+    backendToken = backendToken || localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || "";
     if (!backendToken || !P.loadBackendUser) {
       document.documentElement.classList.remove("auth-pending");
+      if ((location.hostname === "localhost" || location.hostname === "127.0.0.1") && location.port === "4173") {
+        setAuthenticated(true);
+        localStorage.setItem(ROLE_KEY, "Administrador");
+        applyRole("Administrador");
+        applyUserAvatar();
+        await P.loadBackendData?.("").catch(() => null);
+        P.renderApp?.();
+      }
       return null;
     }
     try {
       const payload = await P.loadBackendUser(backendToken);
-      const user = payload?.user;
+      const user = payload?.user || P.onlineUser?.() || (payload?.session ? {
+        name: payload.session.name || "Administrador",
+        role: payload.session.role || "Administrador",
+        preferences: {}
+      } : null);
       if (user) {
+        localStorage.setItem(TOKEN_KEY, backendToken);
+        sessionStorage.setItem(TOKEN_KEY, backendToken);
         P.setOnlineUser?.(user);
         localStorage.setItem(ROLE_KEY, user.role || "Consulta");
         applyRole(user.role || "Consulta");
@@ -249,7 +271,8 @@
       return user || null;
     } catch (error) {
       backendToken = "";
-      sessionStorage.removeItem("painelure2_backend_token");
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
       P.clearOnlineUser?.();
       applyRole(P.activeUser?.()?.role || "Administrador");
       setAuthenticated(false);
@@ -359,7 +382,8 @@
     P.$("#restoreAdminBtn")?.addEventListener("click", async () => {
       if (backendToken) await P.logoutBackend?.(backendToken).catch(() => {});
       backendToken = "";
-      sessionStorage.removeItem("painelure2_backend_token");
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
       P.clearOnlineUser?.();
       const adminUser = (P.users?.() || []).find(user => user.role === "Administrador" && user.active !== false);
       if (adminUser) P.setActiveUser?.(adminUser.id);

@@ -30,6 +30,7 @@ const STORAGE_DIR = path.join(__dirname, "storage");
 const DATA_FILE = path.join(STORAGE_DIR, "app-data.json");
 const SOURCES_FILE = path.join(STORAGE_DIR, "sources.json");
 const USERS_FILE = path.join(STORAGE_DIR, "users.json");
+const SESSIONS_FILE = path.join(STORAGE_DIR, "sessions.json");
 const PORT = Number(process.env.PORT || 4173);
 const ADMIN_KEY = process.env.PAINELURE_ADMIN_KEY || "";
 const ADMIN_USER = process.env.PAINELURE_ADMIN_USER || "";
@@ -40,14 +41,16 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || "";
 const sessions = new Map();
 let dbReady = false;
 let dbError = "";
+let frontendSeedStore = null;
 const DATA_ACCESS = {
-  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-  "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "reports"],
-  "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "calendar"],
-  SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "reports"],
-  SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "reports"],
-  Gabinete: ["dashboard", "schools", "calls", "contacts", "calendar", "reports"],
-  Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
+  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
+  "Supervisao": ["dashboard", "schools", "supervision", "contacts", "cars", "calendar", "reports"],
+  "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
+  SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
+  SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
+  Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
+  SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
+  Pedagogico: ["dashboard", "schools", "supervision", "contacts", "cars", "calendar"],
   Consulta: ["dashboard", "schools", "contacts"]
 };
 const pool = DATABASE_URL
@@ -141,6 +144,27 @@ function loadFrontendSeedData() {
   return context.window.PainelURE.seedData || {};
 }
 
+function hasAppData(appData = {}) {
+  return Boolean(
+    (Array.isArray(appData.schools) && appData.schools.length)
+    || (Array.isArray(appData.contacts) && appData.contacts.length)
+    || (Array.isArray(appData.schoolAssets) && appData.schoolAssets.length)
+    || (appData.networkData && Object.keys(appData.networkData).length)
+  );
+}
+
+function frontendSeedStoreData() {
+  if (!frontendSeedStore) {
+    frontendSeedStore = {
+      version: 1,
+      source: "frontend-seed",
+      updatedAt: null,
+      appData: loadFrontendSeedData()
+    };
+  }
+  return frontendSeedStore;
+}
+
 async function seedLocalUsersFromFrontend() {
   if (pool || currentUsers().length) return false;
   const seed = loadFrontendSeedData();
@@ -169,6 +193,23 @@ function currentUsers() {
 
 function currentSources() {
   return readJsonFile(SOURCES_FILE, {});
+}
+
+function loadLocalSessions() {
+  const saved = readJsonFile(SESSIONS_FILE, []);
+  if (!Array.isArray(saved)) return;
+  const now = Date.now();
+  saved.forEach(entry => {
+    if (!entry?.token || !entry?.session) return;
+    if (now - Number(entry.session.createdAt || 0) > 1000 * 60 * 60 * 24 * 30) return;
+    sessions.set(entry.token, entry.session);
+  });
+}
+
+function saveLocalSessions() {
+  if (pool) return;
+  const entries = [...sessions.entries()].map(([token, session]) => ({ token, session }));
+  writeJsonFile(SESSIONS_FILE, entries);
 }
 
 function buildStore(appData, source = "api") {
@@ -271,9 +312,13 @@ async function initDatabase() {
 }
 
 async function readStore() {
-  if (!pool || !dbReady) return currentStore();
+  if (!pool || !dbReady) {
+    const store = currentStore();
+    return hasAppData(store?.appData) ? store : frontendSeedStoreData();
+  }
   const result = await pool.query("select payload from app_state where id = $1", ["main"]);
-  return result.rows[0] ? result.rows[0].payload : null;
+  const store = result.rows[0] ? result.rows[0].payload : null;
+  return hasAppData(store?.appData) ? store : frontendSeedStoreData();
 }
 
 async function saveStore(appData, source = "api") {
@@ -583,6 +628,7 @@ function scopeAppDataForUser(appData = {}, user = null) {
       ? (supervisorScope ? (appData.ctcVisits || []).filter(visit => allowed.has(normalizeText(visit.place))) : (appData.ctcVisits || []))
       : [],
     contacts: canAccessData("contacts", user) ? (appData.contacts || []) : [],
+    cars: canAccessData("cars", user) ? (appData.cars || []) : [],
     calendar: canAccessData("calendar", user) ? (appData.calendar || []) : [],
     reports: canAccessData("reports", user) ? (appData.reports || []) : [],
     profiles: canAccessData("profiles", user) ? (appData.profiles || []) : [],
@@ -731,6 +777,7 @@ async function ensureBootstrapUser() {
 function createSession(user = null) {
   const token = crypto.randomBytes(24).toString("hex");
   sessions.set(token, { createdAt: Date.now(), userId: user ? user.id : null, role: user ? user.role : "Administrador" });
+  saveLocalSessions();
   return token;
 }
 
@@ -784,6 +831,81 @@ function parseCsv(text) {
       return row;
     }, {});
   });
+}
+
+function setCookieJar(jar, response) {
+  const setCookies = typeof response.headers.getSetCookie === "function"
+    ? response.headers.getSetCookie()
+    : String(response.headers.get("set-cookie") || "").split(/,(?=\s*[^;,=\s]+=[^;,]+)/).filter(Boolean);
+  setCookies.forEach(cookie => {
+    const pair = String(cookie || "").split(";")[0];
+    const index = pair.indexOf("=");
+    if (index > 0) jar.set(pair.slice(0, index).trim(), pair.slice(index + 1).trim());
+  });
+}
+
+function cookieHeader(jar) {
+  return [...jar.entries()].map(([key, value]) => `${key}=${value}`).join("; ");
+}
+
+async function fetchWithCookieJar(url, jar, options = {}, redirectLimit = 8) {
+  const response = await fetch(url, {
+    ...options,
+    redirect: "manual",
+    headers: {
+      ...(options.headers || {}),
+      ...(jar.size ? { Cookie: cookieHeader(jar) } : {})
+    }
+  });
+  setCookieJar(jar, response);
+  if ([301, 302, 303, 307, 308].includes(response.status) && response.headers.get("location") && redirectLimit > 0) {
+    const nextUrl = new URL(response.headers.get("location"), url).toString();
+    return fetchWithCookieJar(nextUrl, jar, options, redirectLimit - 1);
+  }
+  return response;
+}
+
+function assertAllowedSharePointUrl(url) {
+  const parsed = new URL(url);
+  if (parsed.hostname !== "seesp-my.sharepoint.com") {
+    throw new Error("Apenas links seesp-my.sharepoint.com sao aceitos.");
+  }
+  return parsed;
+}
+
+function sharePointListApiFromPage(pageUrl, html = "") {
+  const parsed = assertAllowedSharePointUrl(pageUrl);
+  const contextListUrl = html.match(/"listUrl":"([^"]+)"/)?.[1]?.replace(/\\\//g, "/");
+  const direct = parsed.pathname.match(/^(.*)\/Lists\/([^/]+)\/AllItems\.aspx$/i);
+  const listPath = contextListUrl || (direct ? `${decodeURIComponent(direct[1])}/Lists/${decodeURIComponent(direct[2])}` : "");
+  if (!listPath) throw new Error("Nao foi possivel identificar a lista do SharePoint.");
+  const sitePath = listPath.split("/Lists/")[0];
+  const escapedListPath = listPath.replace(/'/g, "''");
+  const query = new URLSearchParams({ "$top": "5000", "$expand": "FieldValuesAsText" });
+  return `${parsed.origin}${sitePath}/_api/web/GetList('${escapedListPath}')/items?${query}`;
+}
+
+async function fetchSharePointListRows(sourceUrl) {
+  assertAllowedSharePointUrl(sourceUrl);
+  const jar = new Map();
+  const pageResponse = await fetchWithCookieJar(sourceUrl, jar, {
+    headers: { Accept: "text/html,application/xhtml+xml" }
+  });
+  const pageHtml = await pageResponse.text();
+  if (!pageResponse.ok) throw new Error(`SharePoint respondeu ${pageResponse.status} ao abrir o link.`);
+  if (/Sign in to your account/i.test(pageHtml)) {
+    throw new Error("O link do SharePoint abriu tela de login. Use um link compartilhado anonimo da lista.");
+  }
+  const apiUrl = sharePointListApiFromPage(pageResponse.url, pageHtml);
+  const apiResponse = await fetchWithCookieJar(apiUrl, jar, {
+    headers: { Accept: "application/json;odata=nometadata" }
+  });
+  const text = await apiResponse.text();
+  if (!apiResponse.ok) {
+    throw new Error(`SharePoint API respondeu ${apiResponse.status}: ${text.slice(0, 180)}`);
+  }
+  const payload = JSON.parse(text);
+  return Array.isArray(payload.value) ? payload.value : [];
 }
 
 function firstValue(row, keys, fallback = "") {
@@ -852,6 +974,18 @@ function normalizeRows(type, rows) {
         ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email"], "")
       };
     });
+  }
+  if (type === "cars") {
+    return rows.map(row => ({
+      vehicle: firstValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], "Carro oficial"),
+      date: firstValue(row, ["data", "data_da_reserva", "data_x0020_da_x0020_reserva", "data_reserva", "date", "quando"], ""),
+      time: firstValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], ""),
+      requester: firstValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "author"], ""),
+      destination: firstValue(row, ["destino", "local", "destination", "place", "local_destino"], ""),
+      driver: firstValue(row, ["motorista", "driver"], ""),
+      status: firstValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], "pendente"),
+      note: firstValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo"], "")
+    }));
   }
   if (type === "inventory") {
     return rows.map(row => {
@@ -937,6 +1071,7 @@ function currentSession(req) {
 function deleteSession(req) {
   const token = bearerToken(req);
   if (token) sessions.delete(token);
+  saveLocalSessions();
 }
 
 function isAdminRequest(req) {
@@ -981,7 +1116,7 @@ function serveStatic(req, res, urlPath) {
   const ext = path.extname(file);
   res.writeHead(200, {
     "Content-Type": MIME[ext] || "application/octet-stream",
-    "Cache-Control": ext === ".html" ? "no-store" : "public, max-age=120"
+    "Cache-Control": "no-store"
   });
   fs.createReadStream(file).pipe(res);
 }
@@ -1026,7 +1161,8 @@ async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/auth/me") {
     if (!requireAuth(req, res)) return;
     const user = await currentSessionUser(req);
-    send(res, 200, { ok: true, user: publicUser(user), session: currentSession(req) });
+    const session = currentSession(req) || (!ADMIN_KEY ? { role: "Administrador", name: "Desenvolvimento local" } : null);
+    send(res, 200, { ok: true, user: publicUser(user), session });
     return;
   }
 
@@ -1073,6 +1209,13 @@ async function handleApi(req, res, pathname) {
 
   if (req.method === "GET" && pathname === "/api/sources") {
     send(res, 200, { ok: true, sources: await listOfficialSources() });
+    return;
+  }
+
+  if (req.method === "GET" && pathname === "/api/sharepoint-list") {
+    const sourceUrl = new URL(req.url, `http://${req.headers.host}`).searchParams.get("url") || "";
+    const rows = await fetchSharePointListRows(sourceUrl);
+    send(res, 200, { ok: true, rows, rowsCount: rows.length });
     return;
   }
 
@@ -1167,6 +1310,7 @@ initDatabase()
   })
   .then(() => ensureBootstrapUser())
   .finally(() => {
+    loadLocalSessions();
     server.listen(PORT, () => {
       const mode = pool && dbReady ? "postgres" : "arquivo-local";
       console.log(`PainelURE 2.0 rodando em http://localhost:${PORT} (${mode})`);

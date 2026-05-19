@@ -23,6 +23,15 @@
   const STORAGE_VERSION = 2;
   const STORAGE_KEY = "painelure2_state_v2";
 
+  function hasMeaningfulAppData(source = {}) {
+    return Boolean(
+      (Array.isArray(source.schools) && source.schools.length)
+      || (Array.isArray(source.contacts) && source.contacts.length)
+      || (Array.isArray(source.schoolAssets) && source.schoolAssets.length)
+      || (source.networkData && Object.keys(source.networkData).length)
+    );
+  }
+
   function cleanContactPhoto(photo) {
     const value = String(photo || "").trim();
     if (value.startsWith("data:image/") || value.startsWith("blob:")) return value;
@@ -64,6 +73,10 @@
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
         if (saved?.version === STORAGE_VERSION && saved?.appData) {
+          if (!hasMeaningfulAppData(saved.appData) && hasMeaningfulAppData(P.seedData)) {
+            localStorage.removeItem(STORAGE_KEY);
+            return setAppData({ ...(P.mockData || EMPTY_DATA), ...(P.seedData || {}) });
+          }
           const merged = { ...(P.mockData || EMPTY_DATA), ...(P.seedData || {}), ...saved.appData };
           if (!saved.appData.schoolProfiles?.length && P.seedData?.schoolProfiles?.length) {
             merged.schoolProfiles = P.seedData.schoolProfiles;

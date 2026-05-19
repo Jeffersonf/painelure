@@ -7,6 +7,7 @@
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
+    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
     Pedagógico: ["dashboard", "schools", "supervision", "contacts", "cars", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };

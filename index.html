@@ -7,17 +7,33 @@
   <title>PainelURE 2.0</title>
   <script>
     try {
+      window.PAINELURE_BUILD = "sharepoint-cars-refresh-20260518";
+      const buildKey = "painelure2_build";
+      const previousBuild = localStorage.getItem(buildKey);
+      if (previousBuild && previousBuild !== window.PAINELURE_BUILD && !sessionStorage.getItem(`${buildKey}_reloaded`)) {
+        sessionStorage.setItem(`${buildKey}_reloaded`, "true");
+        localStorage.setItem(buildKey, window.PAINELURE_BUILD);
+        if (window.caches) {
+          caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))).finally(() => {
+            location.replace(`${location.pathname || "/index.html"}?v=${window.PAINELURE_BUILD}${location.hash || ""}`);
+          });
+        } else {
+          location.replace(`${location.pathname || "/index.html"}?v=${window.PAINELURE_BUILD}${location.hash || ""}`);
+        }
+      } else {
+        localStorage.setItem(buildKey, window.PAINELURE_BUILD);
+      }
       if (localStorage.getItem("painelure2_theme") === "light") {
         document.documentElement.dataset.theme = "light";
       }
-      if (sessionStorage.getItem("painelure2_backend_token")) {
+      if (localStorage.getItem("painelure2_backend_token") || sessionStorage.getItem("painelure2_backend_token")) {
         document.documentElement.classList.add("auth-pending");
       }
     } catch (error) {}
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=sharepoint-cars-refresh-20260518">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -65,23 +81,23 @@
     <div class="brand">
       <span class="brand-word"><span>Painel</span><strong>URE</strong></span>
       <div class="brand-actions">
-        <button class="icon-btn" id="themeBtn" type="button" aria-label="Usar tema claro" aria-pressed="false">☀️</button>
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="Usar tema claro" aria-pressed="false">&#9728;&#65039;</button>
       </div>
     </div>
 
     <label class="sidebar-search">
-      <span>🔎</span>
+      <span>&#128269;</span>
       <input type="search" placeholder="Buscar... (Ctrl+K)">
     </label>
     <div class="global-search" id="globalSearchResults"></div>
 
     <div class="nav-label">Menu</div>
     <nav class="nav" aria-label="Navegacao principal">
-      <button class="nav-item active" type="button" data-page="dashboard"><span>📊</span>Painel</button>
-      <button class="nav-item" type="button" data-page="schools"><span>🏫</span>Escolas</button>
-      <button class="nav-item" type="button" data-page="supervision"><span>🧭</span>Supervisao</button>
+      <button class="nav-item active" type="button" data-page="dashboard"><span>&#128202;</span>Painel</button>
+      <button class="nav-item" type="button" data-page="schools"><span>&#127979;</span>Escolas</button>
+      <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>Supervisao</button>
       <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
-      <button class="nav-item" type="button" data-page="contacts"><span>☎️</span>Contatos</button>
+      <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
     </nav>
 
     <section class="sidebar-card">
@@ -89,13 +105,13 @@
         <span>Atalhos fixos</span>
       </div>
       <div class="sidebar-shortcuts labeled">
-        <button type="button" data-jump="network"><span>🌐 Redes</span></button>
-        <button type="button" data-jump="inventory"><span>💻 Invent.</span></button>
-        <button type="button" data-jump="ctc"><span>🛠️ CTC</span></button>
-        <button type="button" data-jump="calls"><span>📥 Cham.</span></button>
+        <button type="button" data-jump="network"><span>&#127760; Redes</span></button>
+        <button type="button" data-jump="inventory"><span>&#128187; Invent.</span></button>
+        <button type="button" data-jump="ctc"><span>&#128736;&#65039; CTC</span></button>
+        <button type="button" data-jump="calls"><span>&#128229; Cham.</span></button>
         <button type="button" data-jump="cars"><span>&#128663; Carros</span></button>
-        <button type="button" data-jump="calendar"><span>📅 Agenda</span></button>
-        <button type="button" data-jump="reports"><span>📈 Relat.</span></button>
+        <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
+        <button type="button" data-jump="reports"><span>&#128200; Relat.</span></button>
       </div>
     </section>
     <div class="account">
@@ -105,7 +121,7 @@
           <strong id="accountNameLabel">Jefferson</strong>
           <span><i></i><span id="accountRoleLabel">Administrador</span></span>
         </div>
-        <small>›</small>
+        <small>&rsaquo;</small>
       </button>
       <div class="account-pop" id="accountPop">
         <button class="pop-item" type="button" data-page="user">Conta e perfil</button>
@@ -117,6 +133,13 @@
   </aside>
 
   <main class="main">
+    <div class="global-month-bar">
+      <div class="month-switcher" aria-label="Selecionar mes global">
+        <button class="month-step" type="button" data-month-prev aria-label="Mes anterior">&lsaquo;</button>
+        <button class="month-pill" type="button" data-month-current>Maio 2026</button>
+        <button class="month-step" type="button" data-month-next aria-label="Proximo mes">&rsaquo;</button>
+      </div>
+    </div>
     <section class="page active" id="page-dashboard">
       <header class="page-header">
         <div>
@@ -125,9 +148,9 @@
         </div>
         <div class="header-actions">
           <div class="month-switcher" aria-label="Selecionar mes">
-            <button class="month-step" type="button" id="prevMonthBtn" aria-label="Mes anterior">‹</button>
-            <button class="month-pill" type="button" id="currentMonthBtn">Maio 2026</button>
-            <button class="month-step" type="button" id="nextMonthBtn" aria-label="Proximo mes">›</button>
+            <button class="month-step" type="button" id="prevMonthBtn" data-month-prev aria-label="Mes anterior">&lsaquo;</button>
+            <button class="month-pill" type="button" id="currentMonthBtn" data-month-current>Maio 2026</button>
+            <button class="month-step" type="button" id="nextMonthBtn" data-month-next aria-label="Proximo mes">&rsaquo;</button>
           </div>
         </div>
       </header>
@@ -148,6 +171,8 @@
         </div>
       </div>
 
+      <section class="dashboard-command" id="dashboardCommand"></section>
+
       <section class="workbench widget" data-widget-area="shortcuts">
         <div class="widget-head">
           <div>
@@ -156,22 +181,22 @@
         </div>
         <div class="shortcut-grid">
           <button class="shortcut-card" type="button" data-jump="schools">
-            <span>🏫</span>
+            <span>&#127979;</span>
             <strong>Escolas</strong>
             <small id="shortcutSchoolsNote">Unidades, fichas e inventario por escola</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="network">
-            <span>🌐</span>
+            <span>&#127760;</span>
             <strong>Redes e Cameras</strong>
             <small id="shortcutNetworkNote">Rede, IPs, DVR e infraestrutura</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="inventory">
-            <span>💻</span>
+            <span>&#128187;</span>
             <strong>Inventario</strong>
             <small id="shortcutInventoryNote">Equipamentos e status por escola</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="supervision">
-            <span>🧭</span>
+            <span>&#129517;</span>
             <strong>Supervisao</strong>
             <small id="shortcutSupervisionNote">Metas, visitas e escolas vinculadas</small>
           </button>
@@ -209,51 +234,20 @@
 
     <section class="page" id="page-schools">
       <header class="page-header compact">
-        <div><h1>Escolas</h1><p>Consulta rapida das unidades, fichas e vinculos.</p></div>
+        <div><h1>Escolas</h1></div>
       </header>
-      <div class="selector-panel school-filters">
+      <div class="selector-panel school-city-filter">
         <label>
           <span>Municipio</span>
           <select id="schoolCityFilter"></select>
         </label>
-        <label>
-          <span>Ficha</span>
-          <select id="schoolProfileFilter">
-            <option value="all">Todas</option>
-            <option value="ok">Mais completas</option>
-            <option value="warn">Ficha parcial</option>
-            <option value="danger">Ficha baixa</option>
-          </select>
-        </label>
-        <label>
-          <span>Inventario</span>
-          <select id="schoolInventoryFilter">
-            <option value="all">Todas</option>
-            <option value="alerts">Manutencao/defeito</option>
-            <option value="ok">Somente OK</option>
-          </select>
-        </label>
-        <label>
-          <span>Rede</span>
-          <select id="schoolNetworkFilter">
-            <option value="all">Todas</option>
-            <option value="mapped">Mapeadas</option>
-            <option value="pending">Pendentes</option>
-          </select>
-        </label>
-        <button class="ghost-btn filter-reset" type="button" id="schoolFilterReset">Limpar</button>
-        <p id="schoolFilterSummary">21 escolas na base regional.</p>
       </div>
-      <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo das escolas</strong><small>Leitura rapida antes da lista</small></div></div>
-        <div class="row-list compact" id="schoolSummaryRows"></div>
-      </article>
       <div class="school-grid" id="schoolGrid"></div>
     </section>
 
     <section class="page" id="page-school-detail">
       <header class="page-header compact detail-page-header">
-        <button class="back-btn" type="button" data-back>‹</button>
+        <button class="back-btn" type="button" data-back>&lsaquo;</button>
         <div><h1 id="schoolDetailTitle">Escola</h1><p id="schoolDetailSubtitle">Ficha operacional da unidade.</p></div>
       </header>
       <div class="school-detail" id="schoolDetailPageBody"></div>
@@ -346,7 +340,7 @@
 
     <section class="page" id="page-supervisor-detail">
       <header class="page-header compact detail-page-header">
-        <button class="back-btn" type="button" data-back>‹</button>
+        <button class="back-btn" type="button" data-back>&lsaquo;</button>
         <div><h1 id="supervisorDetailTitle">Supervisor</h1><p id="supervisorDetailSubtitle">Metas, vinculos e acompanhamento.</p></div>
       </header>
       <div class="supervisor-detail" id="supervisorDetailPageBody"></div>
@@ -417,7 +411,9 @@
           <select id="carStatusFilter"></select>
         </label>
         <button class="ghost-btn filter-reset" type="button" id="carFilterReset">Limpar</button>
+        <button class="ghost-btn" type="button" id="carRefreshBtn">Atualizar</button>
         <p id="carFilterSummary">Agendamentos de carros carregados.</p>
+        <p id="carSourceStatus">Fonte: SharePoint ReservasVeiculos.</p>
       </div>
       <article class="box summary-box">
         <div class="box-head"><div><strong>Resumo dos carros</strong><small>Agenda puxada da base de carros e do calendario</small></div></div>
@@ -438,8 +434,8 @@
         <button type="button" data-sector="Compras">Compras</button>
         <button type="button" data-sector="Pagamento">Pagamento</button>
         <button type="button" data-sector="RH">RH</button>
-        <button type="button" data-sector="Supervisão">Supervisao</button>
-        <button type="button" data-sector="Pedagógico">Pedagogico</button>
+        <button type="button" data-sector="Supervis&atilde;o">Supervisao</button>
+        <button type="button" data-sector="Pedag&oacute;gico">Pedagogico</button>
       </div>
       <article class="box summary-box">
         <div class="box-head"><div><strong>Resumo dos contatos</strong><small>Canais disponiveis no recorte atual</small></div></div>
@@ -476,7 +472,7 @@
 
     <section class="page" id="page-user">
       <header class="page-header compact detail-page-header">
-        <button class="back-btn" type="button" data-back>‹</button>
+        <button class="back-btn" type="button" data-back>&lsaquo;</button>
         <div><h1>Conta</h1><p>Perfil ativo, acessos e preferencias locais.</p></div>
       </header>
       <div class="settings-shell">
@@ -690,38 +686,38 @@
   </main>
 
   <nav class="mobile-nav" aria-label="Navegacao mobile">
-    <button class="active" type="button" data-page="dashboard">📊<span>Painel</span></button>
-    <button type="button" data-page="schools">🏫<span>Escolas</span></button>
-    <button type="button" data-page="supervision">🧭<span>Supervisao</span></button>
-    <button type="button" data-page="contacts">☎️<span>Contatos</span></button>
+    <button class="active" type="button" data-page="dashboard">&#128202;<span>Painel</span></button>
+    <button type="button" data-page="schools">&#127979;<span>Escolas</span></button>
+    <button type="button" data-page="supervision">&#129517;<span>Supervisao</span></button>
+    <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js"></script>
-  <script src="./data/schools.js"></script>
-  <script src="./data/school-profiles.js"></script>
-  <script src="./data/school-operational.js"></script>
-  <script src="./data/inventory.js"></script>
-  <script src="./data/supervision.js"></script>
-  <script src="./data/contacts.js"></script>
-  <script src="./data/users.js"></script>
-  <script src="./data/governance.js"></script>
-  <script src="./data/operations.js"></script>
-  <script src="./data/sources.js"></script>
-  <script src="./modules/dom.js"></script>
-  <script src="./modules/ui-catalog.js"></script>
-  <script src="./modules/data-store.js"></script>
-  <script src="./modules/identity.js"></script>
-  <script src="./modules/access-scope.js"></script>
-  <script src="./modules/month-state.js"></script>
-  <script src="./modules/csv.js"></script>
-  <script src="./modules/normalizers.js"></script>
-  <script src="./modules/source-loader.js"></script>
-  <script src="./config.js"></script>
-  <script src="./modules/backend-client.js"></script>
-  <script src="./modules/search.js"></script>
-  <script src="./modules/render.js"></script>
-  <script src="./modules/navigation.js"></script>
-  <script src="./modules/admin-tools.js"></script>
-  <script src="./app.js"></script>
+  <script src="./data/mock.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/schools.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/school-profiles.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/school-operational.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/inventory.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/supervision.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/contacts.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/users.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/governance.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/operations.js?v=school-detail-edit-20260515"></script>
+  <script src="./data/sources.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./modules/dom.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/ui-catalog.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/data-store.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/identity.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/access-scope.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/month-state.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/csv.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./modules/normalizers.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./modules/source-loader.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./config.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/backend-client.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/search.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/render.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./modules/navigation.js?v=school-detail-edit-20260515"></script>
+  <script src="./modules/admin-tools.js?v=sharepoint-cars-refresh-20260518"></script>
+  <script src="./app.js?v=school-detail-edit-20260515"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   const MONTHS = [
     "Janeiro",
     "Fevereiro",
-    "Março",
+    "Marco",
     "Abril",
     "Maio",
     "Junho",
@@ -64,27 +64,58 @@
   }
 
   function updateMonthControls() {
-    const button = P.$("#currentMonthBtn");
-    if (button) button.textContent = monthLabel();
+    const buttons = [
+      ...(P.$all?.("[data-month-current]") || []),
+      ...(P.$all?.("#currentMonthBtn") || [])
+    ];
+    buttons.forEach(button => {
+      if (button) button.textContent = monthLabel();
+    });
+    const note = P.$?.("#monthScopeNote");
+    if (note) {
+      const selected = selectedMonthKey();
+      const supervisionMonth = P.sources?.supervision?.monthKey || "";
+      const calendarReady = Boolean(P.sources?.calendar?.url);
+      const carsReady = Boolean(P.sources?.cars?.url);
+      const details = [
+        "Painel, carros, agenda e CTC filtram por data.",
+        supervisionMonth && supervisionMonth !== selected ? `Supervisao oficial disponivel em ${monthLabel(supervisionMonth)}.` : "Supervisao usa o mes selecionado quando houver fonte mensal.",
+        !calendarReady && "Calendario oficial pendente: agenda usa fallback operacional.",
+        !carsReady && "Carros usa base local ate conectar fonte oficial."
+      ].filter(Boolean);
+      note.textContent = details.join(" ");
+    }
   }
 
   function bindMonthControls() {
     updateMonthControls();
-    const prev = P.$("#prevMonthBtn");
-    const next = P.$("#nextMonthBtn");
-    const current = P.$("#currentMonthBtn");
-    if (prev && !prev.dataset.bound) {
-      prev.dataset.bound = "true";
-      prev.addEventListener("click", () => shiftMonth(-1));
-    }
-    if (next && !next.dataset.bound) {
-      next.dataset.bound = "true";
-      next.addEventListener("click", () => shiftMonth(1));
-    }
-    if (current && !current.dataset.bound) {
-      current.dataset.bound = "true";
-      current.addEventListener("click", () => setSelectedMonth(monthKey(new Date())));
-    }
+    const prevButtons = [
+      ...(P.$all?.("[data-month-prev]") || []),
+      ...(P.$all?.("#prevMonthBtn") || [])
+    ];
+    const nextButtons = [
+      ...(P.$all?.("[data-month-next]") || []),
+      ...(P.$all?.("#nextMonthBtn") || [])
+    ];
+    const currentButtons = [
+      ...(P.$all?.("[data-month-current]") || []),
+      ...(P.$all?.("#currentMonthBtn") || [])
+    ];
+    prevButtons.forEach(button => {
+      if (!button || button.dataset.bound) return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", () => shiftMonth(-1));
+    });
+    nextButtons.forEach(button => {
+      if (!button || button.dataset.bound) return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", () => shiftMonth(1));
+    });
+    currentButtons.forEach(button => {
+      if (!button || button.dataset.bound) return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", () => setSelectedMonth(monthKey(new Date())));
+    });
   }
 
   P.selectedMonthKey = selectedMonthKey;

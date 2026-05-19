@@ -528,6 +528,32 @@ Não fazer:
 
 ## Changelog
 
+### 2.0.0-dev.95
+
+- Seletor de mes virou controle global no topo do app, visivel em todas as paginas.
+- Controles de mes agora usam atributos compartilhados e ficam sincronizados quando houver mais de um seletor na tela.
+- Estado mensal segue salvo em `localStorage` e re-renderiza as paginas ao trocar mes.
+- Corrigido simbolo do botao de tema no JS para evitar mojibake.
+- Painel, Carros, Agenda, CTC e Relatorios passaram a usar o mesmo recorte mensal para itens com data.
+- Agenda filtra tambem a lista de detalhes pelo mes selecionado, nao apenas o calendario visual.
+- Barra global do mes agora explica quais fontes estao realmente mensais e quais ainda usam fallback local.
+- Labels de fontes oficiais foram limpas para ASCII legivel.
+
+### 2.0.0-dev.94
+
+- Painel inicial ganhou camada de comando operacional compacta, com foco mensal, atalhos por indicador e menos dependencia de cards grandes.
+- Escolas deixou o grid de cards grandes e passou a usar lista de trabalho densa com prioridade por inventario, rede e ficha.
+- Supervisao ganhou carteira por escola com supervisor, visitas previstas/feitas, pendencias e alertas de inventario para aproximar a leitura operacional da v1.
+- Carros passou a renderizar agenda por dia, carga por veiculo e status de reserva, em vez de cards soltos.
+- Agenda passou a usar fallback operacional de carros e visitas CTC enquanto a fonte oficial de calendario nao estiver conectada.
+- `data/operations.js` foi limpo para ASCII legivel, removendo textos corrompidos de CTC, chamados e relatorios.
+
+### 2.0.0-dev.93
+
+- `npm run check` voltou a passar no Windows ao normalizar quebras de linha na verificacao de rotas do backend.
+- `index.html` deixou de ter emojis e setas como caracteres literais, usando entidades HTML para evitar mojibake em terminal/editor.
+- Checklist da v2 foi atualizado com os totais validados: 21 escolas, 6 supervisores, 107 itens de inventario, 46 contatos e 21 redes mapeadas.
+
 ### 2.0.0-dev.92
 
 - Registrado o ponto real de retomada: recalibrar barra lateral, supervisao, escolas, inventario, emojis, resumos e alertas antes de crescer funcionalidades.

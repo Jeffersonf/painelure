@@ -93,7 +93,7 @@
     mapUser({ id: "user-admin-jefferson", name: "Jefferson", login: "Jefferson", role: "Administrador", contactName: "Jefferson Felipe", contactRole: "Chefe de Seção", email: "jefferson.paula@educacao.sp.gov.br", active: true }),
     mapUser({ id: "user-dirigente", name: "Andre", login: "Andre", role: "Gabinete", contactName: "Andre Dias de Oliveira", contactRole: "Dirigente Regional de Ensino", email: "deitv@educacao.sp.gov.br", active: true }),
     mapUser({ id: "user-seintec", name: "Elcio", login: "Elcio", role: "SEINTEC", contactName: "Elcio Renato Bonifacio de Azevedo", contactRole: "Chefe de Serviço", email: "elcio.azevedo@educacao.sp.gov.br", active: true }),
-    mapUser({ id: "user-seom-nelio", name: "Nelio", login: "Nelio", role: "Consulta", contactName: "Nelio Celso Fernandes Junior", contactRole: "Chefe de Serviço", email: "nelio.junior@educacao.sp.gov.br", active: true }),
+    mapUser({ id: "user-seom-nelio", name: "Nelio", login: "Nelio", role: "SEOM", contactName: "Nelio Celso Fernandes Junior", contactRole: "Chefe de Serviço", email: "nelio.junior@educacao.sp.gov.br", active: true }),
     mapUser({ id: "user-ctc", name: "Gustavo", login: "Gustavo", role: "Técnicos CTC", contactName: "Gustavo", contactRole: "CTC", email: "itv.setec@educacao.sp.gov.br", active: true }),
     mapUser({ id: "user-ctc-bruno", name: "Bruno", login: "Bruno", role: "Técnicos CTC", contactName: "Bruno", contactRole: "CTC", active: true }),
     mapUser({ id: "user-ctc-danilo", name: "Danilo", login: "Danilo", role: "Técnicos CTC", contactName: "Danilo", contactRole: "CTC", active: true }),
@@ -101,3 +101,4 @@
     ...supervisorUsers
   ];
 })();
+

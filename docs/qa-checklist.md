@@ -9,17 +9,23 @@ Objetivo: deixar claro o que ainda falta para a v2 herdar o que importa da v1 se
 - [ ] Toda pagina precisa abrir com uma decisao clara antes da lista.
 - [ ] Toda lista grande precisa parecer leve, densa e escaneavel.
 - [ ] Toda funcionalidade herdada da v1 precisa respeitar escopo por perfil.
-- [ ] `npm run check` precisa passar antes de cada push.
+- [x] `npm run check` precisa passar antes de cada push.
 
 ## Ponto De Partida Da Proxima Sessao
 
 Quando retomarmos, comecar por estes problemas antes de qualquer funcionalidade nova:
 
 - [ ] Barra lateral nao esta confiavel; atalhos com icones sem texto nao sao adivinhaveis.
-- [ ] Supervisao nao esta funcionando bem; tela de supervisor e detalhe ainda ficam piores que a v1 em uso real.
-- [ ] Escolas precisa ser reavaliada do zero: layout, hierarquia e fluxo estao ruins.
+- [ ] Supervisao nao esta funcionando bem; tela de supervisor e detalhe ainda ficam piores que a v1 em uso real. Primeira correcao: carteira por escola voltou para a tela principal.
+- [ ] Escolas precisa ser reavaliada do zero: layout, hierarquia e fluxo estao ruins. Primeira correcao: lista de trabalho substituiu cards grandes.
 - [ ] Inventario precisa ser simplificado; excesso de blocos nao ajuda a operacao.
-- [ ] Emojis quebrados/encoding corrompido precisam ser corrigidos no app inteiro.
+- [x] Emojis quebrados/encoding corrompido precisam ser corrigidos no app inteiro.
+- [ ] Painel inicial precisa funcionar como comando operacional, nao vitrine de cards. Primeira correcao: comando mensal compacto criado.
+- [ ] Carros precisa mostrar agenda por dia, veiculo e status. Primeira correcao: agenda por dia e carga por veiculo criada.
+- [ ] Agenda precisa usar fonte oficial; enquanto isso, deve mostrar fallback operacional claro. Primeira correcao: carros e CTC entram como fallback.
+- [x] Troca de mes precisa aparecer em todas as telas.
+- [x] Painel, Carros, Agenda, CTC e Relatorios precisam respeitar o recorte mensal quando houver data.
+- [ ] Supervisao precisa ter fonte mensal por mes, nao apenas aviso quando o mes selecionado difere da fonte carregada.
 - [ ] Visual precisa voltar ao padrao Finanza: mais limpo, menos pesado, mais coeso.
 - [ ] Resumos no topo das paginas estao pouco uteis; remover ou trocar por informacao realmente acionavel.
 - [ ] Alertas genericos como critico/revisar/atencao sem regra oficial devem sair ou virar status com logica clara.
@@ -110,11 +116,11 @@ Quando retomarmos, comecar por estes problemas antes de qualquer funcionalidade 
 
 ## Dados Esperados
 
-- [ ] Escolas: 21.
-- [ ] Supervisores: 6.
-- [ ] Inventario: 107 linhas ou valor oficial atualizado.
-- [ ] Contatos: validar total atual da base.
-- [ ] Redes e cameras: validar total de escolas mapeadas.
+- [x] Escolas: 21.
+- [x] Supervisores: 6.
+- [x] Inventario: 107 linhas ou valor oficial atualizado.
+- [x] Contatos: 46.
+- [x] Redes e cameras: 21 escolas mapeadas.
 - [ ] Calendario: pendente de fonte oficial.
 
 ## Criterios De Aceite Visual
@@ -131,10 +137,10 @@ Quando retomarmos, comecar por estes problemas antes de qualquer funcionalidade 
 
 ## Criterios De Aceite Tecnico
 
-- [ ] `npm run check` passa.
+- [x] `npm run check` passa.
 - [ ] Nenhum erro no console ao navegar pelas paginas principais.
 - [ ] Nao ha arquivo da v1 alterado por engano.
-- [ ] Changelog do `ROADMAP.md` atualizado.
+- [x] Changelog do `ROADMAP.md` atualizado.
 - [ ] `docs/fundamentos-audit.md` atualizado quando a mudanca mexer em fundamentos.
 - [ ] Commit pequeno e com mensagem clara.
 - [ ] Push em `main` depois de validar.

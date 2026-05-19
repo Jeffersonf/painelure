@@ -1,12 +1,66 @@
 (function () {
   const P = window.PainelURE;
 
+  function valueToText(value) {
+    if (value === null || value === undefined) return "";
+    if (typeof value === "object") {
+      return value.Title || value.Name || value.LookupValue || value.Email || value.EMail || value.label || value.value || "";
+    }
+    return String(value).trim();
+  }
+
   function firstValue(row, keys, fallback = "") {
     for (const key of keys) {
       const value = row[key];
-      if (value !== undefined && String(value).trim()) return String(value).trim();
+      const text = valueToText(value);
+      if (text) return text;
     }
     return fallback;
+  }
+
+  function firstMatchingValue(row, keys, terms, fallback = "") {
+    const exact = firstValue(row, keys, "");
+    if (exact) return exact;
+    const normalizedTerms = terms.map(term => P.normalize(term));
+    const found = Object.entries(row || {}).find(([key, value]) => {
+      if (!valueToText(value)) return false;
+      const normalizedKey = P.normalize(key);
+      return normalizedTerms.some(term => normalizedKey.includes(term));
+    });
+    return found ? valueToText(found[1]) : fallback;
+  }
+
+  function formatDateValue(value) {
+    const text = valueToText(value);
+    if (!text) return "";
+    const serialized = text.match(/\/Date\((\d+)\)\//);
+    if (serialized) return new Date(Number(serialized[1])).toISOString().slice(0, 10);
+    const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+    const pt = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (pt) return `${String(Number(pt[1])).padStart(2, "0")}/${String(Number(pt[2])).padStart(2, "0")}/${pt[3]}`;
+    return text;
+  }
+
+  function formatTimeValue(value) {
+    const text = valueToText(value);
+    if (!text) return "";
+    const serialized = text.match(/\/Date\((\d+)\)\//);
+    if (serialized) {
+      const date = new Date(Number(serialized[1]));
+      return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }
+    const iso = text.match(/T(\d{2}):(\d{2})/);
+    if (iso) return `${iso[1]}:${iso[2]}`;
+    const time = text.match(/(\d{1,2}):(\d{2})/);
+    if (time) return `${String(Number(time[1])).padStart(2, "0")}:${time[2]}`;
+    return text;
+  }
+
+  function lookupLabel(value, label) {
+    const text = valueToText(value);
+    if (!text) return "";
+    return /^\d+$/.test(text) ? `${label} #${text}` : text;
   }
 
   function initialsFromName(name) {
@@ -190,16 +244,22 @@
   }
 
   function normalizeCarRows(rows) {
-    return rows.map(row => ({
-      vehicle: firstValue(row, ["carro", "veiculo", "vehicle", "recurso"], "Carro oficial"),
-      date: firstValue(row, ["data", "date", "quando"], ""),
-      time: firstValue(row, ["hora", "horario", "time"], ""),
-      requester: firstValue(row, ["solicitante", "responsavel", "requester", "owner"], ""),
-      destination: firstValue(row, ["destino", "local", "destination", "place"], ""),
-      driver: firstValue(row, ["motorista", "driver"], ""),
-      status: firstValue(row, ["status", "situacao", "tone"], "pendente"),
-      note: firstValue(row, ["observacao", "descricao", "note", "motivo"], "")
-    }));
+    return rows.map(row => {
+      const date = firstMatchingValue(row, ["data", "data_da_reserva", "data_x0020_da_x0020_reserva", "data_reserva", "date", "quando"], ["data", "date", "quando"], "");
+      const time = firstMatchingValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], ["hora", "horario", "time"], "");
+      const destination = firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino", "escolas"], ["destino", "local", "destination", "place", "escola"], "");
+      const driver = firstMatchingValue(row, ["motorista", "driver", "condutor"], ["motorista", "driver", "condutor"], "");
+      return {
+        vehicle: firstMatchingValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], ["carro", "veiculo", "vehicle", "recurso"], "Carro oficial"),
+        date: formatDateValue(date),
+        time: formatTimeValue(time || date),
+        requester: firstMatchingValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "setor", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsavel", "requester", "owner", "setor", "mail"], ""),
+        destination: lookupLabel(destination, "Escola"),
+        driver: lookupLabel(driver, "Condutor"),
+        status: firstMatchingValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], ["status", "situacao"], "pendente"),
+        note: firstMatchingValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ["observacao", "descricao", "motivo", "note"], "")
+      };
+    });
   }
 
   P.normalizers = {

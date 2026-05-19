@@ -147,34 +147,102 @@
     return String(text || "").split(".").map(item => item.trim()).find(Boolean) || "";
   }
 
+  function attrValue(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function canEditSchoolData() {
+    const display = P.displayUser?.() || {};
+    const role = P.normalize(P.currentRole?.() || display.role || "");
+    const contactRole = P.normalize(display.contactRole || "");
+    const sector = P.normalize(display.sector || "");
+    const name = P.normalize(display.name || display.shortName || "");
+    return [
+      "administrador",
+      "gabinete",
+      "seintec",
+      "supervis",
+      "seom"
+    ].some(item => role.includes(item) || sector.includes(item) || contactRole.includes(item))
+      || contactRole.includes("dirigente")
+      || name.includes("nelio");
+  }
+
+  function saveSchoolDetailForm(schoolName, form) {
+    const data = P.getAppData();
+    const current = findSchool(schoolName);
+    if (!current || !form) return;
+    const value = name => String(form.querySelector(`[name="${name}"]`)?.value || "").trim();
+    const profile = schoolProfile(schoolName) || { school: schoolName };
+    const nextSchool = {
+      ...current,
+      city: value("city") || current.city,
+      cie: value("cie") || current.cie
+    };
+    const nextProfile = {
+      ...profile,
+      school: schoolName,
+      director: value("director"),
+      viceDirector: value("viceDirector"),
+      proati: value("proati"),
+      goe: value("goe"),
+      phone: value("phone"),
+      mobile: value("mobile"),
+      email: value("email"),
+      address: value("address"),
+      notes: value("notes")
+    };
+    const target = P.normalize(schoolName);
+    const schools = (data.schools || []).map(item => P.normalize(item.name) === target ? nextSchool : item);
+    const profiles = (data.schoolProfiles || []).some(item => P.normalize(item.school) === target)
+      ? data.schoolProfiles.map(item => P.normalize(item.school) === target ? nextProfile : item)
+      : [...(data.schoolProfiles || []), nextProfile];
+    P.setAppData({ ...data, schools, schoolProfiles: profiles });
+    P.saveAppData?.();
+    openSchoolPage(schoolName);
+  }
+
+  function isInSelectedMonth(value) {
+    const month = P.selectedMonth?.();
+    const date = calendarDate({ value });
+    if (!month || !date) return true;
+    return date.getFullYear() === month.year && date.getMonth() === month.month - 1;
+  }
+
+  function monthFiltered(items, getter = item => item.date || item.value) {
+    return (items || []).filter(item => isInSelectedMonth(getter(item)));
+  }
+
   function setSelectOptions(select, options, selectedValue) {
     if (!select) return;
     select.innerHTML = options.map(option => `<option value="${option.value}">${option.label}</option>`).join("");
     select.value = options.some(option => option.value === selectedValue) ? selectedValue : options[0]?.value || "";
   }
 
-  function applySchoolFilters() {
+  function applySchoolCityFilter() {
     const city = P.$("#schoolCityFilter")?.value || "all";
-    const profile = P.$("#schoolProfileFilter")?.value || "all";
-    const inventory = P.$("#schoolInventoryFilter")?.value || "all";
-    const network = P.$("#schoolNetworkFilter")?.value || "all";
-    const cards = P.$all("#schoolGrid .school-card");
-    let visibleCount = 0;
-
-    cards.forEach(card => {
-      const cityOk = city === "all" || card.dataset.city === city;
-      const profileOk = profile === "all" || card.dataset.profileStatus === profile;
-      const inventoryOk = inventory === "all"
-        || (inventory === "alerts" && Number(card.dataset.inventoryAlerts || 0) > 0)
-        || (inventory === "ok" && Number(card.dataset.inventoryAlerts || 0) === 0);
-      const networkOk = network === "all" || card.dataset.networkStatus === network;
-      const visible = cityOk && profileOk && inventoryOk && networkOk;
-      card.classList.toggle("filter-hidden", !visible);
-      if (visible) visibleCount++;
+    P.$all("#schoolGrid .school-card").forEach(card => {
+      card.classList.toggle("filter-hidden", city !== "all" && card.dataset.city !== city);
     });
+  }
 
-    const summary = P.$("#schoolFilterSummary");
-    if (summary) summary.textContent = `${visibleCount}/${cards.length} escola(s) visiveis.`;
+  function renderSchoolCityFilter(schools) {
+    const select = P.$("#schoolCityFilter");
+    if (!select) return;
+    const current = select.value || "all";
+    const cities = [...new Set(schools.map(school => school.city).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    setSelectOptions(select, [
+      { value: "all", label: "Todos" },
+      ...cities.map(city => ({ value: P.searchText([city]), label: city }))
+    ], current);
+    if (!select.dataset.bound) {
+      select.dataset.bound = "true";
+      select.addEventListener("change", applySchoolCityFilter);
+    }
   }
 
   function supervisorTone(item) {
@@ -249,50 +317,6 @@
     if (!button || button.dataset.bound) return;
     button.dataset.bound = "true";
     button.addEventListener("click", handler);
-  }
-
-  function renderSchoolFilters(schools) {
-    const citySelect = P.$("#schoolCityFilter");
-    if (!citySelect) return;
-    const currentCity = citySelect.value || "all";
-    const cities = [...new Set(schools.map(school => school.city).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    setSelectOptions(citySelect, [
-      { value: "all", label: "Todos" },
-      ...cities.map(city => ({ value: P.searchText([city]), label: city }))
-    ], currentCity);
-
-    [citySelect, P.$("#schoolProfileFilter"), P.$("#schoolInventoryFilter"), P.$("#schoolNetworkFilter")].forEach(select => {
-      if (!select || select.dataset.bound) return;
-      select.dataset.bound = "true";
-      select.addEventListener("change", applySchoolFilters);
-    });
-    bindResetButton(P.$("#schoolFilterReset"), () => {
-      if (citySelect) citySelect.value = "all";
-      const profile = P.$("#schoolProfileFilter");
-      const inventory = P.$("#schoolInventoryFilter");
-      const network = P.$("#schoolNetworkFilter");
-      if (profile) profile.value = "all";
-      if (inventory) inventory.value = "all";
-      if (network) network.value = "all";
-      applySchoolFilters();
-    });
-  }
-
-  function renderSchoolOperationalSummary(schools) {
-    const data = P.getAppData();
-    const total = schools.length;
-    const cities = new Set(schools.map(school => school.city).filter(Boolean)).size;
-    const completeProfiles = schools.filter(school => schoolProfileCompletion(school.name) >= 65).length;
-    const inventoryAlerts = schools.reduce((sum, school) => sum + inventoryAlertCount(school), 0);
-    const networkMapped = schools.filter(school => data.networkData?.[school.name]).length;
-    const linkedSupervision = schools.filter(school => supervisorForSchool(school.name)).length;
-    const rows = [
-      { icon: "🏫", title: "Base escolar", note: `${total} escola(s) em ${cities || 0} municipio(s).`, label: `${total}`, tone: "info" },
-      { icon: "📋", title: "Fichas escolares", note: `${completeProfiles}/${total} ficha(s) com dados principais preenchidos.`, label: total && completeProfiles === total ? "ok" : "revisar", tone: total && completeProfiles === total ? "ok" : "warn" },
-      { icon: "💻", title: "Inventario", note: inventoryAlerts ? `${inventoryAlerts} unidade(s) fora de OK.` : "Inventario sem manutencao/defeito neste recorte.", label: inventoryAlerts ? "atencao" : "ok", tone: inventoryAlerts ? "warn" : "ok" },
-      { icon: "🌐", title: "Redes e supervisao", note: `${networkMapped}/${total} rede(s) mapeada(s) e ${linkedSupervision}/${total} escola(s) com supervisor.`, label: networkMapped === total && linkedSupervision === total ? "ok" : "base", tone: networkMapped === total && linkedSupervision === total ? "ok" : "info" }
-    ];
-    renderSummaryRows("#schoolSummaryRows", rows);
   }
 
   function supervisorForSchool(name) {
@@ -566,13 +590,13 @@
     P.bindMonthControls?.();
     const monthLabel = P.selectedMonthLabel?.() || "Maio 2026";
     const networkCount = Object.keys(data.networkData || {}).length;
-    const calendarCount = data.calendar?.length || 0;
-    const carCount = carBookings(data).length;
+    const calendarCount = monthFiltered(data.calendar || [], item => item.date || item.value).length;
+    const carCount = monthFiltered(carBookings(data), item => item.date).length;
     const missingNetwork = Math.max((data.schools?.length || 0) - networkCount, 0);
     const inventoryAlerts = Object.values(data.schoolInventoryMetrics || {}).reduce((sum, item) => sum + Number(item.alerts || 0), 0);
     const pendingVisits = (data.supervisors || []).reduce((sum, item) => sum + Number(item.pending || 0), 0);
     const openCalls = (data.calls || []).filter(item => item.status !== "resolvido").length;
-    const ctcVisits = data.ctcVisits?.length || 0;
+    const ctcVisits = monthFiltered(data.ctcVisits || [], item => item.date).length;
     const officialSources = (P.sourceStatus || []).filter(item => item.status === "loaded").length;
     const profile = dashboardProfile(data, { networkCount, calendarCount, missingNetwork, inventoryAlerts, pendingVisits, openCalls, ctcVisits });
     const sourceNote = officialSources
@@ -623,6 +647,42 @@
       tone: "info",
       page: currentRoleKey().includes("supervis") ? "supervision" : "schools"
     };
+
+    const command = P.$("#dashboardCommand");
+    if (command) {
+      const supervisionPct = (data.supervisors || []).reduce((acc, item) => {
+        const month = progressParts(item.month);
+        acc.done += month.done;
+        acc.total += month.total;
+        return acc;
+      }, { done: 0, total: 0 });
+      const agendaFallbackCount = monthFiltered(calendarWithOperationalFallback(data.calendar || [], data), item => item.date || item.value).length;
+      const commandItems = [
+        { label: "Escolas", value: data.schools?.length || 0, note: `${networkCount}/${data.schools?.length || 0} com rede`, page: "schools", tone: missingNetwork ? "info" : "ok" },
+        { label: "Supervisao", value: supervisionPct.total ? `${Math.round((supervisionPct.done / supervisionPct.total) * 100)}%` : "0%", note: `${pendingVisits} visita(s) pendente(s)`, page: "supervision", tone: pendingVisits ? "warn" : "ok" },
+        { label: "Carros", value: carCount, note: carCount ? "reservas no mes" : "sem reserva no mes", page: "cars", tone: carCount ? "info" : "warn" },
+        { label: "Agenda", value: agendaFallbackCount, note: calendarCount ? "fonte carregada" : "com fallback operacional", page: "calendar", tone: calendarCount ? "ok" : "info" }
+      ];
+      command.innerHTML = `
+        <article class="command-primary command-${profile.notice === "Base operacional pronta" ? "info" : "ok"}">
+          <div>
+            <span class="eyebrow">Comando do mes</span>
+            <strong>${profile.title}</strong>
+            <p>${profile.note}</p>
+          </div>
+          <button class="ghost-btn" type="button" data-jump="${currentRoleKey().includes("supervis") ? "supervision" : "schools"}">Abrir foco</button>
+        </article>
+        <div class="command-metrics">
+          ${commandItems.map(item => `
+            <button class="command-metric command-metric-${item.tone}" type="button" data-jump="${item.page}">
+              <small>${item.label}</small>
+              <strong>${item.value}</strong>
+              <span>${item.note}</span>
+            </button>
+          `).join("")}
+        </div>
+      `;
+    }
 
     const decisionRows = P.$("#decisionRows");
     const agendaRows = P.$("#agendaRows");
@@ -687,82 +747,28 @@
   function renderSchools(schools) {
     const grid = P.$("#schoolGrid");
     if (!grid) return;
-    renderSchoolOperationalSummary(schools);
     if (!schools.length) {
       grid.innerHTML = `<div class="empty-state">Nenhuma escola carregada ainda.</div>`;
       return;
     }
-    const data = P.getAppData();
-    const cityCounts = schools.reduce((acc, school) => {
-      acc[school.city] = (acc[school.city] || 0) + 1;
-      return acc;
-    }, {});
-    const cityOrder = Object.entries(cityCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    renderSchoolCityFilter(schools);
+    const sorted = [...schools].sort((a, b) => a.city.localeCompare(b.city) || a.name.localeCompare(b.name));
     grid.innerHTML = `
-      <section class="schools-finanza-overview">
-        <article class="schools-hero-card">
-          <div>
-            <span class="eyebrow">🏫 Escolas</span>
-            <strong>${schools.length} unidades na base</strong>
-            <p>Ficha, supervisao, inventario e rede no mesmo ponto de consulta.</p>
-          </div>
-          <div class="schools-city-stack">
-            ${cityOrder.slice(0, 4).map(([city, count]) => `<span><strong>${count}</strong><small>${city}</small></span>`).join("")}
-          </div>
-        </article>
-      </section>
-      <section class="school-finanza-grid">
-        ${schools.map(school => {
-      const profile = schoolProfile(school.name);
-      const profilePct = schoolProfileCompletion(school.name);
-      const missing = schoolMissingProfileFields(school.name);
-      const metrics = data.schoolInventoryMetrics?.[school.name] || { items: school.items || 0, alerts: school.alerts || 0 };
-      const alertCount = inventoryAlertCount(school);
-      const profileStatus = profileStatusFromPct(profilePct);
-      const network = data.networkData?.[school.name];
-      const networkStatus = network ? "mapped" : "pending";
-      const supervisor = supervisorForSchool(school.name);
-      const cardTone = alertCount ? "warn" : (!network || profileStatus !== "ok" ? "info" : "ok");
-      const cardLabel = alertCount ? "Inventario" : (!network ? "Rede" : (profileStatus !== "ok" ? "Ficha" : "OK"));
-      const note = followUpText(missing, alertCount, network, 0);
-      const actionLabel = alertCount ? "Conferir inventario" : (!network ? "Mapear rede" : (profileStatus !== "ok" ? "Completar ficha" : "Abrir unidade"));
-      return `
-        <button class="school-card school-card-${cardTone} school-finanza-card" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([school.city])}" data-profile-status="${profileStatus}" data-inventory-alerts="${alertCount}" data-network-status="${networkStatus}" data-search="${P.searchText([school.name, school.city, school.cie, school.initials, profile?.director, profile?.email, profile?.phone, supervisor?.name])}">
-          <div class="school-finanza-main">
-            <div class="school-avatar">🏫</div>
-            <div class="school-title-block">
-              <h2>${school.name}</h2>
-              <p>${school.city} · CIE ${school.cie}</p>
+      <section class="schools-board">
+        ${sorted.map(school => `
+        <button class="school-card school-compact-card" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([school.city])}" data-search="${P.searchText([school.name, school.city, school.cie, school.initials])}">
+          <div class="school-compact-main">
+            <div class="school-avatar">&#127979;</div>
+            <div class="school-compact-title">
+              <strong>${school.name}</strong>
+              <small>${school.city} | CIE ${school.cie}</small>
             </div>
-            <span class="status-pill ${cardTone}">${cardLabel}</span>
-          </div>
-          <div class="school-finanza-body">
-            <div>
-              <small>Supervisor</small>
-              <strong>${supervisor?.name || "Nao vinculado"}</strong>
-            </div>
-            <div>
-              <small>Status da unidade</small>
-              <strong>${note}</strong>
-            </div>
-          </div>
-          <div class="school-finanza-metrics">
-            <span><strong>${profilePct}%</strong><small>ficha</small></span>
-            <span><strong>${metrics.items || 0}</strong><small>itens</small></span>
-            <span><strong>${alertCount || 0}</strong><small>manut.</small></span>
-            <span><strong>${network ? "sim" : "nao"}</strong><small>rede</small></span>
-          </div>
-          <div class="school-finanza-foot">
-            <em>${actionLabel}</em>
-            <div class="progress" aria-label="Ficha ${profilePct}%"><i style="width:${profilePct}%"></i></div>
           </div>
         </button>
-      `;
-        }).join("")}
+      `).join("")}
       </section>
     `;
-    renderSchoolFilters(schools);
-    applySchoolFilters();
+    applySchoolCityFilter();
     grid.querySelectorAll("[data-school-name]").forEach(button => {
       button.addEventListener("click", () => {
         openSchoolPage(button.dataset.schoolName);
@@ -783,10 +789,8 @@
     const network = data.networkData?.[school.name];
     const supervisor = supervisorForSchool(school.name);
     const calls = (data.calls || []).filter(call => P.normalize(call.school) === P.normalize(school.name));
-    const contacts = (data.contacts || []).filter(contact => ["tecnologia", "supervisao", "gabinete"].includes(P.normalize(contact.sector))).slice(0, 3);
     const networkStatus = network ? "Mapeada" : "Pendente";
     const profileNote = missingProfile.length ? `Pendencias: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
-    const mainAction = followUpText(missingProfile, totals.alertUnits || metrics.alerts, network, calls.length);
     const schoolTone = totals.alertUnits || metrics.alerts ? "warn" : (!network || profilePct < 65 || calls.length ? "info" : "ok");
     const inventoryPreview = assets.slice(0, 6);
     const networkItems = [
@@ -794,15 +798,20 @@
       { title: "IPs", value: network?.ips?.[0] || "Sem IP cadastrado" },
       { title: "Cameras", value: network?.cameras?.[0] || "Sem camera cadastrada" }
     ];
+    const guideWidgets = [
+      { key: "inventory", title: "&#128187; Inventario", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) pedem revisao` : `${totals.lines || metrics.items || 0} item(ns) sem alerta`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "Abrir", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("inventory") },
+      { key: "network", title: "&#127760; Redes", note: network ? `${networkItems.filter(item => !item.value.includes("Sem")).length}/3 grupos mapeados` : "Rede e cameras pendentes", label: network ? "Abrir" : "Pendente", tone: network ? "info" : "warn", enabled: Boolean(network) && (!P.canAccess || P.canAccess("network")) },
+      { key: "supervisor", title: "&#129517; Supervisao", note: supervisor ? `${supervisor.name} | mes ${supervisor.month || "0/12"}` : "Sem supervisor vinculado", label: supervisor ? "Abrir" : "Pendente", tone: supervisor ? "info" : "warn", enabled: Boolean(supervisor) },
+      { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estavel", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("calls") }
+    ];
     detail.innerHTML = `
       <section class="school-profile-page school-profile-${schoolTone}">
-        <article class="school-profile-hero">
+        <article class="school-profile-hero compact">
           <div class="school-profile-title">
-            <div class="school-avatar large">🏫</div>
+            <div class="school-avatar large">&#127979;</div>
             <div>
-              <span class="eyebrow">${school.city} · CIE ${school.cie}</span>
-              <strong>${school.name}</strong>
-              <p>${mainAction}</p>
+              <span class="eyebrow">${school.city} | CIE ${school.cie}</span>
+              <strong>Ficha operacional</strong>
             </div>
           </div>
           <div class="school-profile-owner">
@@ -813,11 +822,19 @@
         </article>
 
         <section class="school-profile-metrics">
-          <article><span>📋</span><small>Ficha</small><strong>${profilePct}%</strong><i style="--pct:${profilePct}%"></i></article>
-          <article><span>💻</span><small>Inventario</small><strong>${totals.lines || metrics.items || 0}</strong><i style="--pct:100%"></i></article>
-          <article><span>🛠️</span><small>Manutencao</small><strong>${totals.alertUnits || metrics.alerts || 0}</strong><i style="--pct:${totals.alertUnits || metrics.alerts ? 100 : 0}%"></i></article>
-          <article><span>🌐</span><small>Rede</small><strong>${networkStatus}</strong><i style="--pct:${network ? 100 : 0}%"></i></article>
-          <article><span>📥</span><small>Chamados</small><strong>${calls.length}</strong><i style="--pct:${calls.length ? 100 : 0}%"></i></article>
+          <article><span>&#128203;</span><small>Ficha</small><strong>${profilePct}%</strong><i style="--pct:${profilePct}%"></i></article>
+          <article><span>&#128187;</span><small>Inventario</small><strong>${totals.lines || metrics.items || 0}</strong><i style="--pct:100%"></i></article>
+          <article><span>&#128736;&#65039;</span><small>Manutencao</small><strong>${totals.alertUnits || metrics.alerts || 0}</strong><i style="--pct:${totals.alertUnits || metrics.alerts ? 100 : 0}%"></i></article>
+          <article><span>&#127760;</span><small>Rede</small><strong>${networkStatus}</strong><i style="--pct:${network ? 100 : 0}%"></i></article>
+          <article><span>&#128229;</span><small>Chamados</small><strong>${calls.length}</strong><i style="--pct:${calls.length ? 100 : 0}%"></i></article>
+        </section>
+
+        <section class="school-guide-grid">
+          ${guideWidgets.map(widget => `<button class="school-guide-widget school-guide-${widget.tone}" type="button" data-school-guide="${widget.key}" ${widget.enabled ? "" : "disabled"}>
+            <span>${widget.title}</span>
+            <strong>${widget.label}</strong>
+            <small>${widget.note}</small>
+          </button>`).join("")}
         </section>
 
         <section class="school-profile-grid">
@@ -856,7 +873,7 @@
             <div class="box-head"><div><strong>Inventario</strong><small>Resumo consolidado da escola.</small></div><span class="status-pill ${totals.alertUnits || metrics.alerts ? "warn" : "ok"}">${totals.alertUnits || metrics.alerts ? "revisar" : "ok"}</span></div>
             <div class="school-inventory-preview">
               ${inventoryPreview.length ? inventoryPreview.map(asset => `<button class="data-row compact" type="button" data-open-inventory="${school.name}">
-                <span class="row-icon">💻</span>
+                <span class="row-icon">&#128187;</span>
                 <span><strong>${asset.name}</strong><small>${asset.description || `${asset.quantity || 0} unidade(s)`}</small></span>
                 <em class="status-pill ${statusClass(asset.status)}">${asset.status || "base"}</em>
               </button>`).join("") : `<div class="empty-state">Sem linhas de inventario para esta escola.</div>`}
@@ -871,21 +888,24 @@
             </div>
           </article>
 
-          <article class="box school-profile-card">
-            <div class="box-head"><div><strong>Contatos URE</strong><small>Apoio rapido.</small></div></div>
-            <div class="school-profile-stack">
-              ${contacts.length ? contacts.map(contact => `<span><small>${contact.sector}</small><strong>${contact.name}</strong></span>`).join("") : `<span><small>Base</small><strong>Sem contato sugerido</strong></span>`}
-            </div>
-          </article>
+          ${canEditSchoolData() ? `<article class="box school-edit-card wide">
+            <div class="box-head"><div><strong>Editar dados</strong><small>Alteracoes ficam salvas neste painel.</small></div><span class="status-pill info">aberto</span></div>
+            <form class="school-edit-form" data-school-edit-form>
+              <label><span>Municipio</span><input name="city" value="${attrValue(school.city)}"></label>
+              <label><span>CIE</span><input name="cie" value="${attrValue(school.cie)}"></label>
+              <label><span>Direcao</span><input name="director" value="${attrValue(profile?.director)}"></label>
+              <label><span>Vice-direcao</span><input name="viceDirector" value="${attrValue(profile?.viceDirector)}"></label>
+              <label><span>PROATI</span><input name="proati" value="${attrValue(profile?.proati)}"></label>
+              <label><span>GOE</span><input name="goe" value="${attrValue(profile?.goe)}"></label>
+              <label><span>Telefone</span><input name="phone" value="${attrValue(profile?.phone)}"></label>
+              <label><span>Celular</span><input name="mobile" value="${attrValue(profile?.mobile)}"></label>
+              <label><span>Email</span><input name="email" value="${attrValue(profile?.email)}"></label>
+              <label class="wide"><span>Endereco</span><input name="address" value="${attrValue(profile?.address)}"></label>
+              <label class="wide"><span>Observacoes</span><textarea name="notes">${attrValue(profile?.notes)}</textarea></label>
+              <button class="ghost-btn" type="submit">Salvar dados</button>
+            </form>
+          </article>` : ""}
         </section>
-
-        <div class="detail-actions school-profile-actions">
-          ${profile?.email ? `<a class="ghost-btn" href="mailto:${profile.email}">Enviar email</a>` : ""}
-          ${profile?.phone ? `<a class="ghost-btn" href="tel:${String(profile.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
-          ${!P.canAccess || P.canAccess("network") ? `<button class="ghost-btn" type="button" data-open-network="${school.name}" ${network ? "" : "disabled"}>Abrir redes</button>` : ""}
-          ${!P.canAccess || P.canAccess("inventory") ? `<button class="ghost-btn" type="button" data-open-inventory="${school.name}">Abrir inventario</button>` : ""}
-          <button class="ghost-btn" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
-        </div>
       </section>
     `;
     detail.querySelectorAll("[data-open-network]").forEach(button => {
@@ -897,11 +917,24 @@
     detail.querySelectorAll("[data-open-supervisor]").forEach(button => {
       button.addEventListener("click", event => focusSupervisor(event.currentTarget.dataset.openSupervisor));
     });
+    detail.querySelectorAll("[data-school-guide]").forEach(button => {
+      button.addEventListener("click", event => {
+        const guide = event.currentTarget.dataset.schoolGuide;
+        if (guide === "inventory") focusInventorySchool(school.name);
+        if (guide === "network") focusNetworkSchool(school.name);
+        if (guide === "supervisor") focusSupervisor(supervisor?.name);
+        if (guide === "calls") P.setPage?.("calls");
+      });
+    });
+    detail.querySelector("[data-school-edit-form]")?.addEventListener("submit", event => {
+      event.preventDefault();
+      saveSchoolDetailForm(school.name, event.currentTarget);
+    });
   }
 
   function followUpText(missingProfile, alertCount, network, callCount) {
     if (alertCount) return "Conferir inventario com manutencao ou defeito.";
-    if (callCount) return "Acompanhar chamados vinculados antes de encerrar a escola.";
+    if (callCount) return "Chamados vinculados na escola.";
     if (missingProfile.length) return `Completar ficha: ${missingProfile.slice(0, 3).join(", ")}.`;
     if (!network) return "Mapear rede e cameras para completar a base tecnica.";
     return "Escola sem pendencia resumida no painel.";
@@ -934,10 +967,10 @@
   function renderNetworkOperationalSummary(networkData, selectedName, selectedData) {
     const names = Object.keys(networkData || {});
     const rows = [
-      { icon: "🌐", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
-      { icon: "🔢", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
-      { icon: "📹", title: "Cameras", note: `${selectedData?.cameras?.length || 0} informacao(oes) de cameras disponiveis.`, label: selectedData?.cameras?.length ? "ok" : "base", tone: selectedData?.cameras?.length ? "ok" : "info" },
-      { icon: "🔐", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais tecnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
+      { icon: "RD", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
+      { icon: "IP", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
+      { icon: "CM", title: "Cameras", note: `${selectedData?.cameras?.length || 0} informacao(oes) de cameras disponiveis.`, label: selectedData?.cameras?.length ? "ok" : "base", tone: selectedData?.cameras?.length ? "ok" : "info" },
+      { icon: "CR", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais tecnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
     ];
     renderSummaryRows("#networkSummaryRows", rows);
   }
@@ -958,15 +991,15 @@
     const supervisor = supervisorForSchool(selectedName);
     const credentialItems = data.credentials || [];
     const widgets = [
-      ["Informacoes sobre redes", data.network || [], "🌐", "info", "Publico CTC"],
-      ["Informacoes sobre IPs", data.ips || [], "🔢", "info", "Publico CTC"],
-      ["Informacoes sobre cameras", data.cameras || [], "📹", "info", "Publico CTC"],
-      ["Credenciais", data.credentials || [], "🔐", "warn", "Restrito"]
+      ["Informacoes sobre redes", data.network || [], "RD", "info", "Publico CTC"],
+      ["Informacoes sobre IPs", data.ips || [], "IP", "info", "Publico CTC"],
+      ["Informacoes sobre cameras", data.cameras || [], "CM", "info", "Publico CTC"],
+      ["Credenciais", data.credentials || [], "CR", "warn", "Restrito"]
     ].filter(([, items]) => items.length);
     if (credentialItems.length && !canViewCredentials()) {
       const credentialIndex = widgets.findIndex(([title]) => title === "Credenciais");
       if (credentialIndex >= 0) {
-        widgets[credentialIndex] = ["Credenciais protegidas", ["Disponivel apenas para Administrador, SETEC, SEINTEC e Tecnicos CTC."], "🔐", "warn", "Restrito"];
+        widgets[credentialIndex] = ["Credenciais protegidas", ["Disponivel apenas para Administrador, SETEC, SEINTEC e Tecnicos CTC."], "CR", "warn", "Restrito"];
       }
     }
 
@@ -1130,7 +1163,7 @@
         <div class="row-list">
           ${selectedAssets.map(asset => `
             <div class="data-row" data-inventory-key="${P.searchText([asset.school, asset.sourceName || asset.name, asset.notes])}" data-search="${P.searchText([asset.school, asset.name, asset.sourceName, asset.notes, asset.status])}">
-              <span class="row-icon">💻</span>
+              <span class="row-icon">IN</span>
               <span><strong>${asset.sourceName || asset.name}</strong><small>${asset.notes || asset.name}</small></span>
               <em class="status-pill ${assetTone(asset.status)}">${assetUnits(asset)} | ${assetStatusLabel(asset.status)}</em>
             </div>
@@ -1212,6 +1245,26 @@
       return acc;
     }, { schools: 0, weekDone: 0, weekTotal: 0, monthDone: 0, monthTotal: 0, pending: 0 });
     const coverage = totals.monthTotal ? Math.round((totals.monthDone / totals.monthTotal) * 100) : 0;
+    const schoolLedger = sorted.flatMap(item => {
+      const assigned = item.assignedSchools || [];
+      const { month } = supervisorProgress(item);
+      const targetPerSchool = assigned.length ? Math.max(1, Math.round((month.total || assigned.length * 3) / assigned.length)) : 0;
+      return assigned.map((schoolName, index) => {
+        const school = findSchool(schoolName);
+        const done = Math.min(targetPerSchool, Math.max(0, month.done - (index * targetPerSchool)));
+        const pending = Math.max(targetPerSchool - done, 0);
+        return {
+          supervisor: item.name,
+          school: schoolName,
+          city: school?.city || "Municipio pendente",
+          cie: school?.cie || "CIE pendente",
+          done,
+          target: targetPerSchool,
+          pending,
+          alerts: school ? inventoryAlertCount(school) : 0
+        };
+      });
+    }).sort((a, b) => b.pending - a.pending || b.alerts - a.alerts || a.school.localeCompare(b.school));
     host.innerHTML = `
       <section class="supervision-v1-shell">
         <div class="supervision-v1-metrics">
@@ -1258,6 +1311,17 @@
             </div>
           </aside>
         </div>
+        <article class="supervision-school-ledger box">
+          <div class="box-head"><div><strong>Carteira por escola</strong><small>Leitura de v1: unidade, supervisor, visitas previstas e pendencias.</small></div></div>
+          <div class="supervision-ledger-head"><span>Escola</span><span>Supervisor</span><span>Visitas</span><span>Inventario</span><span>Status</span></div>
+          ${schoolLedger.map(row => `<button class="supervision-ledger-row" type="button" data-school-jump="${row.school}" data-search="${P.searchText([row.school, row.city, row.cie, row.supervisor])}">
+            <span><strong>${row.school}</strong><small>${row.city} | ${row.cie}</small></span>
+            <span><strong>${row.supervisor}</strong><small>responsavel</small></span>
+            <span><strong>${row.done}/${row.target}</strong><small>${row.pending ? `${row.pending} pendente(s)` : "em dia"}</small></span>
+            <span><strong>${row.alerts}</strong><small>manut./defeito</small></span>
+            <em class="status-pill ${row.pending ? "warn" : "ok"}">${row.pending ? "pendente" : "ok"}</em>
+          </button>`).join("")}
+        </article>
       </section>`;
     applySupervisorFilters();
     host.querySelectorAll("[data-supervisor-index], [data-supervisor-selector]").forEach(button => {
@@ -1265,6 +1329,9 @@
         const index = Number(button.dataset.supervisorIndex || button.dataset.supervisorSelector);
         openSupervisorPage(sorted[index].name);
       });
+    });
+    host.querySelectorAll("[data-school-jump]").forEach(button => {
+      button.addEventListener("click", () => focusSchool(button.dataset.schoolJump));
     });
   }
 
@@ -1374,7 +1441,7 @@
 
   function carStatusTone(status) {
     const key = P.normalize(status || "");
-    if (["cancelado", "cancelada", "bloqueado", "indisponivel"].some(item => key.includes(item))) return "danger";
+    if (["cancelado", "cancelada", "bloqueado", "indisponivel", "recusado", "reprovado"].some(item => key.includes(item))) return "danger";
     if (["pendente", "aguardando", "solicitado"].some(item => key.includes(item))) return "warn";
     if (["uso", "rota", "andamento"].some(item => key.includes(item))) return "info";
     return "ok";
@@ -1435,16 +1502,53 @@
     });
   }
 
+  function calendarWithOperationalFallback(calendar, data = P.getAppData()) {
+    const base = [...(calendar || [])];
+    const carItems = carBookings(data).map(item => ({
+      label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
+      value: item.date,
+      date: item.date,
+      time: item.time,
+      note: `${item.time || "Horario a definir"} | ${item.requester || "Solicitante nao informado"} | ${item.status || "pendente"}`,
+      scope: "shared",
+      type: "carro",
+      source: "cars"
+    }));
+    if (base.length) {
+      const seen = new Set(base.map(item => P.searchText([item.label, item.value, item.date, item.time, item.note])));
+      return [...base, ...carItems.filter(item => {
+        const key = P.searchText([item.label, item.value, item.date, item.time, item.note]);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })].sort((a, b) => {
+        const dateA = calendarDate({ value: a.date || a.value })?.getTime() || Number.MAX_SAFE_INTEGER;
+        const dateB = calendarDate({ value: b.date || b.value })?.getTime() || Number.MAX_SAFE_INTEGER;
+        return dateA - dateB || String(a.time || "").localeCompare(String(b.time || ""));
+      });
+    }
+    const ctcItems = (data.ctcVisits || []).map(item => ({
+      label: `CTC - ${item.place || item.owner || "visita tecnica"}`,
+      value: item.date,
+      date: item.date,
+      time: item.time,
+      note: `${item.time || "Horario a definir"} | ${item.owner || "Tecnico"} | ${item.objective || "Visita tecnica"}`,
+      scope: "shared",
+      type: "ctc",
+      source: "ctc"
+    }));
+    return [...carItems, ...ctcItems].sort((a, b) => {
+      const dateA = calendarDate({ value: a.date })?.getTime() || Number.MAX_SAFE_INTEGER;
+      const dateB = calendarDate({ value: b.date })?.getTime() || Number.MAX_SAFE_INTEGER;
+      return dateA - dateB || String(a.time || "").localeCompare(String(b.time || ""));
+    });
+  }
+
   function renderCars(data) {
     const grid = P.$("#carGrid");
     if (!grid) return;
-    const month = P.selectedMonth?.();
     const allBookings = carBookings(data);
-    const bookings = allBookings.filter(item => {
-      const date = calendarDate({ value: item.date });
-      if (!month || !date) return true;
-      return date.getFullYear() === month.year && date.getMonth() === month.month - 1;
-    });
+    const bookings = monthFiltered(allBookings, item => item.date);
     const vehicleFilter = P.$("#carVehicleFilter");
     const statusFilter = P.$("#carStatusFilter");
     const vehicles = [...new Set(bookings.map(item => item.vehicle).filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -1458,6 +1562,29 @@
       if (statusFilter) statusFilter.value = "all";
       renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
     });
+    const refreshButton = P.$("#carRefreshBtn");
+    const sourceStatus = P.$("#carSourceStatus");
+    if (refreshButton && !refreshButton.dataset.bound) {
+      refreshButton.dataset.bound = "true";
+      refreshButton.addEventListener("click", async () => {
+        const original = refreshButton.textContent;
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Atualizando...";
+        if (sourceStatus) sourceStatus.textContent = "Atualizando a lista ReservasVeiculos no SharePoint...";
+        try {
+          const result = await P.refreshSource?.("cars");
+          P.renderSourceStatus?.();
+          const rows = result?.rows?.length || 0;
+          if (sourceStatus) sourceStatus.textContent = `SharePoint atualizado: ${rows} item(ns) lido(s) de ReservasVeiculos.`;
+          renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
+        } catch (error) {
+          if (sourceStatus) sourceStatus.textContent = error?.message || "Nao foi possivel atualizar o SharePoint.";
+        } finally {
+          refreshButton.disabled = false;
+          refreshButton.textContent = original || "Atualizar";
+        }
+      });
+    }
     const vehicleValue = vehicleFilter?.value || "all";
     const statusValue = statusFilter?.value || "all";
     const visible = bookings.filter(item => {
@@ -1470,6 +1597,12 @@
     const calendarLinked = visible.filter(item => item.source === "calendar").length;
     const summary = P.$("#carFilterSummary");
     if (summary) summary.textContent = `${visible.length}/${bookings.length} agendamento(s) visiveis no mes.`;
+    if (sourceStatus && !sourceStatus.textContent.includes("Atualizando")) {
+      const status = (P.sourceStatus || []).find(item => item.key === "cars");
+      if (status?.status === "loaded") sourceStatus.textContent = `Fonte SharePoint carregada: ${status.rows?.length || 0} item(ns) de ReservasVeiculos.`;
+      else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "SharePoint nao carregado.";
+      else sourceStatus.textContent = P.sources?.cars?.url ? "Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar." : "Fonte de carros nao configurada.";
+    }
     renderSummaryRows("#carSummaryRows", [
       { icon: "&#128663;", title: "Agendamentos", note: `${visible.length} reserva(s) no filtro atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
       { icon: "&#9989;", title: "Reservados", note: `${reserved} carro(s) confirmado(s) ou reservado(s).`, label: `${reserved}`, tone: reserved ? "ok" : "info" },
@@ -1477,15 +1610,36 @@
       { icon: "&#128197;", title: "Calendario", note: `${calendarLinked} item(ns) vieram da agenda oficial.`, label: `${calendarLinked}`, tone: calendarLinked ? "info" : "warn" }
     ]);
     if (!visible.length) {
-      grid.innerHTML = `<div class="empty-state">Nenhum agendamento de carro encontrado neste filtro.</div>`;
+      grid.innerHTML = `<div class="empty-state">${bookings.length ? "Nenhum agendamento de carro encontrado neste filtro." : `Nenhum agendamento de carro em ${P.selectedMonthLabel?.() || "mes selecionado"}.`}</div>`;
       return;
     }
+    const byDate = visible.reduce((acc, item) => {
+      const key = item.date || "Sem data";
+      acc[key] = acc[key] || [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+    const vehicleLoad = vehicles.map(vehicle => ({
+      vehicle,
+      total: visible.filter(item => item.vehicle === vehicle).length,
+      pending: visible.filter(item => item.vehicle === vehicle && carStatusTone(item.status) === "warn").length
+    }));
+    const carCalendar = visible.map(item => ({
+      label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
+      value: item.date,
+      date: item.date,
+      time: item.time,
+      note: `${item.time || "Horario a definir"} | ${item.requester || "Solicitante nao informado"} | ${item.status || "pendente"}`,
+      tone: carStatusTone(item.status),
+      type: "carro",
+      scope: "shared"
+    }));
     grid.innerHTML = `
-      <article class="cars-hero">
+      <article class="cars-hero car-command">
         <div>
-          <span class="eyebrow">&#128663; Carros oficiais</span>
-          <strong>${visible.length} agendamento(s)</strong>
-          <p>Reservas, destinos, solicitantes e motoristas no mesmo painel.</p>
+          <span class="eyebrow">Carros oficiais</span>
+          <strong>${visible.length} agenda(s) no mes</strong>
+          <p>${vehicles.length} veiculo(s), ${pending} pendencia(s) de confirmacao e ${calendarLinked} item(ns) vindos do calendario.</p>
         </div>
         <div class="cars-hero-score">
           <span><strong>${vehicles.length}</strong><small>carros</small></span>
@@ -1493,24 +1647,29 @@
           <span><strong>${calendarLinked}</strong><small>agenda</small></span>
         </div>
       </article>
-      ${visible.map(item => {
-        const tone = carStatusTone(item.status);
-        const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
-        return `<article class="car-booking-card car-booking-${tone}" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
-          <div class="car-booking-top">
-            <span class="row-icon">&#128663;</span>
-            <div><small>${item.date || "Sem data"} ${item.time || ""}</small><strong>${item.vehicle}</strong></div>
-            <em class="status-pill ${tone}">${item.status || "pendente"}</em>
-          </div>
-          <div class="car-booking-grid">
-            <span><small>Destino</small><strong>${item.destination || "Nao informado"}</strong></span>
-            <span><small>Solicitante</small><strong>${item.requester || "Nao informado"}</strong></span>
-            <span><small>Motorista</small><strong>${item.driver || "A definir"}</strong></span>
-            <span><small>Fonte</small><strong>${item.source === "calendar" ? "Calendario" : "Base carros"}</strong></span>
-          </div>
-          <p>${item.note || "Sem observacao."}</p>
-        </article>`;
-      }).join("")}
+      <section class="car-resource-strip">
+        ${vehicleLoad.map(item => `<span><strong>${item.vehicle}</strong><small>${item.total} agenda(s)${item.pending ? ` | ${item.pending} pendente(s)` : ""}</small></span>`).join("")}
+      </section>
+      <section class="car-calendar-shell">
+        ${calendarBoardMarkup(carCalendar)}
+      </section>
+      <section class="car-day-list">
+        ${Object.entries(byDate).map(([date, items]) => `
+          <article class="car-day-group">
+            <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
+            ${items.map(item => {
+              const tone = carStatusTone(item.status);
+              const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
+              return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
+                <span class="car-time"><strong>${item.time || "--:--"}</strong><small>${item.source === "calendar" ? "calendario" : "carros"}</small></span>
+                <span class="car-route"><strong>${item.vehicle}</strong><small>${item.destination || "Destino nao informado"}</small></span>
+                <span class="car-requester"><strong>${item.requester || "Solicitante nao informado"}</strong><small>${item.driver || "Motorista a definir"}</small></span>
+                <em class="status-pill ${tone}">${item.status || "pendente"}</em>
+              </button>`;
+            }).join("")}
+          </article>
+        `).join("")}
+      </section>
     `;
   }
 
@@ -1519,10 +1678,12 @@
     if (!grid) return;
     bindCalendarTabs();
     const mode = P.$("[data-calendar-mode].active")?.dataset.calendarMode || "shared";
-    const visible = calendarByMode(calendar, mode);
+    const sourceCalendar = calendarWithOperationalFallback(calendar, P.scopedData?.(P.getAppData()) || P.getAppData());
+    const visibleAll = calendarByMode(sourceCalendar, mode);
+    const visible = monthFiltered(visibleAll, item => item.date || item.value);
     renderCalendarOperationalSummary(visible, mode);
     if (!visible.length) {
-      grid.innerHTML = `<div class="empty-state">${mode === "personal" ? "Nenhum evento pessoal carregado ainda." : "Nenhum evento compartilhado carregado ainda."}</div>`;
+      grid.innerHTML = `<div class="empty-state">${mode === "personal" ? "Nenhum evento pessoal" : "Nenhum evento compartilhado"} em ${P.selectedMonthLabel?.() || "mes selecionado"}.</div>`;
       return;
     }
     grid.innerHTML = calendarBoardMarkup(visible);
@@ -1716,8 +1877,9 @@
     if (!grid) return;
     const ownerFilter = P.$("#ctcOwnerFilter");
     const schoolFilter = P.$("#ctcSchoolFilter");
-    const owners = [...new Set(visits.map(visit => visit.owner).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    const schools = [...new Set(visits.map(visit => visit.place).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const monthVisits = monthFiltered(visits, visit => visit.date);
+    const owners = [...new Set(monthVisits.map(visit => visit.owner).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const schools = [...new Set(monthVisits.map(visit => visit.place).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     setSelectOptions(ownerFilter, [{ value: "all", label: "Todos" }, ...owners.map(owner => ({ value: P.searchText([owner]), label: owner }))], ownerFilter?.value || "all");
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
     bindSimpleSelect(ownerFilter, () => renderCtc(P.getAppData().ctcVisits));
@@ -1730,14 +1892,14 @@
 
     const selectedOwner = ownerFilter?.value || "all";
     const selectedSchool = schoolFilter?.value || "all";
-    const visible = visits.filter(visit => {
+    const visible = monthVisits.filter(visit => {
       const ownerOk = selectedOwner === "all" || P.searchText([visit.owner]) === selectedOwner;
       const schoolOk = selectedSchool === "all" || P.searchText([visit.place]) === selectedSchool;
       return ownerOk && schoolOk;
     });
-    renderCtcOperationalSummary(visits, visible);
+    renderCtcOperationalSummary(monthVisits, visible);
     const summary = P.$("#ctcFilterSummary");
-    if (summary) summary.textContent = `${visible.length}/${visits.length} visita(s) visiveis.`;
+    if (summary) summary.textContent = `${visible.length}/${monthVisits.length} visita(s) visiveis em ${P.selectedMonthLabel?.() || "mes selecionado"}.`;
 
     grid.innerHTML = visible.length ? visible.map(visit => `
       <article class="detail-widget" data-ctc-key="${P.searchText([visit.owner, visit.date, visit.time, visit.place])}" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
@@ -1750,7 +1912,7 @@
           <button class="ghost-btn" type="button" data-open-school="${visit.place}">Abrir escola</button>
         </div>
       </article>
-    `).join("") : `<div class="empty-state">${visits.length ? "Nenhuma visita CTC com esses filtros." : "Nenhuma visita CTC carregada."}</div>`;
+    `).join("") : `<div class="empty-state">${monthVisits.length ? "Nenhuma visita CTC com esses filtros." : `Nenhuma visita CTC em ${P.selectedMonthLabel?.() || "mes selecionado"}.`}</div>`;
     grid.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });
@@ -1836,15 +1998,15 @@
     const networkCount = Object.keys(data.networkData || {}).length;
     const pendingVisits = (data.supervisors || []).reduce((sum, item) => sum + Number(item.pending || 0), 0);
     const linkedUsers = (data.users || []).filter(user => user.contactSync === "linked").length;
-    const cars = carBookings(data).length;
+    const cars = monthFiltered(carBookings(data), item => item.date).length;
     const metrics = [
-      { icon: "🏫", label: "Escolas", value: String(data.schools.length), note: "base regional", tone: "glow-lime" },
-      { icon: "💻", label: "Inventario", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
-      { icon: "⚠️", label: "Alertas", value: String(alerts), note: "manutencao/defeito", tone: "glow-amber" },
-      { icon: "🌐", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
-      { icon: "🧭", label: "Pendencias", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
+      { icon: "ES", label: "Escolas", value: String(data.schools.length), note: "base regional", tone: "glow-lime" },
+      { icon: "IN", label: "Inventario", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
+      { icon: "AT", label: "Alertas", value: String(alerts), note: "manutencao/defeito", tone: "glow-amber" },
+      { icon: "RD", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
+      { icon: "SV", label: "Pendencias", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
       { icon: "&#128663;", label: "Carros", value: String(cars), note: "agendamentos", tone: "glow-teal" },
-      { icon: "👤", label: "Usuarios", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
+      { icon: "US", label: "Usuarios", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
     ];
     grid.innerHTML = metrics.map(item => `
       <article class="metric-card ${item.tone}">

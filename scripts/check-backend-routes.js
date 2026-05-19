@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const source = fs.readFileSync(path.resolve(__dirname, "..", "server", "index.js"), "utf8");
+const source = fs.readFileSync(path.resolve(__dirname, "..", "server", "index.js"), "utf8").replace(/\r\n/g, "\n");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
