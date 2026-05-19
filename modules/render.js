@@ -1608,7 +1608,7 @@
     const pending = visible.filter(item => carStatusTone(item.status) === "warn").length;
     const calendarLinked = visible.filter(item => item.source === "calendar").length;
     const summary = P.$("#carFilterSummary");
-    if (summary) summary.textContent = `${visible.length}/${bookings.length} agendamento(s) visiveis no mes.`;
+    if (summary) summary.textContent = "";
     if (sourceStatus && !sourceStatus.textContent.includes("Atualizando")) {
       const status = (P.sourceStatus || []).find(item => item.key === "cars");
       if (status?.status === "loading") sourceStatus.textContent = "Carregando ReservasVeiculos do SharePoint...";
@@ -1632,17 +1632,6 @@
       acc[key].push(item);
       return acc;
     }, {});
-    const vehicleLoad = vehicles.map(vehicle => ({
-      vehicle,
-      total: visible.filter(item => item.vehicle === vehicle).length,
-      pending: visible.filter(item => item.vehicle === vehicle && carStatusTone(item.status) === "warn").length
-    }));
-    const sectorLoad = [...new Set(visible.map(item => item.requester).filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b))
-      .map(sector => ({
-        sector,
-        total: visible.filter(item => item.requester === sector).length
-      }));
     const carCalendar = visible.map(item => ({
       label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
       value: item.date,
@@ -1655,30 +1644,32 @@
     }));
     grid.innerHTML = `
       <section class="car-widget-strip">
-        <span><strong>${visible.length}</strong><small>solicitacoes no mes</small></span>
-        ${sectorLoad.map(item => `<span><strong>${item.sector}</strong><small>${item.total} solicitacao(oes)</small></span>`).join("")}
-        ${vehicleLoad.map(item => `<span><strong>${item.vehicle}</strong><small>${item.total} agenda(s)${item.pending ? ` | ${item.pending} pendente(s)` : ""}</small></span>`).join("")}
+        <span class="car-widget-primary"><strong>${visible.length}</strong><small>reservas no mes</small></span>
+        <span><strong>${reserved}</strong><small>aprovadas</small></span>
+        <span><strong>${pending}</strong><small>pendentes</small></span>
+        <span><strong>${vehicles.length}</strong><small>veiculos</small></span>
       </section>
-      <section class="car-calendar-shell">
-        ${calendarBoardMarkup(carCalendar)}
-      </section>
-      <section class="car-day-list">
-        ${Object.entries(byDate).map(([date, items]) => `
-          <article class="car-day-group">
-            <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
-            ${items.map(item => {
-              const tone = carStatusTone(item.status);
-              const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
-              return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
-                <span class="car-time"><strong>${item.time || "--:--"}</strong><small>hora</small></span>
-                <span class="car-route"><strong>${item.vehicle}</strong><small>${item.destination || "Destino nao informado"}</small></span>
-                <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.driver || "Condutor a definir"}</small></span>
-                <span class="car-request-id"><strong>${item.requestId || "--"}</strong><small>solicitacao</small></span>
-                <em class="status-pill ${tone}">${item.status || "pendente"}</em>
-              </button>`;
-            }).join("")}
-          </article>
-        `).join("")}
+      <section class="car-layout">
+        <div class="car-calendar-shell">
+          ${calendarBoardMarkup(carCalendar)}
+        </div>
+        <div class="car-day-list">
+          ${Object.entries(byDate).map(([date, items]) => `
+            <article class="car-day-group">
+              <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
+              ${items.map(item => {
+                const tone = carStatusTone(item.status);
+                const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
+                return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
+                  <span class="car-time"><strong>${item.time || "--:--"}</strong><small>${item.requestId || "--"}</small></span>
+                  <span class="car-route"><strong>${item.destination || "Destino nao informado"}</strong><small>${item.vehicle}</small></span>
+                  <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.driver || "Condutor a definir"}</small></span>
+                  <em class="status-pill ${tone}">${item.status || "pendente"}</em>
+                </button>`;
+              }).join("")}
+            </article>
+          `).join("")}
+        </div>
       </section>
     `;
   }

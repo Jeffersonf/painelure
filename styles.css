@@ -4495,6 +4495,9 @@ select:focus-visible {
   align-items: end;
   gap: 12px;
   padding: 14px;
+  border-color: color-mix(in srgb, var(--ac2) 18%, var(--bd));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--sf-solid) 88%, transparent), color-mix(in srgb, var(--sf2) 78%, transparent));
 }
 
 .selector-panel.operation-filters label {
@@ -4504,6 +4507,20 @@ select:focus-visible {
 .selector-panel.operation-filters .ghost-btn {
   min-height: 44px;
   align-self: end;
+}
+
+#carRefreshBtn {
+  padding-inline: 20px;
+  border-color: color-mix(in srgb, var(--ac2) 45%, var(--bd));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ac2) 28%, transparent), color-mix(in srgb, var(--ac) 14%, transparent));
+  color: var(--tx);
+  font-weight: 900;
+}
+
+#carRefreshBtn:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--ac2) 65%, var(--bd));
 }
 
 #carFilterSummary,
@@ -4529,13 +4546,63 @@ select:focus-visible {
   align-items: start;
 }
 
+.car-widget-strip {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(116px, 150px));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.car-widget-strip span {
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid var(--bd);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--sf) 90%, transparent), color-mix(in srgb, var(--sf2) 75%, transparent));
+}
+
+.car-widget-strip strong,
+.car-widget-strip small {
+  display: block;
+}
+
+.car-widget-strip strong {
+  color: var(--tx);
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.car-widget-strip small {
+  margin-top: 10px;
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.car-widget-primary {
+  border-color: color-mix(in srgb, var(--ac2) 34%, var(--bd)) !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ac2) 15%, var(--sf)), color-mix(in srgb, var(--sf2) 82%, transparent)) !important;
+}
+
 .car-widget-strip span,
 .car-day-group {
   border-radius: 12px;
 }
 
-.car-calendar-shell {
+.car-layout {
   grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(380px, .95fr) minmax(440px, 1.05fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.car-calendar-shell {
+  min-width: 0;
 }
 
 .car-calendar-shell .calendar-board {
@@ -4550,12 +4617,13 @@ select:focus-visible {
 }
 
 .car-calendar-shell .calendar-day {
-  min-height: 104px;
+  min-height: 92px;
   border-radius: 10px;
 }
 
 .car-day-group .car-booking-card {
-  grid-template-columns: 86px minmax(0, 1.2fr) minmax(0, .9fr) 110px auto;
+  grid-template-columns: 74px minmax(0, 1.2fr) minmax(0, .78fr) auto;
+  min-height: 64px;
 }
 
 .car-booking-danger {
@@ -4572,6 +4640,13 @@ select:focus-visible {
     grid-column: 1 / -1;
   }
 
+  .car-widget-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .car-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
