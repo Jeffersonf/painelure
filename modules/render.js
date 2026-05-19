@@ -1455,6 +1455,8 @@
       date: item.date || item.value || "",
       time: item.time || item.hora || "",
       requester: item.requester || item.owner || item.responsavel || "",
+      sector: item.sector || item.setor || "",
+      category: item.category || item.categoria || "",
       destination: item.destination || item.place || item.local || "",
       driver: item.driver || item.motorista || "",
       status: item.status || "pendente",
@@ -1467,6 +1469,8 @@
       date: item.date || item.value || "",
       time: item.time || "",
       requester: item.owner || item.assignee || item.responsible || "",
+      sector: item.sector || item.setor || "",
+      category: item.category || item.categoria || "",
       destination: item.place || item.local || item.note || "",
       driver: item.driver || "",
       status: item.tone || item.status || "agenda",
@@ -1489,6 +1493,28 @@
       });
   }
 
+  function canShowCarDetails(item) {
+    return P.canViewCarBookingDetails ? P.canViewCarBookingDetails(item) : true;
+  }
+
+  function carCalendarEntry(item) {
+    const details = canShowCarDetails(item);
+    return {
+      label: details
+        ? `${item.vehicle} - ${item.destination || item.requester || "reserva"}`
+        : `${item.vehicle} - ${item.time || "horario a definir"}`,
+      value: item.date,
+      date: item.date,
+      time: item.time,
+      note: details
+        ? `${item.time || "Horario a definir"} | ${item.requester || "Solicitante nao informado"} | ${item.status || "pendente"}`
+        : `${item.time || "Horario a definir"} | Reserva de veiculo`,
+      tone: carStatusTone(item.status),
+      type: "carro",
+      scope: "shared"
+    };
+  }
+
   function focusCarBooking(key) {
     P.setPage?.("cars");
     requestAnimationFrame(() => {
@@ -1502,16 +1528,7 @@
 
   function calendarWithOperationalFallback(calendar, data = P.getAppData()) {
     const base = [...(calendar || [])];
-    const carItems = carBookings(data).map(item => ({
-      label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
-      value: item.date,
-      date: item.date,
-      time: item.time,
-      note: `${item.time || "Horario a definir"} | ${item.requester || "Solicitante nao informado"} | ${item.status || "pendente"}`,
-      scope: "shared",
-      type: "carro",
-      source: "cars"
-    }));
+    const carItems = carBookings(data).map(item => ({ ...carCalendarEntry(item), source: "cars" }));
     if (base.length) {
       const seen = new Set(base.map(item => P.searchText([item.label, item.value, item.date, item.time, item.note])));
       return [...base, ...carItems.filter(item => {
@@ -1622,16 +1639,7 @@
       acc[key].push(item);
       return acc;
     }, {});
-    const carCalendar = visible.map(item => ({
-      label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
-      value: item.date,
-      date: item.date,
-      time: item.time,
-      note: `${item.time || "Horario a definir"} | ${item.requester || "Solicitante nao informado"} | ${item.status || "pendente"}`,
-      tone: carStatusTone(item.status),
-      type: "carro",
-      scope: "shared"
-    }));
+    const carCalendar = visible.map(carCalendarEntry);
     grid.innerHTML = `
       <section class="car-calendar-shell">
         ${calendarBoardMarkup(carCalendar, { includeDetails: false })}
@@ -1642,11 +1650,17 @@
             <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
             ${items.map(item => {
               const tone = carStatusTone(item.status);
-              const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
-              return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
+              const details = canShowCarDetails(item);
+              const key = details
+                ? P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester])
+                : P.searchText([item.vehicle, item.date, item.time]);
+              const search = details
+                ? P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])
+                : P.searchText([item.vehicle, item.date, item.time]);
+              return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${search}">
                 <span class="car-card-icon">&#127979;</span>
-                <span class="car-route"><strong>${item.destination || "Destino nao informado"}</strong><small>${item.date} | ${item.time || "--:--"} | Solicitacao ${item.requestId || "--"}</small></span>
-                <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.vehicle} | ${item.driver || "Condutor a definir"}</small></span>
+                <span class="car-route"><strong>${details ? (item.destination || "Destino nao informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.date} | ${item.time || "--:--"} | Solicitacao ${item.requestId || "--"}` : `${item.time || "Horario a definir"}`}</small></span>
+                <span class="car-requester"><strong>${details ? (item.requester || "Setor nao informado") : "Veiculo reservado"}</strong><small>${details ? `${item.vehicle} | ${item.driver || "Condutor a definir"}` : "Detalhes restritos"}</small></span>
                 <em class="status-pill ${tone}">${item.status || "pendente"}</em>
               </button>`;
             }).join("")}

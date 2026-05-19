@@ -60,6 +60,7 @@
     const data = P.scopedData?.(P.getAppData()) || P.getAppData();
     renderer(data);
     renderedPages.add(id);
+    P.applyAccessState?.();
   }
 
   function renderApp() {

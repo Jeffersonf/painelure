@@ -81,6 +81,7 @@ function run() {
     assert(scoped.supervisors.length === 1 && scoped.supervisors[0].name === magda.name, "Supervisor deve ver apenas o proprio registro.");
     assert(Object.keys(scoped.networkData).length === 0, "Supervisor nao deve receber redes/cameras.");
     assert(scoped.schoolAssets.length === 0, "Supervisor nao deve receber inventario tecnico.");
+    assert(scoped.cars.length === 0, "Supervisor nao deve receber agendamentos de carro.");
     assert(P.canViewSchool(magda.assignedSchools[0]), "Supervisor deve abrir escola propria.");
     assert(!P.canViewSchool("EE Bairro Boa Vista Intervales"), "Supervisor nao deve abrir escola fora da carteira.");
   });
@@ -95,6 +96,7 @@ function run() {
   withUser(P, { name: "Tecnico", role: "Tecnicos CTC" }, scoped => {
     assert(Object.keys(scoped.networkData).length > 0, "Tecnicos CTC devem receber redes/cameras.");
     assert(scoped.schoolAssets.length > 0, "Tecnicos CTC devem receber inventario.");
+    assert(scoped.cars.length === data.cars.length, "Tecnicos CTC devem receber agendamentos de carro.");
     assert(hasCredentials(scoped.networkData), "Tecnicos CTC devem receber credenciais.");
     assert(scoped.users.length === 0, "Tecnicos CTC nao devem receber usuarios admin.");
   });
@@ -109,12 +111,14 @@ function run() {
   withUser(P, { name: "SEINTEC", role: "SEINTEC" }, scoped => {
     assert(Object.keys(scoped.networkData).length > 0, "SEINTEC deve receber redes/cameras.");
     assert(scoped.schoolAssets.length > 0, "SEINTEC deve receber inventario.");
+    assert(scoped.cars.length === data.cars.length, "SEINTEC deve receber agendamentos de carro.");
     assert(hasCredentials(scoped.networkData), "SEINTEC deve receber credenciais.");
     assert(scoped.calls.length === 0, "SEINTEC nao deve receber chamados pela matriz atual.");
   });
 
   withUser(P, { name: "Gabinete", role: "Gabinete" }, scoped => {
     assert(scoped.calls.length === data.calls.length, "Gabinete deve receber chamados.");
+    assert(scoped.cars.length === data.cars.length, "Gabinete deve receber agendamentos de carro.");
     assert(Object.keys(scoped.networkData).length === 0, "Gabinete nao deve receber redes/cameras.");
     assert(scoped.schoolAssets.length === 0, "Gabinete nao deve receber inventario tecnico.");
   });
@@ -122,6 +126,7 @@ function run() {
   withUser(P, { name: "Pedagogico", role: "Pedagogico" }, scoped => {
     assert(scoped.schools.length === data.schools.length, "Pedagogico deve receber escolas.");
     assert(scoped.supervisors.length === data.supervisors.length, "Pedagogico deve receber supervisao.");
+    assert(scoped.cars.length === 0, "Pedagogico/PEC nao deve receber agendamentos de carro.");
     assert(Object.keys(scoped.networkData).length === 0, "Pedagogico nao deve receber redes/cameras.");
     assert(scoped.schoolAssets.length === 0, "Pedagogico nao deve receber inventario tecnico.");
   });
@@ -154,12 +159,12 @@ function run() {
   });
 
   assertAccess(P, "Administrador", ["admin", "network", "inventory", "profiles"], []);
-  assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision"], ["network", "inventory", "admin"]);
-  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc"], ["admin", "profiles"]);
+  assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision"], ["network", "inventory", "cars", "admin"]);
+  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars"], ["admin", "profiles"]);
   assertAccess(P, "SETEC", ["network", "inventory", "reports"], ["admin", "calendar"]);
-  assertAccess(P, "SEINTEC", ["network", "inventory", "reports"], ["admin", "calls"]);
-  assertAccess(P, "Gabinete", ["calls", "calendar", "reports"], ["network", "inventory", "admin"]);
-  assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar"], ["network", "inventory", "admin"]);
+  assertAccess(P, "SEINTEC", ["network", "inventory", "reports", "cars"], ["admin", "calls"]);
+  assertAccess(P, "Gabinete", ["calls", "calendar", "reports", "cars"], ["network", "inventory", "admin"]);
+  assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar"], ["network", "inventory", "cars", "admin"]);
   assertAccess(P, "Consulta", ["schools", "contacts"], ["network", "inventory", "admin"]);
 
   console.log("Escopo de acesso OK");

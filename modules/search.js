@@ -59,13 +59,16 @@
         note: `${item.date} ${item.time} | ${item.objective}`,
         focus: searchText([item.owner, item.date, item.time, item.place])
       })),
-      ...(P.carBookings?.(data) || []).map(item => ({
-        page: "cars",
-        title: `${item.vehicle} - ${item.destination || item.requester || "Agendamento"}`,
-        type: "Carros",
-        note: `${item.date || "sem data"} ${item.time || ""} | ${item.status || "pendente"}`,
-        focus: searchText([item.vehicle, item.date, item.time, item.destination, item.requester])
-      })),
+      ...(P.carBookings?.(data) || []).map(item => {
+        const details = P.canViewCarBookingDetails ? P.canViewCarBookingDetails(item) : true;
+        return {
+          page: "cars",
+          title: details ? `${item.vehicle} - ${item.destination || item.requester || "Agendamento"}` : `${item.vehicle} - ${item.time || "Horario a definir"}`,
+          type: "Carros",
+          note: details ? `${item.date || "sem data"} ${item.time || ""} | ${item.status || "pendente"}` : `${item.date || "sem data"} ${item.time || ""}`,
+          focus: details ? searchText([item.vehicle, item.date, item.time, item.destination, item.requester]) : searchText([item.vehicle, item.date, item.time])
+        };
+      }),
       ...(data.calls || []).map(item => ({ page: "calls", title: item.title, type: "Chamado", note: item.school || item.status, focus: item.title }))
     ].filter(item => !P.canAccess || P.canAccess(item.page));
   }

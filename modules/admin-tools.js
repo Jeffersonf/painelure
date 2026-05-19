@@ -11,13 +11,13 @@
 
   const ROLE_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-    "Supervisão": ["dashboard", "schools", "supervision", "contacts", "cars", "calendar", "reports"],
-    "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
+    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "reports"],
+    "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
-    Pedagógico: ["dashboard", "schools", "supervision", "contacts", "cars", "calendar"],
+    Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
 
@@ -26,6 +26,7 @@
   }
 
   function accessForRole(role) {
+    if (P.roleAccess) return P.roleAccess(role);
     const exact = ROLE_ACCESS[role];
     if (exact) return exact;
     const target = P.normalize ? P.normalize(role) : String(role || "").toLowerCase().trim();
@@ -38,13 +39,35 @@
     return accessForRole(role).includes(page);
   }
 
+  function pageLabel(page) {
+    return P.pageMeta?.(page)?.label || page;
+  }
+
+  function allowedPageLabels(role = currentRole()) {
+    return accessForRole(role)
+      .map(page => pageLabel(page))
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  function applyAccessState(role = currentRole()) {
+    P.$all("[data-page], [data-jump]").forEach(button => {
+      const page = button.dataset.page || button.dataset.jump;
+      const denied = !canAccess(page, role);
+      button.classList.toggle("access-disabled", denied);
+      button.setAttribute("aria-disabled", denied ? "true" : "false");
+      if (denied) {
+        button.title = `Acesso negado a ${pageLabel(page)}. Disponiveis: ${allowedPageLabels(role)}`;
+      } else if (button.title?.startsWith("Acesso negado")) {
+        button.removeAttribute("title");
+      }
+    });
+  }
+
   function applyRole(role = currentRole()) {
     localStorage.setItem(ROLE_KEY, role);
     document.documentElement.dataset.role = role;
-    P.$all("[data-page], [data-jump]").forEach(button => {
-      const page = button.dataset.page || button.dataset.jump;
-      button.hidden = !canAccess(page, role);
-    });
+    applyAccessState(role);
     const active = P.$(".page.active");
     const activeId = active?.id?.replace("page-", "");
     if (activeId && !canAccess(activeId, role)) P.setPage("dashboard");
@@ -64,6 +87,7 @@
     if (adminAccountLine) adminAccountLine.textContent = `${display.shortName || display.name} • ${role}`;
     P.renderUser?.(P.getAppData?.() || {});
     if (typeof applyPrefs === "function") applyPrefs();
+    applyAccessState(role);
   }
 
   function closeAccountMenu() {
@@ -744,8 +768,9 @@
       area.hidden = prefs.widgets?.[area.dataset.widgetArea] === false;
     });
     P.$all(".sidebar-shortcuts [data-jump]").forEach(button => {
-      button.hidden = prefs.shortcuts?.[button.dataset.jump] === false || (P.canAccess && !P.canAccess(button.dataset.jump));
+      button.hidden = prefs.shortcuts?.[button.dataset.jump] === false;
     });
+    applyAccessState();
   }
 
   function loadSourceOverrides() {
@@ -969,8 +994,11 @@
   }
 
   P.ROLE_ACCESS = ROLE_ACCESS;
+  P.accessForRole = accessForRole;
   P.currentRole = currentRole;
   P.canAccess = canAccess;
+  P.allowedPageLabels = allowedPageLabels;
+  P.applyAccessState = applyAccessState;
   P.applyRole = applyRole;
   P.closeAccountMenu = closeAccountMenu;
   P.toggleAccountMenu = toggleAccountMenu;

@@ -2,13 +2,13 @@
   const P = window.PainelURE;
   const ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-    "Supervisão": ["dashboard", "schools", "supervision", "contacts", "cars", "calendar", "reports"],
-    "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
+    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "reports"],
+    "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
-    Pedagógico: ["dashboard", "schools", "supervision", "contacts", "cars", "calendar"],
+    Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
 
@@ -32,7 +32,16 @@
   function roleAccess(role) {
     const target = normalized(role);
     const key = Object.keys(ACCESS).find(name => normalized(name) === target);
-    return ACCESS[key] || ACCESS.Consulta;
+    if (key) return ACCESS[key];
+    if (target.includes("supervis")) return ACCESS.Supervisao;
+    if (target.includes("ctc")) return ACCESS["Tecnicos CTC"];
+    if (target.includes("seintec")) return ACCESS.SEINTEC;
+    if (target.includes("setec")) return ACCESS.SETEC;
+    if (target.includes("gabinete") || target.includes("dirigente")) return ACCESS.Gabinete;
+    if (target.includes("seom")) return ACCESS.SEOM;
+    if (target.includes("pedag") || target.includes("pec")) return ACCESS.Pedagogico;
+    if (target.includes("admin")) return ACCESS.Administrador;
+    return ACCESS.Consulta;
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
@@ -41,7 +50,41 @@
 
   function canViewCredentials(role = P.currentRole?.()) {
     const key = normalized(role);
-    return ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => key.includes(item));
+    return ["administrador", "ctc", "setec", "seintec"].some(item => key.includes(item));
+  }
+
+  function canViewAllCarBookings(user = activeIdentity()) {
+    const role = normalized(user?.role || P.currentRole?.());
+    const contactRole = normalized(user?.contactRole || user?.cargo || user?.position);
+    return role.includes("administrador")
+      || role.includes("gabinete")
+      || role.includes("dirigente")
+      || contactRole.includes("dirigente")
+      || role.includes("seintec")
+      || role.includes("ctc");
+  }
+
+  function canViewCarBookingDetails(booking = {}, user = activeIdentity()) {
+    if (canViewAllCarBookings(user)) return true;
+    const userKeys = [
+      user?.role,
+      user?.sector,
+      user?.setor,
+      user?.contactRole,
+      user?.category,
+      user?.categoria
+    ].map(normalized).filter(Boolean);
+    const bookingKeys = [
+      booking.requester,
+      booking.sector,
+      booking.setor,
+      booking.category,
+      booking.categoria,
+      booking.owner
+    ].map(normalized).filter(Boolean);
+    return userKeys.some(userKey => bookingKeys.some(bookingKey =>
+      bookingKey === userKey || bookingKey.includes(userKey) || userKey.includes(bookingKey)
+    ));
   }
 
   function isSupervisorUser(user = activeIdentity()) {
@@ -108,6 +151,11 @@
     return items.filter(item => allowed.has(normalized(item?.[field])));
   }
 
+  function isCarLikeCalendarItem(item = {}) {
+    const text = normalized([item.label, item.note, item.type, item.scope, item.category, item.categoria].join(" "));
+    return ["carro", "veiculo", "motorista", "deslocamento"].some(term => text.includes(term));
+  }
+
   function scopedData(data = P.getAppData?.()) {
     if (!data) return data;
     const user = activeIdentity();
@@ -156,7 +204,7 @@
         : [],
       cars: byAccess.cars ? (data.cars || []) : [],
       contacts: byAccess.contacts ? (data.contacts || []) : [],
-      calendar: byAccess.calendar ? (data.calendar || []) : [],
+      calendar: byAccess.calendar ? (byAccess.cars ? (data.calendar || []) : (data.calendar || []).filter(item => !isCarLikeCalendarItem(item))) : [],
       reports: byAccess.reports ? (data.reports || []) : [],
       profiles: byAccess.profiles ? (data.profiles || []) : [],
       quality: byAccess.quality ? (data.quality || []) : [],
@@ -169,6 +217,8 @@
   P.roleAccess = roleAccess;
   P.canAccessData = canAccessData;
   P.canViewCredentials = canViewCredentials;
+  P.canViewAllCarBookings = canViewAllCarBookings;
+  P.canViewCarBookingDetails = canViewCarBookingDetails;
   P.isSupervisorRole = isSupervisorRole;
   P.isSupervisorUser = isSupervisorUser;
   P.supervisorForCurrentUser = supervisorForCurrentUser;
