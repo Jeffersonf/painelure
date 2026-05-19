@@ -569,6 +569,186 @@ function parseBrazilianDate(value) {
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
+function parseSourceDate(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  const brazilian = parseBrazilianDate(text);
+  if (brazilian) return brazilian;
+  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  const parsed = new Date(text);
+  if (!Number.isNaN(parsed.getTime())) return localIsoDate(parsed);
+  return '';
+}
+
+function parseSourceTime(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  const time = text.match(/(\d{1,2}):(\d{2})/);
+  if (time) return `${time[1].padStart(2, '0')}:${time[2]}`;
+  return text;
+}
+
+function sharePointListApiUrl(url) {
+  const parsed = new URL(url, window.location.href);
+  const match = parsed.pathname.match(/^(.*)\/Lists\/([^/]+)\/AllItems\.aspx$/i);
+  if (!match) return url;
+  const sitePath = match[1];
+  const listName = decodeURIComponent(match[2]);
+  const listPath = `${decodeURIComponent(sitePath)}/Lists/${listName}`.replace(/'/g, "''");
+  const query = new URLSearchParams({ '$top': '5000' });
+  return `${parsed.origin}${sitePath}/_api/web/GetList('${listPath}')/items?${query}`;
+}
+
+function normalizeSourceRecord(row) {
+  return Object.entries(row || {}).reduce((acc, [key, value]) => {
+    const normalized = normalizeCsvHeader(key);
+    if (normalized) acc[normalized] = value;
+    return acc;
+  }, {});
+}
+
+function sharePointItems(payload) {
+  if (Array.isArray(payload?.value)) return payload.value;
+  if (Array.isArray(payload?.d?.results)) return payload.d.results;
+  if (Array.isArray(payload?.d)) return payload.d;
+  return [];
+}
+
+async function fetchSharePointList(url) {
+  const localUrl = `/api/sharepoint-list?url=${encodeURIComponent(url)}`;
+  const attempts = [
+    () => fetch(localUrl, { cache: 'no-store' }),
+    () => fetch(sharePointListApiUrl(url), {
+      cache: 'no-store',
+      credentials: 'include',
+      headers: { Accept: 'application/json;odata=nometadata' }
+    })
+  ];
+  let lastError = null;
+  for (const attempt of attempts) {
+    try {
+      const response = await attempt();
+      if (!response.ok) {
+        let detail = '';
+        try {
+          const payload = await response.clone().json();
+          detail = payload?.hint || payload?.error || '';
+        } catch {}
+        throw new Error(`HTTP ${response.status}${detail ? ` - ${detail}` : ''}`);
+      }
+      const payload = await response.json();
+      const rows = Array.isArray(payload?.items) ? payload.items : sharePointItems(payload);
+      return rows.map(normalizeSourceRecord);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error('Falha ao ler lista SharePoint.');
+}
+
+function officialCarScheduleLink() {
+  return (state.officialLinks || []).find((item) => item.category === 'car-schedule' && item.url);
+}
+
+function carScheduleRowToTask(row, source) {
+  const vehicle = csvValue(row, ['Carro', 'Veiculo', 'Veículo', 've_x00ed_culo', 'Vehicle', 'Recurso', 'Title']) || 'Carro oficial';
+  const date = parseSourceDate(csvValue(row, [
+    'Data',
+    'Data da Reserva',
+    'data_x0020_da_x0020_reserva',
+    'Data Reserva',
+    'Data do Agendamento',
+    'Quando',
+    'EventDate',
+    'Inicio',
+    'Início'
+  ]));
+  const time = parseSourceTime(csvValue(row, [
+    'Hora',
+    'Horario',
+    'Horário',
+    'Horario da Reserva',
+    'Horário da Reserva',
+    'horario_x0020_da_x0020_reserva',
+    'Hora da Saida',
+    'Hora da Saída'
+  ]));
+  const requester = csvValue(row, ['Solicitante', 'Responsavel', 'Responsável', 'Responsavel pela Reserva', 'responsavel_x0020_pela_x0020_reserva', 'Author', 'Owner']);
+  const destination = csvValue(row, ['Destino', 'Local', 'Destination', 'Place', 'Local Destino']) || 'Destino nao informado';
+  const driver = csvValue(row, ['Motorista', 'Driver']);
+  const status = csvValue(row, ['Status', 'Situacao', 'Situação', 'situa_x00e7__x00e3_o']) || 'reservado';
+  const note = csvValue(row, ['Observacao', 'Observação', 'Descricao', 'Descrição', 'descri_x00e7__x00e3_o', 'Motivo', 'Note']);
+  const title = csvValue(row, ['Titulo', 'Título', 'Title', 'Motivo']) || `Reserva de ${vehicle}`;
+  const rawId = csvValue(row, ['ID', 'Id']) || `${date}|${time}|${vehicle}|${requester}|${destination}`;
+  return {
+    id: `sharepoint-cars-${normalizeKey(rawId).replace(/[^a-z0-9]+/g, '-')}`,
+    title,
+    date,
+    time,
+    priority: normalizeKey(status).includes('pend') ? 'media' : 'baixa',
+    place: destination,
+    category: 'Carro oficial',
+    scope: 'carro',
+    owner: requester || driver || 'Frota URE',
+    createdBy: 'Agenda de carros',
+    vehicle,
+    driver,
+    authorization: status,
+    notes: note,
+    done: /cancelad|concluid|finalizad/i.test(status),
+    source: 'SharePoint - ReservasVeiculos',
+    sourceId: source.id,
+    sourceLabel: source.label,
+    sourceUrl: source.url,
+    sourceSyncedAt: new Date().toISOString()
+  };
+}
+
+function isCarScheduleTask(item) {
+  return item?.scope === 'carro' || item?.category === 'Carro oficial' || normalizeKey(item?.source || '').startsWith('frota excel');
+}
+
+function mergeCarScheduleRows(source, rows) {
+  const imported = rows
+    .map((row) => carScheduleRowToTask(row, source))
+    .filter((item) => item.date || item.rawDate || item.title);
+  state.tasks = [
+    ...imported,
+    ...(state.tasks || []).filter((item) => !isCarScheduleTask(item))
+  ];
+  return imported.length;
+}
+
+async function syncCarScheduleSource(options = {}) {
+  const source = officialCarScheduleLink();
+  if (!source?.url) return { importedCount: 0, errorCount: 0 };
+  const silent = options.silent === true;
+  const status = document.getElementById('fleetImportStatus');
+  const carStatus = document.getElementById('carSourceStatus');
+  if (status && !silent) status.textContent = 'Lendo ReservasVeiculos no SharePoint...';
+  if (carStatus && !silent) carStatus.textContent = 'Atualizando a lista ReservasVeiculos no SharePoint...';
+  const toast = silent ? null : showToast('Atualizando agenda de carros...', 'syncing', { persist: true });
+  try {
+    const rows = await fetchSharePointList(source.url);
+    const importedCount = mergeCarScheduleRows(source, rows);
+    if (options.refresh !== false) {
+      currentTaskFilter = 'carro';
+      refreshAll();
+    }
+    if (status) status.textContent = `${importedCount} reserva(s) carregada(s) da lista oficial ReservasVeiculos.`;
+    if (carStatus) carStatus.textContent = `${importedCount} reserva(s) carregada(s) da lista oficial ReservasVeiculos.`;
+    if (toast) toast.update(`${importedCount} reserva(s) carregada(s) da agenda de carros.`, 'success');
+    return { importedCount, errorCount: 0 };
+  } catch (error) {
+    console.warn('Nao foi possivel sincronizar a agenda de carros.', error);
+    if (status && !silent) status.textContent = 'Nao foi possivel ler ReservasVeiculos. Verifique acesso ao SharePoint.';
+    if (carStatus && !silent) carStatus.textContent = 'Nao foi possivel ler ReservasVeiculos. Verifique acesso ao SharePoint.';
+    if (toast) toast.update('Nao foi possivel ler a agenda de carros.', 'error', { duration: 4200 });
+    return { importedCount: 0, errorCount: 1, error };
+  }
+}
+
 function supervisorVisitSourceFor(source) {
   return (state.supervisors || []).find((supervisor) =>
     normalizeKey(supervisor.name) === normalizeKey(source.supervisor) ||

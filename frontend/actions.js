@@ -650,13 +650,13 @@ function importLegacyState() {
 
 function toggleTask(id) {
   if (!requireEditAccess()) return;
-  state.tasks = state.tasks.map((item) => item.id === id ? { ...item, done: !item.done } : item);
+  state.tasks = state.tasks.map((item) => String(item.id) === String(id) ? { ...item, done: !item.done } : item);
   refreshAll();
 }
 
 function removeTask(id) {
   if (!requireEditAccess()) return;
-  state.tasks = state.tasks.filter((item) => item.id !== id);
+  state.tasks = state.tasks.filter((item) => String(item.id) !== String(id));
   refreshAll();
 }
 
@@ -2114,6 +2114,21 @@ function setupEventListeners() {
     const file = event.target.files[0];
     if (file) importFleetSchedule(file);
     event.target.value = '';
+  });
+  document.getElementById('syncCarScheduleBtn')?.addEventListener('click', async () => {
+    const button = document.getElementById('syncCarScheduleBtn');
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Atualizando...';
+    }
+    try {
+      await syncCarScheduleSource();
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Atualizar carros';
+      }
+    }
   });
   document.getElementById('schoolAssetExcelInput')?.addEventListener('change', (event) => {
     const file = event.target.files[0];
