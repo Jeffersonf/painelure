@@ -1454,6 +1454,7 @@
 
   function carBookings(data = P.getAppData()) {
     const direct = (data.cars || []).map(item => ({
+      requestId: item.requestId || item.id || item.ID || "",
       vehicle: item.vehicle || item.car || item.recurso || "Carro oficial",
       date: item.date || item.value || "",
       time: item.time || item.hora || "",
@@ -1465,6 +1466,7 @@
       source: "cars"
     }));
     const fromCalendar = (data.calendar || []).filter(isCarCalendarItem).map(item => ({
+      requestId: item.requestId || "",
       vehicle: item.vehicle || "Carro oficial",
       date: item.date || item.value || "",
       time: item.time || "",
@@ -1635,6 +1637,12 @@
       total: visible.filter(item => item.vehicle === vehicle).length,
       pending: visible.filter(item => item.vehicle === vehicle && carStatusTone(item.status) === "warn").length
     }));
+    const sectorLoad = [...new Set(visible.map(item => item.requester).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b))
+      .map(sector => ({
+        sector,
+        total: visible.filter(item => item.requester === sector).length
+      }));
     const carCalendar = visible.map(item => ({
       label: `${item.vehicle} - ${item.destination || item.requester || "reserva"}`,
       value: item.date,
@@ -1646,19 +1654,9 @@
       scope: "shared"
     }));
     grid.innerHTML = `
-      <article class="cars-hero car-command">
-        <div>
-          <span class="eyebrow">Carros oficiais</span>
-          <strong>${visible.length} agenda(s) no mes</strong>
-          <p>${vehicles.length} veiculo(s), ${pending} pendencia(s) de confirmacao e ${calendarLinked} item(ns) vindos do calendario.</p>
-        </div>
-        <div class="cars-hero-score">
-          <span><strong>${vehicles.length}</strong><small>carros</small></span>
-          <span><strong>${pending}</strong><small>pendentes</small></span>
-          <span><strong>${calendarLinked}</strong><small>agenda</small></span>
-        </div>
-      </article>
-      <section class="car-resource-strip">
+      <section class="car-widget-strip">
+        <span><strong>${visible.length}</strong><small>solicitacoes no mes</small></span>
+        ${sectorLoad.map(item => `<span><strong>${item.sector}</strong><small>${item.total} solicitacao(oes)</small></span>`).join("")}
         ${vehicleLoad.map(item => `<span><strong>${item.vehicle}</strong><small>${item.total} agenda(s)${item.pending ? ` | ${item.pending} pendente(s)` : ""}</small></span>`).join("")}
       </section>
       <section class="car-calendar-shell">
@@ -1672,9 +1670,10 @@
               const tone = carStatusTone(item.status);
               const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
               return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
-                <span class="car-time"><strong>${item.time || "--:--"}</strong><small>${item.source === "calendar" ? "calendario" : "carros"}</small></span>
+                <span class="car-time"><strong>${item.time || "--:--"}</strong><small>hora</small></span>
                 <span class="car-route"><strong>${item.vehicle}</strong><small>${item.destination || "Destino nao informado"}</small></span>
-                <span class="car-requester"><strong>${item.requester || "Solicitante nao informado"}</strong><small>${item.driver || "Motorista a definir"}</small></span>
+                <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.driver || "Condutor a definir"}</small></span>
+                <span class="car-request-id"><strong>${item.requestId || "--"}</strong><small>solicitacao</small></span>
                 <em class="status-pill ${tone}">${item.status || "pendente"}</em>
               </button>`;
             }).join("")}

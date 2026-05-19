@@ -63,6 +63,16 @@
     return /^\d+$/.test(text) ? `${label} #${text}` : text;
   }
 
+  function schoolLookupName(value) {
+    const text = valueToText(value);
+    if (!text) return "";
+    if (/^\d+$/.test(text)) {
+      const school = P.seedData?.schools?.[Number(text) - 1];
+      return school?.name || `Escola #${text}`;
+    }
+    return text;
+  }
+
   function initialsFromName(name) {
     return String(name || "")
       .split(/\s+/)
@@ -250,11 +260,12 @@
       const destination = firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino", "escolas"], ["destino", "local", "destination", "place", "escola"], "");
       const driver = firstMatchingValue(row, ["motorista", "driver", "condutor"], ["motorista", "driver", "condutor"], "");
       return {
+        requestId: firstMatchingValue(row, ["id"], ["id"], ""),
         vehicle: firstMatchingValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], ["carro", "veiculo", "vehicle", "recurso"], "Carro oficial"),
         date: formatDateValue(date),
         time: formatTimeValue(time || date),
         requester: firstMatchingValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "setor", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsavel", "requester", "owner", "setor", "mail"], ""),
-        destination: lookupLabel(destination, "Escola"),
+        destination: schoolLookupName(destination),
         driver: lookupLabel(driver, "Condutor"),
         status: firstMatchingValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], ["status", "situacao"], "pendente"),
         note: firstMatchingValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ["observacao", "descricao", "motivo", "note"], "")
