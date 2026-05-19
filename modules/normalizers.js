@@ -155,6 +155,44 @@
       return found?.name || String(value || "").trim() || "Supervisor";
     }
 
+    function officialSchoolName(value) {
+      const text = schoolLookupName(value);
+      const raw = P.normalize(text);
+      if (!raw) return "";
+      const aliases = {
+        "ee antonio defunne": "EE Doutor Antonio Deffune",
+        "ee dr antonio defunne": "EE Doutor Antonio Deffune",
+        "ee dr antonio deffune": "EE Doutor Antonio Deffune",
+        "ee dr raul venturelli": "EE Doutor Raul Venturelli",
+        "ee cinira daniel da silva": "PEI EE Professora Cinira Daniel da Silva",
+        "ee celia vasques": "PEI EE Professora Celia Vasques Ferrari Duch",
+        "ee celia vasques duch": "PEI EE Professora Celia Vasques Ferrari Duch",
+        "ee francelina franco": "PEI EE Professora Francelina Franco",
+        "ee joao batista amaral vasconcelos": "PEI EE Professor Joao Baptista do Amaral Vasconcellos",
+        "ee joao baptista do amaral vasconcellos": "PEI EE Professor Joao Baptista do Amaral Vasconcellos",
+        "ee jose vasques ferrari": "PEI EE Professor Jose Vasques Ferrari",
+        "ee nicota soares": "PEI EE Professora Nicota Soares",
+        "ee oscar kurtz camargo": "PEI EE Oscar Kurtz Camargo",
+        "ee otavio ferrari": "PEI EE Otavio Ferrari",
+        "ee padre arlindo vieira": "PEI EE Padre Arlindo Vieira",
+        "ee ricardo campolim de almeida": "PEI EE Ricardo Campolim de Almeida Neto",
+        "ee silverio monteiro": "EE Professor Silverio Monteiro",
+        "ee simpliciano campolim de almeida neto": "PEI EE Simpliciano Campolim de Almeida",
+        "ee zulmira de oliveira": "PEI EE Professora Zulmira de Oliveira",
+        "ee boa vista intervales": "EE Bairro Boa Vista Intervales",
+        "ee turvo dos almeidas": "EE Bairro Turvo dos Almeidas",
+        "ee bairro turvo dos almeidas": "EE Bairro Turvo dos Almeidas"
+      };
+      if (aliases[raw]) return aliases[raw];
+      const comparable = raw.replace(/\b(pei|ee|doutor|dr|professor|professora)\b/g, "").replace(/\s+/g, " ").trim();
+      const found = (P.seedData?.schools || []).find(school => {
+        const name = P.normalize(school.name);
+        const schoolComparable = name.replace(/\b(pei|ee|doutor|dr|professor|professora)\b/g, "").replace(/\s+/g, " ").trim();
+        return name === raw || name.includes(raw) || raw.includes(name) || (comparable && (schoolComparable.includes(comparable) || comparable.includes(schoolComparable)));
+      });
+      return found?.name || text;
+    }
+
     function visitDate(value) {
       const match = String(value || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
       if (!match) return null;
@@ -175,15 +213,23 @@
         .filter(Boolean);
 
       if (!stats.has(supervisorName)) {
-        stats.set(supervisorName, { visits: 0, schools: new Set(), weekVisits: new Map() });
+        stats.set(supervisorName, { visits: 0, schools: new Set(), weekVisits: new Map(), records: [] });
       }
 
       const item = stats.get(supervisorName);
-      schools.forEach(school => item.schools.add(school));
+      const canonicalSchools = schools.map(officialSchoolName).filter(Boolean);
+      canonicalSchools.forEach(school => item.schools.add(school));
       item.visits += schools.length || 1;
       if (date) {
         const week = weekOfMonth(date);
-        item.weekVisits.set(week, (item.weekVisits.get(week) || 0) + (schools.length || 1));
+        item.weekVisits.set(week, (item.weekVisits.get(week) || 0) + (canonicalSchools.length || 1));
+        (canonicalSchools.length ? canonicalSchools : ["Escola nao informada"]).forEach(school => {
+          item.records.push({
+            date: formatDateValue(firstValue(row, ["data_da_visita", "data", "date"], "")),
+            school,
+            type: firstValue(row, ["confirmacao_de_visita", "tipo", "type"], "Visita")
+          });
+        });
         allVisits.push(date);
       }
     });
@@ -194,7 +240,7 @@
 
     const source = official.length ? official : Array.from(stats.keys()).map(name => ({ name, schools: 0, assignedSchools: [] }));
     return source.map(supervisor => {
-      const item = stats.get(supervisor.name) || { visits: 0, schools: new Set(), weekVisits: new Map() };
+      const item = stats.get(supervisor.name) || { visits: 0, schools: new Set(), weekVisits: new Map(), records: [] };
       const schoolCount = Number(supervisor.schools || supervisor.assignedSchools?.length || item.schools.size || 0);
       const monthlyGoal = Math.max(3, schoolCount * 3);
       const weekVisits = latestWeek ? (item.weekVisits.get(latestWeek) || 0) : 0;
@@ -206,7 +252,8 @@
         pending: Math.max(0, monthlyGoal - item.visits),
         visits: item.visits,
         visitedSchools: item.schools.size,
-        source: "Planilha supervisores - abril de 2026"
+        visitRecords: item.records,
+        source: "Planilha supervisores - maio de 2026"
       };
     });
   }

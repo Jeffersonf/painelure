@@ -444,7 +444,10 @@
     const title = P.$("#supervisorDetailTitle");
     const subtitle = P.$("#supervisorDetailSubtitle");
     if (title) title.textContent = supervisor.name;
-    if (subtitle) subtitle.textContent = supervisor.email || supervisor.phone || "Acompanhamento de metas e vinculos.";
+    if (subtitle) {
+      const stats = supervisorStatsForMonth([supervisor])[0];
+      subtitle.textContent = `${stats?.assignedSchools.length || supervisor.assignedSchools?.length || 0} escola(s) | ${stats?.visits.length || 0} visita(s) importada(s).`;
+    }
     renderSupervisorDetail(supervisor, "#supervisorDetailPageBody");
     P.setPage?.("supervisor-detail");
   }
@@ -1198,26 +1201,98 @@
   }
 
   function renderSupervisionOperationalSummary(supervisors) {
-    const totals = supervisors.reduce((acc, item) => {
-      const { week, month, pending, schools } = supervisorProgress(item);
-      acc.weekDone += week.done;
-      acc.weekTotal += week.total;
-      acc.monthDone += month.done;
-      acc.monthTotal += month.total;
-      acc.pending += pending;
-      acc.schools += schools;
-      if (!pending) acc.ok += 1;
+    const stats = supervisorStatsForMonth(supervisors);
+    const totals = stats.reduce((acc, item) => {
+      acc.visits += item.visits;
+      acc.schools += item.assignedSchools.length;
+      acc.coverage += item.coverage;
       return acc;
-    }, { weekDone: 0, weekTotal: 0, monthDone: 0, monthTotal: 0, pending: 0, schools: 0, ok: 0 });
+    }, { visits: 0, schools: 0, coverage: 0 });
+    const avgCoverage = stats.length ? Math.round(totals.coverage / stats.length) : 0;
     const sourceNote = supervisionMonthNote();
     const rows = [
-      { icon: "SM", title: "Semana", note: `${totals.weekDone}/${totals.weekTotal || 0} visita(s) registradas no recorte atual.`, label: `${totals.weekDone}/${totals.weekTotal || 0}`, tone: totals.weekTotal && totals.weekDone >= totals.weekTotal ? "ok" : "warn" },
-      { icon: "MS", title: "Mes", note: `${totals.monthDone}/${totals.monthTotal || 0} visita(s) no mes oficial.`, label: `${totals.monthDone}/${totals.monthTotal || 0}`, tone: totals.pending ? "warn" : "ok" },
-      { icon: "ES", title: "Carteira", note: `${totals.schools} escola(s) vinculada(s) a ${supervisors.length} supervisor(es).`, label: `${supervisors.length}`, tone: "info" },
-      { icon: "FT", title: "Faltantes", note: sourceNote || `${totals.pending} visita(s) faltam no recorte atual.`, label: `${totals.pending}`, tone: totals.pending ? "warn" : "ok" }
+      { icon: "SP", title: "Supervisores", note: `${stats.length} supervisor(es) no recorte.`, label: `${stats.length}`, tone: "info" },
+      { icon: "ES", title: "Escolas", note: `${totals.schools} escola(s) vinculada(s).`, label: `${totals.schools}`, tone: "info" },
+      { icon: "VI", title: "Visitas", note: `${totals.visits} visita(s) registradas em ${P.selectedMonthLabel?.() || "mes selecionado"}.`, label: `${totals.visits}`, tone: totals.visits ? "ok" : "warn" },
+      { icon: "CO", title: "Cobertura", note: sourceNote || `${avgCoverage}% de cobertura media.`, label: `${avgCoverage}%`, tone: avgCoverage >= 80 ? "ok" : "warn" }
     ];
     renderSummaryRows("#supervisionSummaryRows", rows);
   }
+
+  function supervisorVisitDate(value) {
+    const text = String(value || "");
+    const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+    const pt = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (pt) return new Date(Number(pt[3]), Number(pt[2]) - 1, Number(pt[1]));
+    return null;
+  }
+
+  function supervisorVisitMonthKey(visit) {
+    const date = supervisorVisitDate(visit?.date);
+    if (!date) return "";
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function supervisorVisitRowsForMonth(supervisor) {
+    const selected = P.selectedMonthKey?.() || "";
+    const records = supervisor.visitRecords || [];
+    if (records.length) return records.filter(visit => supervisorVisitMonthKey(visit) === selected);
+    const fallbackCount = progressParts(supervisor.month).done;
+    const schools = supervisor.assignedSchools || [];
+    return Array.from({ length: fallbackCount }, (_, index) => ({
+      date: "",
+      school: schools[index % Math.max(1, schools.length)] || "Escola nao informada",
+      type: "Visita"
+    }));
+  }
+
+  function supervisorStatsForMonth(supervisors) {
+    return (supervisors || []).map(supervisor => {
+      const assignedSchools = supervisor.assignedSchools || [];
+      const visits = supervisorVisitRowsForMonth(supervisor);
+      const visited = new Set(visits.map(visit => visit.school).filter(Boolean));
+      return {
+        supervisor,
+        assignedSchools,
+        visits,
+        visitCount: visits.length,
+        visitedSchools: visited.size,
+        visited,
+        coverage: assignedSchools.length ? Math.round((visited.size / assignedSchools.length) * 100) : 0,
+        openCalls: (P.getAppData().calls || []).filter(call => assignedSchools.some(school => P.normalize(school) === P.normalize(call.school)) && call.status !== "resolvido").length
+      };
+    }).sort((a, b) => a.supervisor.name.localeCompare(b.supervisor.name));
+  }
+
+  function supervisionAprilWarningMarkup() {
+    if ((P.selectedMonthKey?.() || "") !== "2026-04") return "";
+    return `
+      <article class="supervisor-april-warning" role="note">
+        <strong>Aviso importante sobre abril</strong>
+        <p>A planilha de abril foi usada apenas como teste de importacao e validacao do painel. Abril nao sera considerado para acompanhamento oficial; a partir de maio a supervisao usa a planilha oficial nova.</p>
+      </article>
+    `;
+  }
+
+  function supervisorVisitCalendarMarkup(visits = []) {
+    const selected = P.selectedMonth?.() || { year: 2026, month: 5 };
+    const daysInMonth = new Date(selected.year, selected.month, 0).getDate();
+    const byDay = visits.reduce((acc, visit) => {
+      const date = supervisorVisitDate(visit.date);
+      if (!date || date.getFullYear() !== selected.year || date.getMonth() !== selected.month - 1) return acc;
+      const day = date.getDate();
+      acc[day] = acc[day] || [];
+      acc[day].push(visit);
+      return acc;
+    }, {});
+    return Array.from({ length: daysInMonth }, (_, index) => {
+      const day = index + 1;
+      const items = byDay[day] || [];
+      return `<div class="supervisor-calendar-day ${items.length ? "has-visit" : ""}"><strong>${day}</strong><span>${items.length ? `${items.length} visita(s)` : ""}</span></div>`;
+    }).join("");
+  }
+
   function renderSupervisors(supervisors) {
     const host = P.$("#supervisorRows");
     if (!host) return;
@@ -1226,33 +1301,17 @@
       host.innerHTML = `<div class="empty-state">Nenhum supervisor carregado ainda.</div>`;
       return;
     }
-    bindSupervisorFilters();
-    const sortMode = P.$("#supervisorSortFilter")?.value || "name";
-    const sourceNote = supervisionMonthNote();
-    const sorted = [...supervisors].sort((a, b) => {
-      if (sortMode === "pending") return Number(b.pending || 0) - Number(a.pending || 0) || a.name.localeCompare(b.name);
-      if (sortMode === "schools") return Number(b.schools || 0) - Number(a.schools || 0) || a.name.localeCompare(b.name);
-      return a.name.localeCompare(b.name);
-    });
-    const totals = sorted.reduce((acc, item) => {
-      const { week, month, pending, schools } = supervisorProgress(item);
-      acc.schools += schools;
-      acc.weekDone += week.done;
-      acc.weekTotal += week.total;
-      acc.monthDone += month.done;
-      acc.monthTotal += month.total;
-      acc.pending += pending;
-      return acc;
-    }, { schools: 0, weekDone: 0, weekTotal: 0, monthDone: 0, monthTotal: 0, pending: 0 });
-    const indicatorClass = metric => metric.total && metric.done >= metric.total ? "pill-ok" : metric.done ? "pill-warn" : "pill-danger";
-    const indicatorText = metric => metric.total && metric.done >= metric.total ? "Meta cumprida" : metric.done ? "Em andamento" : "Sem registro";
-    const goalPct = metric => metric.total ? Math.min(100, Math.round((metric.done / metric.total) * 100)) : 0;
-    const viewMonthLabel = sourceNote || P.selectedMonthLabel?.() || "mes selecionado";
+    const stats = supervisorStatsForMonth(supervisors);
     host.innerHTML = `
       <section class="supervision-original-shell">
+        ${supervisionAprilWarningMarkup()}
         <article class="box" id="painelSupervisor">
           <div class="box-head supervisor-original-box-head">
             <div><strong>Painel de supervisores</strong><small>Resumo mensal das visitas, metas e indicadores da planilha oficial.</small></div>
+            <div class="mini-actions">
+              <button class="btn btn-p btn-sm" id="syncSupervisorSourcesBtn" type="button">Atualizar planilha</button>
+              <button class="btn btn-g btn-sm" id="supervisorFullscreenBtn" type="button">Apresentar</button>
+            </div>
           </div>
           <div class="supervisor-sheet-panel">
             <div class="supervisor-sheet-table-wrap">
@@ -1261,34 +1320,23 @@
                   <tr>
                     <th>Supervisor</th>
                     <th>Escolas</th>
-                    <th>Meta semanal</th>
-                    <th>Meta mensal</th>
-                    <th>Semana</th>
-                    <th>Indicador semana</th>
-                    <th>Indicador mes</th>
+                    <th>Visitas</th>
+                    <th>Cobertura</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${sorted.map((item, index) => {
-                    const { week, month, pending, schools } = supervisorProgress(item);
-                    return `<tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${pending ? "warn" : "ok"}" data-search="${P.searchText([item.name, item.email, item.phone, item.week, item.month])}">
-                      <td><strong>${item.name}</strong></td>
-                      <td>${schools}</td>
-                      <td class="supervisor-goal-cell"><strong>${week.done}/${week.total || "--"}</strong><div class="supervisor-sheet-bar"><span style="width:${Math.max(4, goalPct(week))}%"></span></div></td>
-                      <td class="supervisor-goal-cell"><strong>${month.done}/${month.total || "--"}</strong><div class="supervisor-sheet-bar"><span style="width:${Math.max(4, goalPct(month))}%"></span></div></td>
-                      <td>${item.currentWeek || item.weekNumber || "--"}</td>
-                      <td><span class="diag-pill ${indicatorClass(week)}">${indicatorText(week)}</span></td>
-                      <td><span class="diag-pill ${indicatorClass(month)}">${indicatorText(month)}</span></td>
-                      <td><button class="ghost-btn btn-sm" type="button">Abrir</button></td>
-                    </tr>`;
-                  }).join("")}
+                  ${stats.map((item, index) => `
+                    <tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${item.coverage >= 80 ? "ok" : "warn"}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
+                      <td><strong>${item.supervisor.name}</strong></td>
+                      <td>${item.assignedSchools.length}</td>
+                      <td>${item.visitCount}</td>
+                      <td><span class="diag-pill ${item.coverage >= 80 ? "pill-ok" : "pill-warn"}">${item.coverage}%</span></td>
+                      <td><button class="btn btn-g btn-sm" type="button">Abrir</button></td>
+                    </tr>`
+                  ).join("")}
                 </tbody>
               </table>
-            </div>
-            <div class="supervisor-sheet-foot">
-              <span>Fonte: planilha oficial de supervisao | Mes exibido: ${viewMonthLabel}</span>
-              <span>${totals.monthDone}/${totals.monthTotal || 0} visita(s) registradas</span>
             </div>
           </div>
         </article>
@@ -1297,33 +1345,34 @@
             <div><strong>Supervisores</strong><small>Resumo, meta e sinal de pendencia sem repetir os dados completos.</small></div>
           </div>
           <div class="stack-list supervisor-selector-list">
-            ${sorted.map((item, index) => {
-              const { week, month, pending, schools } = supervisorProgress(item);
-              const tone = indicatorClass(month);
-              return `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${pending ? "warn" : "ok"}" data-search="${P.searchText([item.name, item.email, item.phone])}">
-                <div class="setechub-head">
-                  <div>
-                    <strong>${item.name}</strong>
-                    <div class="sync-meta">${item.email || "email nao informado"} | ${item.phone || "telefone nao informado"}</div>
-                  </div>
-                  <span class="diag-pill ${tone}">${indicatorText(month)}</span>
-                </div>
-                <div class="school-overview-kpis supervisor-list-kpis">
-                  <div><span>Mes</span><strong>${month.done}/${month.total || "--"}</strong></div>
-                  <div><span>Semana</span><strong>${week.done}/${week.total || "--"}</strong></div>
-                  <div><span>Escolas</span><strong>${schools}</strong></div>
-                  <div><span>Faltam</span><strong>${pending || "--"}</strong></div>
-                </div>
-              </button>`;
-            }).join("")}
+            ${stats.map((item, index) => `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${item.coverage >= 80 ? "ok" : "warn"}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
+              <strong>${item.supervisor.name}</strong>
+              <div class="sync-meta">${item.assignedSchools.length} escola(s) | ${item.visitCount} visita(s)</div>
+            </button>`).join("") || `<div class="sync-empty">Nenhum supervisor cadastrado.</div>`}
           </div>
         </article>
       </section>`;
     applySupervisorFilters();
+    const refreshButton = host.querySelector("#syncSupervisorSourcesBtn");
+    refreshButton?.addEventListener("click", async () => {
+      const original = refreshButton.textContent;
+      refreshButton.disabled = true;
+      refreshButton.textContent = "Atualizando...";
+      try {
+        await P.refreshSource?.("supervision");
+        renderSupervisors(P.scopedData?.(P.getAppData())?.supervisors || P.getAppData().supervisors);
+      } finally {
+        refreshButton.disabled = false;
+        refreshButton.textContent = original || "Atualizar planilha";
+      }
+    });
+    host.querySelector("#supervisorFullscreenBtn")?.addEventListener("click", () => {
+      P.$("#painelSupervisor")?.requestFullscreen?.();
+    });
     host.querySelectorAll("[data-supervisor-index], [data-supervisor-selector]").forEach(button => {
       button.addEventListener("click", () => {
         const index = Number(button.dataset.supervisorIndex || button.dataset.supervisorSelector);
-        openSupervisorPage(sorted[index].name);
+        openSupervisorPage(stats[index].supervisor.name);
       });
     });
     host.querySelectorAll("[data-school-jump]").forEach(button => {
@@ -1334,82 +1383,73 @@
   function renderSupervisorDetail(supervisor, target = "#supervisorDetailPageBody") {
     const detail = P.$(target);
     if (!detail || !supervisor) return;
-    const schools = supervisor.assignedSchools || [];
-    const schoolCards = schools.map(name => {
-      const school = findSchool(name);
-      const alerts = school ? inventoryAlertCount(school) : 0;
-      const profilePct = schoolProfileCompletion(name);
-      return {
-        name,
-        city: school?.city || "Municipio nao informado",
-        cie: school?.cie || "CIE pendente",
-        items: school?.items ?? 0,
-        alerts,
-        profilePct,
-        status: alerts ? "warn" : profileStatusFromPct(profilePct)
-      };
-    });
-    const { week, month, pending, schools: schoolCount } = supervisorProgress(supervisor);
-    const visitedCount = Math.min(month.done, schoolCards.length);
-    const visited = new Set(schoolCards.slice(0, visitedCount).map(item => item.name));
-    const weekCount = Math.max(4, Math.ceil((month.total || schoolCards.length * 3 || 12) / Math.max(schoolCards.length || 1, 1)));
-    const weeks = Array.from({ length: weekCount }, (_, index) => index + 1);
-    const completedMessage = pending ? `${pending} visita(s) ainda faltam no mes.` : "Meta mensal concluida.";
+    const selected = supervisorStatsForMonth([supervisor])[0];
+    const visits = selected?.visits || [];
+    const assignedSchools = selected?.assignedSchools || supervisor.assignedSchools || [];
+    const visited = selected?.visited || new Set(visits.map(visit => visit.school));
+    const coverage = selected?.coverage || 0;
     detail.innerHTML = `
       <section class="supervisor-record-v1">
-        <article class="supervisor-record-hero box">
-          <div class="supervisor-record-id">
-            <div class="school-avatar large">${initials(supervisor.name)}</div>
-            <div><span class="eyebrow">&#129517; Supervisor</span><strong>${supervisor.name}</strong><p>${supervisor.email || "email nao informado"}${supervisor.phone ? ` | ${supervisor.phone}` : ""}</p></div>
+        ${supervisionAprilWarningMarkup()}
+        <article class="box">
+          <div class="school-record-nav">
+            <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordProfile">Resumo</button>
+            <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordCalendar">Calendario</button>
+            <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisited">Visitadas</button>
+            <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordPending">Faltantes</button>
+            <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisitTable">Registros</button>
           </div>
-          <div class="supervisor-record-goal"><strong>${month.pct}%</strong><span class="status-pill ${pending ? "warn" : "ok"}">${pending ? "em andamento" : "meta ok"}</span></div>
-        </article>
-
-        <section class="supervisor-score-grid">
-          <article class="supervisor-score-card ${week.missing ? "warn" : "ok"}"><div class="score-card-head"><small>Meta semanal</small><span>${week.pct}%</span></div><strong>${supervisor.week}</strong><i style="--pct:${week.pct}%"></i><p>${week.missing ? `${week.missing} visita(s) para fechar a semana.` : "Semana concluida."}</p></article>
-          <article class="supervisor-score-card ${month.missing ? "warn" : "ok"}"><div class="score-card-head"><small>Meta mensal</small><span>${month.pct}%</span></div><strong>${supervisor.month}</strong><i style="--pct:${month.pct}%"></i><p>${completedMessage}</p></article>
-          <article class="supervisor-score-card info"><div class="score-card-head"><small>Escolas</small><span>${schoolCount}</span></div><strong>${schoolCards.length}</strong><i style="--pct:${schoolCards.length ? 100 : 0}%"></i><p>Carteira vinculada ao supervisor.</p></article>
-          <article class="supervisor-score-card info"><div class="score-card-head"><small>Visitas importadas</small><span>base</span></div><strong>${month.done}</strong><i style="--pct:${month.pct}%"></i><p>Dados oficiais do recorte atual.</p></article>
-        </section>
-
-        <article class="box supervisor-matrix-box">
-          <div class="box-head"><div><strong>Matriz semanal</strong><small>Modelo da v1: semanas por escola vinculada.</small></div></div>
-          <div class="supervisor-weekly-matrix-wrap">
-            <table class="supervisor-weekly-matrix">
-              <thead><tr><th>Escola</th>${weeks.map(weekNumber => `<th>Semana ${weekNumber}</th>`).join("")}</tr></thead>
-              <tbody>
-                ${schoolCards.map((school, schoolIndex) => `<tr>
-                  <td class="week-col"><strong>${school.name}</strong><span>${school.city} | ${school.cie}</span></td>
-                  ${weeks.map((weekNumber, weekIndex) => {
-                    const estimated = (schoolIndex + (weekIndex * schoolCards.length)) < month.done;
-                    return `<td class="${estimated ? "visited" : "matrix-wait"}"><strong>${estimated ? "1" : "0"}</strong><span class="matrix-cell-icon">${estimated ? "&#9989;" : "&#9203;"}</span><small>${estimated ? "visita" : "aguarda"}</small></td>`;
-                  }).join("")}
-                </tr>`).join("")}
-              </tbody>
-            </table>
+          <div id="supervisorRecordProfile" class="stack-list">
+            <div class="setechub-item"><strong>${supervisor.name}</strong><div class="sync-meta">${supervisor.email || ""} | ${supervisor.phone || ""}</div></div>
           </div>
         </article>
-
-        <section class="supervisor-record-columns">
-          <article class="box"><div class="box-head"><div><strong>Escolas visitadas</strong><small>Com visita no recorte atual.</small></div></div><div class="row-list compact">
-            ${schoolCards.filter(school => visited.has(school.name)).map(school => `<button class="data-row compact" type="button" data-school-jump="${school.name}"><span class="row-icon">&#9989;</span><span><strong>${school.name}</strong><small>${school.city} | ficha ${school.profilePct}%</small></span><em class="status-pill ok">visitada</em></button>`).join("") || `<div class="empty-state">Nenhuma escola visitada no mes atual.</div>`}
-          </div></article>
-          <article class="box"><div class="box-head"><div><strong>Escolas pendentes</strong><small>Sem visita suficiente no recorte.</small></div></div><div class="row-list compact">
-            ${schoolCards.filter(school => !visited.has(school.name)).map(school => `<button class="data-row compact" type="button" data-school-jump="${school.name}"><span class="row-icon">&#129517;</span><span><strong>${school.name}</strong><small>${school.city} | ${school.alerts ? `${school.alerts} manut./defeito` : `${school.items} item(ns)`}</small></span><em class="status-pill warn">pendente</em></button>`).join("") || `<div class="empty-state">Todas as escolas vinculadas possuem visita.</div>`}
-          </div></article>
-        </section>
-
-        <div class="detail-actions supervisor-actions">
-          ${supervisor.email ? `<a class="ghost-btn" href="mailto:${supervisor.email}">Enviar email</a>` : ""}
-          ${supervisor.phone ? `<a class="ghost-btn" href="tel:${String(supervisor.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
-          <button class="ghost-btn" type="button" data-jump="contacts">Abrir contatos</button>
+        <div class="setechub-two-col">
+          <div class="box">
+            <div class="box-head"><div><strong>Meta mensal</strong><small>Se cumpriu a meta de visitas do mes atual.</small></div></div>
+            <div class="stack-list"><div class="setechub-command-score"><strong>${coverage}%</strong><span class="diag-pill ${coverage >= 80 ? "pill-ok" : "pill-warn"}">Cobertura</span></div></div>
+          </div>
+          <div class="box">
+            <div class="box-head"><div><strong>Indicadores do supervisor</strong></div></div>
+            <div class="setechub-monitor-grid compact-grid">
+              ${[
+                ["Escolas", assignedSchools.length],
+                ["Visitadas", visited.size],
+                ["Visitas", visits.length],
+                ["Chamados", selected?.openCalls || 0]
+              ].map(([label, value]) => `<div class="setechub-monitor-card compact"><div class="sync-meta">${label}</div><strong>${value}</strong></div>`).join("")}
+            </div>
+          </div>
+        </div>
+        <div class="box" id="supervisorRecordCalendar">
+          <div class="box-head"><div><strong>Calendario de visitas</strong><small>Dias com registro de visita para este supervisor.</small></div></div>
+          <div class="supervisor-calendar-grid">${supervisorVisitCalendarMarkup(visits)}</div>
+        </div>
+        <div class="setechub-two-col">
+          <div class="box" id="supervisorRecordVisited">
+            <div class="box-head"><div><strong>Escolas visitadas</strong><small>Unidades vinculadas com visita no mes atual.</small></div></div>
+            <div class="stack-list">${assignedSchools.filter(school => visited.has(school)).map(school => `<button class="setechub-item setechub-clickable" type="button" data-school-jump="${school}"><strong>${school}</strong><div class="sync-meta">Visitada</div></button>`).join("") || `<div class="sync-empty">Nenhuma escola visitada no mes atual.</div>`}</div>
+          </div>
+          <div class="box" id="supervisorRecordPending">
+            <div class="box-head"><div><strong>Faltam visitas</strong><small>Unidades vinculadas sem visita registrada no mes.</small></div></div>
+            <div class="stack-list">${assignedSchools.filter(school => !visited.has(school)).map(school => `<button class="setechub-item setechub-clickable" type="button" data-school-jump="${school}"><strong>${school}</strong><div class="sync-meta">Sem visita registrada</div></button>`).join("") || `<div class="sync-empty">Todas as escolas vinculadas possuem visita.</div>`}</div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="box-head"><div><strong>Todas as escolas vinculadas</strong><small>Mapa completo de responsabilidade do supervisor.</small></div></div>
+          <div class="supervisor-school-list">${assignedSchools.map(school => `<button class="supervisor-school-row" type="button" data-school-jump="${school}"><span>${school}</span><strong>${visited.has(school) ? "visitada" : "pendente"}</strong></button>`).join("")}</div>
+        </div>
+        <div class="box" id="supervisorRecordVisitTable">
+          <div class="box-head"><div><strong>Historico de visitas</strong><small>Registros deste supervisor em ordem de data.</small></div></div>
+          <div class="setechub-table-wrap">${visits.length ? `<table class="setechub-table"><thead><tr><th>Data</th><th>Escola</th><th>Tipo</th></tr></thead><tbody>${visits.slice(0, 80).map(visit => `<tr><td>${visit.date || "--"}</td><td>${visit.school}</td><td>${visit.type || "Visita"}</td></tr>`).join("")}</tbody></table>` : `<div class="sync-empty">Nenhuma visita registrada.</div>`}</div>
         </div>
       </section>
     `;
     detail.querySelectorAll("[data-school-jump]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.schoolJump));
     });
-    detail.querySelector("[data-jump='contacts']")?.addEventListener("click", () => P.setPage?.("contacts"));
+    detail.querySelectorAll("[data-scroll-target]").forEach(button => {
+      button.addEventListener("click", () => detail.querySelector(`#${button.dataset.scrollTarget}`)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    });
   }
   function renderContactOperationalSummary(contacts, visible, sector) {
     const sectors = new Set(contacts.map(contact => contact.sector).filter(Boolean)).size;

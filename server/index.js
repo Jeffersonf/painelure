@@ -44,13 +44,13 @@ let dbError = "";
 let frontendSeedStore = null;
 const DATA_ACCESS = {
   Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-  "Supervisao": ["dashboard", "schools", "supervision", "contacts", "cars", "calendar", "reports"],
+  "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "reports"],
   "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
   SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
   Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
   SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
-  Pedagogico: ["dashboard", "schools", "supervision", "contacts", "cars", "calendar"],
+  Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
   Consulta: ["dashboard", "schools", "contacts"]
 };
 const pool = DATABASE_URL
@@ -561,7 +561,16 @@ function isSupervisorRole(role) {
 function accessForRole(role) {
   const target = normalizeText(role);
   const key = Object.keys(DATA_ACCESS).find(item => normalizeText(item) === target);
-  return DATA_ACCESS[key] || DATA_ACCESS.Consulta;
+  if (key) return DATA_ACCESS[key];
+  if (target.includes("supervis")) return DATA_ACCESS.Supervisao;
+  if (target.includes("ctc")) return DATA_ACCESS["Tecnicos CTC"];
+  if (target.includes("seintec")) return DATA_ACCESS.SEINTEC;
+  if (target.includes("setec")) return DATA_ACCESS.SETEC;
+  if (target.includes("gabinete") || target.includes("dirigente")) return DATA_ACCESS.Gabinete;
+  if (target.includes("seom")) return DATA_ACCESS.SEOM;
+  if (target.includes("pedag") || target.includes("pec")) return DATA_ACCESS.Pedagogico;
+  if (target.includes("admin")) return DATA_ACCESS.Administrador;
+  return DATA_ACCESS.Consulta;
 }
 
 function canAccessData(page, user = null) {

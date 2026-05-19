@@ -26,10 +26,10 @@
     supervision: {
       label: "Supervisao",
       type: "csv",
-      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS4b4nZ79Ev8139wvRESOX9YNedCB4PwNiqU2i-UbYUI3c4oKYrmuXjuiMS742RTluOFv94eGK0qMwd/pub?output=csv",
+      url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSkqZydw5EWNLREBCXdG-VpqcoOfuOf-AI2gYawdaeEwDNitR2m37okLvurfscimlSQMtpbHg_H_bzz/pub?output=csv",
       status: "official",
-      monthKey: "2026-04",
-      metadata: { domain: "Supervisao", monthKey: "2026-04", cadence: "mensal", owner: "Gabinete" }
+      monthKey: "2026-05",
+      metadata: { domain: "Supervisao", monthKey: "2026-05", cadence: "mensal", owner: "Gabinete", startsAt: "2026-05" }
     },
     network: {
       label: "Redes e Cameras",
