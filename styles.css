@@ -4623,6 +4623,126 @@ select:focus-visible {
   background: color-mix(in srgb, var(--dan) 7%, transparent);
 }
 
+#page-cars .summary-box[hidden],
+#carFilterSummary {
+  display: none !important;
+}
+
+.car-widget-agenda {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+}
+
+.car-widget-agenda .car-day-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--bd);
+  border-radius: 16px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .025), transparent 55%),
+    var(--sf);
+}
+
+.car-widget-agenda .car-day-head {
+  grid-column: 1 / -1;
+  padding: 0 2px 2px;
+  border-bottom: 0;
+}
+
+.car-widget-agenda .car-day-head strong {
+  color: var(--tx);
+  font-size: 16px;
+}
+
+.car-widget-agenda .car-day-group .car-booking-card {
+  position: relative;
+  min-height: 118px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 12px 16px;
+  align-items: center;
+  padding: 18px 16px;
+  border: 1px solid color-mix(in srgb, var(--bd) 82%, transparent);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--ac2) 10%, transparent), transparent 36%),
+    color-mix(in srgb, var(--sf2) 72%, var(--sf));
+  color: var(--tx);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.car-widget-agenda .car-day-group .car-booking-card:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--bd) 82%, transparent);
+}
+
+.car-widget-agenda .car-day-group .car-booking-card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--ac2) 42%, var(--bd));
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--ac2) 15%, transparent), transparent 38%),
+    color-mix(in srgb, var(--sf2) 82%, var(--sf));
+}
+
+.car-card-icon {
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--ok) 28%, var(--bd));
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ok) 18%, var(--sf2)), color-mix(in srgb, var(--warn) 12%, var(--sf)));
+  font-size: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .03);
+}
+
+.car-widget-agenda .car-route,
+.car-widget-agenda .car-requester {
+  min-width: 0;
+  padding-right: 88px;
+}
+
+.car-widget-agenda .car-route strong,
+.car-widget-agenda .car-requester strong {
+  display: block;
+  overflow: hidden;
+  color: var(--tx);
+  font-size: 15px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.car-widget-agenda .car-route small,
+.car-widget-agenda .car-requester small {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.car-widget-agenda .car-requester strong {
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.car-widget-agenda .status-pill {
+  position: absolute;
+  top: 16px;
+  right: 14px;
+}
+
 @media (max-width: 980px) {
   .selector-panel.operation-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4635,6 +4755,10 @@ select:focus-visible {
 
   .car-widget-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .car-widget-agenda .car-day-group {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
   }
 
 }
@@ -4657,5 +4781,19 @@ select:focus-visible {
 
   .car-day-group .car-booking-card {
     grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .car-widget-agenda .car-day-group {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .car-widget-agenda .car-day-group .car-booking-card {
+    min-height: 112px;
+  }
+
+  .car-widget-agenda .car-route,
+  .car-widget-agenda .car-requester {
+    padding-right: 74px;
   }
 }

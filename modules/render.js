@@ -1604,11 +1604,10 @@
       const statusOk = statusValue === "all" || P.searchText([item.status || "pendente"]) === statusValue;
       return vehicleOk && statusOk;
     });
-    const reserved = visible.filter(item => carStatusTone(item.status) === "ok").length;
-    const pending = visible.filter(item => carStatusTone(item.status) === "warn").length;
-    const calendarLinked = visible.filter(item => item.source === "calendar").length;
     const summary = P.$("#carFilterSummary");
     if (summary) summary.textContent = "";
+    const summaryBox = P.$("#carSummaryRows")?.closest(".summary-box");
+    if (summaryBox) summaryBox.hidden = true;
     if (sourceStatus && !sourceStatus.textContent.includes("Atualizando")) {
       const status = (P.sourceStatus || []).find(item => item.key === "cars");
       if (status?.status === "loading") sourceStatus.textContent = "Carregando ReservasVeiculos do SharePoint...";
@@ -1616,12 +1615,7 @@
       else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "SharePoint nao carregado.";
       else sourceStatus.textContent = P.sources?.cars?.url ? "Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar." : "Fonte de carros nao configurada.";
     }
-    renderSummaryRows("#carSummaryRows", [
-      { icon: "&#128663;", title: "Agendamentos", note: `${visible.length} reserva(s) no filtro atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
-      { icon: "&#9989;", title: "Reservados", note: `${reserved} carro(s) confirmado(s) ou reservado(s).`, label: `${reserved}`, tone: reserved ? "ok" : "info" },
-      { icon: "&#9203;", title: "Pendentes", note: `${pending} solicitacao(oes) aguardando confirmacao.`, label: `${pending}`, tone: pending ? "warn" : "ok" },
-      { icon: "&#128197;", title: "Calendario", note: `${calendarLinked} item(ns) vieram da agenda oficial.`, label: `${calendarLinked}`, tone: calendarLinked ? "info" : "warn" }
-    ]);
+    renderSummaryRows("#carSummaryRows", []);
     if (!visible.length) {
       grid.innerHTML = `<div class="empty-state">${bookings.length ? "Nenhum agendamento de carro encontrado neste filtro." : `Nenhum agendamento de carro em ${P.selectedMonthLabel?.() || "mes selecionado"}.`}</div>`;
       return;
@@ -1643,16 +1637,10 @@
       scope: "shared"
     }));
     grid.innerHTML = `
-      <section class="car-widget-strip">
-        <span class="car-widget-primary"><strong>${visible.length}</strong><small>reservas no mes</small></span>
-        <span><strong>${reserved}</strong><small>aprovadas</small></span>
-        <span><strong>${pending}</strong><small>pendentes</small></span>
-        <span><strong>${vehicles.length}</strong><small>veiculos</small></span>
-      </section>
       <section class="car-calendar-shell">
         ${calendarBoardMarkup(carCalendar, { includeDetails: false })}
       </section>
-      <section class="car-day-list">
+      <section class="car-widget-agenda">
         ${Object.entries(byDate).map(([date, items]) => `
           <article class="car-day-group">
             <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
@@ -1660,9 +1648,9 @@
               const tone = carStatusTone(item.status);
               const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
               return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
-                <span class="car-time"><strong>${item.time || "--:--"}</strong><small>${item.requestId || "--"}</small></span>
-                <span class="car-route"><strong>${item.destination || "Destino nao informado"}</strong><small>${item.vehicle}</small></span>
-                <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.driver || "Condutor a definir"}</small></span>
+                <span class="car-card-icon">&#127979;</span>
+                <span class="car-route"><strong>${item.destination || "Destino nao informado"}</strong><small>${item.date} | ${item.time || "--:--"} | Solicitacao ${item.requestId || "--"}</small></span>
+                <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.vehicle} | ${item.driver || "Condutor a definir"}</small></span>
                 <em class="status-pill ${tone}">${item.status || "pendente"}</em>
               </button>`;
             }).join("")}
