@@ -1547,6 +1547,16 @@
   function renderCars(data) {
     const grid = P.$("#carGrid");
     if (!grid) return;
+    const existingStatus = P.sourceResult?.("cars");
+    if (!existingStatus && P.sources?.cars?.url && !P.carsAutoRefreshStarted) {
+      P.carsAutoRefreshStarted = true;
+      P.ensureSource?.("cars")
+        .then(() => {
+          P.renderSourceStatus?.();
+          renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
+        })
+        .catch(() => renderCars(P.scopedData?.(P.getAppData()) || P.getAppData()));
+    }
     const allBookings = carBookings(data);
     const bookings = monthFiltered(allBookings, item => item.date);
     const vehicleFilter = P.$("#carVehicleFilter");
@@ -1599,7 +1609,8 @@
     if (summary) summary.textContent = `${visible.length}/${bookings.length} agendamento(s) visiveis no mes.`;
     if (sourceStatus && !sourceStatus.textContent.includes("Atualizando")) {
       const status = (P.sourceStatus || []).find(item => item.key === "cars");
-      if (status?.status === "loaded") sourceStatus.textContent = `Fonte SharePoint carregada: ${status.rows?.length || 0} item(ns) de ReservasVeiculos.`;
+      if (status?.status === "loading") sourceStatus.textContent = "Carregando ReservasVeiculos do SharePoint...";
+      else if (status?.status === "loaded") sourceStatus.textContent = `Fonte SharePoint carregada: ${status.rows?.length || 0} item(ns) de ReservasVeiculos.`;
       else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "SharePoint nao carregado.";
       else sourceStatus.textContent = P.sources?.cars?.url ? "Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar." : "Fonte de carros nao configurada.";
     }

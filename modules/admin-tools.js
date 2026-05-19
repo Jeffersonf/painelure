@@ -765,6 +765,7 @@
   function applySourceOverrides() {
     const overrides = loadSourceOverrides();
     Object.entries(overrides).forEach(([key, url]) => {
+      if (P.sources?.[key]?.metadata?.locked) return;
       if (P.sources?.[key]) P.sources[key].url = url;
     });
   }
@@ -793,12 +794,13 @@
     if (!host) return;
     const overrides = loadSourceOverrides();
     host.innerHTML = Object.entries(P.sources || {}).map(([key, source]) => {
-      const value = overrides[key] ?? source.url ?? "";
+      const locked = Boolean(source.metadata?.locked);
+      const value = locked ? source.url ?? "" : overrides[key] ?? source.url ?? "";
       const metaLine = sourceMetaLine(source) || `${source.status || "pending"} | ${source.type || "csv"}`;
       return `
         <div class="settings-row source-editor-row" data-search="${P.searchText([key, source.label, value, metaLine])}">
           <div><strong>${source.label || key}</strong><small>${metaLine}</small></div>
-          <input type="url" data-source-url="${key}" value="${value}" placeholder="https://.../pub?output=csv">
+          <input type="url" data-source-url="${key}" value="${value}" placeholder="https://.../pub?output=csv"${locked ? " disabled" : ""}>
         </div>
       `;
     }).join("");
@@ -861,6 +863,7 @@
       if (sources?.sources?.length) {
         sources.sources.forEach(item => {
           if (!P.sources?.[item.key]) return;
+          if (P.sources[item.key].metadata?.locked) return;
           P.sources[item.key] = {
             ...P.sources[item.key],
             label: item.label || P.sources[item.key].label,

@@ -50,7 +50,7 @@
       type: "sharepoint-list",
       url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACaDeD8XkaHRaX2WSJPMXJ6AUCrQaodqExoAqBNE7w0JR4?e=LkPfD3",
       status: "official",
-      metadata: { domain: "Carros", cadence: "sempre atualizado", owner: "Gabinete", source: "ReservasVeiculos" }
+      metadata: { domain: "Carros", cadence: "sempre atualizado", owner: "Gabinete", source: "ReservasVeiculos", locked: true }
     }
   };
 })();

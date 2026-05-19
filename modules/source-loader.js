@@ -36,6 +36,29 @@
     return result;
   }
 
+  function sourceResult(key) {
+    return (P.sourceStatus || []).find(item => item.key === key) || null;
+  }
+
+  async function ensureSource(key) {
+    const current = sourceResult(key);
+    if (current?.status === "loaded" || current?.status === "loading") return current;
+    P.sourceStatus = [
+      ...(P.sourceStatus || []).filter(item => item.key !== key),
+      { key, status: "loading" }
+    ];
+    try {
+      return await refreshSource(key);
+    } catch (error) {
+      const result = { key, status: "error", error };
+      P.sourceStatus = [
+        ...(P.sourceStatus || []).filter(item => item.key !== key),
+        result
+      ];
+      throw error;
+    }
+  }
+
   async function loadConfiguredSources() {
     const nextData = { ...P.getAppData() };
     const results = [];
@@ -62,5 +85,7 @@
 
   P.loadSource = loadSource;
   P.refreshSource = refreshSource;
+  P.ensureSource = ensureSource;
+  P.sourceResult = sourceResult;
   P.loadConfiguredSources = loadConfiguredSources;
 })();
