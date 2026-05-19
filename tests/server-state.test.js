@@ -29,9 +29,10 @@ test('validateStateShape rejects invalid task shape container', () => {
   }), /tasks precisa ser uma lista/i);
 });
 
-test('safeResolve keeps frontend root access and blocks traversal', () => {
+test('safeResolve keeps app entry access and blocks traversal', () => {
   const allowed = safeResolve('/frontend/index.html');
   assert.match(allowed, /frontend[\\/]index\.html$/i);
-  assert.match(safeResolve('/login'), /frontend[\\/]index\.html$/i);
+  assert.match(safeResolve('/'), /index\.html$/i);
+  assert.match(safeResolve('/login'), /index\.html$/i);
   assert.equal(safeResolve('/../../Windows/system32'), null);
 });

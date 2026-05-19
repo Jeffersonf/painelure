@@ -106,6 +106,7 @@
     <button class="nav-item" type="button" data-page="assets"><span class="ico">&#128187;</span>Inventário</button>
     <button class="nav-item" type="button" data-page="supervisors"><span class="ico">&#129517;</span>Supervisores</button>
     <button class="nav-item" type="button" data-page="ctc"><span class="ico">&#128736;</span>Técnicos CTC</button>
+    <button class="nav-item" type="button" data-page="cars"><span class="ico">&#128663;</span>Carros</button>
     <button class="nav-item fn" type="button" data-page="reports"><span class="ico">&#128204;</span>Relatórios</button>
     <button class="nav-item sl-n" type="button" data-page="info"><span class="ico">&#128101;</span>Contatos</button>
   </nav>
@@ -277,11 +278,12 @@
       <div class="bh">
         <div><div class="ct">Agenda</div><div class="cs">Itens ordenados por data, horário e responsável.</div></div>
         <div class="mini-actions">
+          <button class="btn btn-p btn-sm" id="syncCarScheduleBtn" type="button">Atualizar carros</button>
           <label class="btn btn-g btn-sm" for="fleetScheduleInput" data-v1-admin-import>Importar frota Excel</label>
           <input id="fleetScheduleInput" type="file" accept=".xlsx,.xls" hidden>
         </div>
       </div>
-      <div class="sync-meta" id="fleetImportStatus" data-v1-admin-import>Importe a planilha da frota para preencher reservas de carros oficiais.</div>
+      <div class="sync-meta" id="fleetImportStatus" data-v1-admin-import>A agenda de carros usa a lista oficial ReservasVeiculos do SharePoint.</div>
       <div class="setechub-toolbar" id="taskFilterBar">
         <button class="btn btn-g btn-sm active-filter" data-task-filter="todas" type="button">Todas</button>
         <button class="btn btn-g btn-sm" data-task-filter="minhas" type="button">Minha agenda</button>
@@ -295,6 +297,47 @@
       <div id="agendaCalendarGrid" class="supervisor-calendar-grid agenda-calendar-grid" data-v2-heavy hidden></div>
       <div id="taskList" class="stack-list"></div>
     </div>
+  </div>
+
+  <div class="page" id="page-cars">
+    <div class="ph">
+      <div>
+        <div class="pt">Carros</div>
+        <div class="ps">Agendamento de carros oficiais, destinos, solicitantes e motoristas.</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-p btn-sm" id="carRefreshBtn" type="button">Atualizar</button>
+      </div>
+    </div>
+    <div class="box car-filter-panel">
+      <div class="bh">
+        <div><div class="ct">Fonte oficial</div><div class="cs">Lista SharePoint ReservasVeiculos.</div></div>
+      </div>
+      <div class="car-filterbar">
+        <label>
+          <span>Carro</span>
+          <select class="fi" id="carVehicleFilter"></select>
+        </label>
+        <label>
+          <span>Status</span>
+          <select class="fi" id="carStatusFilter"></select>
+        </label>
+        <label>
+          <span>Busca</span>
+          <input class="fi" id="carSearchInput" placeholder="Destino, solicitante, motorista">
+        </label>
+        <button class="btn btn-g btn-sm" type="button" id="carFilterReset">Limpar</button>
+      </div>
+      <div class="sync-meta" id="carFilterSummary">Agendamentos de carros carregados.</div>
+      <div class="sync-meta car-source-status" id="carSourceStatus">Fonte: SharePoint ReservasVeiculos.</div>
+    </div>
+    <div class="box car-summary-box">
+      <div class="bh">
+        <div><div class="ct">Resumo dos carros</div><div class="cs">Agenda oficial do recorte atual.</div></div>
+      </div>
+      <div class="car-widget-strip" id="carSummaryRows"></div>
+    </div>
+    <div class="car-grid" id="carGrid"></div>
   </div>
 
   <div class="page" id="page-calls">

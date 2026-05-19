@@ -475,18 +475,18 @@ function visibleNavigationPages() {
   const pages = isPecUser()
     ? new Set(['info', 'settings'])
     : isSupervisorUser()
-      ? new Set(['dashboard', 'agenda', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'info', 'settings'])
+      ? new Set(['dashboard', 'agenda', 'cars', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'info', 'settings'])
       : currentUserRole() === 'seom'
-        ? new Set(['dashboard', 'agenda', 'schools', 'school-record', 'assets', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'cars', 'schools', 'school-record', 'assets', 'info', 'settings'])
       : currentUserRole() === 'ctc'
-        ? new Set(['dashboard', 'agenda', 'ctc', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'cars', 'ctc', 'info', 'settings'])
       : currentUserRole() === 'dirigente'
-        ? new Set(['dashboard', 'agenda', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'cars', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
       : isRestrictedCtcUser()
-        ? new Set(['dashboard', 'agenda', 'ctc', 'schools', 'school-record', 'assets', 'reports', 'info', 'settings'])
+        ? new Set(['dashboard', 'agenda', 'cars', 'ctc', 'schools', 'school-record', 'assets', 'reports', 'info', 'settings'])
       : canEditData()
-      ? new Set(['dashboard', 'agenda', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
-        : new Set(['dashboard', 'agenda', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings']);
+      ? new Set(['dashboard', 'agenda', 'cars', 'ctc', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings'])
+        : new Set(['dashboard', 'agenda', 'cars', 'schools', 'school-record', 'supervisors', 'supervisor-record', 'assets', 'reports', 'info', 'settings']);
   DORMANT_NAV_PAGES.forEach((page) => pages.delete(page));
   if (['admin', 'seintec', 'ctc', 'dirigente'].includes(currentUserRole())) {
     pages.add('networks');
@@ -728,6 +728,14 @@ function openAgendaWithScope(scope = 'ure') {
   syncFilterButtons('task');
   renderTasks();
   titleInput?.focus();
+}
+
+async function openCarSchedule() {
+  currentTaskFilter = 'carro';
+  showPage('cars');
+  syncFilterButtons('task');
+  renderCars();
+  await syncCarScheduleSource();
 }
 
 function filteredCalls() {
@@ -1947,6 +1955,10 @@ function renderCurrentPage(page = currentPage) {
     }
     if (page === 'ctc') {
       renderCtcAgenda();
+      return;
+    }
+    if (page === 'cars') {
+      renderCars();
       return;
     }
     if (page === 'calls') {

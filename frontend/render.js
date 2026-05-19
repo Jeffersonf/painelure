@@ -293,27 +293,29 @@ function renderDashboardAccess() {
     const schoolAlertCount = schools.filter((item) => item.status !== 'estavel').length;
     const inventoryAlertCount = state.schoolAssets.filter((item) => item.status !== 'ok').length;
     const ctcTasks = (state.tasks || []).filter((item) => normalizeKey(item.category).includes('ctc') && !item.done).length;
+    const carTasks = (state.tasks || []).filter((item) => item.scope === 'carro' || item.category === 'Carro oficial').length;
     const allModules = [
       { icon: '&#127979;', title: 'Escolas', meta: `${schools.length} unidades cadastradas`, action: `showPage('schools')`, page: 'schools', key: 'schools', tone: 'lime', priority: 'primary' },
       { icon: '&#128187;', title: 'Inventário', meta: `${inventoryAlertCount} alerta(s)`, action: `openInventoryCategory()`, page: 'assets', tone: 'teal', priority: 'primary' },
       { icon: '&#127760;', title: 'Redes e Cameras', meta: `${state.schoolNetworks.length} escolas com dados`, action: `showPage('networks')`, page: 'networks', key: 'networks', tone: 'amber', priority: 'primary' },
       { icon: '&#129517;', title: 'Supervisores', meta: `${visibleSupervisors().length} no painel`, action: `showPage('supervisors')`, page: 'supervisors', tone: 'blue', priority: 'primary' },
       { icon: '&#128736;', title: 'Técnicos CTC', meta: ctcTasks ? `${ctcTasks} visita(s)` : 'agenda de visitas', action: `openCtcAgenda()`, page: 'ctc', tone: 'amber', priority: 'secondary' },
+      { icon: '&#128663;', title: 'Carros', meta: carTasks ? `${carTasks} reserva(s)` : 'ReservasVeiculos', action: `openCarSchedule()`, page: 'cars', key: 'cars', tone: 'teal', priority: 'secondary' },
       { icon: '&#128197;', title: 'Agenda', meta: 'compromissos e frota', action: `showPage('agenda')`, page: 'agenda', tone: 'slate', priority: 'secondary' },
       { icon: '&#128101;', title: 'Contatos', meta: 'ramais e setores', action: `showPage('info')`, page: 'info', tone: 'slate', priority: 'secondary' },
       { icon: '&#9881;', title: 'Admin', meta: 'backup e importações', action: `showPage('admin')`, page: 'admin', tone: 'red', priority: 'secondary' }
     ];
     const rolePages = {
-      admin: ['schools', 'assets', 'supervisors', 'ctc', 'agenda', 'admin'],
-      seintec: ['schools', 'assets', 'supervisors', 'agenda', 'admin'],
-      ctc: ['ctc', 'agenda', 'schools', 'info'],
-      supervisor: ['supervisors', 'schools', 'agenda', 'info'],
-      seom: ['schools', 'assets', 'agenda', 'info'],
-      dirigente: ['schools', 'assets', 'supervisors', 'ctc', 'agenda', 'info'],
+      admin: ['schools', 'assets', 'supervisors', 'ctc', 'cars', 'agenda', 'admin'],
+      seintec: ['schools', 'assets', 'supervisors', 'cars', 'agenda', 'admin'],
+      ctc: ['ctc', 'cars', 'agenda', 'schools', 'info'],
+      supervisor: ['supervisors', 'schools', 'cars', 'agenda', 'info'],
+      seom: ['schools', 'assets', 'cars', 'agenda', 'info'],
+      dirigente: ['schools', 'assets', 'supervisors', 'ctc', 'cars', 'agenda', 'info'],
       pec: ['info', 'agenda']
     };
     const modules = allModules
-      .filter((item) => (rolePages[role] || rolePages.admin).includes(item.page))
+      .filter((item) => (rolePages[role] || rolePages.admin).includes(item.key || item.page))
       .filter((item) => canAccessPage(item.page));
 
     if (categoryBox) categoryBox.hidden = !modules.length;
@@ -2797,6 +2799,223 @@ function renderOfficialData() {
   if (officeInput) officeInput.value = state.officialContacts.office;
 }
 
+function carStatusTone(status) {
+  const key = normalizeKey(status || '');
+  if (['cancelado', 'cancelada', 'bloqueado', 'indisponivel', 'recusado', 'reprovado'].some((item) => key.includes(item))) return 'danger';
+  if (['pendente', 'aguardando', 'solicitado'].some((item) => key.includes(item))) return 'warn';
+  if (['uso', 'rota', 'andamento'].some((item) => key.includes(item))) return 'info';
+  return 'ok';
+}
+
+function carBookings() {
+  return (state.tasks || [])
+    .filter((task) => task.scope === 'carro' || task.category === 'Carro oficial' || normalizeKey(task.source || '').includes('reservasveiculos'))
+    .map((task) => ({
+      id: task.id,
+      requestId: String(task.id || '').replace(/^sharepoint-cars-/, '') || '--',
+      vehicle: task.vehicle || task.car || 'Carro oficial',
+      date: task.date || task.rawDate || '',
+      time: task.time || '',
+      requester: task.owner || task.createdBy || '',
+      destination: task.place || '',
+      driver: task.driver || '',
+      status: task.authorization || (task.done ? 'concluido' : 'reservado'),
+      note: task.notes || task.title || '',
+      title: task.title || '',
+      source: task.source || '',
+      sourceSyncedAt: task.sourceSyncedAt || ''
+    }))
+    .sort((a, b) => `${a.date || '9999-99-99'} ${a.time || '99:99'}`.localeCompare(`${b.date || '9999-99-99'} ${b.time || '99:99'}`));
+}
+
+function monthCarBookings(items = carBookings()) {
+  const year = currentViewDate.getFullYear();
+  const month = currentViewDate.getMonth();
+  return items.filter((item) => {
+    if (!item.date || !/^\d{4}-\d{2}-\d{2}/.test(item.date)) return false;
+    const date = new Date(`${item.date.slice(0, 10)}T00:00:00`);
+    return date.getFullYear() === year && date.getMonth() === month;
+  });
+}
+
+function setSimpleSelectOptions(select, options, currentValue = 'all') {
+  if (!select) return;
+  const value = options.some((item) => item.value === currentValue) ? currentValue : 'all';
+  select.innerHTML = options.map((item) => `<option value="${esc(item.value)}">${esc(item.label)}</option>`).join('');
+  select.value = value;
+}
+
+function bindCarsControls() {
+  const controls = [
+    document.getElementById('carVehicleFilter'),
+    document.getElementById('carStatusFilter'),
+    document.getElementById('carSearchInput')
+  ];
+  controls.forEach((control) => {
+    if (!control || control.dataset.boundCars) return;
+    control.dataset.boundCars = 'true';
+    control.addEventListener(control.tagName === 'INPUT' ? 'input' : 'change', () => renderCars());
+  });
+  const reset = document.getElementById('carFilterReset');
+  if (reset && !reset.dataset.boundCars) {
+    reset.dataset.boundCars = 'true';
+    reset.addEventListener('click', () => {
+      const vehicle = document.getElementById('carVehicleFilter');
+      const status = document.getElementById('carStatusFilter');
+      const search = document.getElementById('carSearchInput');
+      if (vehicle) vehicle.value = 'all';
+      if (status) status.value = 'all';
+      if (search) search.value = '';
+      renderCars();
+    });
+  }
+  const refresh = document.getElementById('carRefreshBtn');
+  if (refresh && !refresh.dataset.boundCars) {
+    refresh.dataset.boundCars = 'true';
+    refresh.addEventListener('click', async () => {
+      const original = refresh.textContent;
+      refresh.disabled = true;
+      refresh.textContent = 'Atualizando...';
+      try {
+        await syncCarScheduleSource();
+      } finally {
+        refresh.disabled = false;
+        refresh.textContent = original || 'Atualizar';
+      }
+    });
+  }
+}
+
+function renderCarCalendar(items) {
+  const year = currentViewDate.getFullYear();
+  const month = currentViewDate.getMonth();
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const days = new Date(year, month + 1, 0).getDate();
+  const byDay = new Map();
+  items.forEach((item) => {
+    if (!item.date) return;
+    const day = Number(item.date.slice(8, 10));
+    if (!day) return;
+    byDay.set(day, [...(byDay.get(day) || []), item]);
+  });
+  const blanks = Array.from({ length: firstWeekday }, () => '<div class="car-calendar-day empty"></div>');
+  const dayCells = Array.from({ length: days }, (_, index) => {
+    const day = index + 1;
+    const dayItems = byDay.get(day) || [];
+    return `
+      <div class="car-calendar-day ${dayItems.length ? 'has-event' : ''}">
+        <strong>${esc(String(day))}</strong>
+        ${dayItems.slice(0, 3).map((item) => `<span class="car-calendar-dot ${carStatusTone(item.status)}">${esc(item.time || '--:--')} ${esc(item.vehicle)}</span>`).join('')}
+        ${dayItems.length > 3 ? `<small>+${esc(String(dayItems.length - 3))}</small>` : ''}
+      </div>
+    `;
+  });
+  return `
+    <section class="car-calendar-shell">
+      <div class="car-calendar-board">
+        <div class="car-calendar-week">Dom</div><div class="car-calendar-week">Seg</div><div class="car-calendar-week">Ter</div><div class="car-calendar-week">Qua</div><div class="car-calendar-week">Qui</div><div class="car-calendar-week">Sex</div><div class="car-calendar-week">Sab</div>
+        ${[...blanks, ...dayCells].join('')}
+      </div>
+    </section>
+  `;
+}
+
+function renderCars() {
+  const grid = document.getElementById('carGrid');
+  if (!grid) return;
+  bindCarsControls();
+
+  const all = carBookings();
+  const monthly = monthCarBookings(all);
+  const vehicleFilter = document.getElementById('carVehicleFilter');
+  const statusFilter = document.getElementById('carStatusFilter');
+  const searchInput = document.getElementById('carSearchInput');
+  const vehicles = [...new Set(monthly.map((item) => item.vehicle).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const statuses = [...new Set(monthly.map((item) => item.status || 'pendente'))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  setSimpleSelectOptions(vehicleFilter, [{ value: 'all', label: 'Todos' }, ...vehicles.map((item) => ({ value: normalizeKey(item), label: item }))], vehicleFilter?.value || 'all');
+  setSimpleSelectOptions(statusFilter, [{ value: 'all', label: 'Todos' }, ...statuses.map((item) => ({ value: normalizeKey(item), label: item }))], statusFilter?.value || 'all');
+
+  const vehicleValue = vehicleFilter?.value || 'all';
+  const statusValue = statusFilter?.value || 'all';
+  const search = normalizeKey(searchInput?.value || '');
+  const visible = monthly.filter((item) => {
+    const vehicleOk = vehicleValue === 'all' || normalizeKey(item.vehicle) === vehicleValue;
+    const statusOk = statusValue === 'all' || normalizeKey(item.status || 'pendente') === statusValue;
+    const searchOk = !search || normalizeKey(`${item.vehicle} ${item.destination} ${item.requester} ${item.driver} ${item.status} ${item.note}`).includes(search);
+    return vehicleOk && statusOk && searchOk;
+  });
+
+  const reserved = visible.filter((item) => carStatusTone(item.status) === 'ok').length;
+  const pending = visible.filter((item) => carStatusTone(item.status) === 'warn').length;
+  const blocked = visible.filter((item) => carStatusTone(item.status) === 'danger').length;
+  const syncedAt = all.find((item) => item.sourceSyncedAt)?.sourceSyncedAt || '';
+  const summary = document.getElementById('carFilterSummary');
+  const sourceStatus = document.getElementById('carSourceStatus');
+  if (summary) summary.textContent = `${visible.length}/${monthly.length} reserva(s) visiveis em ${monthName()}.`;
+  if (sourceStatus && !sourceStatus.textContent.includes('Atualizando')) {
+    sourceStatus.textContent = syncedAt
+      ? `Fonte SharePoint ReservasVeiculos sincronizada em ${new Date(syncedAt).toLocaleString('pt-BR')}.`
+      : 'Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar.';
+  }
+
+  const summaryRows = document.getElementById('carSummaryRows');
+  if (summaryRows) {
+    summaryRows.innerHTML = [
+      ['Reservas', visible.length, 'no filtro atual', 'primary'],
+      ['Reservados', reserved, 'confirmados', 'ok'],
+      ['Pendentes', pending, 'aguardando', pending ? 'warn' : 'ok'],
+      ['Bloqueios', blocked, 'cancelados/recusados', blocked ? 'danger' : 'ok']
+    ].map(([label, value, note, tone]) => `
+      <span class="car-widget-${tone}">
+        <strong>${esc(String(value))}</strong>
+        <small>${esc(label)} | ${esc(note)}</small>
+      </span>
+    `).join('');
+  }
+
+  if (!visible.length) {
+    grid.innerHTML = `
+      ${renderCarCalendar(visible)}
+      <div class="sync-empty">${monthly.length ? 'Nenhum agendamento de carro encontrado neste filtro.' : `Nenhum agendamento de carro em ${esc(monthName())}.`}</div>
+    `;
+    return;
+  }
+
+  const byDate = visible.reduce((acc, item) => {
+    const key = item.date || 'Sem data';
+    acc.set(key, [...(acc.get(key) || []), item]);
+    return acc;
+  }, new Map());
+
+  grid.innerHTML = `
+    <section class="car-widget-strip car-widget-strip-top">
+      <span class="car-widget-primary"><strong>${visible.length}</strong><small>reservas no mes</small></span>
+      <span><strong>${reserved}</strong><small>aprovadas</small></span>
+      <span><strong>${pending}</strong><small>pendentes</small></span>
+      <span><strong>${vehicles.length}</strong><small>veiculos</small></span>
+    </section>
+    ${renderCarCalendar(visible)}
+    <section class="car-day-list">
+      ${Array.from(byDate.entries()).map(([date, items]) => `
+        <article class="car-day-group">
+          <div class="car-day-head"><strong>${esc(date)}</strong><small>${esc(String(items.length))} reserva(s)</small></div>
+          ${items.map((item) => {
+            const tone = carStatusTone(item.status);
+            return `
+              <button class="car-booking-card car-booking-${tone}" type="button">
+                <span class="car-time"><strong>${esc(item.time || '--:--')}</strong><small>${esc(item.requestId || '--')}</small></span>
+                <span class="car-route"><strong>${esc(item.destination || 'Destino nao informado')}</strong><small>${esc(item.vehicle)}</small></span>
+                <span class="car-requester"><strong>${esc(item.requester || 'Setor nao informado')}</strong><small>${esc(item.driver || 'Condutor a definir')}</small></span>
+                <em class="diag-pill ${tone === 'danger' ? 'pill-danger' : tone === 'warn' ? 'pill-warn' : tone === 'info' ? 'pill-info' : 'pill-ok'}">${esc(item.status || 'pendente')}</em>
+              </button>
+            `;
+          }).join('')}
+        </article>
+      `).join('')}
+    </section>
+  `;
+}
+
 function renderTasks(filtered) {
   const list = document.getElementById('taskList');
   const source = filtered || filteredTasks();
@@ -2844,8 +3063,8 @@ function renderTasks(filtered) {
   const dateInput = document.getElementById('taskDate');
   if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
   const taskActions = (task) => canEditData() ? `
-    <button class="btn btn-g btn-sm" onclick="toggleTask(${task.id})">${task.done ? 'Reabrir' : 'Concluir'}</button>
-    <button class="btn btn-d btn-sm" onclick="removeTask(${task.id})">Remover</button>
+    <button class="btn btn-g btn-sm" onclick="toggleTask('${esc(task.id)}')">${task.done ? 'Reabrir' : 'Concluir'}</button>
+    <button class="btn btn-d btn-sm" onclick="removeTask('${esc(task.id)}')">Remover</button>
   ` : '';
   list.innerHTML = sorted.map((task) => `
     <div class="setechub-item">

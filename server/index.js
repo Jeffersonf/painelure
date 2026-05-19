@@ -56,6 +56,27 @@ function sendText(res, statusCode, text) {
   res.end(text);
 }
 
+function sharePointListApiUrl(url) {
+  const parsed = new URL(url);
+  if (!/\.sharepoint\.com$/i.test(parsed.hostname)) {
+    throw new Error('Somente listas SharePoint sao aceitas.');
+  }
+  const match = parsed.pathname.match(/^(.*)\/Lists\/([^/]+)\/AllItems\.aspx$/i);
+  if (!match) return parsed.toString();
+  const sitePath = match[1];
+  const listName = decodeURIComponent(match[2]);
+  const listPath = `${decodeURIComponent(sitePath)}/Lists/${listName}`.replace(/'/g, "''");
+  const query = new URLSearchParams({ '$top': '5000' });
+  return `${parsed.origin}${sitePath}/_api/web/GetList('${listPath}')/items?${query}`;
+}
+
+function unwrapSharePointItems(payload) {
+  if (Array.isArray(payload?.value)) return payload.value;
+  if (Array.isArray(payload?.d?.results)) return payload.d.results;
+  if (Array.isArray(payload?.d)) return payload.d;
+  return [];
+}
+
 function validateStateShape(candidate) {
   if (!isPlainObject(candidate)) {
     throw new Error('Estado invalido: payload precisa ser um objeto.');
@@ -104,7 +125,7 @@ function validateStateShape(candidate) {
 function safeResolve(urlPath) {
   const normalized = decodeURIComponent(urlPath.split('?')[0]);
   const requested = ['/', '/login'].includes(normalized)
-    ? '/frontend/index.html'
+    ? '/index.html'
     : normalized.endsWith('/')
       ? `${normalized}index.html`
       : normalized;
@@ -312,6 +333,30 @@ const server = http.createServer(async (req, res) => {
       const parsed = JSON.parse(body || '{}');
       const result = await runRedeProcessor(parsed.config || parsed);
       sendJson(res, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message });
+    }
+    return;
+  }
+
+  if (requestUrl.pathname === '/api/sharepoint-list' && req.method === 'GET') {
+    try {
+      const sourceUrl = requestUrl.searchParams.get('url') || '';
+      if (!sourceUrl) {
+        sendJson(res, 400, { error: 'URL da lista nao informada.' });
+        return;
+      }
+      const response = await fetch(sharePointListApiUrl(sourceUrl), {
+        headers: { Accept: 'application/json;odata=nometadata' }
+      });
+      if (!response.ok) {
+        sendJson(res, response.status, {
+          error: `SharePoint retornou HTTP ${response.status}.`,
+          hint: 'Se a lista for restrita, o servidor local nao recebe seu login do navegador.'
+        });
+        return;
+      }
+      sendJson(res, 200, { items: unwrapSharePointItems(await response.json()) });
     } catch (error) {
       sendJson(res, 400, { error: error.message });
     }

@@ -130,6 +130,13 @@ const APRIL_SUPERVISOR_SHEET_LINK = {
   panelGid: ''
 };
 
+const CAR_SCHEDULE_LINK = {
+  label: 'Agenda de carros oficiais',
+  url: 'https://seesp-my.sharepoint.com/personal/itv_seintec_educacao_sp_gov_br/Lists/ReservasVeiculos/AllItems.aspx',
+  category: 'car-schedule',
+  sourceType: 'sharepoint-list'
+};
+
 const SUPERVISOR_SOURCE_ALIASES = {
   adilson: ['Adilson Manoel', 'Adilson Fogaca'],
   daiane: ['Daiane Aparecida', 'Daiane Aparecida de Oliveira Ribeiro'],
@@ -677,8 +684,13 @@ function defaultSupervisors(schools) {
 function normalizeOfficialLinks(links) {
   const source = Array.isArray(links) ? links : [];
   const normalized = source.filter((item) =>
-    !(item.category === 'supervisor-sheet' && item.monthKey === APRIL_SUPERVISOR_SHEET_LINK.monthKey)
+    !(item.category === 'supervisor-sheet' && item.monthKey === APRIL_SUPERVISOR_SHEET_LINK.monthKey) &&
+    item.category !== CAR_SCHEDULE_LINK.category
   );
+  normalized.unshift({
+    id: source.find((item) => item.category === CAR_SCHEDULE_LINK.category)?.id || uid(),
+    ...CAR_SCHEDULE_LINK
+  });
   normalized.unshift({
     id: source.find((item) => item.category === 'supervisor-sheet' && item.monthKey === APRIL_SUPERVISOR_SHEET_LINK.monthKey)?.id || uid(),
     ...APRIL_SUPERVISOR_SHEET_LINK
@@ -1102,6 +1114,10 @@ function createDefaults() {
       {
         id: uid(),
         ...APRIL_SUPERVISOR_SHEET_LINK
+      },
+      {
+        id: uid(),
+        ...CAR_SCHEDULE_LINK
       },
       { id: uid(), label: 'Portal da Diretoria de Ensino de Itapeva', url: 'https://deitapeva.educacao.sp.gov.br/' },
       { id: uid(), label: 'Escolas da URE Itapeva', url: 'https://deitapeva.educacao.sp.gov.br/escolas/' },

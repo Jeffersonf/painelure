@@ -73,9 +73,11 @@ function restoreLoginState() {
       await refreshServerHealth();
       await syncFromServerIfUseful();
       await loadServerSnapshots();
+      await syncCarScheduleSource({ silent: true, refresh: false });
       await syncSupervisorVisitSources({ silent: true });
       const aprilSheet = supervisorMonthlySheetLinks().find((item) => item.monthKey === '2026-04');
       if (aprilSheet) await syncSupervisorMonthlySheet(aprilSheet.id, { silent: true, preserveView: true });
+      refreshAll();
       await refreshServerHealth();
     } catch (error) {
       console.warn('Sincronização em segundo plano não concluída.', error);
