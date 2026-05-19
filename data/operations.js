@@ -23,7 +23,7 @@
   P.seedData.reports = [
     { label: "Escolas", value: "21", note: "base mestre carregada" },
     { label: "Inventario", value: "107", note: "linhas sanitizadas por escola" },
-    { label: "Supervisores", value: "6", note: "metas conectadas a planilha de abril" },
+    { label: "Supervisores", value: "6", note: "visitas conectadas a planilha oficial de maio" },
     { label: "Contatos", value: "46", note: "contatos categorizados" }
   ];
 

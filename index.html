@@ -308,30 +308,6 @@
       <header class="page-header compact supervision-original-head">
         <div><h1>Supervisores</h1><p>Cards de resumo por supervisor. Clique em um supervisor para abrir os dados completos.</p></div>
       </header>
-      <div class="selector-panel supervisor-filters supervision-hidden-controls">
-        <label>
-          <span>Situacao</span>
-          <select id="supervisorStatusFilter">
-            <option value="all">Todos</option>
-            <option value="ok">Meta ok</option>
-            <option value="warn">Com pendencia</option>
-          </select>
-        </label>
-        <label>
-          <span>Ordenacao</span>
-          <select id="supervisorSortFilter">
-            <option value="name">Ordem alfabetica</option>
-            <option value="pending">Mais pendentes</option>
-            <option value="schools">Mais escolas</option>
-          </select>
-        </label>
-        <button class="ghost-btn filter-reset" type="button" id="supervisorFilterReset">Limpar</button>
-        <p id="supervisorFilterSummary">Supervisores ativos na base.</p>
-      </div>
-      <article class="box summary-box supervision-hidden-controls">
-        <div class="box-head"><div><strong>Resumo da supervisao</strong><small>Metas e pendencias do recorte atual</small></div></div>
-        <div class="row-list compact" id="supervisionSummaryRows"></div>
-      </article>
       <div id="supervisorRows"></div>
     </section>
 
@@ -713,6 +689,7 @@
   <script src="./modules/backend-client.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/search.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/render.js?v=supervision-setechub-design-20260519"></script>
+  <script src="./modules/supervision-render.js?v=supervision-module-20260519"></script>
   <script src="./modules/navigation.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/admin-tools.js?v=cars-design-data-20260519"></script>
   <script src="./app.js?v=school-detail-edit-20260515"></script>

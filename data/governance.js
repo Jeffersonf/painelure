@@ -23,7 +23,7 @@
     { label: "Base visual Finanza", status: "ok", note: "Shell, cards, sidebar e tipografia consolidados." },
     { label: "Dados mockados", status: "ok", note: "Mock reduzido a estrutura vazia; seeds reais documentados." },
     { label: "Credenciais", status: "ok", note: "Não há senha real em JS público do 2.0." },
-    { label: "Supervisão oficial", status: "ok", note: "Planilha de abril conectada e normalizada." },
+    { label: "Supervisão oficial", status: "ok", note: "Planilha oficial de maio conectada; abril fica marcado apenas como teste." },
     { label: "Inventário por escola", status: "ok", note: "107 linhas sanitizadas importadas da base 1.0." },
     { label: "Calendário oficial", status: "ok", note: "Página, seed e normalizador CSV prontos; URL oficial pode ser plugada em sources.js." },
     { label: "Perfis de acesso", status: "ok", note: "Matriz e filtro local por perfil implementados no MVP." },

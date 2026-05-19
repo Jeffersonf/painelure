@@ -3472,10 +3472,6 @@ select:focus-visible {
   font-weight: 750;
 }
 
-.supervision-hidden-controls {
-  display: none !important;
-}
-
 .supervision-original-page .page-header {
   margin-bottom: 18px;
   border-radius: 8px;

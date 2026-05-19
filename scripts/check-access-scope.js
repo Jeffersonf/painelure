@@ -18,7 +18,7 @@ const DATA_FILES = [
   "operations.js",
   "sources.js"
 ];
-const MODULE_FILES = ["search.js", "data-store.js", "access-scope.js", "render.js"];
+const MODULE_FILES = ["search.js", "data-store.js", "access-scope.js", "render.js", "supervision-render.js"];
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
