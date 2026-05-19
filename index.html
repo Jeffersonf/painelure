@@ -7,7 +7,7 @@
   <title>PainelURE 2.0</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "cars-agenda-card-widgets-20260519";
+      window.PAINELURE_BUILD = "supervision-setechub-design-20260519";
       const buildKey = "painelure2_build";
       const previousBuild = localStorage.getItem(buildKey);
       if (previousBuild && previousBuild !== window.PAINELURE_BUILD && !sessionStorage.getItem(`${buildKey}_reloaded`)) {
@@ -33,7 +33,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=cars-agenda-card-widgets-20260519">
+  <link rel="stylesheet" href="./styles.css?v=supervision-setechub-design-20260519">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -304,11 +304,11 @@
       </div>
     </section>
 
-    <section class="page" id="page-supervision">
-      <header class="page-header compact">
-        <div><h1>Supervisao</h1><p>Metas, visitas e escolas vinculadas.</p></div>
+    <section class="page supervision-original-page" id="page-supervision">
+      <header class="page-header compact supervision-original-head">
+        <div><h1>Supervisores</h1><p>Cards de resumo por supervisor. Clique em um supervisor para abrir os dados completos.</p></div>
       </header>
-      <div class="selector-panel supervisor-filters">
+      <div class="selector-panel supervisor-filters supervision-hidden-controls">
         <label>
           <span>Situacao</span>
           <select id="supervisorStatusFilter">
@@ -328,14 +328,11 @@
         <button class="ghost-btn filter-reset" type="button" id="supervisorFilterReset">Limpar</button>
         <p id="supervisorFilterSummary">Supervisores ativos na base.</p>
       </div>
-      <article class="box summary-box">
+      <article class="box summary-box supervision-hidden-controls">
         <div class="box-head"><div><strong>Resumo da supervisao</strong><small>Metas e pendencias do recorte atual</small></div></div>
         <div class="row-list compact" id="supervisionSummaryRows"></div>
       </article>
-      <div class="table-card">
-        <div class="table-head"><strong>Supervisores</strong><span>metas, carteira e prioridade</span></div>
-        <div id="supervisorRows"></div>
-      </div>
+      <div id="supervisorRows"></div>
     </section>
 
     <section class="page" id="page-supervisor-detail">
@@ -715,7 +712,7 @@
   <script src="./config.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/backend-client.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/search.js?v=school-detail-edit-20260515"></script>
-  <script src="./modules/render.js?v=cars-agenda-card-widgets-20260519"></script>
+  <script src="./modules/render.js?v=supervision-setechub-design-20260519"></script>
   <script src="./modules/navigation.js?v=school-detail-edit-20260515"></script>
   <script src="./modules/admin-tools.js?v=cars-design-data-20260519"></script>
   <script src="./app.js?v=school-detail-edit-20260515"></script>

@@ -1244,83 +1244,79 @@
       acc.pending += pending;
       return acc;
     }, { schools: 0, weekDone: 0, weekTotal: 0, monthDone: 0, monthTotal: 0, pending: 0 });
-    const coverage = totals.monthTotal ? Math.round((totals.monthDone / totals.monthTotal) * 100) : 0;
-    const schoolLedger = sorted.flatMap(item => {
-      const assigned = item.assignedSchools || [];
-      const { month } = supervisorProgress(item);
-      const targetPerSchool = assigned.length ? Math.max(1, Math.round((month.total || assigned.length * 3) / assigned.length)) : 0;
-      return assigned.map((schoolName, index) => {
-        const school = findSchool(schoolName);
-        const done = Math.min(targetPerSchool, Math.max(0, month.done - (index * targetPerSchool)));
-        const pending = Math.max(targetPerSchool - done, 0);
-        return {
-          supervisor: item.name,
-          school: schoolName,
-          city: school?.city || "Municipio pendente",
-          cie: school?.cie || "CIE pendente",
-          done,
-          target: targetPerSchool,
-          pending,
-          alerts: school ? inventoryAlertCount(school) : 0
-        };
-      });
-    }).sort((a, b) => b.pending - a.pending || b.alerts - a.alerts || a.school.localeCompare(b.school));
+    const indicatorClass = metric => metric.total && metric.done >= metric.total ? "pill-ok" : metric.done ? "pill-warn" : "pill-danger";
+    const indicatorText = metric => metric.total && metric.done >= metric.total ? "Meta cumprida" : metric.done ? "Em andamento" : "Sem registro";
+    const goalPct = metric => metric.total ? Math.min(100, Math.round((metric.done / metric.total) * 100)) : 0;
+    const viewMonthLabel = sourceNote || P.selectedMonthLabel?.() || "mes selecionado";
     host.innerHTML = `
-      <section class="supervision-v1-shell">
-        <div class="supervision-v1-metrics">
-          <article><span>&#129517;</span><small>Supervisores</small><strong>${sorted.length}</strong></article>
-          <article><span>&#127979;</span><small>Escolas</small><strong>${totals.schools}</strong></article>
-          <article><span>&#9989;</span><small>Visitas</small><strong>${totals.monthDone}/${totals.monthTotal || 0}</strong></article>
-          <article><span>&#127919;</span><small>Cobertura</small><strong>${coverage}%</strong></article>
-        </div>
-        ${sourceNote ? `<div class="supervision-source"><span>&#128197;</span><strong>Fonte de supervisao</strong><small>${sourceNote}</small></div>` : ""}
-        <div class="supervision-v1-layout">
-          <article class="supervision-v1-table box">
-            <div class="box-head"><div><strong>Supervisores</strong><small>Mes, semana, carteira e cobertura.</small></div></div>
+      <section class="supervision-original-shell">
+        <article class="box" id="painelSupervisor">
+          <div class="box-head supervisor-original-box-head">
+            <div><strong>Painel de supervisores</strong><small>Resumo mensal das visitas, metas e indicadores da planilha oficial.</small></div>
+          </div>
+          <div class="supervisor-sheet-panel">
             <div class="supervisor-sheet-table-wrap">
               <table class="supervisor-sheet-table">
-                <thead><tr><th>Supervisor</th><th>Escolas</th><th>Semana</th><th>Mes</th><th>Cobertura</th><th></th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Supervisor</th>
+                    <th>Escolas</th>
+                    <th>Meta semanal</th>
+                    <th>Meta mensal</th>
+                    <th>Semana</th>
+                    <th>Indicador semana</th>
+                    <th>Indicador mes</th>
+                    <th></th>
+                  </tr>
+                </thead>
                 <tbody>
                   ${sorted.map((item, index) => {
                     const { week, month, pending, schools } = supervisorProgress(item);
-                    const pct = month.total ? Math.round((month.done / month.total) * 100) : 0;
                     return `<tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${pending ? "warn" : "ok"}" data-search="${P.searchText([item.name, item.email, item.phone, item.week, item.month])}">
-                      <td><strong>${item.name}</strong><small>${item.email || item.phone || "contato pendente"}</small></td>
+                      <td><strong>${item.name}</strong></td>
                       <td>${schools}</td>
-                      <td><span>${item.week}</span><i style="--pct:${week.pct}%"></i></td>
-                      <td><span>${item.month}</span><i style="--pct:${month.pct}%"></i></td>
-                      <td><em class="status-pill ${pending ? "warn" : "ok"}">${pct}%</em></td>
-                      <td><button class="ghost-btn" type="button">Abrir</button></td>
+                      <td class="supervisor-goal-cell"><strong>${week.done}/${week.total || "--"}</strong><div class="supervisor-sheet-bar"><span style="width:${Math.max(4, goalPct(week))}%"></span></div></td>
+                      <td class="supervisor-goal-cell"><strong>${month.done}/${month.total || "--"}</strong><div class="supervisor-sheet-bar"><span style="width:${Math.max(4, goalPct(month))}%"></span></div></td>
+                      <td>${item.currentWeek || item.weekNumber || "--"}</td>
+                      <td><span class="diag-pill ${indicatorClass(week)}">${indicatorText(week)}</span></td>
+                      <td><span class="diag-pill ${indicatorClass(month)}">${indicatorText(month)}</span></td>
+                      <td><button class="ghost-btn btn-sm" type="button">Abrir</button></td>
                     </tr>`;
                   }).join("")}
                 </tbody>
               </table>
             </div>
-          </article>
-          <aside class="supervision-v1-selector box">
-            <div class="box-head"><div><strong>Carteiras</strong><small>Atalho rapido como na v1.</small></div></div>
-            <div class="row-list compact">
-              ${sorted.map((item, index) => {
-                const { month, pending, schools } = supervisorProgress(item);
-                return `<button class="data-row compact" type="button" data-supervisor-selector="${index}" data-status="${pending ? "warn" : "ok"}" data-search="${P.searchText([item.name, item.email])}">
-                  <span class="row-icon">&#129517;</span>
-                  <span><strong>${item.name}</strong><small>${schools} escola(s) | ${month.done}/${month.total || 0} visitas</small></span>
-                  <em class="status-pill ${pending ? "warn" : "ok"}">${pending ? `${pending} faltam` : "ok"}</em>
-                </button>`;
-              }).join("")}
+            <div class="supervisor-sheet-foot">
+              <span>Fonte: planilha oficial de supervisao | Mes exibido: ${viewMonthLabel}</span>
+              <span>${totals.monthDone}/${totals.monthTotal || 0} visita(s) registradas</span>
             </div>
-          </aside>
-        </div>
-        <article class="supervision-school-ledger box">
-          <div class="box-head"><div><strong>Carteira por escola</strong><small>Leitura de v1: unidade, supervisor, visitas previstas e pendencias.</small></div></div>
-          <div class="supervision-ledger-head"><span>Escola</span><span>Supervisor</span><span>Visitas</span><span>Inventario</span><span>Status</span></div>
-          ${schoolLedger.map(row => `<button class="supervision-ledger-row" type="button" data-school-jump="${row.school}" data-search="${P.searchText([row.school, row.city, row.cie, row.supervisor])}">
-            <span><strong>${row.school}</strong><small>${row.city} | ${row.cie}</small></span>
-            <span><strong>${row.supervisor}</strong><small>responsavel</small></span>
-            <span><strong>${row.done}/${row.target}</strong><small>${row.pending ? `${row.pending} pendente(s)` : "em dia"}</small></span>
-            <span><strong>${row.alerts}</strong><small>manut./defeito</small></span>
-            <em class="status-pill ${row.pending ? "warn" : "ok"}">${row.pending ? "pendente" : "ok"}</em>
-          </button>`).join("")}
+          </div>
+        </article>
+        <article class="box">
+          <div class="box-head supervisor-original-box-head">
+            <div><strong>Supervisores</strong><small>Resumo, meta e sinal de pendencia sem repetir os dados completos.</small></div>
+          </div>
+          <div class="stack-list supervisor-selector-list">
+            ${sorted.map((item, index) => {
+              const { week, month, pending, schools } = supervisorProgress(item);
+              const tone = indicatorClass(month);
+              return `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${pending ? "warn" : "ok"}" data-search="${P.searchText([item.name, item.email, item.phone])}">
+                <div class="setechub-head">
+                  <div>
+                    <strong>${item.name}</strong>
+                    <div class="sync-meta">${item.email || "email nao informado"} | ${item.phone || "telefone nao informado"}</div>
+                  </div>
+                  <span class="diag-pill ${tone}">${indicatorText(month)}</span>
+                </div>
+                <div class="school-overview-kpis supervisor-list-kpis">
+                  <div><span>Mes</span><strong>${month.done}/${month.total || "--"}</strong></div>
+                  <div><span>Semana</span><strong>${week.done}/${week.total || "--"}</strong></div>
+                  <div><span>Escolas</span><strong>${schools}</strong></div>
+                  <div><span>Faltam</span><strong>${pending || "--"}</strong></div>
+                </div>
+              </button>`;
+            }).join("")}
+          </div>
         </article>
       </section>`;
     applySupervisorFilters();

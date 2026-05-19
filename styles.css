@@ -3406,6 +3406,327 @@ select:focus-visible {
   font-weight: 750;
 }
 
+.supervision-hidden-controls {
+  display: none !important;
+}
+
+.supervision-original-page .page-header {
+  margin-bottom: 18px;
+  border-radius: 8px;
+}
+
+.supervision-original-page .page-header h1 {
+  font-size: clamp(28px, 3vw, 34px);
+  letter-spacing: 0;
+  line-height: 1.08;
+}
+
+.supervision-original-page .page-header p {
+  max-width: 72ch;
+  font-size: 14px;
+}
+
+.supervision-original-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.supervision-original-shell .box {
+  padding: 18px;
+  border-color: color-mix(in srgb, var(--bd) 82%, transparent);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.032), rgba(255,255,255,.014)),
+    color-mix(in srgb, var(--sf) 86%, transparent);
+}
+
+.supervisor-original-box-head {
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.supervisor-original-box-head strong {
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.supervisor-original-box-head small,
+.sync-meta,
+.sync-empty {
+  max-width: 72ch;
+}
+
+.supervisor-sheet-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.supervisor-sheet-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: var(--sf2);
+}
+
+.supervisor-sheet-table {
+  width: 100%;
+  min-width: 880px;
+  border-collapse: collapse;
+}
+
+.supervisor-sheet-table th,
+.supervisor-sheet-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--bd);
+  color: var(--tx);
+  font-size: 13px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.supervisor-sheet-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--sf2);
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.supervisor-sheet-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.supervisor-sheet-table td > strong {
+  display: block;
+  color: var(--tx);
+  font-size: 15px;
+  line-height: 1.28;
+}
+
+.supervisor-sheet-table .supervisor-goal-cell > strong {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.supervisor-sheet-row {
+  cursor: pointer;
+}
+
+.supervisor-sheet-row:hover {
+  background: rgba(200,245,90,.06);
+}
+
+.supervisor-sheet-row:has(.pill-danger) {
+  box-shadow: inset 4px 0 0 #ef4444;
+}
+
+.supervisor-sheet-row:has(.pill-warn):not(:has(.pill-danger)) {
+  box-shadow: inset 4px 0 0 #facc15;
+}
+
+.supervisor-sheet-row:has(.pill-ok):not(:has(.pill-warn)):not(:has(.pill-danger)) {
+  box-shadow: inset 4px 0 0 #22c55e;
+}
+
+.supervisor-sheet-bar {
+  width: 100%;
+  min-width: 78px;
+  height: 7px;
+  margin-top: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+}
+
+.supervisor-sheet-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ac);
+}
+
+.supervisor-sheet-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--mt);
+  font-size: 11px;
+}
+
+.diag-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid rgba(200,245,90,.18);
+  border-radius: 999px;
+  background: rgba(200,245,90,.07);
+  color: var(--ac);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.supervisor-sheet-table .diag-pill,
+.supervisor-list-card .diag-pill {
+  min-width: 96px;
+  border-width: 1px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.16);
+}
+
+.supervisor-sheet-table th:nth-child(6),
+.supervisor-sheet-table th:nth-child(7),
+.supervisor-sheet-table td:nth-child(6),
+.supervisor-sheet-table td:nth-child(7) {
+  width: 220px;
+}
+
+.supervisor-sheet-table td:nth-child(6),
+.supervisor-sheet-table td:nth-child(7) {
+  padding-inline: 18px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.supervisor-sheet-table .diag-pill {
+  width: 190px;
+  min-width: 190px;
+  height: 30px;
+  min-height: 30px;
+  margin: 0 auto;
+  padding: 0;
+  letter-spacing: .055em;
+  box-shadow: 0 10px 22px rgba(0,0,0,.24);
+}
+
+.supervisor-sheet-table .pill-ok,
+.supervisor-list-card .pill-ok {
+  color: #062b18;
+  border-color: rgba(74,222,128,.78);
+  background: linear-gradient(180deg, #6ee78d, #30c765);
+}
+
+.supervisor-sheet-table .pill-warn,
+.supervisor-list-card .pill-warn {
+  color: #382600;
+  border-color: rgba(250,204,21,.82);
+  background: linear-gradient(180deg, #ffe66b, #f6b91f);
+}
+
+.supervisor-sheet-table .pill-danger,
+.supervisor-list-card .pill-danger {
+  color: #fff5f3;
+  border-color: rgba(248,113,113,.86);
+  background: linear-gradient(180deg, #ff776d, #df2f2f);
+}
+
+.supervisor-selector-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.setechub-item {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid color-mix(in srgb, var(--bd) 82%, transparent);
+  border-radius: 8px;
+  background: rgba(255,255,255,.03);
+  color: var(--tx);
+  text-align: left;
+}
+
+.setechub-clickable {
+  cursor: pointer;
+}
+
+.setechub-clickable:hover {
+  border-color: color-mix(in srgb, var(--ac) 28%, var(--bd));
+  background: rgba(200,245,90,.045);
+}
+
+.setechub-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.setechub-head strong {
+  display: block;
+  color: var(--tx);
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.sync-meta {
+  margin-top: 5px;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.school-overview-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.school-overview-kpis > div {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  background: rgba(255,255,255,.035);
+}
+
+.school-overview-kpis span {
+  display: block;
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.school-overview-kpis strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--tx);
+  font-size: 17px;
+  line-height: 1.1;
+}
+
+.supervisor-list-card {
+  border-color: color-mix(in srgb, var(--bd) 82%, transparent);
+  background: rgba(255,255,255,.03);
+}
+
+.supervisor-list-kpis {
+  margin-top: 10px;
+}
+
+.supervisor-list-card > .setechub-head {
+  align-items: center;
+}
+
+.supervisor-list-card .setechub-head > .diag-pill {
+  width: 118px;
+  min-width: 118px;
+  min-height: 30px;
+  flex: 0 0 118px;
+  padding: 0 14px;
+}
+
 .supervisor-record-v1 {
   display: grid;
   gap: 14px;
@@ -4795,5 +5116,24 @@ select:focus-visible {
   .car-widget-agenda .car-route,
   .car-widget-agenda .car-requester {
     padding-right: 74px;
+  }
+
+  .supervisor-sheet-table {
+    min-width: 760px;
+  }
+
+  .supervisor-sheet-foot,
+  .setechub-head {
+    flex-direction: column;
+  }
+
+  .school-overview-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .supervisor-list-card .setechub-head > .diag-pill {
+    width: auto;
+    min-width: 0;
+    align-self: flex-start;
   }
 }
