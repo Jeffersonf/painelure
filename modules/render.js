@@ -1649,27 +1649,25 @@
         <span><strong>${pending}</strong><small>pendentes</small></span>
         <span><strong>${vehicles.length}</strong><small>veiculos</small></span>
       </section>
-      <section class="car-layout">
-        <div class="car-calendar-shell">
-          ${calendarBoardMarkup(carCalendar)}
-        </div>
-        <div class="car-day-list">
-          ${Object.entries(byDate).map(([date, items]) => `
-            <article class="car-day-group">
-              <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
-              ${items.map(item => {
-                const tone = carStatusTone(item.status);
-                const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
-                return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
-                  <span class="car-time"><strong>${item.time || "--:--"}</strong><small>${item.requestId || "--"}</small></span>
-                  <span class="car-route"><strong>${item.destination || "Destino nao informado"}</strong><small>${item.vehicle}</small></span>
-                  <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.driver || "Condutor a definir"}</small></span>
-                  <em class="status-pill ${tone}">${item.status || "pendente"}</em>
-                </button>`;
-              }).join("")}
-            </article>
-          `).join("")}
-        </div>
+      <section class="car-calendar-shell">
+        ${calendarBoardMarkup(carCalendar, { includeDetails: false })}
+      </section>
+      <section class="car-day-list">
+        ${Object.entries(byDate).map(([date, items]) => `
+          <article class="car-day-group">
+            <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
+            ${items.map(item => {
+              const tone = carStatusTone(item.status);
+              const key = P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester]);
+              return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])}">
+                <span class="car-time"><strong>${item.time || "--:--"}</strong><small>${item.requestId || "--"}</small></span>
+                <span class="car-route"><strong>${item.destination || "Destino nao informado"}</strong><small>${item.vehicle}</small></span>
+                <span class="car-requester"><strong>${item.requester || "Setor nao informado"}</strong><small>${item.driver || "Condutor a definir"}</small></span>
+                <em class="status-pill ${tone}">${item.status || "pendente"}</em>
+              </button>`;
+            }).join("")}
+          </article>
+        `).join("")}
       </section>
     `;
   }
@@ -1787,7 +1785,8 @@
     return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
   }
 
-  function calendarBoardMarkup(calendar) {
+  function calendarBoardMarkup(calendar, options = {}) {
+    const includeDetails = options.includeDetails !== false;
     const selected = P.selectedMonth?.() || { year: 2026, month: 5 };
     const first = new Date(selected.year, selected.month - 1, 1);
     const daysInMonth = new Date(selected.year, selected.month, 0).getDate();
@@ -1820,7 +1819,7 @@
         <div class="calendar-weekdays"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sab</span></div>
         <div class="calendar-days">${cells.join("")}</div>
       </article>
-      ${calendar.map(item => `
+      ${includeDetails ? calendar.map(item => `
         <article class="detail-widget" data-calendar-key="${P.searchText([item.label, item.value])}" data-search="${P.searchText([item.label, item.value, item.note])}">
           <div>
             <small>${item.value || "Sem data"}</small>
@@ -1829,7 +1828,7 @@
           </div>
           <span class="status-pill info">Agenda</span>
         </article>
-      `).join("")}
+      `).join("") : ""}
     `;
   }
 
