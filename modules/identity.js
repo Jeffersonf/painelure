@@ -21,6 +21,10 @@
       .toUpperCase() || "U";
   }
 
+  function firstName(name) {
+    return String(name || "Usuario").trim().split(/\s+/).filter(Boolean)[0] || "Usuario";
+  }
+
   function users() {
     return P.getAppData?.().users || [];
   }
@@ -84,7 +88,7 @@
     return {
       id: user?.id || "",
       name: contact?.name || user?.name || "Usuario",
-      shortName: user?.name || contact?.name || "Usuario",
+      shortName: firstName(user?.name || contact?.name || "Usuario"),
       role: user?.role || "Consulta",
       login: user?.login || user?.username || "",
       contactId: contact?.id || user?.contactId || "",
@@ -111,6 +115,7 @@
 
   P.USER_KEY = USER_KEY;
   P.userInitials = initials;
+  P.firstName = firstName;
   P.users = users;
   P.activeUser = activeUser;
   P.setActiveUser = setActiveUser;

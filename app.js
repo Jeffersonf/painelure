@@ -137,7 +137,7 @@
 
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
-      metaTheme.setAttribute("content", selectedTheme === "light" ? "#f5f7f0" : "#08090d");
+      metaTheme.setAttribute("content", selectedTheme === "light" ? "#f7f9fc" : "#08090d");
     }
   }
 

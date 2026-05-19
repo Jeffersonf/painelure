@@ -636,9 +636,9 @@
     const role = P.currentRole?.() || display.role || "Administrador";
     const profile = (data.profiles || []).find(item => P.normalize(item.name) === P.normalize(role));
     setText("#userNameLabel", display.name);
-    setText("#accountNameLabel", display.shortName || display.name);
+    setText("#accountNameLabel", P.firstName?.(display.shortName || display.name) || display.shortName || display.name);
     setText("#userIdentitySource", display.linked ? "Usuario vinculado ao contato" : "Usuario importado da v1");
-    setText("#userRoleSummary", role);
+    setText("#userRoleSummary", P.roleLabel?.(role) || role);
     setText("#userAccessSummary", profile?.note || "Perfil local de acesso ao painel.");
     setText("#userContactSummary", display.linked
       ? `${display.contactRole || "Contato"} | ${display.sector || "Setor"} | ${display.email || display.phone || "sem canal"}`
@@ -665,7 +665,7 @@
 
     const list = P.$("#userAccessList");
     if (list) {
-      const pages = (P.ROLE_ACCESS?.[role] || P.ROLE_ACCESS?.Consulta || []).filter(page => !["profiles", "quality", "admin"].includes(page));
+      const pages = (P.roleAccess?.(role) || P.ROLE_ACCESS?.[role] || P.ROLE_ACCESS?.Consulta || []).filter(page => !["profiles", "quality", "admin"].includes(page));
       list.innerHTML = pages.map(page => {
         const item = P.pageMeta(page);
         return `

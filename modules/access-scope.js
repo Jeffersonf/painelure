@@ -2,14 +2,36 @@
   const P = window.PainelURE;
   const ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "reports"],
+    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
-    Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
-    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
+    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars"],
+    Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
+    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
+  };
+  const ROLE_EMOJI = {
+    Administrador: "🛡️",
+    Supervisao: "🧭",
+    "Tecnicos CTC": "🛠️",
+    SETEC: "🌐",
+    SEINTEC: "📡",
+    Gabinete: "📌",
+    SEOM: "🏗️",
+    Pedagogico: "📚",
+    Consulta: "👁️"
+  };
+  const ROLE_NAMES = {
+    Administrador: "Administrador",
+    Supervisao: "Supervisão",
+    "Tecnicos CTC": "Técnicos CTC",
+    SETEC: "SETEC",
+    SEINTEC: "SEINTEC",
+    Gabinete: "Gabinete",
+    SEOM: "SEOM",
+    Pedagogico: "Pedagógico",
+    Consulta: "Consulta"
   };
 
   function normalized(value) {
@@ -42,6 +64,29 @@
     if (target.includes("pedag") || target.includes("pec")) return ACCESS.Pedagogico;
     if (target.includes("admin")) return ACCESS.Administrador;
     return ACCESS.Consulta;
+  }
+
+  function roleKey(role) {
+    const target = normalized(role);
+    return Object.keys(ACCESS).find(name => normalized(name) === target)
+      || (target.includes("supervis") && "Supervisao")
+      || (target.includes("ctc") && "Tecnicos CTC")
+      || (target.includes("seintec") && "SEINTEC")
+      || (target.includes("setec") && "SETEC")
+      || ((target.includes("gabinete") || target.includes("dirigente")) && "Gabinete")
+      || (target.includes("seom") && "SEOM")
+      || ((target.includes("pedag") || target.includes("pec")) && "Pedagogico")
+      || (target.includes("admin") && "Administrador")
+      || "Consulta";
+  }
+
+  function roleEmoji(role) {
+    return ROLE_EMOJI[roleKey(role)] || ROLE_EMOJI.Consulta;
+  }
+
+  function roleLabel(role) {
+    const key = roleKey(role);
+    return `${roleEmoji(key)} ${ROLE_NAMES[key] || key}`;
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
@@ -214,7 +259,12 @@
   }
 
   P.DATA_ACCESS = ACCESS;
+  P.ROLE_EMOJI = ROLE_EMOJI;
+  P.ROLE_NAMES = ROLE_NAMES;
   P.roleAccess = roleAccess;
+  P.roleKey = roleKey;
+  P.roleEmoji = roleEmoji;
+  P.roleLabel = roleLabel;
   P.canAccessData = canAccessData;
   P.canViewCredentials = canViewCredentials;
   P.canViewAllCarBookings = canViewAllCarBookings;

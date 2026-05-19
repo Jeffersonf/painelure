@@ -159,13 +159,13 @@ function run() {
   });
 
   assertAccess(P, "Administrador", ["admin", "network", "inventory", "profiles"], []);
-  assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision"], ["network", "inventory", "cars", "admin"]);
-  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars"], ["admin", "profiles"]);
-  assertAccess(P, "SETEC", ["network", "inventory", "reports"], ["admin", "calendar"]);
-  assertAccess(P, "SEINTEC", ["network", "inventory", "reports", "cars"], ["admin", "calls"]);
-  assertAccess(P, "Gabinete", ["calls", "calendar", "reports", "cars"], ["network", "inventory", "admin"]);
-  assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar"], ["network", "inventory", "cars", "admin"]);
-  assertAccess(P, "Consulta", ["schools", "contacts"], ["network", "inventory", "admin"]);
+  assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision"], ["network", "inventory", "cars", "reports", "admin"]);
+  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars"], ["reports", "admin", "profiles"]);
+  assertAccess(P, "SETEC", ["network", "inventory"], ["reports", "admin", "calendar"]);
+  assertAccess(P, "SEINTEC", ["network", "inventory", "cars"], ["reports", "admin", "calls"]);
+  assertAccess(P, "Gabinete", ["calls", "calendar", "cars"], ["reports", "network", "inventory", "admin"]);
+  assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar"], ["reports", "network", "inventory", "cars", "admin"]);
+  assertAccess(P, "Consulta", ["schools", "contacts"], ["reports", "network", "inventory", "admin"]);
 
   console.log("Escopo de acesso OK");
 }

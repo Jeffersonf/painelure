@@ -11,12 +11,12 @@
 
   const ROLE_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "reports"],
+    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
-    Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
-    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
+    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars"],
+    Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
+    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
@@ -79,12 +79,13 @@
     const activeUser = P.activeUser?.();
     if (activeUserSelect && activeUser) activeUserSelect.value = activeUser.id;
     const accountRole = P.$("#accountRoleLabel");
-    if (accountRole) accountRole.textContent = role;
+    if (accountRole) accountRole.textContent = P.roleLabel?.(role) || role;
     const display = P.displayUser?.() || { name: "Jefferson", role };
+    const sidebarName = P.firstName?.(display.shortName || display.name) || display.shortName || display.name;
     const accountName = P.$("#accountNameLabel");
-    if (accountName) accountName.textContent = display.shortName || display.name;
+    if (accountName) accountName.textContent = sidebarName;
     const adminAccountLine = P.$("#adminAccountLine");
-    if (adminAccountLine) adminAccountLine.textContent = `${display.shortName || display.name} • ${role}`;
+    if (adminAccountLine) adminAccountLine.textContent = `${sidebarName} • ${P.roleLabel?.(role) || role}`;
     P.renderUser?.(P.getAppData?.() || {});
     if (typeof applyPrefs === "function") applyPrefs();
     applyAccessState(role);
@@ -312,26 +313,26 @@
     const roleSelect = P.$("#activeRoleSelect");
     if (roleSelect && !roleSelect.dataset.bound) {
       roleSelect.dataset.bound = "true";
-      roleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${role}</option>`).join("");
+      roleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
       roleSelect.addEventListener("change", () => applyRole(roleSelect.value));
     }
     const userRoleSelect = P.$("#userRoleSelect");
     if (userRoleSelect && !userRoleSelect.dataset.bound) {
       userRoleSelect.dataset.bound = "true";
-      userRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${role}</option>`).join("");
+      userRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
       userRoleSelect.addEventListener("change", () => applyRole(userRoleSelect.value));
     }
     const newUserRoleSelect = P.$("#newUserRoleSelect");
     if (newUserRoleSelect && !newUserRoleSelect.dataset.bound) {
       newUserRoleSelect.dataset.bound = "true";
-      newUserRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${role}</option>`).join("");
+      newUserRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
     }
     const activeUserSelect = P.$("#activeUserSelect");
     if (activeUserSelect && !activeUserSelect.dataset.bound) {
       activeUserSelect.dataset.bound = "true";
       activeUserSelect.innerHTML = (P.users?.() || []).map(user => {
         const display = P.displayUser?.(user) || user;
-        return `<option value="${user.id}">${display.shortName || display.name} • ${user.role}</option>`;
+        return `<option value="${user.id}">${display.shortName || display.name} • ${P.roleLabel?.(user.role) || user.role}</option>`;
       }).join("");
       activeUserSelect.addEventListener("change", () => {
         const user = P.setActiveUser?.(activeUserSelect.value);
@@ -975,7 +976,7 @@
             <div class="settings-actions backend-user-actions">
               <span class="status-pill ${pinPending ? "warn" : "ok"}">${pinPending ? "PIN inicial" : "PIN alterado"}</span>
               <select data-user-role>
-                ${roleOptions.map(role => `<option value="${role}"${role === user.role ? " selected" : ""}>${role}</option>`).join("")}
+                ${roleOptions.map(role => `<option value="${role}"${role === user.role ? " selected" : ""}>${P.roleLabel?.(role) || role}</option>`).join("")}
               </select>
               <select data-user-contact>
                 <option value="">Sem contato</option>

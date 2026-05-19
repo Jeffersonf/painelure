@@ -9,11 +9,11 @@
   ];
 
   P.seedData.profiles = [
-    { name: "Administrador", emoji: "🛡️", access: "Tudo", note: "Visão completa, fontes, qualidade e publicação." },
+    { name: "Administrador", emoji: "🛡️", access: "Tudo, incluindo relatórios", note: "Visão completa, fontes, qualidade e publicação." },
     { name: "Supervisão", emoji: "🧭", access: "Escolas, supervisão, contatos e calendário", note: "Foco em metas, vínculos e acompanhamento." },
     { name: "Técnicos CTC", emoji: "🛠️", access: "Escolas, inventário, redes e câmeras", note: "Consulta técnica e triagem de infraestrutura." },
     { name: "SETEC", emoji: "🌐", access: "Redes, inventário, contatos e calendário", note: "Operação técnica e suporte regional." },
-    { name: "SEINTEC", emoji: "📡", access: "Redes, escolas e relatórios", note: "Consulta técnica e indicadores." },
+    { name: "SEINTEC", emoji: "📡", access: "Redes, escolas, inventário e carros", note: "Consulta técnica e indicadores sem relatórios administrativos." },
     { name: "Gabinete", emoji: "📌", access: "Painel, escolas, contatos e calendário", note: "Visão executiva e decisões rápidas." },
     { name: "Pedagógico", emoji: "📚", access: "Escolas, supervisão e contatos", note: "Acompanhamento pedagógico sem campos técnicos restritos." },
     { name: "Consulta", emoji: "👁️", access: "Painel, escolas e contatos", note: "Leitura simples, sem dados restritos." }

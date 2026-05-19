@@ -12,7 +12,7 @@
     supervision: { icon: "🧭", label: "Supervisao", note: "Metas e vinculos", type: "Pagina" },
     contacts: { icon: "☎️", label: "Contatos", note: "Setores e ramais", type: "Pagina" },
     calendar: { icon: "📅", label: "Calendario URE", note: "Agenda institucional", type: "Pagina" },
-    reports: { icon: "📈", label: "Relatorios", note: "Resumo operacional", type: "Pagina" },
+    reports: { icon: "📈", label: "Relatorios", note: "Acesso administrativo", type: "Pagina" },
     profiles: { icon: "🧩", label: "Perfis", note: "Matriz de acesso", type: "Pagina" },
     quality: { icon: "✅", label: "Qualidade", note: "Checklist do painel", type: "Pagina" },
     admin: { icon: "🔐", label: "Admin", note: "Fontes, backups e publicacao", type: "Pagina" },
