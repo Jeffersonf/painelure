@@ -18,10 +18,10 @@
     },
     inventory: {
       label: "Inventario",
-      type: "csv",
-      url: "",
-      status: "pending",
-      metadata: { domain: "Inventario", cadence: "sob demanda", owner: "SETEC/CTC" }
+      type: "sharepoint-list",
+      url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACUz84zfYrYRIadNAPXJvISAetLbQd40ptsKrcSMFs4TNQ?e=3WOQtG",
+      status: "official",
+      metadata: { domain: "Inventario", cadence: "sob demanda", owner: "SETEC/CTC", source: "Inventario" }
     },
     supervision: {
       label: "Supervisao",

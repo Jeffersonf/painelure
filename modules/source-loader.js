@@ -24,9 +24,7 @@
     const appData = { ...P.getAppData() };
     const result = await loadSource(key);
     if (result.status === "loaded" && result.data) {
-      if (key === "supervision") appData.supervisors = result.data;
-      else if (key === "network") appData.networkData = result.data;
-      else appData[key] = result.data;
+      applySourceData(appData, key, result.data);
       P.setAppData(appData);
       P.sourceStatus = [
         ...(P.sourceStatus || []).filter(item => item.key !== key),
@@ -34,6 +32,16 @@
       ];
     }
     return result;
+  }
+
+  function applySourceData(appData, key, data) {
+    if (key === "supervision") appData.supervisors = data;
+    else if (key === "network") appData.networkData = data;
+    else if (key === "inventory") {
+      if (Array.isArray(data) && data.some(item => item?.school)) appData.schoolAssets = data;
+      else appData.inventory = data;
+    } else appData[key] = data;
+    return appData;
   }
 
   function sourceResult(key) {
@@ -68,9 +76,7 @@
         const result = await loadSource(key);
         results.push(result);
         if (result.status === "loaded" && result.data) {
-          if (key === "supervision") nextData.supervisors = result.data;
-          else if (key === "network") nextData.networkData = result.data;
-          else nextData[key] = result.data;
+          applySourceData(nextData, key, result.data);
         }
       } catch (error) {
         results.push({ key, status: "error", error });
