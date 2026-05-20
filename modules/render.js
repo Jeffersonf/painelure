@@ -637,6 +637,7 @@
     const profile = (data.profiles || []).find(item => P.normalize(item.name) === P.normalize(role));
     setText("#userNameLabel", display.name);
     setText("#accountNameLabel", P.firstName?.(display.shortName || display.name) || display.shortName || display.name);
+    P.applyConnectionState?.();
     setText("#userIdentitySource", display.linked ? "Usuario vinculado ao contato" : "Usuario importado da v1");
     setText("#userRoleSummary", P.roleLabel?.(role) || role);
     setText("#userAccessSummary", profile?.note || "Perfil local de acesso ao painel.");

@@ -869,6 +869,40 @@ select:focus-visible {
   line-height: 1.2;
 }
 
+.account-name-line {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+}
+
+.account-name-line span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connection-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--dan);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dan) 14%, transparent);
+  cursor: help;
+}
+
+.connection-dot.online {
+  background: var(--grn);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--grn) 16%, transparent), 0 0 12px color-mix(in srgb, var(--grn) 34%, transparent);
+}
+
+.connection-dot.offline {
+  background: var(--dan);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dan) 14%, transparent), 0 0 10px color-mix(in srgb, var(--dan) 28%, transparent);
+}
+
 .account-row small {
   color: var(--mt);
   font-size: 12px;

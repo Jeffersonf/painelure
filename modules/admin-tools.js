@@ -86,9 +86,21 @@
     if (accountName) accountName.textContent = sidebarName;
     const adminAccountLine = P.$("#adminAccountLine");
     if (adminAccountLine) adminAccountLine.textContent = `${sidebarName} • ${P.roleLabel?.(role) || role}`;
+    applyConnectionState();
     P.renderUser?.(P.getAppData?.() || {});
     if (typeof applyPrefs === "function") applyPrefs();
     applyAccessState(role);
+  }
+
+  function applyConnectionState() {
+    const online = Boolean(P.onlineUser?.());
+    const dot = P.$("#accountConnectionDot");
+    const label = online ? "Online no servidor" : "Modo offline local";
+    if (!dot) return;
+    dot.classList.toggle("online", online);
+    dot.classList.toggle("offline", !online);
+    dot.title = label;
+    dot.setAttribute("aria-label", label);
   }
 
   function closeAccountMenu() {
@@ -1004,6 +1016,7 @@
   P.closeAccountMenu = closeAccountMenu;
   P.toggleAccountMenu = toggleAccountMenu;
   P.applyUserAvatar = applyUserAvatar;
+  P.applyConnectionState = applyConnectionState;
   P.bindAdminTools = bindAdminTools;
   P.restoreBackendSession = restoreBackendSession;
   P.renderSourceStatus = renderSourceStatus;
