@@ -683,16 +683,60 @@
     });
 
     const calendarInput = P.$("#calendarSourceInput");
-    if (calendarInput) calendarInput.value = loadSourceOverrides().calendar || P.sources?.calendar?.url || "";
+    if (calendarInput) calendarInput.value = sourceOverride(loadSourceOverrides(), "calendar").url || P.sources?.calendar?.url || "";
     P.$("#saveCalendarSourceBtn")?.addEventListener("click", () => {
       const overrides = loadSourceOverrides();
-      overrides.calendar = calendarInput?.value || "";
+      overrides.calendar = {
+        ...sourceOverride(overrides, "calendar"),
+        url: calendarInput?.value || "",
+        type: P.sources?.calendar?.type || "csv",
+        autoLoad: P.sources?.calendar?.metadata?.autoLoad !== false
+      };
       saveSourceOverrides(overrides);
       applySourceOverrides();
       renderSourceStatus();
       const meta = P.$("#adminBackupMeta");
       if (meta) meta.textContent = "Fonte do calendário salva.";
     });
+
+    const sourceEditorList = P.$("#sourceEditorList");
+    if (sourceEditorList && !sourceEditorList.dataset.bound) {
+      sourceEditorList.dataset.bound = "true";
+      sourceEditorList.addEventListener("click", async event => {
+        const button = event.target.closest("[data-sync-source]");
+        if (!button) return;
+        const key = button.dataset.syncSource;
+        const original = button.textContent;
+        try {
+          const overrides = readSourceEditor();
+          saveSourceOverrides(overrides);
+          applySourceOverrides();
+          button.disabled = true;
+          button.textContent = "Sincronizando...";
+          P.sourceStatus = [
+            ...(P.sourceStatus || []).filter(item => item.key !== key),
+            { key, status: "loading" }
+          ];
+          renderSourceStatus();
+          const result = await P.refreshSource?.(key);
+          P.saveAppData?.();
+          P.renderApp?.();
+          applyRole();
+          renderSourceStatus();
+          setAdminMeta(`${P.sources?.[key]?.label || key} sincronizado: ${result?.rows?.length || 0} linha(s).`);
+        } catch (error) {
+          P.sourceStatus = [
+            ...(P.sourceStatus || []).filter(item => item.key !== key),
+            { key, status: "error", error }
+          ];
+          renderSourceStatus();
+          setAdminMeta(`Falha ao sincronizar ${P.sources?.[key]?.label || key}: ${error.message}`);
+        } finally {
+          button.disabled = false;
+          button.textContent = original || "Sincronizar";
+        }
+      });
+    }
 
     P.$("#saveSourceOverridesBtn")?.addEventListener("click", () => {
       const overrides = readSourceEditor();
@@ -828,6 +872,12 @@
     }
   }
 
+  function sourceOverride(overrides, key) {
+    const item = overrides?.[key];
+    if (!item || typeof item === "string") return { url: item || "" };
+    return item;
+  }
+
   function saveSourceOverrides(overrides) {
     try {
       localStorage.setItem(SOURCE_KEY, JSON.stringify(overrides));
@@ -836,16 +886,32 @@
 
   function applySourceOverrides() {
     const overrides = loadSourceOverrides();
-    Object.entries(overrides).forEach(([key, url]) => {
+    Object.entries(overrides).forEach(([key, override]) => {
       if (P.sources?.[key]?.metadata?.locked) return;
-      if (P.sources?.[key]) P.sources[key].url = url;
+      if (!P.sources?.[key]) return;
+      const next = typeof override === "string" ? { url: override } : override || {};
+      P.sources[key] = {
+        ...P.sources[key],
+        type: next.type || P.sources[key].type || "csv",
+        url: next.url ?? P.sources[key].url ?? "",
+        metadata: {
+          ...(P.sources[key].metadata || {}),
+          autoLoad: next.autoLoad === undefined ? P.sources[key].metadata?.autoLoad : Boolean(next.autoLoad)
+        }
+      };
     });
   }
 
   function readSourceEditor() {
     const overrides = {};
-    P.$all("[data-source-url]").forEach(input => {
-      overrides[input.dataset.sourceUrl] = input.value.trim();
+    P.$all("[data-source-key]").forEach(row => {
+      const key = row.dataset.sourceKey;
+      if (!key) return;
+      overrides[key] = {
+        url: row.querySelector("[data-source-url]")?.value.trim() || "",
+        type: row.querySelector("[data-source-type]")?.value || "csv",
+        autoLoad: Boolean(row.querySelector("[data-source-autoload]")?.checked)
+      };
     });
     return overrides;
   }
@@ -856,6 +922,7 @@
       compact ? null : (meta.domain || source.label),
       meta.owner && `resp. ${meta.owner}`,
       meta.cadence && `cadencia ${meta.cadence}`,
+      meta.autoLoad === false && "sincronizacao manual",
       (meta.monthKey || source.monthKey) && `mes ${P.selectedMonthLabel?.(meta.monthKey || source.monthKey) || meta.monthKey || source.monthKey}`,
       meta.sensitive && (compact ? "dados sensiveis" : `sensivel: ${meta.sensitive}`)
     ].filter(Boolean).join(" | ");
@@ -867,12 +934,23 @@
     const overrides = loadSourceOverrides();
     host.innerHTML = Object.entries(P.sources || {}).map(([key, source]) => {
       const locked = Boolean(source.metadata?.locked);
-      const value = locked ? source.url ?? "" : overrides[key] ?? source.url ?? "";
+      const override = sourceOverride(overrides, key);
+      const value = locked ? source.url ?? "" : override.url ?? source.url ?? "";
+      const type = locked ? source.type || "csv" : override.type || source.type || "csv";
+      const autoLoad = locked ? source.metadata?.autoLoad !== false : (override.autoLoad ?? source.metadata?.autoLoad) !== false;
       const metaLine = sourceMetaLine(source) || `${source.status || "pending"} | ${source.type || "csv"}`;
       return `
-        <div class="settings-row source-editor-row" data-search="${P.searchText([key, source.label, value, metaLine])}">
+        <div class="settings-row source-editor-row" data-source-key="${key}" data-search="${P.searchText([key, source.label, value, metaLine, type])}">
           <div><strong>${source.label || key}</strong><small>${metaLine}</small></div>
-          <input type="url" data-source-url="${key}" value="${value}" placeholder="https://.../pub?output=csv"${locked ? " disabled" : ""}>
+          <div class="source-editor-controls">
+            <input type="url" data-source-url value="${value}" placeholder="https://.../pub?output=csv"${locked ? " disabled" : ""}>
+            <select data-source-type${locked ? " disabled" : ""}>
+              <option value="csv"${type === "csv" ? " selected" : ""}>CSV / Google Sheets</option>
+              <option value="sharepoint-list"${type === "sharepoint-list" ? " selected" : ""}>SharePoint</option>
+            </select>
+            <label class="check-row source-autoload"><input type="checkbox" data-source-autoload${autoLoad ? " checked" : ""}${locked ? " disabled" : ""}><span>Auto</span></label>
+            <button class="ghost-btn" type="button" data-sync-source="${key}">Sincronizar</button>
+          </div>
         </div>
       `;
     }).join("");
@@ -888,7 +966,7 @@
       const source = P.sources?.[item.key] || {};
       const label = source.label || item.key;
       const ok = item.status === "loaded" || item.status === "official";
-      const status = item.status === "skipped" || item.status === "pending" ? "pendente" : item.status;
+      const status = item.reason === "manual" ? "manual" : item.status === "skipped" || item.status === "pending" ? "pendente" : item.status;
       const detail = [
         source.url ? "fonte configurada" : "sem URL configurada",
         sourceMetaLine(source, true)

@@ -4625,7 +4625,16 @@ select:focus-visible {
   align-items: stretch;
 }
 
-.source-editor-row input {
+.source-editor-controls {
+  display: flex;
+  flex: 1 1 620px;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.source-editor-controls input {
   min-height: 38px;
   min-width: min(560px, 100%);
   flex: 1 1 360px;
@@ -4637,6 +4646,16 @@ select:focus-visible {
   font: inherit;
   font-size: 12px;
   font-weight: 700;
+}
+
+.source-editor-controls select {
+  min-height: 38px;
+  min-width: 170px;
+}
+
+.source-autoload {
+  min-height: 38px;
+  flex: 0 0 auto;
 }
 
 .user-create-actions input,

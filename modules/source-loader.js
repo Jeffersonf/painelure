@@ -26,11 +26,11 @@
     if (result.status === "loaded" && result.data) {
       applySourceData(appData, key, result.data);
       P.setAppData(appData);
-      P.sourceStatus = [
-        ...(P.sourceStatus || []).filter(item => item.key !== key),
-        result
-      ];
     }
+    P.sourceStatus = [
+      ...(P.sourceStatus || []).filter(item => item.key !== key),
+      result
+    ];
     return result;
   }
 
