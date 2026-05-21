@@ -64,6 +64,10 @@
     `;
   }
 
+  function supervisorGoalCell(parts) {
+    return `<td class="supervisor-goal-cell"><strong>${parts.done}/${parts.total}</strong><i class="supervisor-sheet-bar" style="--pct:${progressPct(parts)}%"></i></td>`;
+  }
+
   function supervisorVisitRowsForMonth(supervisor) {
     const selected = P.selectedMonthKey?.() || "";
     const records = supervisor.visitRecords || [];
@@ -168,8 +172,8 @@
                     <tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${monthIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
                       <td><strong>${item.supervisor.name}</strong></td>
                       <td>${item.assignedSchools.length}</td>
-                      <td class="supervisor-goal-cell"><strong>${week.done}/${week.total}</strong><i class="supervisor-sheet-bar"><span style="width:${progressPct(week)}%"></span></i></td>
-                      <td class="supervisor-goal-cell"><strong>${month.done}/${month.total}</strong><i class="supervisor-sheet-bar"><span style="width:${progressPct(month)}%"></span></i></td>
+                      ${supervisorGoalCell(week)}
+                      ${supervisorGoalCell(month)}
                       <td>${currentWeek}</td>
                       <td><span class="diag-pill pill-${weekIndicator.tone}">${weekIndicator.label}</span></td>
                       <td><span class="diag-pill pill-${monthIndicator.tone}">${monthIndicator.label}</span></td>
@@ -180,6 +184,30 @@
               </table>
             </div>
             ${supervisorSourceFooter()}
+          </div>
+        </article>
+        <article class="box">
+          <div class="box-head supervisor-original-box-head">
+            <div><strong>Supervisores</strong><small>Resumo individual, metas e sinal de acompanhamento.</small></div>
+          </div>
+          <div class="stack-list supervisor-selector-list">
+            ${stats.map((item, index) => {
+              const week = progressParts(item.supervisor.week, 3);
+              const month = progressParts(item.supervisor.month, Math.max(3, item.assignedSchools.length * 3));
+              const monthIndicator = indicatorMeta(month);
+              return `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${monthIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
+                <div class="setechub-head">
+                  <div><strong>${item.supervisor.name}</strong><small class="sync-meta">${item.assignedSchools.length} escola(s) | ${month.done}/${month.total} meta mensal | ${week.done}/${week.total} semana</small></div>
+                  <span class="diag-pill pill-${monthIndicator.tone}">${monthIndicator.label}</span>
+                </div>
+                <div class="supervisor-list-kpis">
+                  <div><span>Escolas</span><strong>${item.assignedSchools.length}</strong></div>
+                  <div><span>Visitadas</span><strong>${item.visitedSchools}</strong></div>
+                  <div><span>Visitas</span><strong>${item.visitCount}</strong></div>
+                  <div><span>Cobertura</span><strong>${item.coverage}%</strong></div>
+                </div>
+              </button>`;
+            }).join("") || `<div class="sync-empty">Nenhum supervisor cadastrado.</div>`}
           </div>
         </article>
       </section>`;
@@ -199,9 +227,9 @@
     host.querySelector("#supervisorFullscreenBtn")?.addEventListener("click", () => {
       P.$("#painelSupervisor")?.requestFullscreen?.();
     });
-    host.querySelectorAll("[data-supervisor-index]").forEach(button => {
+    host.querySelectorAll("[data-supervisor-index], [data-supervisor-selector]").forEach(button => {
       button.addEventListener("click", () => {
-        const index = Number(button.dataset.supervisorIndex);
+        const index = Number(button.dataset.supervisorIndex || button.dataset.supervisorSelector);
         P.focusSupervisor?.(stats[index].supervisor.name);
       });
     });
