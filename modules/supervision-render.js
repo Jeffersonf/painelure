@@ -42,10 +42,9 @@
     const key = P.normalize(text);
     if (key.includes("verde") || key === "ok" || key.includes("meta_ok")) return { label: "VERDE", tone: "ok" };
     if (key.includes("vermelho") || key.includes("critico") || key.includes("atras")) return { label: "VERMELHO", tone: "danger" };
-    if (key.includes("amarelo") || key.includes("aguard") || key.includes("aviso") || key.includes("atenc")) {
-      return { label: key.includes("aguard") ? "AGUARDANDO" : "AMARELO", tone: "warn" };
-    }
-    return text ? { label: text.toUpperCase(), tone: "warn" } : indicatorMeta(fallbackParts);
+    if (key.includes("amarelo")) return { label: "AMARELO", tone: "warn" };
+    if (key.includes("aviso") || key.includes("atenc")) return { label: "AVISO!", tone: "warn" };
+    return text ? { label: text.replace(/_/g, " ").toUpperCase(), tone: "info" } : indicatorMeta(fallbackParts);
   }
 
   function currentWeekNumber(stats) {
@@ -163,16 +162,6 @@
           <div class="supervisor-sheet-panel">
             <div class="supervisor-sheet-table-wrap">
               <table class="supervisor-sheet-table">
-                <colgroup>
-                  <col class="supervisor-col-name">
-                  <col class="supervisor-col-schools">
-                  <col class="supervisor-col-goal">
-                  <col class="supervisor-col-goal">
-                  <col class="supervisor-col-week">
-                  <col class="supervisor-col-indicator">
-                  <col class="supervisor-col-indicator">
-                  <col class="supervisor-col-action">
-                </colgroup>
                 <thead>
                   <tr>
                     <th>Supervisor</th>

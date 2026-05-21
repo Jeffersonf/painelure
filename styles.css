@@ -3716,21 +3716,14 @@ select:focus-visible {
 
 .supervisor-sheet-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 880px;
   border-collapse: collapse;
   table-layout: auto;
 }
 
-.supervisor-col-name { width: 32%; }
-.supervisor-col-schools { width: 7%; }
-.supervisor-col-goal { width: 13%; }
-.supervisor-col-week { width: 7%; }
-.supervisor-col-indicator { width: 16%; }
-.supervisor-col-action { width: 7%; }
-
 .supervisor-sheet-table th,
 .supervisor-sheet-table td {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--bd);
   color: var(--tx);
   font-size: 14px;
@@ -3907,6 +3900,13 @@ select:focus-visible {
   color: #fff5f3;
   border-color: rgba(248,113,113,.86);
   background: linear-gradient(180deg, #ff776d, #df2f2f);
+}
+
+.supervisor-sheet-table .pill-info,
+.supervisor-list-card .pill-info {
+  color: #d9fff8;
+  border-color: rgba(90,245,200,.38);
+  background: linear-gradient(180deg, rgba(90,245,200,.28), rgba(90,245,200,.13));
 }
 
 .supervisor-selector-list {
