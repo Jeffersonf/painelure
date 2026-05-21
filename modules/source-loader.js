@@ -12,12 +12,41 @@
     const rows = source.type === "sharepoint-list"
       ? await P.fetchSharePointList(source.url)
       : await P.fetchCsv(source.url);
+    const payload = key === "supervision"
+      ? await supervisionPayload(source, rows)
+      : rows;
     return {
       key,
       status: "loaded",
       rows,
-      data: normalize(rows)
+      data: normalize(payload)
     };
+  }
+
+  function googleSheetGidCsvUrl(url, gid) {
+    const text = String(url || "").trim();
+    if (!gid) return text;
+    const publishedMatch = text.match(/docs\.google\.com\/spreadsheets\/d\/e\/([^/]+)/i);
+    if (publishedMatch) {
+      return `https://docs.google.com/spreadsheets/d/e/${publishedMatch[1]}/pub?output=csv&single=true&gid=${encodeURIComponent(gid)}`;
+    }
+    const regularMatch = text.match(/docs\.google\.com\/spreadsheets\/d\/([^/]+)/i);
+    if (regularMatch) {
+      return `https://docs.google.com/spreadsheets/d/${regularMatch[1]}/export?format=csv&gid=${encodeURIComponent(gid)}`;
+    }
+    return text;
+  }
+
+  async function supervisionPayload(source, visitRows) {
+    const panelGid = source?.metadata?.panelGid;
+    if (!panelGid) return visitRows;
+    try {
+      const panelRows = await P.fetchCsv(googleSheetGidCsvUrl(source.url, panelGid));
+      return { visitRows, panelRows };
+    } catch (error) {
+      console.warn("[PainelURE] Painel oficial de supervisao nao carregado:", error);
+      return { visitRows, panelRows: [] };
+    }
   }
 
   async function refreshSource(key) {

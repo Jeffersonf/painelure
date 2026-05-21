@@ -37,7 +37,20 @@
     return { label: "VERMELHO", tone: "danger" };
   }
 
+  function indicatorFromValue(value, fallbackParts) {
+    const text = String(value || "").trim();
+    const key = P.normalize(text);
+    if (key.includes("verde") || key === "ok" || key.includes("meta_ok")) return { label: "VERDE", tone: "ok" };
+    if (key.includes("vermelho") || key.includes("critico") || key.includes("atras")) return { label: "VERMELHO", tone: "danger" };
+    if (key.includes("amarelo") || key.includes("aguard") || key.includes("aviso") || key.includes("atenc")) {
+      return { label: key.includes("aguard") ? "AGUARDANDO" : "AMARELO", tone: "warn" };
+    }
+    return text ? { label: text.toUpperCase(), tone: "warn" } : indicatorMeta(fallbackParts);
+  }
+
   function currentWeekNumber(stats) {
+    const officialWeek = stats.map(item => Number(item.supervisor?.currentWeek || 0)).find(Boolean);
+    if (officialWeek) return officialWeek;
     const visits = stats.flatMap(item => item.visits || []);
     const dates = visits.map(visit => supervisorVisitDate(visit.date)).filter(Boolean);
     if (dates.length) {
@@ -65,7 +78,7 @@
   }
 
   function supervisorGoalCell(parts) {
-    return `<td class="supervisor-goal-cell"><strong>${parts.done}/${parts.total}</strong><i class="supervisor-sheet-bar" style="--pct:${progressPct(parts)}%"></i></td>`;
+    return `<td class="supervisor-goal-cell"><strong>${parts.done}/${parts.total || "--"}</strong><div class="supervisor-sheet-bar"><span style="width:${Math.max(4, progressPct(parts))}%"></span></div></td>`;
   }
 
   function supervisorVisitRowsForMonth(supervisor) {
@@ -174,17 +187,18 @@
                 </thead>
                 <tbody>
                   ${stats.map((item, index) => {
-                    const week = progressParts(item.supervisor.week, 3);
-                    const month = progressParts(item.supervisor.month, Math.max(3, item.assignedSchools.length * 3));
-                    const weekIndicator = indicatorMeta(week);
-                    const monthIndicator = indicatorMeta(month);
+                    const week = progressParts(item.supervisor.week, Number(item.supervisor.weeklyGoal || 3));
+                    const month = progressParts(item.supervisor.month, Number(item.supervisor.monthlyGoal || Math.max(3, item.assignedSchools.length * 3)));
+                    const rowWeek = Number(item.supervisor.currentWeek || currentWeek) || currentWeek;
+                    const weekIndicator = indicatorFromValue(item.supervisor.weeklyIndicator, week);
+                    const monthIndicator = indicatorFromValue(item.supervisor.monthlyIndicator, month);
                     return `
                     <tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${monthIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
                       <td><strong>${item.supervisor.name}</strong></td>
                       <td>${item.assignedSchools.length}</td>
                       ${supervisorGoalCell(week)}
                       ${supervisorGoalCell(month)}
-                      <td>${currentWeek}</td>
+                      <td>${rowWeek || "--"}</td>
                       <td><span class="diag-pill pill-${weekIndicator.tone}">${weekIndicator.label}</span></td>
                       <td><span class="diag-pill pill-${monthIndicator.tone}">${monthIndicator.label}</span></td>
                       <td><button class="btn btn-g btn-sm supervisor-open-btn" type="button">Abrir</button></td>
@@ -202,9 +216,9 @@
           </div>
           <div class="stack-list supervisor-selector-list">
             ${stats.map((item, index) => {
-              const week = progressParts(item.supervisor.week, 3);
-              const month = progressParts(item.supervisor.month, Math.max(3, item.assignedSchools.length * 3));
-              const monthIndicator = indicatorMeta(month);
+              const week = progressParts(item.supervisor.week, Number(item.supervisor.weeklyGoal || 3));
+              const month = progressParts(item.supervisor.month, Number(item.supervisor.monthlyGoal || Math.max(3, item.assignedSchools.length * 3)));
+              const monthIndicator = indicatorFromValue(item.supervisor.monthlyIndicator, month);
               return `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${monthIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
                 <div class="setechub-head">
                   <div><strong>${item.supervisor.name}</strong><small class="sync-meta">${item.assignedSchools.length} escola(s) | ${month.done}/${month.total} meta mensal | ${week.done}/${week.total} semana</small></div>

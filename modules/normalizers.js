@@ -140,9 +140,27 @@
     }));
   }
 
-  function normalizeSupervisorRows(rows) {
+  function parseVisitCount(value) {
+    const match = String(value || "").match(/\d+/);
+    return match ? Number(match[0]) : 0;
+  }
+
+  function indicatorTone(value) {
+    const text = String(value || "").trim();
+    if (!text) return "aviso";
+    const key = P.normalize(text);
+    if (key.includes("verde")) return "verde";
+    if (key.includes("amarelo")) return "amarelo";
+    if (key.includes("vermelho")) return "vermelho";
+    return text;
+  }
+
+  function normalizeSupervisorRows(payload) {
+    const rows = Array.isArray(payload) ? payload : payload?.visitRows || [];
+    const panelRows = Array.isArray(payload?.panelRows) ? payload.panelRows : [];
     const official = P.seedData?.supervisors || [];
     const stats = new Map();
+    const panelStats = new Map();
     const allVisits = [];
 
     function officialSupervisorName(value) {
@@ -204,6 +222,26 @@
       return Math.ceil(date.getDate() / 7);
     }
 
+    panelRows.forEach(row => {
+      const supervisorName = officialSupervisorName(firstValue(row, ["supervisor", "nome_do_supervisor", "nome"], ""));
+      if (!supervisorName) return;
+      const weeklyGoal = parseVisitCount(firstValue(row, ["meta_semanal"], "")) || 3;
+      const monthlyGoal = parseVisitCount(firstValue(row, ["meta_mensal"], ""));
+      const assignedSchoolCount = parseVisitCount(firstValue(row, ["escolas_atribuidas", "escolas"], ""));
+      panelStats.set(supervisorName, {
+        assignedSchoolCount,
+        weeklyGoal,
+        weeklyGoalLabel: weeklyGoal ? String(weeklyGoal) : "--",
+        monthlyGoal,
+        monthlyGoalLabel: monthlyGoal ? String(monthlyGoal) : "--",
+        currentWeek: parseVisitCount(firstValue(row, ["semana_do_mes", "semana_do_m_s", "semana"], "")),
+        weeklyVisits: parseVisitCount(firstValue(row, ["visitas_na_semana"], "")),
+        monthlyVisits: parseVisitCount(firstValue(row, ["visitas_no_mes", "visitas_no_m_s"], "")),
+        weeklyIndicator: indicatorTone(firstValue(row, ["indicador_semana"], "")),
+        monthlyIndicator: indicatorTone(firstValue(row, ["indicador_mensal", "indicador_mes"], ""))
+      });
+    });
+
     rows.forEach(row => {
       const supervisorName = officialSupervisorName(firstValue(row, ["nome_do_supervisor", "supervisor", "nome"], ""));
       const date = visitDate(firstValue(row, ["data_da_visita", "data", "date"], ""));
@@ -241,16 +279,30 @@
     const source = official.length ? official : Array.from(stats.keys()).map(name => ({ name, schools: 0, assignedSchools: [] }));
     return source.map(supervisor => {
       const item = stats.get(supervisor.name) || { visits: 0, schools: new Set(), weekVisits: new Map(), records: [] };
-      const schoolCount = Number(supervisor.schools || supervisor.assignedSchools?.length || item.schools.size || 0);
-      const monthlyGoal = Math.max(3, schoolCount * 3);
+      const panel = panelStats.get(supervisor.name) || {};
+      const schoolCount = Number(panel.assignedSchoolCount || supervisor.schools || supervisor.assignedSchools?.length || item.schools.size || 0);
+      const monthlyGoal = Number(panel.monthlyGoal || Math.max(3, schoolCount * 3));
       const weekVisits = latestWeek ? (item.weekVisits.get(latestWeek) || 0) : 0;
+      const weeklyGoal = Number(panel.weeklyGoal || 3);
+      const officialWeeklyVisits = Number.isFinite(Number(panel.weeklyVisits)) ? Number(panel.weeklyVisits) : weekVisits;
+      const officialMonthlyVisits = Number.isFinite(Number(panel.monthlyVisits)) ? Number(panel.monthlyVisits) : item.visits;
       return {
         ...supervisor,
         schools: schoolCount,
-        week: `${weekVisits}/3`,
-        month: `${item.visits}/${monthlyGoal}`,
-        pending: Math.max(0, monthlyGoal - item.visits),
-        visits: item.visits,
+        assignedSchoolCount: schoolCount,
+        weeklyGoal,
+        weeklyGoalLabel: panel.weeklyGoalLabel || String(weeklyGoal),
+        monthlyGoal,
+        monthlyGoalLabel: panel.monthlyGoalLabel || String(monthlyGoal),
+        currentWeek: panel.currentWeek || latestWeek || 0,
+        weeklyVisits: officialWeeklyVisits,
+        monthlyVisits: officialMonthlyVisits,
+        weeklyIndicator: panel.weeklyIndicator || indicatorTone(officialWeeklyVisits >= weeklyGoal ? "verde" : officialWeeklyVisits > 0 ? "amarelo" : "vermelho"),
+        monthlyIndicator: panel.monthlyIndicator || indicatorTone(officialMonthlyVisits >= monthlyGoal ? "verde" : officialMonthlyVisits > 0 ? "amarelo" : "vermelho"),
+        week: `${officialWeeklyVisits}/${weeklyGoal}`,
+        month: `${officialMonthlyVisits}/${monthlyGoal}`,
+        pending: Math.max(0, monthlyGoal - officialMonthlyVisits),
+        visits: officialMonthlyVisits,
         visitedSchools: item.schools.size,
         visitRecords: item.records,
         source: "Planilha supervisores - maio de 2026"
