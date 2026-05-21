@@ -64,6 +64,7 @@
       const appData = payload?.data?.appData;
       if (appData) {
         P.setAppData({ ...(P.getAppData() || {}), ...appData });
+        P.applyLoadedSourceData?.();
         P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt || "" };
       }
       return payload;

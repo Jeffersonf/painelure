@@ -73,6 +73,17 @@
     return appData;
   }
 
+  function applyLoadedSourceData(appData = P.getAppData()) {
+    const nextData = { ...(appData || {}) };
+    (P.sourceStatus || []).forEach(result => {
+      if (result?.status === "loaded" && result.data) {
+        applySourceData(nextData, result.key, result.data);
+      }
+    });
+    P.setAppData(nextData);
+    return nextData;
+  }
+
   function sourceResult(key) {
     return (P.sourceStatus || []).find(item => item.key === key) || null;
   }
@@ -127,4 +138,5 @@
   P.ensureSource = ensureSource;
   P.sourceResult = sourceResult;
   P.loadConfiguredSources = loadConfiguredSources;
+  P.applyLoadedSourceData = applyLoadedSourceData;
 })();
