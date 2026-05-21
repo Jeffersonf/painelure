@@ -30,6 +30,32 @@
     return parts.total ? Math.min(100, Math.round((parts.done / parts.total) * 100)) : 0;
   }
 
+  function monthSourceIsSelected() {
+    return (P.selectedMonthKey?.() || "") === (P.sources?.supervision?.monthKey || "");
+  }
+
+  function selectedWeekOneStart() {
+    const selected = P.selectedMonth?.() || { year: 2026, month: 5 };
+    const firstDay = new Date(selected.year, selected.month - 1, 1);
+    const start = new Date(firstDay);
+    start.setDate(firstDay.getDate() - firstDay.getDay());
+    return start;
+  }
+
+  function selectedDateWeek(date) {
+    if (!date) return 0;
+    const start = selectedWeekOneStart();
+    const current = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffDays = Math.floor((current - start) / 86400000);
+    if (diffDays < 0) return 0;
+    return Math.floor(diffDays / 7) + 1;
+  }
+
+  function lastWeekOfSelectedMonth() {
+    const selected = P.selectedMonth?.() || { year: 2026, month: 5 };
+    return selectedDateWeek(new Date(selected.year, selected.month, 0));
+  }
+
   function indicatorMeta(parts) {
     const pct = progressPct(parts);
     if (pct >= 100) return { label: "VERDE", tone: "ok" };
@@ -48,15 +74,15 @@
   }
 
   function currentWeekNumber(stats) {
-    const officialWeek = stats.map(item => Number(item.supervisor?.currentWeek || 0)).find(Boolean);
+    const officialWeek = monthSourceIsSelected() && stats.map(item => Number(item.supervisor?.currentWeek || 0)).find(Boolean);
     if (officialWeek) return officialWeek;
     const visits = stats.flatMap(item => item.visits || []);
     const dates = visits.map(visit => supervisorVisitDate(visit.date)).filter(Boolean);
     if (dates.length) {
       const latest = new Date(Math.max(...dates.map(date => date.getTime())));
-      return Math.max(1, Math.ceil(latest.getDate() / 7));
+      return Math.max(1, selectedDateWeek(latest));
     }
-    return Math.max(1, Math.ceil((new Date()).getDate() / 7));
+    return Math.max(1, lastWeekOfSelectedMonth());
   }
 
   function supervisorSourceFooter() {
@@ -78,6 +104,12 @@
 
   function supervisorGoalCell(parts) {
     return `<td class="supervisor-goal-cell"><strong>${parts.done}/${parts.total || "--"}</strong><div class="supervisor-sheet-bar"><span style="width:${Math.max(4, progressPct(parts))}%"></span></div></td>`;
+  }
+
+  function supervisorIndicatorFromGoal(visits, goal) {
+    if (!Number(goal || 0)) return "aviso";
+    if (Number(visits || 0) >= Number(goal || 0)) return "verde";
+    return Number(visits || 0) > 0 ? "amarelo" : "vermelho";
   }
 
   function supervisorVisitRowsForMonth(supervisor) {
@@ -109,6 +141,40 @@
         openCalls: (P.getAppData().calls || []).filter(call => assignedSchools.some(school => P.normalize(school) === P.normalize(call.school)) && call.status !== "resolvido").length
       };
     }).sort((a, b) => a.supervisor.name.localeCompare(b.supervisor.name));
+  }
+
+  function supervisorSheetMetrics(item, currentWeek) {
+    const supervisor = item.supervisor || {};
+    const officialMonth = monthSourceIsSelected();
+    const weeklyGoal = Number(supervisor.weeklyGoal || 0);
+    const monthlyGoal = Number(supervisor.monthlyGoal || 0);
+    const selectedWeek = officialMonth ? Number(supervisor.currentWeek || currentWeek || 0) : currentWeek;
+    const localWeekVisits = (item.visits || []).filter(visit => selectedDateWeek(supervisorVisitDate(visit.date)) === selectedWeek).length;
+    const weeklyVisits = officialMonth && Number.isFinite(Number(supervisor.weeklyVisits)) ? Number(supervisor.weeklyVisits) : localWeekVisits;
+    const monthlyVisits = officialMonth && Number.isFinite(Number(supervisor.monthlyVisits)) ? Number(supervisor.monthlyVisits) : item.visitCount;
+    const weeklyIndicator = officialMonth ? (supervisor.weeklyIndicator || "aviso") : supervisorIndicatorFromGoal(weeklyVisits, weeklyGoal);
+    const monthlyIndicator = officialMonth ? (supervisor.monthlyIndicator || "aviso") : supervisorIndicatorFromGoal(monthlyVisits, monthlyGoal);
+    return {
+      assigned: Number(supervisor.assignedSchoolCount || item.assignedSchools.length || 0),
+      currentWeek: selectedWeek,
+      week: { done: weeklyVisits, total: weeklyGoal },
+      month: { done: monthlyVisits, total: monthlyGoal },
+      weeklyIndicator: indicatorFromValue(weeklyIndicator, { done: weeklyVisits, total: weeklyGoal }),
+      monthlyIndicator: indicatorFromValue(monthlyIndicator, { done: monthlyVisits, total: monthlyGoal })
+    };
+  }
+
+  function noMonthDataMarkup(stats) {
+    const hasData = stats.some(item => item.visitCount > 0) || (monthSourceIsSelected() && stats.some(item => Number(item.supervisor?.monthlyVisits || 0) > 0));
+    if (hasData) return "";
+    const selected = P.selectedMonthLabel?.() || "mes selecionado";
+    const official = P.sources?.supervision?.monthKey ? P.selectedMonthLabel?.(P.sources.supervision.monthKey) : "";
+    return `
+      <article class="supervisor-no-data-warning" role="status">
+        <strong>Nao ha dados de supervisao para ${selected}</strong>
+        <p>${official ? `A planilha oficial carregada atualmente e de ${official}.` : "Nenhuma fonte mensal oficial esta carregada para este periodo."} Selecione um mes com registros ou sincronize uma fonte oficial deste mes.</p>
+      </article>
+    `;
   }
 
   function supervisionAprilWarningMarkup() {
@@ -148,6 +214,7 @@
     }
     const stats = supervisorStatsForMonth(supervisors);
     const currentWeek = currentWeekNumber(stats);
+    const noDataMarkup = noMonthDataMarkup(stats);
     host.innerHTML = `
       <section class="supervision-original-shell">
         ${supervisionAprilWarningMarkup()}
@@ -160,6 +227,7 @@
             </div>
           </div>
           <div class="supervisor-sheet-panel">
+            ${noDataMarkup}
             <div class="supervisor-sheet-table-wrap">
               <table class="supervisor-sheet-table">
                 <thead>
@@ -176,20 +244,16 @@
                 </thead>
                 <tbody>
                   ${stats.map((item, index) => {
-                    const week = progressParts(item.supervisor.week, Number(item.supervisor.weeklyGoal || 3));
-                    const month = progressParts(item.supervisor.month, Number(item.supervisor.monthlyGoal || Math.max(3, item.assignedSchools.length * 3)));
-                    const rowWeek = Number(item.supervisor.currentWeek || currentWeek) || currentWeek;
-                    const weekIndicator = indicatorFromValue(item.supervisor.weeklyIndicator, week);
-                    const monthIndicator = indicatorFromValue(item.supervisor.monthlyIndicator, month);
+                    const metrics = supervisorSheetMetrics(item, currentWeek);
                     return `
-                    <tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${monthIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
+                    <tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${metrics.monthlyIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
                       <td><strong>${item.supervisor.name}</strong></td>
-                      <td>${item.assignedSchools.length}</td>
-                      ${supervisorGoalCell(week)}
-                      ${supervisorGoalCell(month)}
-                      <td>${rowWeek || "--"}</td>
-                      <td><span class="diag-pill pill-${weekIndicator.tone}">${weekIndicator.label}</span></td>
-                      <td><span class="diag-pill pill-${monthIndicator.tone}">${monthIndicator.label}</span></td>
+                      <td>${metrics.assigned || item.assignedSchools.length}</td>
+                      ${supervisorGoalCell(metrics.week)}
+                      ${supervisorGoalCell(metrics.month)}
+                      <td>${metrics.currentWeek || "--"}</td>
+                      <td><span class="diag-pill pill-${metrics.weeklyIndicator.tone}">${metrics.weeklyIndicator.label}</span></td>
+                      <td><span class="diag-pill pill-${metrics.monthlyIndicator.tone}">${metrics.monthlyIndicator.label}</span></td>
                       <td><button class="btn btn-g btn-sm supervisor-open-btn" type="button">Abrir</button></td>
                     </tr>`;
                   }).join("")}
@@ -205,13 +269,11 @@
           </div>
           <div class="stack-list supervisor-selector-list">
             ${stats.map((item, index) => {
-              const week = progressParts(item.supervisor.week, Number(item.supervisor.weeklyGoal || 3));
-              const month = progressParts(item.supervisor.month, Number(item.supervisor.monthlyGoal || Math.max(3, item.assignedSchools.length * 3)));
-              const monthIndicator = indicatorFromValue(item.supervisor.monthlyIndicator, month);
-              return `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${monthIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
+              const metrics = supervisorSheetMetrics(item, currentWeek);
+              return `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${metrics.monthlyIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
                 <div class="setechub-head">
-                  <div><strong>${item.supervisor.name}</strong><small class="sync-meta">${item.assignedSchools.length} escola(s) | ${month.done}/${month.total} meta mensal | ${week.done}/${week.total} semana</small></div>
-                  <span class="diag-pill pill-${monthIndicator.tone}">${monthIndicator.label}</span>
+                  <div><strong>${item.supervisor.name}</strong><small class="sync-meta">${metrics.assigned || item.assignedSchools.length} escola(s) | ${metrics.month.done}/${metrics.month.total || "--"} meta mensal | ${metrics.week.done}/${metrics.week.total || "--"} semana</small></div>
+                  <span class="diag-pill pill-${metrics.monthlyIndicator.tone}">${metrics.monthlyIndicator.label}</span>
                 </div>
                 <div class="supervisor-list-kpis">
                   <div><span>Escolas</span><strong>${item.assignedSchools.length}</strong></div>

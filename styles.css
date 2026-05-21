@@ -3690,6 +3690,41 @@ select:focus-visible {
   line-height: 1.45;
 }
 
+.supervisor-no-data-warning {
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--warn) 52%, var(--bd));
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--warn) 16%, transparent), transparent 82%),
+    color-mix(in srgb, var(--sf) 92%, black);
+  box-shadow: inset 5px 0 0 var(--warn);
+}
+
+.supervisor-no-data-warning strong,
+.supervisor-no-data-warning p {
+  display: block;
+}
+
+.supervisor-no-data-warning strong {
+  color: #ffeab0;
+  font-size: 15px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.supervisor-no-data-warning p {
+  margin: 7px 0 0;
+  max-width: 88ch;
+  color: var(--tx2);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.supervisor-no-data-warning + .supervisor-sheet-table-wrap {
+  display: none;
+}
+
 .supervisor-original-box-head strong {
   font-size: 16px;
   line-height: 1.25;
