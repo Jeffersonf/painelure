@@ -21,6 +21,49 @@
     return done;
   }
 
+  function progressParts(text, fallbackTotal = 0) {
+    const [done, total] = String(text || `0/${fallbackTotal}`).split("/").map(value => Number(value) || 0);
+    return { done, total: total || fallbackTotal || 0 };
+  }
+
+  function progressPct(parts) {
+    return parts.total ? Math.min(100, Math.round((parts.done / parts.total) * 100)) : 0;
+  }
+
+  function indicatorMeta(parts) {
+    const pct = progressPct(parts);
+    if (pct >= 100) return { label: "VERDE", tone: "ok" };
+    if (pct > 0) return { label: "AMARELO", tone: "warn" };
+    return { label: "VERMELHO", tone: "danger" };
+  }
+
+  function currentWeekNumber(stats) {
+    const visits = stats.flatMap(item => item.visits || []);
+    const dates = visits.map(visit => supervisorVisitDate(visit.date)).filter(Boolean);
+    if (dates.length) {
+      const latest = new Date(Math.max(...dates.map(date => date.getTime())));
+      return Math.max(1, Math.ceil(latest.getDate() / 7));
+    }
+    return Math.max(1, Math.ceil((new Date()).getDate() / 7));
+  }
+
+  function supervisorSourceFooter() {
+    const selected = P.selectedMonthLabel?.() || "mes selecionado";
+    const source = P.sources?.supervision?.label || "planilha oficial de supervisao";
+    const updated = new Date().toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).replace(",", "");
+    return `
+      <div class="supervisor-sheet-foot">
+        <span>Fonte: ${source.toLowerCase()} | Mes exibido: ${selected}</span>
+        <span>Atualizada em ${updated}</span>
+      </div>
+    `;
+  }
+
   function supervisorVisitRowsForMonth(supervisor) {
     const selected = P.selectedMonthKey?.() || "";
     const records = supervisor.visitRecords || [];
@@ -88,12 +131,13 @@
       return;
     }
     const stats = supervisorStatsForMonth(supervisors);
+    const currentWeek = currentWeekNumber(stats);
     host.innerHTML = `
       <section class="supervision-original-shell">
         ${supervisionAprilWarningMarkup()}
         <article class="box" id="painelSupervisor">
           <div class="box-head supervisor-original-box-head">
-            <div><strong>Painel de supervisores</strong><small>Resumo mensal das visitas, metas e indicadores da planilha oficial.</small></div>
+            <div><strong>🧭 Painel de supervisores</strong><small>Resumo mensal das visitas, metas e indicadores da planilha oficial.</small></div>
             <div class="mini-actions">
               <button class="btn btn-p btn-sm" id="syncSupervisorSourcesBtn" type="button">Atualizar planilha</button>
               <button class="btn btn-g btn-sm" id="supervisorFullscreenBtn" type="button">Apresentar</button>
@@ -106,35 +150,36 @@
                   <tr>
                     <th>Supervisor</th>
                     <th>Escolas</th>
-                    <th>Visitas</th>
-                    <th>Cobertura</th>
+                    <th>Meta semanal</th>
+                    <th>Meta mensal</th>
+                    <th>Semana</th>
+                    <th>Indicador semana</th>
+                    <th>Indicador mes</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${stats.map((item, index) => `
-                    <tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${item.coverage >= 80 ? "ok" : "warn"}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
+                  ${stats.map((item, index) => {
+                    const week = progressParts(item.supervisor.week, 3);
+                    const month = progressParts(item.supervisor.month, Math.max(3, item.assignedSchools.length * 3));
+                    const weekIndicator = indicatorMeta(week);
+                    const monthIndicator = indicatorMeta(month);
+                    return `
+                    <tr class="supervisor-sheet-row" data-supervisor-index="${index}" data-status="${monthIndicator.tone}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
                       <td><strong>${item.supervisor.name}</strong></td>
                       <td>${item.assignedSchools.length}</td>
-                      <td>${item.visitCount}</td>
-                      <td><span class="diag-pill ${item.coverage >= 80 ? "pill-ok" : "pill-warn"}">${item.coverage}%</span></td>
-                      <td><button class="btn btn-g btn-sm" type="button">Abrir</button></td>
-                    </tr>`
-                  ).join("")}
+                      <td class="supervisor-goal-cell"><strong>${week.done}/${week.total}</strong><i class="supervisor-sheet-bar"><span style="width:${progressPct(week)}%"></span></i></td>
+                      <td class="supervisor-goal-cell"><strong>${month.done}/${month.total}</strong><i class="supervisor-sheet-bar"><span style="width:${progressPct(month)}%"></span></i></td>
+                      <td>${currentWeek}</td>
+                      <td><span class="diag-pill pill-${weekIndicator.tone}">${weekIndicator.label}</span></td>
+                      <td><span class="diag-pill pill-${monthIndicator.tone}">${monthIndicator.label}</span></td>
+                      <td><button class="btn btn-g btn-sm supervisor-open-btn" type="button">Abrir</button></td>
+                    </tr>`;
+                  }).join("")}
                 </tbody>
               </table>
             </div>
-          </div>
-        </article>
-        <article class="box">
-          <div class="box-head supervisor-original-box-head">
-            <div><strong>Supervisores</strong><small>Resumo, meta e sinal de pendencia sem repetir os dados completos.</small></div>
-          </div>
-          <div class="stack-list supervisor-selector-list">
-            ${stats.map((item, index) => `<button class="setechub-item setechub-clickable supervisor-list-card" type="button" data-supervisor-selector="${index}" data-status="${item.coverage >= 80 ? "ok" : "warn"}" data-search="${P.searchText([item.supervisor.name, item.supervisor.email, item.supervisor.phone])}">
-              <strong>${item.supervisor.name}</strong>
-              <div class="sync-meta">${item.assignedSchools.length} escola(s) | ${item.visitCount} visita(s)</div>
-            </button>`).join("") || `<div class="sync-empty">Nenhum supervisor cadastrado.</div>`}
+            ${supervisorSourceFooter()}
           </div>
         </article>
       </section>`;
@@ -154,9 +199,9 @@
     host.querySelector("#supervisorFullscreenBtn")?.addEventListener("click", () => {
       P.$("#painelSupervisor")?.requestFullscreen?.();
     });
-    host.querySelectorAll("[data-supervisor-index], [data-supervisor-selector]").forEach(button => {
+    host.querySelectorAll("[data-supervisor-index]").forEach(button => {
       button.addEventListener("click", () => {
-        const index = Number(button.dataset.supervisorIndex || button.dataset.supervisorSelector);
+        const index = Number(button.dataset.supervisorIndex);
         P.focusSupervisor?.(stats[index].supervisor.name);
       });
     });
