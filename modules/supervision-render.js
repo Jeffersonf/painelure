@@ -70,7 +70,8 @@
     if (key.includes("vermelho") || key.includes("critico") || key.includes("atras")) return { label: "VERMELHO", tone: "danger" };
     if (key.includes("amarelo")) return { label: "AMARELO", tone: "warn" };
     if (key.includes("aviso") || key.includes("atenc")) return { label: "AVISO!", tone: "warn" };
-    return text ? { label: text.replace(/_/g, " ").toUpperCase(), tone: "info" } : indicatorMeta(fallbackParts);
+    const cleanLabel = text.replace(/_/g, " ").replace(/[^\p{L}\p{N}\s!]/gu, "").replace(/\s+/g, " ").trim().toUpperCase();
+    return cleanLabel ? { label: cleanLabel, tone: "info" } : indicatorMeta(fallbackParts);
   }
 
   function currentWeekNumber(stats) {
@@ -230,6 +231,16 @@
             ${noDataMarkup}
             <div class="supervisor-sheet-table-wrap">
               <table class="supervisor-sheet-table">
+                <colgroup>
+                  <col class="supervisor-col-name">
+                  <col class="supervisor-col-schools">
+                  <col class="supervisor-col-goal">
+                  <col class="supervisor-col-goal">
+                  <col class="supervisor-col-week">
+                  <col class="supervisor-col-indicator">
+                  <col class="supervisor-col-indicator">
+                  <col class="supervisor-col-action">
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Supervisor</th>

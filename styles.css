@@ -3751,10 +3751,17 @@ select:focus-visible {
 
 .supervisor-sheet-table {
   width: 100%;
-  min-width: 880px;
+  min-width: 1180px;
   border-collapse: collapse;
-  table-layout: auto;
+  table-layout: fixed;
 }
+
+.supervisor-col-name { width: 32%; }
+.supervisor-col-schools { width: 7%; }
+.supervisor-col-goal { width: 13%; }
+.supervisor-col-week { width: 7%; }
+.supervisor-col-indicator { width: 16%; }
+.supervisor-col-action { width: 7%; }
 
 .supervisor-sheet-table th,
 .supervisor-sheet-table td {
@@ -3865,7 +3872,7 @@ select:focus-visible {
 .supervisor-sheet-table th:nth-child(7),
 .supervisor-sheet-table td:nth-child(6),
 .supervisor-sheet-table td:nth-child(7) {
-  width: 220px;
+  width: 16%;
 }
 
 .supervisor-sheet-table td:nth-child(6),
@@ -3876,8 +3883,9 @@ select:focus-visible {
 }
 
 .supervisor-sheet-table .diag-pill {
-  width: 190px;
-  min-width: 190px;
+  width: 100%;
+  max-width: 190px;
+  min-width: 0;
   height: 30px;
   min-height: 30px;
   margin: 0 auto;
