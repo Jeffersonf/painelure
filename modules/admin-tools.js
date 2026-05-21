@@ -187,6 +187,17 @@
     }, 0);
   }
 
+  function authErrorIsInvalidSession(error) {
+    return /HTTP 401|HTTP 403|invalido|invalid|unauthorized|forbidden/i.test(String(error?.message || error || ""));
+  }
+
+  function activateLocalSession(role = currentRole()) {
+    setAuthenticated(true);
+    applyRole(role || P.activeUser?.()?.role || "Administrador");
+    applyUserAvatar();
+    P.renderApp?.();
+  }
+
   async function logoutOnline() {
     if (backendToken) await P.logoutBackend?.(backendToken).catch(() => {});
     backendToken = "";
@@ -234,7 +245,7 @@
     const result = await P.loginBackend?.({ username, password });
     if (!result?.token || !result?.user) throw new Error("Login nao retornou usuario.");
     activateOnlineUser(result.token, result.user);
-    await loadScopedBackendData().catch(() => {});
+    loadScopedBackendData().catch(() => {});
     if (result.user.preferences?.forcePinChange) {
       showPinChange(true);
       showLoginStatus("Troque o PIN inicial para continuar.");
@@ -277,14 +288,33 @@
     if (!backendToken || !P.loadBackendUser) {
       document.documentElement.classList.remove("auth-pending");
       if ((location.hostname === "localhost" || location.hostname === "127.0.0.1") && location.port === "4173") {
-        setAuthenticated(true);
         localStorage.setItem(ROLE_KEY, "Administrador");
-        applyRole("Administrador");
-        applyUserAvatar();
-        await P.loadBackendData?.("").catch(() => null);
-        P.renderApp?.();
+        activateLocalSession("Administrador");
       }
       return null;
+    }
+    const cachedUser = P.onlineUser?.();
+    if (cachedUser) {
+      activateLocalSession(cachedUser.role || currentRole());
+      document.documentElement.classList.remove("auth-pending");
+      P.loadBackendUser(backendToken)
+        .then(payload => {
+          const user = payload?.user || cachedUser;
+          P.setOnlineUser?.(user);
+          localStorage.setItem(ROLE_KEY, user.role || "Consulta");
+          applyRole(user.role || "Consulta");
+          showPinChange(Boolean(user.preferences?.forcePinChange));
+          loadScopedBackendData().catch(() => {});
+        })
+        .catch(error => {
+          if (!authErrorIsInvalidSession(error)) return;
+          backendToken = "";
+          localStorage.removeItem(TOKEN_KEY);
+          sessionStorage.removeItem(TOKEN_KEY);
+          P.clearOnlineUser?.();
+          setAuthenticated(false);
+        });
+      return cachedUser;
     }
     try {
       const payload = await P.loadBackendUser(backendToken);
@@ -302,11 +332,15 @@
         applyUserAvatar();
         P.renderPage?.("user", { force: true });
         showPinChange(Boolean(user.preferences?.forcePinChange));
-        await loadScopedBackendData().catch(() => {});
+        loadScopedBackendData().catch(() => {});
         if (!user.preferences?.forcePinChange) P.renderApp?.();
       }
       return user || null;
     } catch (error) {
+      if (!authErrorIsInvalidSession(error)) {
+        activateLocalSession(P.activeUser?.()?.role || localStorage.getItem(ROLE_KEY) || "Administrador");
+        return null;
+      }
       backendToken = "";
       localStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(TOKEN_KEY);

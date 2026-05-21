@@ -73,6 +73,10 @@
 
     for (const key of Object.keys(P.sources || {})) {
       try {
+        if (P.sources[key]?.metadata?.autoLoad === false) {
+          results.push({ key, status: "skipped", rows: [], data: null, reason: "manual" });
+          continue;
+        }
         const result = await loadSource(key);
         results.push(result);
         if (result.status === "loaded" && result.data) {

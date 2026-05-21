@@ -150,6 +150,16 @@
           <div class="supervisor-sheet-panel">
             <div class="supervisor-sheet-table-wrap">
               <table class="supervisor-sheet-table">
+                <colgroup>
+                  <col class="supervisor-col-name">
+                  <col class="supervisor-col-schools">
+                  <col class="supervisor-col-goal">
+                  <col class="supervisor-col-goal">
+                  <col class="supervisor-col-week">
+                  <col class="supervisor-col-indicator">
+                  <col class="supervisor-col-indicator">
+                  <col class="supervisor-col-action">
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Supervisor</th>

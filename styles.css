@@ -3716,14 +3716,21 @@ select:focus-visible {
 
 .supervisor-sheet-table {
   width: 100%;
-  min-width: 1120px;
+  min-width: 1180px;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
+.supervisor-col-name { width: 32%; }
+.supervisor-col-schools { width: 7%; }
+.supervisor-col-goal { width: 13%; }
+.supervisor-col-week { width: 7%; }
+.supervisor-col-indicator { width: 16%; }
+.supervisor-col-action { width: 7%; }
+
 .supervisor-sheet-table th,
 .supervisor-sheet-table td {
-  padding: 14px 15px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--bd);
   color: var(--tx);
   font-size: 14px;
@@ -3776,7 +3783,7 @@ select:focus-visible {
 }
 
 .supervisor-sheet-bar {
-  width: 128px;
+  width: min(128px, 100%);
   max-width: 100%;
   height: 7px;
   margin-top: 7px;
@@ -3831,7 +3838,7 @@ select:focus-visible {
 .supervisor-sheet-table th:nth-child(7),
 .supervisor-sheet-table td:nth-child(6),
 .supervisor-sheet-table td:nth-child(7) {
-  width: 220px;
+  width: auto;
 }
 
 .supervisor-sheet-table td:nth-child(6),
@@ -3842,8 +3849,8 @@ select:focus-visible {
 }
 
 .supervisor-sheet-table .diag-pill {
-  width: 190px;
-  min-width: 190px;
+  width: min(190px, 100%);
+  min-width: 0;
   height: 30px;
   min-height: 30px;
   margin: 0 auto;
@@ -3852,29 +3859,14 @@ select:focus-visible {
   box-shadow: 0 10px 22px rgba(0,0,0,.24);
 }
 
-.supervisor-sheet-table th:nth-child(1),
-.supervisor-sheet-table td:nth-child(1) {
-  width: 31%;
-}
-
 .supervisor-sheet-table th:nth-child(2),
 .supervisor-sheet-table td:nth-child(2),
 .supervisor-sheet-table th:nth-child(5),
 .supervisor-sheet-table td:nth-child(5) {
-  width: 72px;
   text-align: center;
 }
 
-.supervisor-sheet-table th:nth-child(3),
-.supervisor-sheet-table th:nth-child(4),
-.supervisor-sheet-table td:nth-child(3),
-.supervisor-sheet-table td:nth-child(4) {
-  width: 155px;
-}
-
-.supervisor-sheet-table th:nth-child(8),
 .supervisor-sheet-table td:nth-child(8) {
-  width: 82px;
   text-align: center;
 }
 
