@@ -11,6 +11,37 @@
     return P.pageMeta?.(page)?.label || page;
   }
 
+  function showToast(title, message = "", tone = "info", options = {}) {
+    let stack = P.$("#toastStack");
+    if (!stack) {
+      stack = document.createElement("div");
+      stack.id = "toastStack";
+      stack.className = "toast-stack";
+      stack.setAttribute("aria-live", "polite");
+      document.body.appendChild(stack);
+    }
+    const toast = document.createElement("div");
+    toast.className = `app-toast toast-${tone || "info"}`;
+    toast.setAttribute("role", tone === "danger" ? "alert" : "status");
+    toast.innerHTML = `<strong>${title || "Aviso"}</strong>${message ? `<span>${message}</span>` : ""}`;
+    stack.appendChild(toast);
+    window.setTimeout(() => toast.classList.add("show"), 20);
+    const delay = Number(options.delay || 4200);
+    window.setTimeout(() => {
+      toast.classList.remove("show");
+      window.setTimeout(() => toast.remove(), 180);
+    }, delay);
+    return toast;
+  }
+
+  function updateGlobalPageHeading(id) {
+    const meta = P.pageMeta?.(id) || {};
+    const title = P.$("#globalPageTitle");
+    const note = P.$("#globalPageNote");
+    if (title) title.textContent = meta.label || pageLabel(id);
+    if (note) note.textContent = meta.note || "Painel operacional da URE.";
+  }
+
   function accessDeniedMessage(id) {
     const role = P.currentRole?.() || "Consulta";
     const available = P.allowedPageLabels?.(role) || (P.roleAccess?.(role) || []).map(page => pageLabel(page)).join(", ");
@@ -44,6 +75,7 @@
     P.renderPage?.(id);
     P.$all(".page").forEach(page => page.classList.toggle("active", page.id === pageId(id)));
     P.$all("[data-page]").forEach(btn => btn.classList.toggle("active", btn.dataset.page === id));
+    updateGlobalPageHeading(id);
     P.applyAccessState?.();
     history.replaceState(null, "", `#${id}`);
     P.clearSearch();
@@ -109,6 +141,8 @@
 
   P.setPage = setPage;
   P.showAccessDenied = showAccessDenied;
+  P.showToast = showToast;
+  P.updateGlobalPageHeading = updateGlobalPageHeading;
   P.bindNavigation = bindNavigation;
   P.restoreInitialPage = restoreInitialPage;
 })();

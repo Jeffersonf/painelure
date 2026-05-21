@@ -214,13 +214,13 @@ select:focus-visible {
   position: relative;
   display: grid;
   gap: 0;
-  padding: 38px 34px;
-  border: 1px solid color-mix(in srgb, var(--bd) 78%, transparent);
-  border-radius: 18px;
+  padding: 34px 32px 30px;
+  border: 1px solid color-mix(in srgb, var(--bd) 70%, transparent);
+  border-radius: 14px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .018)),
     color-mix(in srgb, var(--sf) 92%, transparent);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, .34);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .32);
   overflow: hidden;
 }
 
@@ -294,8 +294,8 @@ select:focus-visible {
 
 .login-card label {
   display: grid;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: 7px;
+  margin-bottom: 12px;
 }
 
 .login-card label span {
@@ -306,12 +306,12 @@ select:focus-visible {
 }
 
 .login-card input {
-  min-height: 48px;
-  border: 1px solid color-mix(in srgb, var(--bd) 84%, transparent);
-  border-radius: 10px;
-  background: var(--sf2);
+  min-height: 44px;
+  border: 1px solid color-mix(in srgb, var(--bd) 72%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--sf2) 76%, #000 24%);
   color: var(--tx);
-  padding: 0 14px;
+  padding: 0 13px;
   outline: none;
   font-size: 14px;
   font-weight: 800;
@@ -320,7 +320,7 @@ select:focus-visible {
 
 .login-card input:focus {
   border-color: color-mix(in srgb, var(--ac2) 38%, var(--bd));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ac2) 10%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac2) 13%, transparent);
 }
 
 .login-card input:-webkit-autofill,
@@ -328,7 +328,7 @@ select:focus-visible {
 .login-card input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--tx);
   caret-color: var(--ac);
-  box-shadow: 0 0 0 1000px var(--sf2) inset;
+  box-shadow: 0 0 0 1000px color-mix(in srgb, var(--sf2) 76%, #000 24%) inset;
   transition: background-color 9999s ease-out 0s;
 }
 
@@ -703,6 +703,63 @@ select:focus-visible {
   color: var(--tx2);
   font-size: 13px;
   line-height: 1.45;
+}
+
+.toast-stack {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 9999;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.app-toast {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--bd);
+  border-left: 4px solid var(--ac2);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .018)),
+    color-mix(in srgb, var(--sf) 94%, transparent);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .28);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.app-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.app-toast strong {
+  color: var(--tx);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.app-toast span {
+  color: var(--tx2);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.app-toast.toast-ok {
+  border-left-color: var(--ok);
+}
+
+.app-toast.toast-warn {
+  border-left-color: var(--warn);
+}
+
+.app-toast.toast-danger {
+  border-left-color: var(--danger);
 }
 
 .sidebar-card {
@@ -1099,6 +1156,21 @@ select:focus-visible {
   font-size: 13px;
 }
 
+#page-dashboard > .page-header,
+.page:not(#page-school-detail):not(#page-supervisor-detail) > .page-header:not(:has(.header-actions)) {
+  display: none;
+}
+
+.page:not(#page-school-detail):not(#page-supervisor-detail) > .page-header > div:first-child {
+  display: none;
+}
+
+.page:not(#page-school-detail):not(#page-supervisor-detail) > .page-header.compact {
+  justify-content: flex-end;
+  margin-top: -2px;
+  margin-bottom: 12px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -1152,12 +1224,38 @@ select:focus-visible {
   min-height: 54px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 14px;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+.global-page-heading {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.global-page-heading strong {
+  overflow: hidden;
+  color: var(--tx);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 850;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.global-page-heading small {
+  overflow: hidden;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .notice-card {
@@ -5148,6 +5246,24 @@ select:focus-visible {
     padding: 18px 14px 104px;
   }
 
+  .global-month-bar {
+    min-height: auto;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .global-month-bar .month-switcher {
+    width: 100%;
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .global-page-heading strong,
+  .global-page-heading small {
+    white-space: normal;
+  }
+
   .mobile-nav {
     position: fixed;
     left: 0;
@@ -5356,6 +5472,12 @@ select:focus-visible {
   border-color: rgba(28, 39, 62, .14);
   color: var(--tx);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72);
+}
+
+[data-theme="light"] .login-card input {
+  background: #f7f9fc;
+  border-color: rgba(28, 39, 62, .18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82);
 }
 
 .page-header h1 {

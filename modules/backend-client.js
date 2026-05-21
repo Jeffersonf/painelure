@@ -90,7 +90,7 @@
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(credentials || {}),
-      timeoutMs: 15000
+      timeoutMs: 8000
     });
   }
 

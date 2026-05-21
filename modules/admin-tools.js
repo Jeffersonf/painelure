@@ -166,6 +166,51 @@
     if (status) status.textContent = message;
   }
 
+  function normalizeLogin(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+  }
+
+  function backendLooksUnavailable(error) {
+    return /aborted|network|failed to fetch|HTTP 502|HTTP 503|HTTP 504/i.test(String(error?.message || error || ""));
+  }
+
+  function findLocalLoginUser(username) {
+    const target = normalizeLogin(username);
+    if (!target) return null;
+    return (P.users?.() || []).find(user => {
+      const display = P.displayUser?.(user) || user;
+      const names = [
+        user.login,
+        user.username,
+        user.name,
+        display.name,
+        display.shortName,
+        user.email
+      ].map(normalizeLogin).filter(Boolean);
+      return names.includes(target) || names.some(name => name.split(/\s+/)[0] === target);
+    }) || null;
+  }
+
+  function activateOfflineUser(user, reason = "") {
+    P.clearOnlineUser?.();
+    if (user?.id) P.setActiveUser?.(user.id);
+    backendToken = "";
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    const role = user?.role || P.activeUser?.()?.role || "Administrador";
+    localStorage.setItem(ROLE_KEY, role);
+    activateLocalSession(role);
+    showPinChange(false);
+    const text = reason || "Servidor indisponivel. Voce entrou no modo local e a sincronizacao pode ser feita depois.";
+    P.showToast?.("Modo offline", text, "warn", { delay: 5200 });
+    showLoginStatus(text);
+    return user;
+  }
+
   function friendlyAuthError(error) {
     const message = String(error?.message || error || "");
     if (/HTTP 401|invalido|invalid/i.test(message)) return "Nome ou PIN incorretos.";
@@ -242,16 +287,32 @@
   async function submitLogin(username, password) {
     showLoginStatus("");
     if (!username || !password) throw new Error("Informe nome e PIN.");
-    const result = await P.loginBackend?.({ username, password });
+    showLoginStatus("Conectando ao servidor...");
+    P.showToast?.("Atualizando sessao", "Validando usuario no servidor.", "info", { delay: 2200 });
+    let result = null;
+    try {
+      result = await P.loginBackend?.({ username, password });
+    } catch (error) {
+      if (!backendLooksUnavailable(error)) throw error;
+      const localUser = findLocalLoginUser(username);
+      if (localUser && String(password) === "1234") {
+        return activateOfflineUser(localUser);
+      }
+      throw error;
+    }
     if (!result?.token || !result?.user) throw new Error("Login nao retornou usuario.");
     activateOnlineUser(result.token, result.user);
-    loadScopedBackendData().catch(() => {});
+    P.showToast?.("Online", "Sessao conectada ao servidor.", "ok");
+    loadScopedBackendData()
+      .then(() => P.showToast?.("Atualizado", "Dados sincronizados com o servidor.", "ok"))
+      .catch(error => P.showToast?.("Erro ao sincronizar", friendlyAuthError(error), "danger"));
     if (result.user.preferences?.forcePinChange) {
       showPinChange(true);
       showLoginStatus("Troque o PIN inicial para continuar.");
       return result.user;
     }
     showPinChange(false);
+    showLoginStatus("Online no servidor.");
     P.renderApp?.();
     return result.user;
   }

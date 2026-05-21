@@ -1387,7 +1387,7 @@
                 : P.searchText([item.vehicle, item.date, item.time]);
               return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${search}">
                 <span class="car-card-icon">&#127979;</span>
-                <span class="car-route"><strong>${details ? (item.destination || "Destino nao informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.date} | ${item.time || "--:--"} | Solicitacao ${item.requestId || "--"}` : `${item.time || "Horario a definir"}`}</small></span>
+                <span class="car-route"><strong>${details ? (item.destination || "Destino nao informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.time || "--:--"} | Solicitacao ${item.requestId || "--"}` : `${item.time || "Horario a definir"}`}</small></span>
                 <span class="car-requester"><strong>${details ? (item.requester || "Setor nao informado") : "Veiculo reservado"}</strong><small>${details ? `${item.vehicle} | ${item.driver || "Condutor a definir"}` : "Detalhes restritos"}</small></span>
                 <em class="status-pill ${tone}">${item.status || "pendente"}</em>
               </button>`;
