@@ -5,6 +5,25 @@
     return `page-${id}`;
   }
 
+  const PAGE_SLUGS = {
+    dashboard: "painel",
+    schools: "escolas",
+    network: "redes",
+    inventory: "inventario",
+    supervision: "supervisao",
+    contacts: "contatos",
+    calendar: "calendario",
+    reports: "relatorios",
+    cars: "carros",
+    ctc: "ctc",
+    calls: "chamados",
+    admin: "admin",
+    user: "conta",
+    profiles: "perfis",
+    quality: "qualidade"
+  };
+  const PAGE_BY_SLUG = Object.fromEntries(Object.entries(PAGE_SLUGS).map(([page, slug]) => [slug, page]));
+
   let previousPage = "dashboard";
 
   function routeBase() {
@@ -17,15 +36,17 @@
 
   function routePage() {
     const hashPage = location.hash.replace("#", "");
-    const queryPage = new URLSearchParams(location.search).get("tela") || "";
+    const params = new URLSearchParams(location.search);
+    const queryPage = params.get("categoria") || params.get("tela") || "";
+    const normalizedQueryPage = PAGE_BY_SLUG[queryPage] || queryPage;
     const base = routeBase();
     let path = location.pathname;
     if (base && path.toLowerCase().startsWith(base.toLowerCase())) {
       path = path.slice(base.length);
     }
     const segment = path.replace(/^\/+|\/+$/g, "").split("/")[0];
-    const page = segment === "acesso-admin" ? "dashboard" : segment;
-    if (queryPage && P.$(`#${pageId(queryPage)}`)) return queryPage;
+    const page = segment === "acesso-admin" ? "dashboard" : (PAGE_BY_SLUG[segment] || segment);
+    if (normalizedQueryPage && P.$(`#${pageId(normalizedQueryPage)}`)) return normalizedQueryPage;
     if (page && P.$(`#${pageId(page)}`)) return page;
     if (hashPage && P.$(`#${pageId(hashPage)}`)) return hashPage;
     return "";
@@ -34,11 +55,15 @@
   function pageRoute(id) {
     const page = id || "dashboard";
     const url = new URL(location.href);
+    const base = routeBase();
     url.hash = "";
+    if (base) url.pathname = `${base}/`;
     if (page === "dashboard") {
       url.searchParams.delete("tela");
+      url.searchParams.delete("categoria");
     } else {
-      url.searchParams.set("tela", page);
+      url.searchParams.delete("tela");
+      url.searchParams.set("categoria", PAGE_SLUGS[page] || page);
     }
     return `${url.pathname}${url.search}`;
   }
@@ -81,7 +106,7 @@
   function accessDeniedMessage(id) {
     const role = P.currentRole?.() || "Consulta";
     const available = P.allowedPageLabels?.(role) || (P.roleAccess?.(role) || []).map(page => pageLabel(page)).join(", ");
-    return `Acesso negado a ${pageLabel(id)}. Categorias disponiveis para seu perfil: ${available || "nenhuma categoria liberada"}.`;
+    return `Acesso negado a ${pageLabel(id)}. Categorias disponíveis para seu perfil: ${available || "nenhuma categoria liberada"}.`;
   }
 
   function showAccessDenied(id) {

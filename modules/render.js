@@ -694,7 +694,11 @@
       return;
     }
     renderSchoolCityFilter(schools);
-    const sorted = [...schools].sort((a, b) => a.city.localeCompare(b.city) || a.name.localeCompare(b.name));
+    const safeSchools = schools.filter(school => school && school.name);
+    const sorted = [...safeSchools].sort((a, b) =>
+      String(a.city || "").localeCompare(String(b.city || ""))
+      || String(a.name || "").localeCompare(String(b.name || ""))
+    );
     grid.innerHTML = `
       <section class="schools-board">
         ${sorted.map(school => `
