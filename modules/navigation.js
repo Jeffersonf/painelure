@@ -17,6 +17,7 @@
 
   function routePage() {
     const hashPage = location.hash.replace("#", "");
+    const queryPage = new URLSearchParams(location.search).get("tela") || "";
     const base = routeBase();
     let path = location.pathname;
     if (base && path.toLowerCase().startsWith(base.toLowerCase())) {
@@ -24,15 +25,22 @@
     }
     const segment = path.replace(/^\/+|\/+$/g, "").split("/")[0];
     const page = segment === "acesso-admin" ? "dashboard" : segment;
+    if (queryPage && P.$(`#${pageId(queryPage)}`)) return queryPage;
     if (page && P.$(`#${pageId(page)}`)) return page;
     if (hashPage && P.$(`#${pageId(hashPage)}`)) return hashPage;
     return "";
   }
 
   function pageRoute(id) {
-    const base = routeBase();
     const page = id || "dashboard";
-    return `${base || ""}/${page}`;
+    const url = new URL(location.href);
+    url.hash = "";
+    if (page === "dashboard") {
+      url.searchParams.delete("tela");
+    } else {
+      url.searchParams.set("tela", page);
+    }
+    return `${url.pathname}${url.search}`;
   }
 
   function pageLabel(page) {
