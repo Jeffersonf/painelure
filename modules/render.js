@@ -1761,7 +1761,8 @@
 
   function renderAdmin(items) {
     const grid = P.$("#adminGrid");
-    if (!grid) return;
+    const overview = P.$("#adminOverview");
+    if (!grid && !overview) return;
     const data = P.getAppData();
     const sources = Object.entries(P.sources || {});
     const configuredSources = sources.filter(([, source]) => source.url).length;
@@ -1769,6 +1770,26 @@
     const sensitiveSources = sources.filter(([, source]) => source.metadata?.sensitive).length;
     const backend = P.backendStatus || {};
     const currentRole = P.currentRole?.() || "Administrador";
+    const linkedUsers = data.users.filter(user => user.contactSync === "linked").length;
+    const networkCount = Object.keys(data.networkData || {}).length;
+    const overviewRows = [
+      { icon: "DB", label: "Base oficial", value: backend.ok ? "online" : "verificar", note: backend.ok ? "API respondendo" : "Clique em Verificar API", tone: backend.ok ? "ok" : "warn" },
+      { icon: "US", label: "Usuários", value: String(data.users.length), note: `${linkedUsers} vinculado(s) a contatos`, tone: data.users.length ? "ok" : "warn" },
+      { icon: "ES", label: "Escolas", value: String(data.schools.length), note: "unidades na base atual", tone: data.schools.length ? "ok" : "warn" },
+      { icon: "FT", label: "Fontes", value: `${configuredSources}/${sources.length}`, note: `${officialSources} oficial(is)`, tone: configuredSources ? "ok" : "warn" },
+      { icon: "RD", label: "Redes", value: String(networkCount), note: "escolas com infraestrutura", tone: networkCount ? "info" : "warn" },
+      { icon: "BK", label: "Backups", value: "auto", note: "snapshots antes de gravações", tone: "info" }
+    ];
+    if (overview) {
+      overview.innerHTML = overviewRows.map(item => `
+        <article class="admin-overview-card admin-overview-${item.tone}">
+          <span>${item.icon}</span>
+          <small>${item.label}</small>
+          <strong>${item.value}</strong>
+          <em>${item.note}</em>
+        </article>
+      `).join("");
+    }
     const systemChecks = [
       { label: "Escolas carregadas", status: data.schools.length === 21 ? "ok" : "warn", note: `${data.schools.length}/21 escola(s)` },
       { label: "Inventario carregado", status: data.schoolAssets.length ? "ok" : "warn", note: `${data.schoolAssets.length} linha(s)` },
@@ -1797,11 +1818,12 @@
       {
         label: "Usuarios importados da v1",
         status: data.users.length ? "ok" : "warn",
-        note: `${data.users.length} usu?rio(s), ${data.users.filter(user => user.contactSync === "linked").length} vinculado(s) a contatos`
+        note: `${data.users.length} usuário(s), ${linkedUsers} vinculado(s) a contatos`
       },
       { label: "Perfis ativos", status: P.ROLE_ACCESS ? "ok" : "danger", note: P.ROLE_ACCESS ? `${Object.keys(P.ROLE_ACCESS).length} perfil(is)` : "matriz indisponivel" }
     ];
     const rows = [...systemChecks, ...items];
+    if (!grid) return;
     grid.innerHTML = rows.length ? rows.map(item => `
       <article class="detail-widget" data-search="${P.searchText([item.label, item.status, item.note])}">
         <div>

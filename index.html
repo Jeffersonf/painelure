@@ -7,7 +7,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "clean-routes-20260522";
+      window.PAINELURE_BUILD = "admin-redesign-20260522";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -40,7 +40,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=clean-routes-20260522">
+  <link rel="stylesheet" href="./styles.css?v=admin-redesign-20260522">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -543,104 +543,82 @@
 
     <section class="page" id="page-admin">
       <header class="page-header compact">
-        <div><h1>Admin</h1><p>Controles globais, fontes oficiais e saude do painel.</p></div>
+        <div><h1>Admin oficial</h1><p>Controle online, usuários, PINs, fontes oficiais, backups e auditoria.</p></div>
+        <div class="header-actions">
+          <button class="ghost-btn" type="button" id="backendHealthBtn">Verificar API</button>
+          <button class="ghost-btn" type="button" id="reloadSourcesBtn">Atualizar fontes</button>
+        </div>
       </header>
       <div class="settings-shell admin-layout">
-        <section class="settings-section" data-admin-collapsible data-admin-open="true">
-          <div class="settings-title">Visao administrativa</div>
+        <section class="settings-section span-2 admin-overview-section" data-admin-collapsible data-admin-open="true">
+          <div class="settings-title">Visão geral</div>
+          <div class="admin-overview-grid" id="adminOverview"></div>
           <div class="settings-row">
             <div><strong>Conta atual</strong><small id="adminAccountLine">Jefferson | Administrador</small></div>
             <span class="status-pill ok">Admin</span>
           </div>
           <div class="settings-row">
-            <div><strong>Perfil ativo</strong><small>Simula permissoes como na v1, sem perder acesso pela pagina Conta.</small></div>
+            <div><strong>Perfil ativo</strong><small>Use apenas para conferir permissões antes de liberar usuários.</small></div>
             <select id="activeRoleSelect"></select>
           </div>
+        </section>
+
+        <section class="settings-section" data-admin-collapsible data-admin-open="true">
+          <div class="settings-title">Servidor online</div>
           <div class="settings-row">
-            <div><strong>Publicacao</strong><small>Base 2.0 separada da versao oficial 1.0.</small></div>
-            <button class="ghost-btn" type="button" id="reloadSourcesBtn">Atualizar fontes</button>
+            <div><strong>Status da API</strong><small id="backendStatusLine">Aguardando verificação.</small></div>
+            <span class="status-pill info">API</span>
+          </div>
+          <div class="settings-row">
+            <div><strong>Estado oficial</strong><small id="adminBackupMeta">Nenhuma ação administrativa nesta sessão.</small></div>
+            <div class="settings-actions">
+              <button class="ghost-btn" type="button" id="backendPullBtn">Carregar online</button>
+              <button class="ghost-btn" type="button" id="backendPushBtn">Salvar online</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div><strong>Regra principal</strong><small>Postgres/API é a fonte oficial. O navegador só deve funcionar como cache.</small></div>
+            <span class="status-pill info">online-first</span>
           </div>
         </section>
+
         <section class="settings-section" data-admin-collapsible data-admin-open="true">
-          <div class="settings-title">Backup local</div>
+          <div class="settings-title">Contingência local</div>
           <div class="settings-row">
-            <div><strong>Estado do painel</strong><small id="adminBackupMeta">Nenhuma acao de backup nesta sessao.</small></div>
+            <div><strong>Backup manual</strong><small>Use antes de manutenções, importações grandes ou testes fora do fluxo online.</small></div>
             <div class="settings-actions">
-              <button class="ghost-btn" type="button" id="localSaveBtn">Salvar local</button>
-              <button class="ghost-btn" type="button" id="backupExportBtn">Exportar</button>
-              <label class="ghost-btn file-btn" for="backupImportInput">Importar</label>
+              <button class="ghost-btn" type="button" id="localSaveBtn">Salvar cache</button>
+              <button class="ghost-btn" type="button" id="backupExportBtn">Exportar JSON</button>
+              <label class="ghost-btn file-btn" for="backupImportInput">Importar JSON</label>
               <input id="backupImportInput" type="file" accept=".json" hidden>
             </div>
           </div>
           <div class="settings-row">
-            <div><strong>Limpeza local</strong><small>Remove alteracoes salvas neste navegador.</small></div>
-            <button class="ghost-btn" type="button" id="resetLocalBtn">Limpar estado</button>
+            <div><strong>Limpeza do navegador</strong><small>Remove somente alterações/cache deste computador.</small></div>
+            <button class="ghost-btn" type="button" id="resetLocalBtn">Limpar cache</button>
           </div>
         </section>
-        <section class="settings-section" data-admin-collapsible>
-          <div class="settings-title">Backend online</div>
+
+        <section class="settings-section span-2" data-admin-collapsible data-admin-open="true">
+          <div class="settings-title">Usuários e PINs online</div>
           <div class="settings-row">
-            <div><strong>Status da API</strong><small id="backendStatusLine">Aguardando verificacao.</small></div>
-            <button class="ghost-btn" type="button" id="backendHealthBtn">Verificar</button>
-          </div>
-          <div class="settings-row">
-            <div><strong>Estado online</strong><small>Carrega ou envia o estado atual para a API configurada.</small></div>
-            <div class="settings-actions">
-              <button class="ghost-btn" type="button" id="backendPullBtn">Carregar</button>
-              <button class="ghost-btn" type="button" id="backendPushBtn">Enviar</button>
+            <div><strong>Novo usuário</strong><small>Cria acesso no backend. O PIN fica visível no admin quando salvo em preferences.pin.</small></div>
+            <div class="settings-actions user-create-actions">
+              <input id="newUserNameInput" type="text" placeholder="Nome">
+              <input id="newUserLoginInput" type="text" placeholder="Login">
+              <select id="newUserRoleSelect"></select>
+              <input id="newUserPasswordInput" type="password" placeholder="PIN inicial">
+              <button class="ghost-btn" type="button" id="createBackendUserBtn">Criar</button>
             </div>
           </div>
+          <div class="settings-list" id="backendUserList"></div>
         </section>
-        <section class="settings-section" data-admin-collapsible>
-          <div class="settings-title">Importacoes da base</div>
-          <div class="settings-row">
-            <div><strong>CSV normalizado</strong><small>Fluxo herdado da v1, mas tratado antes de renderizar.</small></div>
-            <div class="settings-actions">
-              <select id="importTargetSelect">
-                <option value="schools">Escolas</option>
-                <option value="contacts">Contatos</option>
-                <option value="network">Redes e cameras</option>
-                <option value="cars">Carros</option>
-                <option value="calendar">Calendario</option>
-                <option value="supervision">Supervisao</option>
-              </select>
-              <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
-              <input id="csvImportInput" type="file" accept=".csv,text/csv" hidden>
-            </div>
-          </div>
-          <div class="settings-row">
-            <div><strong>Calendario oficial</strong><small>URL publica CSV para agenda institucional.</small></div>
-            <div class="settings-actions wide">
-              <input id="calendarSourceInput" type="url" placeholder="https://.../pub?output=csv">
-              <button class="ghost-btn" type="button" id="saveCalendarSourceBtn">Salvar</button>
-            </div>
-          </div>
-        </section>
-        <section class="settings-section">
-          <div class="settings-title">Preferencias e apresentacao</div>
-          <div class="settings-row">
-            <div><strong>Modo apresentacao</strong><small>Oculta areas administrativas em demonstracoes.</small></div>
-            <button class="ghost-btn" type="button" id="presentationModeBtn">Alternar</button>
-          </div>
-          <div class="admin-tools compact">
-            <label class="check-row"><input type="checkbox" data-pref-widget="shortcuts" checked><span>Atalhos</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-widget="metrics" checked><span>Indicadores</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-widget="operations" checked><span>Decisoes</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-shortcut="network" checked><span>Redes</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-shortcut="inventory" checked><span>Inventario</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-shortcut="ctc" checked><span>CTC</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-shortcut="calls" checked><span>Chamados</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-shortcut="cars" checked><span>Carros</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-shortcut="calendar" checked><span>Calendario</span></label>
-            <label class="check-row"><input type="checkbox" data-pref-shortcut="reports" checked><span>Relatorios</span></label>
-            <button class="ghost-btn" type="button" id="savePrefsBtn">Salvar preferencias</button>
-          </div>
-        </section>
-        <section class="settings-section span-2" data-admin-collapsible>
-          <div class="settings-title">Fontes oficiais</div>
+
+        <section class="settings-section span-2" data-admin-collapsible data-admin-open="true">
+          <div class="settings-title">Fontes oficiais SharePoint/Excel</div>
           <div class="settings-list" id="sourceEditorList"></div>
           <div class="settings-row">
-            <div><strong>Salvar fontes</strong><small>Grava localmente e, se possivel, tambem no backend online.</small></div>
+            <div><strong>Salvar fontes</strong><small>Grava os links oficiais e permite sincronizar pelo backend.</small></div>
             <div class="settings-actions">
               <button class="ghost-btn" type="button" id="saveSourceOverridesBtn">Salvar local</button>
               <button class="ghost-btn" type="button" id="saveBackendSourcesBtn">Salvar online</button>
@@ -648,6 +626,33 @@
           </div>
           <div class="settings-list" id="sourceStatusList"></div>
         </section>
+
+        <section class="settings-section" data-admin-collapsible>
+          <div class="settings-title">Importação manual</div>
+          <div class="settings-row">
+            <div><strong>CSV de emergência</strong><small>Use apenas quando SharePoint/Excel online não estiver disponível.</small></div>
+            <div class="settings-actions">
+              <select id="importTargetSelect">
+                <option value="schools">Escolas</option>
+                <option value="contacts">Contatos</option>
+                <option value="network">Redes e câmeras</option>
+                <option value="cars">Carros</option>
+                <option value="calendar">Calendário</option>
+                <option value="supervision">Supervisão</option>
+              </select>
+              <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
+              <input id="csvImportInput" type="file" accept=".csv,text/csv" hidden>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div><strong>Calendário oficial</strong><small>URL pública CSV para agenda institucional.</small></div>
+            <div class="settings-actions wide">
+              <input id="calendarSourceInput" type="url" placeholder="https://.../pub?output=csv">
+              <button class="ghost-btn" type="button" id="saveCalendarSourceBtn">Salvar</button>
+            </div>
+          </div>
+        </section>
+
         <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">Snapshots online</div>
           <div class="settings-list" id="backendSnapshotList"></div>
@@ -657,25 +662,15 @@
           <div class="settings-list" id="backendAuditList"></div>
         </section>
         <section class="settings-section span-2" data-admin-collapsible>
-          <div class="settings-title">Historico de importacoes</div>
+          <div class="settings-title">Histórico de importações</div>
           <div class="settings-list" id="backendImportList"></div>
         </section>
+
         <section class="settings-section span-2" data-admin-collapsible>
-          <div class="settings-title">Usuarios online</div>
-          <div class="settings-row">
-            <div><strong>Novo usuario</strong><small>Cria usuario no backend quando a API estiver configurada.</small></div>
-            <div class="settings-actions user-create-actions">
-              <input id="newUserNameInput" type="text" placeholder="Nome">
-              <input id="newUserLoginInput" type="text" placeholder="Login">
-              <select id="newUserRoleSelect"></select>
-              <input id="newUserPasswordInput" type="password" placeholder="Senha inicial">
-              <button class="ghost-btn" type="button" id="createBackendUserBtn">Criar</button>
-            </div>
-          </div>
-          <div class="settings-list" id="backendUserList"></div>
+          <div class="settings-title">Diagnóstico automático</div>
+          <div class="calendar-grid admin-diagnostics" id="adminGrid"></div>
         </section>
       </div>
-      <div class="calendar-grid" id="adminGrid"></div>
     </section>
   </main>
 
@@ -709,10 +704,10 @@
   <script src="./config.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/backend-client.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/search.js?v=ux-login-sync-20260521"></script>
-  <script src="./modules/render.js?v=ux-login-sync-20260521"></script>
+  <script src="./modules/render.js?v=admin-redesign-20260522"></script>
   <script src="./modules/supervision-render.js?v=ux-login-sync-20260521"></script>
-  <script src="./modules/navigation.js?v=clean-routes-20260522"></script>
+  <script src="./modules/navigation.js?v=admin-redesign-20260522"></script>
   <script src="./modules/admin-tools.js?v=ux-login-sync-20260521"></script>
-  <script src="./app.js?v=clean-routes-20260522"></script>
+  <script src="./app.js?v=admin-redesign-20260522"></script>
 </body>
 </html>

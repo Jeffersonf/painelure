@@ -4729,6 +4729,66 @@ html:not(.site-maintenance) .maintenance-message {
   grid-column: 1 / -1;
 }
 
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--bd2);
+}
+
+.admin-overview-card {
+  min-height: 112px;
+  display: grid;
+  align-content: space-between;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .018)),
+    var(--sf2);
+}
+
+.admin-overview-card span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .06);
+  color: var(--ac);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-overview-card small,
+.admin-overview-card em {
+  display: block;
+  color: var(--mt);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.admin-overview-card strong {
+  color: var(--tx);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.admin-overview-ok {
+  border-color: color-mix(in srgb, var(--grn) 28%, var(--bd));
+}
+
+.admin-overview-info {
+  border-color: color-mix(in srgb, var(--ac2) 25%, var(--bd));
+}
+
+.admin-overview-warn {
+  border-color: color-mix(in srgb, var(--warn) 32%, var(--bd));
+}
+
 .settings-section {
   overflow: hidden;
   border: 1px solid var(--bd);
@@ -4999,6 +5059,22 @@ html:not(.site-maintenance) .maintenance-message {
 
 .admin-tools input[type="url"] {
   min-width: 280px;
+}
+
+.admin-diagnostics {
+  padding: 16px 20px 20px;
+}
+
+@media (max-width: 1100px) {
+  .admin-overview-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 [data-presentation="true"] .sidebar-card,
