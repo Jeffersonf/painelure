@@ -139,8 +139,25 @@ body.is-authenticated .login-screen {
   display: none;
 }
 
+html.site-maintenance .login-screen,
+body.site-maintenance .login-screen,
+body.site-maintenance.is-authenticated .login-screen {
+  display: grid;
+  visibility: visible;
+}
+
+body.site-maintenance .sidebar,
+body.site-maintenance .main,
+body.site-maintenance .mobile-nav {
+  display: none;
+}
+
 html.auth-pending .login-screen {
   visibility: hidden;
+}
+
+html.site-maintenance.auth-pending .login-screen {
+  visibility: visible;
 }
 
 body::before {
@@ -363,6 +380,58 @@ select:focus-visible {
   color: var(--warn);
   font-size: 12px;
   font-weight: 900;
+}
+
+.maintenance-card {
+  width: min(560px, calc(100vw - 36px));
+  gap: 18px;
+}
+
+.maintenance-badge {
+  width: fit-content;
+  color: var(--bg);
+  background: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 70%, transparent);
+}
+
+.maintenance-message {
+  display: grid;
+  gap: 18px;
+}
+
+.maintenance-message h1 {
+  margin-top: 4px;
+}
+
+.maintenance-message p {
+  max-width: 48ch;
+}
+
+.maintenance-return {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--warn) 36%, var(--bd));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--warn) 10%, var(--sf2));
+}
+
+.maintenance-return span {
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.maintenance-return strong {
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.12;
+}
+
+.maintenance-message small {
+  min-height: 0;
+  margin-top: 0;
+  color: var(--tx2);
 }
 
 .login-help {

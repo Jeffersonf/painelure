@@ -7,7 +7,9 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "ux-login-sync-20260521";
+      window.PAINELURE_BUILD = "maintenance-20260522";
+      window.PAINELURE_MAINTENANCE = true;
+      document.documentElement.classList.add("site-maintenance");
       const buildKey = "painelure2_build";
       const previousBuild = localStorage.getItem(buildKey);
       if (previousBuild && previousBuild !== window.PAINELURE_BUILD && !sessionStorage.getItem(`${buildKey}_reloaded`)) {
@@ -26,18 +28,18 @@
       if (localStorage.getItem("painelure2_theme") === "light") {
         document.documentElement.dataset.theme = "light";
       }
-      if (localStorage.getItem("painelure2_backend_token") || sessionStorage.getItem("painelure2_backend_token")) {
+      if (!window.PAINELURE_MAINTENANCE && (localStorage.getItem("painelure2_backend_token") || sessionStorage.getItem("painelure2_backend_token"))) {
         document.documentElement.classList.add("auth-pending");
       }
     } catch (error) {}
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=ux-login-sync-20260521">
+  <link rel="stylesheet" href="./styles.css?v=maintenance-20260522">
 </head>
-<body>
+<body class="site-maintenance">
   <section class="login-screen" id="loginScreen">
-    <div class="login-card">
+    <div class="login-card maintenance-card">
       <div class="login-head">
         <span class="brand-word login-brand"><span>Painel</span><strong>URE</strong></span>
       </div>
@@ -45,35 +47,16 @@
         <strong>setec | seintec</strong>
         <span>ure itapeva</span>
       </div>
-      <div class="login-badge">Acesso restrito</div>
-      <div id="loginForm">
-        <h1>Entrar no painel</h1>
-        <p>Use seu primeiro nome e PIN para entrar no painel.</p>
-        <label>
-          <span>Nome</span>
-          <input id="loginUserInput" type="text" autocomplete="username">
-        </label>
-        <label>
-          <span>PIN</span>
-          <input id="loginPinInput" type="password" inputmode="numeric" autocomplete="current-password">
-        </label>
-        <button class="primary-btn" type="button" id="loginSubmitBtn">Entrar</button>
+      <div class="login-badge maintenance-badge">Site em manutenção</div>
+      <div class="maintenance-message" role="status" aria-live="polite">
+        <h1>Estamos preparando o PainelURE</h1>
+        <p>O sistema está temporariamente indisponível para ajustes finais e sincronização dos dados oficiais.</p>
+        <div class="maintenance-return">
+          <span>Previsão de volta</span>
+          <strong>Segunda-feira, 25/05/2026</strong>
+        </div>
+        <small>Obrigado pela compreensão.</small>
       </div>
-      <div id="pinChangeForm" hidden>
-        <h1>Crie um novo PIN</h1>
-        <p>Seu acesso ainda usa o PIN inicial. Escolha um novo PIN para continuar.</p>
-        <label>
-          <span>Novo PIN</span>
-          <input id="newPinInput" type="password" inputmode="numeric" autocomplete="new-password">
-        </label>
-        <label>
-          <span>Confirmar PIN</span>
-          <input id="confirmPinInput" type="password" inputmode="numeric" autocomplete="new-password">
-        </label>
-        <button class="primary-btn" type="button" id="pinChangeSubmitBtn">Salvar PIN</button>
-      </div>
-      <small id="loginStatus"></small>
-      <button class="login-help" type="button">Esqueci meu PIN</button>
     </div>
   </section>
 
