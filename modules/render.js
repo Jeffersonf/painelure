@@ -34,8 +34,8 @@
       return {
         title: "Carteira de supervisao",
         note: `${data.schools.length} escola(s) sob acompanhamento no mes.`,
-        notice: "Visao filtrada para sua supervisao",
-        noticeNote: "A pagina mostra apenas suas escolas, suas metas e os canais de apoio disponiveis.",
+        notice: "Visão filtrada para sua supervisão",
+        noticeNote: "A página mostra apenas suas escolas, suas metas e os canais de apoio disponíveis.",
         shortcuts: {
           schools: `${data.schools.length} escola(s) vinculada(s)`,
           network: "Restrito ao perfil tecnico",
@@ -46,10 +46,10 @@
     }
     if (role.includes("ctc") || role.includes("setec") || role.includes("seintec")) {
       return {
-        title: "Operacao tecnica",
+        title: "Operação técnica",
         note: `${context.networkCount} rede(s) mapeada(s), ${data.schoolAssets.length} item(ns) de inventario.`,
-        notice: "Base tecnica pronta para consulta",
-        noticeNote: "Redes, IPs, cameras, inventario e chamados aparecem no mesmo fluxo operacional.",
+        notice: "Base técnica pronta para consulta",
+        noticeNote: "Redes, IPs, câmeras, inventário e chamados aparecem no mesmo fluxo operacional.",
         shortcuts: null
       };
     }
@@ -66,7 +66,7 @@
       return {
         title: "Acompanhamento pedagogico",
         note: `${data.schools.length} escola(s), ${data.supervisors.length} supervisor(es) e agenda institucional.`,
-        notice: "Visao escolar e de supervisao",
+        notice: "Visão escolar e de supervisão",
         noticeNote: "Escolas, supervisao, contatos e calendario ficam em primeiro plano.",
         shortcuts: null
       };
@@ -76,8 +76,8 @@
       note: `${data.schools.length} escola(s), contatos e dados liberados para consulta.`,
       notice: context.calendarCount ? "Base operacional atualizada" : "Base operacional pronta",
       noticeNote: context.calendarCount
-        ? "Escolas, supervisao, inventario, redes e agenda disponiveis para consulta."
-        : "Escolas, supervisao, inventario, redes e contatos disponiveis para consulta.",
+        ? "Escolas, supervisão, inventário, redes e agenda disponíveis para consulta."
+        : "Escolas, supervisão, inventário, redes e contatos disponíveis para consulta.",
       shortcuts: null
     };
   }
@@ -549,31 +549,31 @@
     setText("#dashboardNoticeNote", [profile.noticeNote, supervisionMonthNote()].filter(Boolean).join(" "));
     setText("#shortcutSchoolsNote", profile.shortcuts?.schools || `${data.schools.length} unidade(s) na base regional`);
     setText("#shortcutNetworkNote", profile.shortcuts?.network || (missingNetwork ? `${missingNetwork} escola(s) ainda sem rede` : `${networkCount} rede(s) mapeada(s)`));
-    setText("#shortcutInventoryNote", profile.shortcuts?.inventory || (inventoryAlerts ? `${inventoryAlerts} unidade(s) em manutencao/defeito` : `${data.schoolAssets.length} linha(s) consolidadas`));
+    setText("#shortcutInventoryNote", profile.shortcuts?.inventory || (inventoryAlerts ? `${inventoryAlerts} unidade(s) em manutenção/defeito` : `${data.schoolAssets.length} linha(s) consolidadas`));
     setText("#shortcutSupervisionNote", profile.shortcuts?.supervision || (pendingVisits ? `${pendingVisits} visita(s) pendente(s)` : `${data.supervisors.length} responsavel(is) ativos`));
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
 
     const decisions = [
       missingNetwork
         ? { icon: "&#127760;", title: "Completar dados de rede", note: `${missingNetwork} escola(s) sem infraestrutura mapeada.`, label: "Rede", tone: "warn", page: "network" }
-        : { icon: "&#127760;", title: "Redes mapeadas", note: `${networkCount} escola(s) com dados tecnicos disponiveis.`, label: "OK", tone: "ok", page: "network" },
+        : { icon: "&#127760;", title: "Redes mapeadas", note: `${networkCount} escola(s) com dados técnicos disponíveis.`, label: "OK", tone: "ok", page: "network" },
       inventoryAlerts
-        ? { icon: "&#128187;", title: "Inventario com manutencao/defeito", note: `${inventoryAlerts} unidade(s) fora de OK.`, label: "Invent.", tone: "warn", page: "inventory" }
-        : { icon: "&#128187;", title: "Inventario consolidado", note: `${data.schoolAssets.length} linha(s) carregada(s).`, label: "OK", tone: "ok", page: "inventory" },
+        ? { icon: "&#128187;", title: "Inventário com manutenção/defeito", note: `${inventoryAlerts} unidade(s) fora de OK.`, label: "Invent.", tone: "warn", page: "inventory" }
+        : { icon: "&#128187;", title: "Inventário consolidado", note: `${data.schoolAssets.length} linha(s) carregada(s).`, label: "OK", tone: "ok", page: "inventory" },
       pendingVisits
         ? { icon: "&#129517;", title: "Acompanhar visitas pendentes", note: `${pendingVisits} visita(s) faltando nas metas atuais.`, label: "Meta", tone: "warn", page: "supervision" }
-        : { icon: "&#129517;", title: "Supervisao em dia", note: `${data.supervisors.length} responsavel(is) ativos no painel.`, label: "OK", tone: "ok", page: "supervision" }
+        : { icon: "&#129517;", title: "Supervisão em dia", note: `${data.supervisors.length} responsável(is) ativos no painel.`, label: "OK", tone: "ok", page: "supervision" }
     ];
 
     const agenda = [
       calendarCount
         ? { icon: "&#128197;", title: "Agenda com eventos", note: `${calendarCount} evento(s) carregado(s) para consulta.`, label: "Agenda", tone: "info", page: "calendar" }
-        : { icon: "&#128197;", title: "Calendario preparado", note: "Area pronta para a agenda institucional da URE.", label: "Agenda", tone: "info", page: "calendar" },
+        : { icon: "&#128197;", title: "Calendário preparado", note: "Área pronta para a agenda institucional da URE.", label: "Agenda", tone: "info", page: "calendar" },
       ctcVisits
-        ? { icon: "&#128736;&#65039;", title: "Visitas tecnicas previstas", note: `${ctcVisits} compromisso(s) tecnico(s) na base atual.`, label: "CTC", tone: "info", page: "ctc" }
+        ? { icon: "&#128736;&#65039;", title: "Visitas técnicas previstas", note: `${ctcVisits} compromisso(s) técnico(s) na base atual.`, label: "CTC", tone: "info", page: "ctc" }
         : { icon: "&#128736;&#65039;", title: "Agenda CTC pronta", note: "Area preparada para rotas e compromissos tecnicos.", label: "CTC", tone: "info", page: "ctc" },
       openCalls
-        ? { icon: "&#128229;", title: "Chamados em acompanhamento", note: `${openCalls} chamado(s) ainda nao resolvido(s).`, label: "Fila", tone: "warn", page: "calls" }
+        ? { icon: "&#128229;", title: "Chamados em acompanhamento", note: `${openCalls} chamado(s) ainda não resolvido(s).`, label: "Fila", tone: "warn", page: "calls" }
         : { icon: "&#128229;", title: "Fila de chamados estavel", note: "Sem pendencia aberta na base atual.", label: "OK", tone: "ok", page: "calls" },
       carCount
         ? { icon: "&#128663;", title: "Carros agendados", note: `${carCount} reserva(s) de carro oficial no recorte.`, label: "Carros", tone: "info", page: "cars" }
@@ -600,7 +600,7 @@
       const agendaFallbackCount = monthFiltered(calendarWithOperationalFallback(data.calendar || [], data), item => item.date || item.value).length;
       const commandItems = [
         { label: "Escolas", value: data.schools?.length || 0, note: `${networkCount}/${data.schools?.length || 0} com rede`, page: "schools", tone: missingNetwork ? "info" : "ok" },
-        { label: "Supervisao", value: supervisionPct.total ? `${Math.round((supervisionPct.done / supervisionPct.total) * 100)}%` : "0%", note: `${pendingVisits} visita(s) pendente(s)`, page: "supervision", tone: pendingVisits ? "warn" : "ok" },
+        { label: "Supervisão", value: supervisionPct.total ? `${Math.round((supervisionPct.done / supervisionPct.total) * 100)}%` : "0%", note: `${pendingVisits} visita(s) pendente(s)`, page: "supervision", tone: pendingVisits ? "warn" : "ok" },
         { label: "Carros", value: carCount, note: carCount ? "reservas no mes" : "sem reserva no mes", page: "cars", tone: carCount ? "info" : "warn" },
         { label: "Agenda", value: agendaFallbackCount, note: calendarCount ? "fonte carregada" : "com fallback operacional", page: "calendar", tone: calendarCount ? "ok" : "info" }
       ];
@@ -651,7 +651,7 @@
     const online = P.onlineUser?.();
     setText("#onlineSessionSummary", online
       ? `${online.username || online.login || online.name} conectado ao backend.`
-      : "Sessao local ativa. Entre quando a API estiver disponivel."
+      : "Sessão local ativa. Entre quando a API estiver disponível."
     );
     const logoutButton = P.$("#onlineLogoutBtn");
     if (logoutButton) logoutButton.hidden = !online;
@@ -736,14 +736,14 @@
     const schoolTone = totals.alertUnits || metrics.alerts ? "warn" : (!network || profilePct < 65 || calls.length ? "info" : "ok");
     const inventoryPreview = assets.slice(0, 6);
     const networkItems = [
-      { title: "Rede", value: network?.network?.[0] || "Sem informacao" },
+      { title: "Rede", value: network?.network?.[0] || "Sem informação" },
       { title: "IPs", value: network?.ips?.[0] || "Sem IP cadastrado" },
-      { title: "Cameras", value: network?.cameras?.[0] || "Sem camera cadastrada" }
+      { title: "Câmeras", value: network?.cameras?.[0] || "Sem câmera cadastrada" }
     ];
     const guideWidgets = [
-      { key: "inventory", title: "&#128187; Inventario", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) pedem revisao` : `${totals.lines || metrics.items || 0} item(ns) sem alerta`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "Abrir", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("inventory") },
-      { key: "network", title: "&#127760; Redes", note: network ? `${networkItems.filter(item => !item.value.includes("Sem")).length}/3 grupos mapeados` : "Rede e cameras pendentes", label: network ? "Abrir" : "Pendente", tone: network ? "info" : "warn", enabled: Boolean(network) && (!P.canAccess || P.canAccess("network")) },
-      { key: "supervisor", title: "&#129517; Supervisao", note: supervisor ? `${supervisor.name} | mes ${supervisor.month || "0/12"}` : "Sem supervisor vinculado", label: supervisor ? "Abrir" : "Pendente", tone: supervisor ? "info" : "warn", enabled: Boolean(supervisor) },
+      { key: "inventory", title: "&#128187; Inventário", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) pedem revisão` : `${totals.lines || metrics.items || 0} item(ns) sem alerta`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "Abrir", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("inventory") },
+      { key: "network", title: "&#127760; Redes", note: network ? `${networkItems.filter(item => !item.value.includes("Sem")).length}/3 grupos mapeados` : "Rede e câmeras pendentes", label: network ? "Abrir" : "Pendente", tone: network ? "info" : "warn", enabled: Boolean(network) && (!P.canAccess || P.canAccess("network")) },
+      { key: "supervisor", title: "&#129517; Supervisão", note: supervisor ? `${supervisor.name} | mês ${supervisor.month || "0/12"}` : "Sem supervisor vinculado", label: supervisor ? "Abrir" : "Pendente", tone: supervisor ? "info" : "warn", enabled: Boolean(supervisor) },
       { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estavel", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("calls") }
     ];
     detail.innerHTML = `
@@ -758,14 +758,14 @@
           </div>
           <div class="school-profile-owner">
             <small>Supervisor</small>
-            <strong>${supervisor?.name || "Nao vinculado"}</strong>
+            <strong>${supervisor?.name || "Não vinculado"}</strong>
             <span class="status-pill ${supervisor ? "info" : "warn"}">${supervisor ? "supervisao" : "pendente"}</span>
           </div>
         </article>
 
         <section class="school-profile-metrics">
           <article><span>&#128203;</span><small>Ficha</small><strong>${profilePct}%</strong><i style="--pct:${profilePct}%"></i></article>
-          <article><span>&#128187;</span><small>Inventario</small><strong>${totals.lines || metrics.items || 0}</strong><i style="--pct:100%"></i></article>
+          <article><span>&#128187;</span><small>Inventário</small><strong>${totals.lines || metrics.items || 0}</strong><i style="--pct:100%"></i></article>
           <article><span>&#128736;&#65039;</span><small>Manutencao</small><strong>${totals.alertUnits || metrics.alerts || 0}</strong><i style="--pct:${totals.alertUnits || metrics.alerts ? 100 : 0}%"></i></article>
           <article><span>&#127760;</span><small>Rede</small><strong>${networkStatus}</strong><i style="--pct:${network ? 100 : 0}%"></i></article>
           <article><span>&#128229;</span><small>Chamados</small><strong>${calls.length}</strong><i style="--pct:${calls.length ? 100 : 0}%"></i></article>
@@ -783,20 +783,20 @@
           <article class="box school-profile-card wide">
             <div class="box-head"><div><strong>Ficha escolar</strong><small>Dados principais da unidade.</small></div><span class="status-pill ${profileStatusFromPct(profilePct)}">${profilePct}%</span></div>
             <div class="school-profile-fields">
-              <span><small>Direcao</small><strong>${profile?.director || "Nao informada"}</strong></span>
-              <span><small>Vice-direcao</small><strong>${profile?.viceDirector || "Nao informada"}</strong></span>
-              <span><small>GOE</small><strong>${profile?.goe || "Nao informado"}</strong></span>
+              <span><small>Direção</small><strong>${profile?.director || "Não informada"}</strong></span>
+              <span><small>Vice-direção</small><strong>${profile?.viceDirector || "Não informada"}</strong></span>
+              <span><small>GOE</small><strong>${profile?.goe || "Não informado"}</strong></span>
               <span><small>Telefone</small><strong>${profile?.phone || "Pendente"}</strong></span>
               <span><small>Email</small><strong>${profile?.email || "Pendente"}</strong></span>
-              <span><small>Endereco</small><strong>${profile?.address || "Nao informado"}</strong></span>
+              <span><small>Endereço</small><strong>${profile?.address || "Não informado"}</strong></span>
             </div>
             <p class="school-profile-note">${profileNote}</p>
           </article>
 
           <article class="box school-profile-card">
-            <div class="box-head"><div><strong>Supervisao</strong><small>Recorte oficial importado.</small></div></div>
+            <div class="box-head"><div><strong>Supervisão</strong><small>Recorte oficial importado.</small></div></div>
             <div class="school-profile-stack">
-              <span><small>Responsavel</small><strong>${supervisor?.name || "Nao vinculado"}</strong></span>
+              <span><small>Responsável</small><strong>${supervisor?.name || "Não vinculado"}</strong></span>
               <span><small>Semana</small><strong>${supervisor?.week || "0/3"}</strong></span>
               <span><small>Mes</small><strong>${supervisor?.month || "0/12"}</strong></span>
             </div>
@@ -812,7 +812,7 @@
           </article>
 
           <article class="box school-profile-card wide">
-            <div class="box-head"><div><strong>Inventario</strong><small>Resumo consolidado da escola.</small></div><span class="status-pill ${totals.alertUnits || metrics.alerts ? "warn" : "ok"}">${totals.alertUnits || metrics.alerts ? "revisar" : "ok"}</span></div>
+            <div class="box-head"><div><strong>Inventário</strong><small>Resumo consolidado da escola.</small></div><span class="status-pill ${totals.alertUnits || metrics.alerts ? "warn" : "ok"}">${totals.alertUnits || metrics.alerts ? "revisar" : "ok"}</span></div>
             <div class="school-inventory-preview">
               ${inventoryPreview.length ? inventoryPreview.map(asset => `<button class="data-row compact" type="button" data-open-inventory="${school.name}">
                 <span class="row-icon">&#128187;</span>
@@ -878,7 +878,7 @@
     if (alertCount) return "Conferir inventario com manutencao ou defeito.";
     if (callCount) return "Chamados vinculados na escola.";
     if (missingProfile.length) return `Completar ficha: ${missingProfile.slice(0, 3).join(", ")}.`;
-    if (!network) return "Mapear rede e cameras para completar a base tecnica.";
+    if (!network) return "Mapear rede e câmeras para completar a base técnica.";
     return "Escola sem pendencia resumida no painel.";
   }
 
@@ -911,8 +911,8 @@
     const rows = [
       { icon: "RD", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
       { icon: "IP", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
-      { icon: "CM", title: "Cameras", note: `${selectedData?.cameras?.length || 0} informacao(oes) de cameras disponiveis.`, label: selectedData?.cameras?.length ? "ok" : "base", tone: selectedData?.cameras?.length ? "ok" : "info" },
-      { icon: "CR", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais tecnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
+      { icon: "CM", title: "Câmeras", note: `${selectedData?.cameras?.length || 0} informação(ões) de câmeras disponíveis.`, label: selectedData?.cameras?.length ? "ok" : "base", tone: selectedData?.cameras?.length ? "ok" : "info" },
+      { icon: "CR", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais técnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
     ];
     renderSummaryRows("#networkSummaryRows", rows);
   }
@@ -984,7 +984,7 @@
     const schools = new Set(assets.map(asset => asset.school).filter(Boolean)).size;
     const categoryCount = new Set(selectedAssets.map(asset => assetCategory(asset))).size;
     const rows = [
-      { icon: "&#128187;", title: "Inventario da escola", note: `${totals.lines} linha(s), ${totals.units} unidade(s) e ${categoryCount} categoria(s).`, label: `${totals.units}`, tone: "info" },
+      { icon: "&#128187;", title: "Inventário da escola", note: `${totals.lines} linha(s), ${totals.units} unidade(s) e ${categoryCount} categoria(s).`, label: `${totals.units}`, tone: "info" },
       { icon: "&#128736;&#65039;", title: "Manutencao/defeito", note: totals.alertUnits ? `${totals.alertUnits} unidade(s) fora de OK em ${selectedSchool}.` : "Todos os itens filtrados estao OK.", label: `${totals.alertUnits}`, tone: totals.alertUnits ? "warn" : "ok" },
       { icon: "&#127979;", title: "Base carregada", note: `${schools} escola(s) com inventario e ${globalTotals.lines} linha(s) totais.`, label: `${schools}`, tone: "info" },
       { icon: "&#9989;", title: "Conferencia", note: `${globalTotals.alertUnits} unidade(s) fora de OK na base completa.`, label: globalTotals.alertUnits ? "acompanhar" : "ok", tone: globalTotals.alertUnits ? "warn" : "ok" }
@@ -999,7 +999,7 @@
     const assets = data.schoolAssets || [];
     if (!assets.length) {
       renderSummaryRows("#inventorySummaryRows", [
-        { icon: "&#128187;", title: "Inventario", note: "Nenhuma linha carregada para o perfil atual.", label: "vazio", tone: "warn" }
+        { icon: "&#128187;", title: "Inventário", note: "Nenhuma linha carregada para o perfil atual.", label: "vazio", tone: "warn" }
       ]);
       grid.innerHTML = `<div class="empty-state">Nenhum dado de inventario carregado ainda.</div>`;
       return;
@@ -1058,7 +1058,7 @@
             <small>Escola selecionada</small>
             <strong>${selectedSchool}</strong>
           </div>
-          <p>${totals.lines} linha(s) | ${totals.units} unidade(s) | ${totals.alertUnits} manutencao/defeito</p>
+          <p>${totals.lines} linha(s) | ${totals.units} unidade(s) | ${totals.alertUnits} manutenção/defeito</p>
         </div>
         <div class="inventory-hero-score">
           <span><strong>${totals.lines}</strong><small>linhas</small></span>
@@ -1073,7 +1073,7 @@
         </div>
       </article>
       <article class="inventory-list box inventory-priority">
-        <div class="box-head"><div><strong>Status da escola</strong><small>${alertAssets.length ? "Itens em manutencao ou defeito" : "Sem manutencao/defeito no filtro atual"}</small></div></div>
+        <div class="box-head"><div><strong>Status da escola</strong><small>${alertAssets.length ? "Itens em manutenção ou defeito" : "Sem manutenção/defeito no filtro atual"}</small></div></div>
         <div class="row-list compact">
           ${alertAssets.length ? alertAssets.map(asset => `
             <div class="data-row compact" data-inventory-key="${P.searchText([asset.school, asset.sourceName || asset.name, asset.notes])}" data-search="${P.searchText([asset.school, asset.name, asset.sourceName, asset.notes, asset.status])}">
@@ -1084,7 +1084,7 @@
           `).join("") : `
             <div class="data-row compact">
               <span class="row-icon">&#9989;</span>
-              <span><strong>Todos OK</strong><small>A escola selecionada nao possui item em manutencao ou defeito neste filtro.</small></span>
+              <span><strong>Todos OK</strong><small>A escola selecionada não possui item em manutenção ou defeito neste filtro.</small></span>
               <em class="status-pill ok">ok</em>
             </div>
           `}
@@ -1095,7 +1095,7 @@
           <div>
             <small>${item.category}</small>
             <strong>${item.units} unidade(s)</strong>
-            <p>${item.lines} linha(s) consolidada(s) | ${item.alerts} em manutencao/defeito.</p>
+            <p>${item.lines} linha(s) consolidada(s) | ${item.alerts} em manutenção/defeito.</p>
           </div>
           <span class="status-pill ${item.alerts ? "warn" : "ok"}">${item.alerts ? "acompanhar" : "ok"}</span>
         </article>
@@ -1146,7 +1146,7 @@
     const photoCount = visible.filter(contact => contact.photo).length;
     const rows = [
       { icon: "CO", title: "Contatos visiveis", note: sector === "Todos" ? `${visible.length} contato(s) em ${sectors} setor(es).` : `${visible.length} contato(s) em ${sector}.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
-      { icon: "EM", title: "Email", note: `${emailCount}/${visible.length || 0} contato(s) com email disponivel.`, label: emailCount === visible.length && visible.length ? "ok" : "base", tone: emailCount === visible.length && visible.length ? "ok" : "info" },
+      { icon: "EM", title: "E-mail", note: `${emailCount}/${visible.length || 0} contato(s) com e-mail disponível.`, label: emailCount === visible.length && visible.length ? "ok" : "base", tone: emailCount === visible.length && visible.length ? "ok" : "info" },
       { icon: "TE", title: "Telefone e ramal", note: `${phoneCount}/${visible.length || 0} contato(s) com canal telefonico.`, label: phoneCount === visible.length && visible.length ? "ok" : "revisar", tone: phoneCount === visible.length && visible.length ? "ok" : "warn" },
       { icon: "US", title: "Perfis vinculados", note: `${photoCount} contato(s) ja usam foto enviada pelo usuario.`, label: photoCount ? "foto" : "local", tone: photoCount ? "ok" : "info" }
     ];
@@ -1235,7 +1235,7 @@
       date: item.date,
       time: item.time,
       note: details
-        ? `${item.time || "Horario a definir"} | ${item.requester || "Solicitante nao informado"} | ${item.status || "pendente"}`
+        ? `${item.time || "Horário a definir"} | ${item.requester || "Solicitante não informado"} | ${item.status || "pendente"}`
         : `${item.time || "Horario a definir"} | Reserva de veiculo`,
       tone: carStatusTone(item.status),
       type: "carro",
@@ -1271,11 +1271,11 @@
       });
     }
     const ctcItems = (data.ctcVisits || []).map(item => ({
-      label: `CTC - ${item.place || item.owner || "visita tecnica"}`,
+      label: `CTC - ${item.place || item.owner || "visita técnica"}`,
       value: item.date,
       date: item.date,
       time: item.time,
-      note: `${item.time || "Horario a definir"} | ${item.owner || "Tecnico"} | ${item.objective || "Visita tecnica"}`,
+      note: `${item.time || "Horário a definir"} | ${item.owner || "Técnico"} | ${item.objective || "Visita técnica"}`,
       scope: "shared",
       type: "ctc",
       source: "ctc"
@@ -1331,7 +1331,7 @@
           if (sourceStatus) sourceStatus.textContent = `SharePoint atualizado: ${rows} item(ns) lido(s) de ReservasVeiculos.`;
           renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
         } catch (error) {
-          if (sourceStatus) sourceStatus.textContent = error?.message || "Nao foi possivel atualizar o SharePoint.";
+          if (sourceStatus) sourceStatus.textContent = error?.message || "Não foi possível atualizar o SharePoint.";
         } finally {
           refreshButton.disabled = false;
           refreshButton.textContent = original || "Atualizar";
@@ -1353,8 +1353,8 @@
       const status = (P.sourceStatus || []).find(item => item.key === "cars");
       if (status?.status === "loading") sourceStatus.textContent = "Carregando ReservasVeiculos do SharePoint...";
       else if (status?.status === "loaded") sourceStatus.textContent = `Fonte SharePoint carregada: ${status.rows?.length || 0} item(ns) de ReservasVeiculos.`;
-      else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "SharePoint nao carregado.";
-      else sourceStatus.textContent = P.sources?.cars?.url ? "Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar." : "Fonte de carros nao configurada.";
+      else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "SharePoint não carregado.";
+      else sourceStatus.textContent = P.sources?.cars?.url ? "Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar." : "Fonte de carros não configurada.";
     }
     renderSummaryRows("#carSummaryRows", []);
     if (!visible.length) {
@@ -1387,8 +1387,8 @@
                 : P.searchText([item.vehicle, item.date, item.time]);
               return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${search}">
                 <span class="car-card-icon">&#127979;</span>
-                <span class="car-route"><strong>${details ? (item.destination || "Destino nao informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.time || "--:--"} | Solicitacao ${item.requestId || "--"}` : `${item.time || "Horario a definir"}`}</small></span>
-                <span class="car-requester"><strong>${details ? (item.requester || "Setor nao informado") : "Veiculo reservado"}</strong><small>${details ? `${item.vehicle} | ${item.driver || "Condutor a definir"}` : "Detalhes restritos"}</small></span>
+                <span class="car-route"><strong>${details ? (item.destination || "Destino não informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.time || "--:--"} | Solicitação ${item.requestId || "--"}` : `${item.time || "Horário a definir"}`}</small></span>
+                <span class="car-requester"><strong>${details ? (item.requester || "Setor não informado") : "Veículo reservado"}</strong><small>${details ? `${item.vehicle} | ${item.driver || "Condutor a definir"}` : "Detalhes restritos"}</small></span>
                 <em class="status-pill ${tone}">${item.status || "pendente"}</em>
               </button>`;
             }).join("")}
@@ -1541,7 +1541,7 @@
     ];
     return `
       <article class="box calendar-board">
-        <div class="box-head"><div><strong>${P.selectedMonthLabel?.() || "Mes atual"}</strong><small>Calendario visual do recorte selecionado</small></div></div>
+        <div class="box-head"><div><strong>${P.selectedMonthLabel?.() || "Mês atual"}</strong><small>Calendário visual do recorte selecionado</small></div></div>
         <div class="calendar-weekdays"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sab</span></div>
         <div class="calendar-days">${cells.join("")}</div>
       </article>
@@ -1560,7 +1560,7 @@
 
   function renderCalendarOperationalSummary(calendar, mode = "shared") {
     const rows = [
-      { icon: "AG", title: mode === "personal" ? "Agenda pessoal" : "Agenda compartilhada", note: `${calendar.length} evento(s) ou prazo(s) disponiveis.`, label: `${calendar.length}`, tone: calendar.length ? "info" : "warn" },
+      { icon: "AG", title: mode === "personal" ? "Agenda pessoal" : "Agenda compartilhada", note: `${calendar.length} evento(s) ou prazo(s) disponíveis.`, label: `${calendar.length}`, tone: calendar.length ? "info" : "warn" },
       { icon: "CR", title: "Recursos compartilhados", note: `${calendar.filter(item => P.normalize([item.label, item.note].join(" ")).includes("carro")).length} item(ns) relacionados a carro oficial.`, label: "recurso", tone: "info" },
       { icon: "PZ", title: "Prazos", note: `${calendar.filter(item => P.normalize([item.label, item.note].join(" ")).includes("prazo")).length} item(ns) com sinal de prazo institucional.`, label: "prazo", tone: "warn" },
       { icon: "OK", title: "Fonte", note: calendar.length ? "Agenda pronta para consulta no recorte atual." : "Aguardando fonte oficial do calendario URE.", label: calendar.length ? "ok" : "pendente", tone: calendar.length ? "ok" : "warn" }
@@ -1595,7 +1595,7 @@
         </div>
         <span class="status-pill ${statusClass(item.status)}">${item.status === "ok" ? "ok" : "revisar"}</span>
       </article>
-    `).join("") : `<div class="empty-state">Checklist de qualidade nao carregado.</div>`;
+    `).join("") : `<div class="empty-state">Checklist de qualidade não carregado.</div>`;
   }
 
   function renderCtc(visits) {
@@ -1649,7 +1649,7 @@
     const schools = new Set(visible.map(visit => visit.place).filter(Boolean)).size;
     const dates = new Set(visible.map(visit => visit.date).filter(Boolean)).size;
     const rows = [
-      { icon: "CT", title: "Visitas tecnicas", note: `${visible.length}/${visits.length} visita(s) no recorte atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
+      { icon: "CT", title: "Visitas técnicas", note: `${visible.length}/${visits.length} visita(s) no recorte atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
       { icon: "US", title: "Tecnicos", note: `${owners} tecnico(s) com agenda visivel.`, label: `${owners}`, tone: owners ? "ok" : "warn" },
       { icon: "ES", title: "Escolas atendidas", note: `${schools} escola(s) aparecem nas visitas filtradas.`, label: `${schools}`, tone: schools ? "info" : "warn" },
       { icon: "AG", title: "Dias de agenda", note: `${dates} dia(s) distintos no recorte.`, label: `${dates}`, tone: dates ? "info" : "warn" }
@@ -1727,12 +1727,12 @@
     const cars = monthFiltered(carBookings(data), item => item.date).length;
     const metrics = [
       { icon: "ES", label: "Escolas", value: String(data.schools.length), note: "base regional", tone: "glow-lime" },
-      { icon: "IN", label: "Inventario", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
-      { icon: "AT", label: "Alertas", value: String(alerts), note: "manutencao/defeito", tone: "glow-amber" },
+      { icon: "IN", label: "Inventário", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
+      { icon: "AT", label: "Alertas", value: String(alerts), note: "manutenção/defeito", tone: "glow-amber" },
       { icon: "RD", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
       { icon: "SV", label: "Pendencias", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
       { icon: "&#128663;", label: "Carros", value: String(cars), note: "agendamentos", tone: "glow-teal" },
-      { icon: "US", label: "Usuarios", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
+      { icon: "US", label: "Usuários", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
     ];
     grid.innerHTML = metrics.map(item => `
       <article class="metric-card ${item.tone}">
@@ -1743,12 +1743,12 @@
       </article>
     `).join("");
     list.innerHTML = [
-      ["Supervisao", `${data.supervisors.length} supervisores com planilha oficial de maio conectada.`, "ok"],
-      ["Inventario", `${data.schoolAssets.length} linhas sanitizadas, sem previews brutos da 1.0.`, "ok"],
-      ["Redes e cameras", `${networkCount}/${data.schools.length} escola(s) com infraestrutura mapeada.`, networkCount === data.schools.length ? "ok" : "warn"],
+      ["Supervisão", `${data.supervisors.length} supervisores com planilha oficial de maio conectada.`, "ok"],
+      ["Inventário", `${data.schoolAssets.length} linhas sanitizadas, sem previews brutos da base anterior.`, "ok"],
+      ["Redes e câmeras", `${networkCount}/${data.schools.length} escola(s) com infraestrutura mapeada.`, networkCount === data.schools.length ? "ok" : "warn"],
       ["Carros", `${cars} agendamento(s) de carro oficial no recorte atual.`, cars ? "ok" : "info"],
       ["Chamados", `${data.calls.length} chamado(s) operacionais em acompanhamento.`, data.calls.some(call => call.status !== "resolvido") ? "warn" : "ok"],
-      ["Calendario", "Estrutura pronta para a agenda institucional.", "info"],
+      ["Calendário", "Estrutura pronta para a agenda institucional.", "info"],
       ["Publicacao", "2.0 publicado em repositorio proprio e GitHub Pages.", "ok"]
     ].map(([title, note, status]) => `
       <div class="data-row" data-search="${P.searchText([title, note, status])}">
@@ -1792,8 +1792,8 @@
     }
     const systemChecks = [
       { label: "Escolas carregadas", status: data.schools.length === 21 ? "ok" : "warn", note: `${data.schools.length}/21 escola(s)` },
-      { label: "Inventario carregado", status: data.schoolAssets.length ? "ok" : "warn", note: `${data.schoolAssets.length} linha(s)` },
-      { label: "Supervisao carregada", status: data.supervisors.length === 6 ? "ok" : "warn", note: `${data.supervisors.length}/6 supervisor(es)` },
+      { label: "Inventário carregado", status: data.schoolAssets.length ? "ok" : "warn", note: `${data.schoolAssets.length} linha(s)` },
+      { label: "Supervisão carregada", status: data.supervisors.length === 6 ? "ok" : "warn", note: `${data.supervisors.length}/6 supervisor(es)` },
       { label: "Contatos carregados", status: data.contacts.length ? "ok" : "warn", note: `${data.contacts.length} contato(s)` },
       {
         label: "Backend online",
@@ -1816,11 +1816,11 @@
         note: `${data.schoolProfiles.length}/${data.schools.length || 21} ficha(s) herdada(s) da v1`
       },
       {
-        label: "Usuarios importados da v1",
+        label: "Usuários importados da base anterior",
         status: data.users.length ? "ok" : "warn",
         note: `${data.users.length} usuário(s), ${linkedUsers} vinculado(s) a contatos`
       },
-      { label: "Perfis ativos", status: P.ROLE_ACCESS ? "ok" : "danger", note: P.ROLE_ACCESS ? `${Object.keys(P.ROLE_ACCESS).length} perfil(is)` : "matriz indisponivel" }
+      { label: "Perfis ativos", status: P.ROLE_ACCESS ? "ok" : "danger", note: P.ROLE_ACCESS ? `${Object.keys(P.ROLE_ACCESS).length} perfil(is)` : "matriz indisponível" }
     ];
     const rows = [...systemChecks, ...items];
     if (!grid) return;
