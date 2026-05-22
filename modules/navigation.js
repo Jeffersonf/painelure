@@ -17,7 +17,6 @@
 
   function routePage() {
     const hashPage = location.hash.replace("#", "");
-    const queryPage = new URLSearchParams(location.search).get("tela") || "";
     const base = routeBase();
     let path = location.pathname;
     if (base && path.toLowerCase().startsWith(base.toLowerCase())) {
@@ -25,26 +24,15 @@
     }
     const segment = path.replace(/^\/+|\/+$/g, "").split("/")[0];
     const page = segment === "acesso-admin" ? "dashboard" : segment;
-    if (queryPage && P.$(`#${pageId(queryPage)}`)) return queryPage;
     if (page && P.$(`#${pageId(page)}`)) return page;
     if (hashPage && P.$(`#${pageId(hashPage)}`)) return hashPage;
     return "";
   }
 
   function pageRoute(id) {
-    const url = new URL(location.href);
+    const base = routeBase();
     const page = id || "dashboard";
-    url.hash = "";
-    if (!/\/painelure\/?$/i.test(url.pathname)) {
-      const base = routeBase();
-      url.pathname = `${base || ""}/`;
-    }
-    if (page === "dashboard") {
-      url.searchParams.delete("tela");
-    } else {
-      url.searchParams.set("tela", page);
-    }
-    return `${url.pathname}${url.search}${url.hash}`;
+    return `${base || ""}/${page}`;
   }
 
   function pageLabel(page) {
@@ -85,7 +73,7 @@
   function accessDeniedMessage(id) {
     const role = P.currentRole?.() || "Consulta";
     const available = P.allowedPageLabels?.(role) || (P.roleAccess?.(role) || []).map(page => pageLabel(page)).join(", ");
-    return `Acesso negado a ${pageLabel(id)}. Categorias disponíveis para seu perfil: ${available || "nenhuma categoria liberada"}.`;
+    return `Acesso negado a ${pageLabel(id)}. Categorias disponiveis para seu perfil: ${available || "nenhuma categoria liberada"}.`;
   }
 
   function showAccessDenied(id) {

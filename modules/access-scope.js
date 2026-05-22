@@ -12,25 +12,25 @@
     Consulta: ["dashboard", "schools", "contacts"]
   };
   const ROLE_EMOJI = {
-    Administrador: "\uD83D\uDEE1\uFE0F",
-    Supervisao: "\uD83E\uDDED",
-    "Tecnicos CTC": "\uD83D\uDEE0\uFE0F",
-    SETEC: "\uD83C\uDF10",
-    SEINTEC: "\uD83D\uDCE1",
-    Gabinete: "\uD83D\uDCCC",
-    SEOM: "\uD83C\uDFD7\uFE0F",
-    Pedagogico: "\uD83D\uDCDA",
-    Consulta: "\uD83D\uDC41\uFE0F"
+    Administrador: "🛡️",
+    Supervisao: "🧭",
+    "Tecnicos CTC": "🛠️",
+    SETEC: "🌐",
+    SEINTEC: "📡",
+    Gabinete: "📌",
+    SEOM: "🏗️",
+    Pedagogico: "📚",
+    Consulta: "👁️"
   };
   const ROLE_NAMES = {
     Administrador: "Administrador",
-    Supervisao: "Supervis\u00E3o",
-    "Tecnicos CTC": "T\u00E9cnicos CTC",
+    Supervisao: "Supervisão",
+    "Tecnicos CTC": "Técnicos CTC",
     SETEC: "SETEC",
     SEINTEC: "SEINTEC",
     Gabinete: "Gabinete",
     SEOM: "SEOM",
-    Pedagogico: "Pedag\u00F3gico",
+    Pedagogico: "Pedagógico",
     Consulta: "Consulta"
   };
 
