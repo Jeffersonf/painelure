@@ -7,20 +7,23 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "maintenance-20260522";
-      window.PAINELURE_MAINTENANCE = true;
-      document.documentElement.classList.add("site-maintenance");
+      window.PAINELURE_BUILD = "maintenance-admin-20260522";
+      const params = new URLSearchParams(location.search);
+      window.PAINELURE_MAINTENANCE = params.get("admin") !== "1";
+      if (window.PAINELURE_MAINTENANCE) document.documentElement.classList.add("site-maintenance");
       const buildKey = "painelure2_build";
       const previousBuild = localStorage.getItem(buildKey);
       if (previousBuild && previousBuild !== window.PAINELURE_BUILD && !sessionStorage.getItem(`${buildKey}_reloaded`)) {
         sessionStorage.setItem(`${buildKey}_reloaded`, "true");
         localStorage.setItem(buildKey, window.PAINELURE_BUILD);
+        const nextUrl = new URL(location.href);
+        nextUrl.searchParams.set("v", window.PAINELURE_BUILD);
         if (window.caches) {
           caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))).finally(() => {
-            location.replace(`${location.pathname || "/index.html"}?v=${window.PAINELURE_BUILD}${location.hash || ""}`);
+            location.replace(nextUrl.toString());
           });
         } else {
-          location.replace(`${location.pathname || "/index.html"}?v=${window.PAINELURE_BUILD}${location.hash || ""}`);
+          location.replace(nextUrl.toString());
         }
       } else {
         localStorage.setItem(buildKey, window.PAINELURE_BUILD);
@@ -35,9 +38,9 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=maintenance-20260522">
+  <link rel="stylesheet" href="./styles.css?v=maintenance-admin-20260522">
 </head>
-<body class="site-maintenance">
+<body>
   <section class="login-screen" id="loginScreen">
     <div class="login-card maintenance-card">
       <div class="login-head">
@@ -57,6 +60,35 @@
         </div>
         <small>Obrigado pela compreensão.</small>
       </div>
+      <div class="admin-login-panel" id="loginForm">
+        <div class="login-badge">Acesso restrito</div>
+        <h1>Entrar no painel</h1>
+        <p>Use seu primeiro nome e PIN para entrar no painel.</p>
+        <label>
+          <span>Nome</span>
+          <input id="loginUserInput" type="text" autocomplete="username">
+        </label>
+        <label>
+          <span>PIN</span>
+          <input id="loginPinInput" type="password" inputmode="numeric" autocomplete="current-password">
+        </label>
+        <button class="primary-btn" type="button" id="loginSubmitBtn">Entrar</button>
+      </div>
+      <div id="pinChangeForm" hidden>
+        <h1>Crie um novo PIN</h1>
+        <p>Seu acesso ainda usa o PIN inicial. Escolha um novo PIN para continuar.</p>
+        <label>
+          <span>Novo PIN</span>
+          <input id="newPinInput" type="password" inputmode="numeric" autocomplete="new-password">
+        </label>
+        <label>
+          <span>Confirmar PIN</span>
+          <input id="confirmPinInput" type="password" inputmode="numeric" autocomplete="new-password">
+        </label>
+        <button class="primary-btn" type="button" id="pinChangeSubmitBtn">Salvar PIN</button>
+      </div>
+      <small id="loginStatus"></small>
+      <button class="login-help" type="button">Esqueci meu PIN</button>
     </div>
   </section>
 

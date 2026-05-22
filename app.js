@@ -171,6 +171,7 @@
 
   function init() {
     bindTheme();
+    if (window.PAINELURE_MAINTENANCE) return;
     P.bindMonthControls?.();
     P.renderPage("dashboard");
     P.bindNavigation({

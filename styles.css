@@ -152,6 +152,12 @@ body.site-maintenance .mobile-nav {
   display: none;
 }
 
+html.site-maintenance body .sidebar,
+html.site-maintenance body .main,
+html.site-maintenance body .mobile-nav {
+  display: none;
+}
+
 html.auth-pending .login-screen {
   visibility: hidden;
 }
@@ -432,6 +438,18 @@ select:focus-visible {
   min-height: 0;
   margin-top: 0;
   color: var(--tx2);
+}
+
+html.site-maintenance .admin-login-panel,
+html.site-maintenance #pinChangeForm,
+html.site-maintenance #loginStatus,
+html.site-maintenance .login-help {
+  display: none;
+}
+
+html:not(.site-maintenance) .maintenance-badge,
+html:not(.site-maintenance) .maintenance-message {
+  display: none;
 }
 
 .login-help {
@@ -776,8 +794,8 @@ select:focus-visible {
 
 .toast-stack {
   position: fixed;
-  top: 18px;
   right: 18px;
+  bottom: 18px;
   z-index: 9999;
   display: grid;
   gap: 10px;
@@ -797,7 +815,7 @@ select:focus-visible {
     color-mix(in srgb, var(--sf) 94%, transparent);
   box-shadow: 0 18px 48px rgba(0, 0, 0, .28);
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(8px);
   transition: opacity .18s ease, transform .18s ease;
 }
 
