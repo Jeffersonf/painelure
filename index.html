@@ -7,7 +7,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "restore-icons-20260522";
+      window.PAINELURE_BUILD = "nav-polish-20260522";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -40,7 +40,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=restore-icons-20260522">
+  <link rel="stylesheet" href="./styles.css?v=nav-polish-20260522">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -126,7 +126,6 @@
         <button type="button" data-jump="inventory"><span>&#128187; Invent.</span></button>
         <button type="button" data-jump="ctc"><span>&#128736;&#65039; CTC</span></button>
         <button type="button" data-jump="calls"><span>&#128229; Cham.</span></button>
-        <button type="button" data-jump="cars"><span>&#128663; Carros</span></button>
         <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
         <button type="button" data-jump="reports"><span>&#128200; Relat.</span></button>
       </div>
@@ -696,7 +695,7 @@
   <script src="./modules/ui-catalog.js?v=restore-icons-20260522"></script>
   <script src="./modules/data-store.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/identity.js?v=ux-login-sync-20260521"></script>
-  <script src="./modules/access-scope.js?v=ux-login-sync-20260521"></script>
+  <script src="./modules/access-scope.js?v=nav-polish-20260522"></script>
   <script src="./modules/month-state.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/csv.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/normalizers.js?v=ux-login-sync-20260521"></script>
@@ -706,8 +705,8 @@
   <script src="./modules/search.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/render.js?v=typography-polish-20260522"></script>
   <script src="./modules/supervision-render.js?v=ux-login-sync-20260521"></script>
-  <script src="./modules/navigation.js?v=typography-polish-20260522"></script>
+  <script src="./modules/navigation.js?v=nav-polish-20260522"></script>
   <script src="./modules/admin-tools.js?v=ux-login-sync-20260521"></script>
-  <script src="./app.js?v=typography-polish-20260522"></script>
+  <script src="./app.js?v=nav-polish-20260522"></script>
 </body>
 </html>
