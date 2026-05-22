@@ -65,7 +65,7 @@
 
   function renderApp() {
     renderedPages.clear();
-    const active = location.hash.replace("#", "") || "dashboard";
+    const active = P.routePage?.() || location.hash.replace("#", "") || "dashboard";
     renderPage(active, { force: true });
   }
 

@@ -7,6 +7,34 @@
 
   let previousPage = "dashboard";
 
+  function routeBase() {
+    const path = location.pathname.replace(/\/+$/, "");
+    const marker = "/painelure";
+    const index = path.toLowerCase().indexOf(marker);
+    if (index >= 0) return path.slice(0, index + marker.length);
+    return "";
+  }
+
+  function routePage() {
+    const hashPage = location.hash.replace("#", "");
+    const base = routeBase();
+    let path = location.pathname;
+    if (base && path.toLowerCase().startsWith(base.toLowerCase())) {
+      path = path.slice(base.length);
+    }
+    const segment = path.replace(/^\/+|\/+$/g, "").split("/")[0];
+    const page = segment === "acesso-admin" ? "dashboard" : segment;
+    if (page && P.$(`#${pageId(page)}`)) return page;
+    if (hashPage && P.$(`#${pageId(hashPage)}`)) return hashPage;
+    return "";
+  }
+
+  function pageRoute(id) {
+    const base = routeBase();
+    const page = id || "dashboard";
+    return `${base || ""}/${page}`;
+  }
+
   function pageLabel(page) {
     return P.pageMeta?.(page)?.label || page;
   }
@@ -77,7 +105,7 @@
     P.$all("[data-page]").forEach(btn => btn.classList.toggle("active", btn.dataset.page === id));
     updateGlobalPageHeading(id);
     P.applyAccessState?.();
-    history.replaceState(null, "", `#${id}`);
+    history.replaceState(null, "", pageRoute(id));
     P.clearSearch();
     window.scrollTo(0, 0);
     return true;
@@ -131,7 +159,7 @@
   }
 
   function restoreInitialPage() {
-    const initial = location.hash.replace("#", "");
+    const initial = routePage();
     if (initial && P.$(`#${pageId(initial)}`)) {
       setPage(initial);
       return true;
@@ -144,5 +172,6 @@
   P.showToast = showToast;
   P.updateGlobalPageHeading = updateGlobalPageHeading;
   P.bindNavigation = bindNavigation;
+  P.routePage = routePage;
   P.restoreInitialPage = restoreInitialPage;
 })();
