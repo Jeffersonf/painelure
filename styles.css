@@ -1225,10 +1225,10 @@ html:not(.site-maintenance) .maintenance-message {
 .page-header h1 {
   margin: 0;
   color: var(--tx);
-  font-family: var(--font-display);
-  font-size: 30px;
+  font-family: var(--font-ui);
+  font-size: 28px;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.12;
   letter-spacing: 0;
 }
 
@@ -1591,9 +1591,9 @@ html:not(.site-maintenance) .maintenance-message {
 .widget-head strong,
 .box-head strong,
 .table-head strong {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .box-head small,
@@ -4804,9 +4804,9 @@ html:not(.site-maintenance) .maintenance-message {
   padding: 18px 20px;
   border-bottom: 1px solid var(--bd2);
   color: var(--tx);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .settings-section[data-admin-collapsible] .settings-title {

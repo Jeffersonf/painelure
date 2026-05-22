@@ -2,25 +2,25 @@
   const P = window.PainelURE;
 
   const PAGE_META = {
-    dashboard: { icon: "📊", label: "Painel", note: "Visao inicial e atalhos", type: "Pagina" },
-    schools: { icon: "🏫", label: "Escolas", note: "Unidades e detalhes", type: "Pagina" },
-    network: { icon: "🌐", label: "Redes e cameras", note: "Infraestrutura por escola", type: "Pagina" },
-    inventory: { icon: "💻", label: "Inventario", note: "Equipamentos e status", type: "Pagina" },
-    ctc: { icon: "🛠️", label: "Tecnicos CTC", note: "Agenda tecnica", type: "Pagina" },
-    calls: { icon: "📥", label: "Chamados", note: "Fila operacional", type: "Pagina" },
-    cars: { icon: "🚗", label: "Carros", note: "Agendamento oficial", type: "Pagina" },
-    supervision: { icon: "🧭", label: "Supervisao", note: "Metas e vinculos", type: "Pagina" },
-    contacts: { icon: "☎️", label: "Contatos", note: "Setores e ramais", type: "Pagina" },
-    calendar: { icon: "📅", label: "Calendario URE", note: "Agenda institucional", type: "Pagina" },
-    reports: { icon: "📈", label: "Relatorios", note: "Acesso administrativo", type: "Pagina" },
-    profiles: { icon: "🧩", label: "Perfis", note: "Matriz de acesso", type: "Pagina" },
-    quality: { icon: "✅", label: "Qualidade", note: "Checklist do painel", type: "Pagina" },
-    admin: { icon: "🔐", label: "Admin", note: "Fontes, backups e publicacao", type: "Pagina" },
-    user: { icon: "⚙️", label: "Conta", note: "Perfil e preferencias", type: "Pagina" }
+    dashboard: { icon: "PN", label: "Painel", note: "Visão inicial e atalhos", type: "Página" },
+    schools: { icon: "ES", label: "Escolas", note: "Unidades e detalhes", type: "Página" },
+    network: { icon: "RD", label: "Redes e câmeras", note: "Infraestrutura por escola", type: "Página" },
+    inventory: { icon: "IN", label: "Inventário", note: "Equipamentos e status", type: "Página" },
+    ctc: { icon: "CT", label: "Técnicos CTC", note: "Agenda técnica", type: "Página" },
+    calls: { icon: "CH", label: "Chamados", note: "Fila operacional", type: "Página" },
+    cars: { icon: "CR", label: "Carros", note: "Agendamento oficial", type: "Página" },
+    supervision: { icon: "SV", label: "Supervisão", note: "Metas e vínculos", type: "Página" },
+    contacts: { icon: "CO", label: "Contatos", note: "Setores e ramais", type: "Página" },
+    calendar: { icon: "AG", label: "Calendário URE", note: "Agenda institucional", type: "Página" },
+    reports: { icon: "RL", label: "Relatórios", note: "Acesso administrativo", type: "Página" },
+    profiles: { icon: "PF", label: "Perfis", note: "Matriz de acesso", type: "Página" },
+    quality: { icon: "QA", label: "Qualidade", note: "Checklist do painel", type: "Página" },
+    admin: { icon: "AD", label: "Admin", note: "Fontes, backups e publicação", type: "Página" },
+    user: { icon: "US", label: "Conta", note: "Perfil e preferências", type: "Página" }
   };
 
   function pageMeta(page) {
-    return PAGE_META[page] || { icon: "•", label: page, note: "Disponivel para este perfil", type: "Pagina" };
+    return PAGE_META[page] || { icon: "--", label: page, note: "Disponível para este perfil", type: "Página" };
   }
 
   function pageEntries(pages) {
