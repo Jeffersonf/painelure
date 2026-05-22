@@ -153,6 +153,54 @@ function hasAppData(appData = {}) {
   );
 }
 
+function normalizeKey(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function schoolKey(school = {}) {
+  return normalizeKey(school.name || school.school || school.nome || "");
+}
+
+function staticSchools() {
+  return loadFrontendSeedData().schools || [];
+}
+
+function hydrateStaticSchools(appData = {}) {
+  const fixedSchools = staticSchools();
+  if (!fixedSchools.length) return appData || {};
+  const incoming = Array.isArray(appData.schools) ? appData.schools : [];
+  const incomingByKey = new Map(incoming.map(school => [schoolKey(school), school]));
+  const fixedKeys = new Set(fixedSchools.map(schoolKey));
+  const mergedFixed = fixedSchools.map(fixed => ({
+    ...(incomingByKey.get(schoolKey(fixed)) || {}),
+    ...fixed,
+    city: fixed.city || fixed.municipio || fixed.cidade || "",
+    cie: fixed.cie || fixed.codigoCie || fixed.codigo_cie || fixed.code || fixed.codigo || ""
+  }));
+  const unknownIncoming = incoming.filter(school => schoolKey(school) && !fixedKeys.has(schoolKey(school)));
+  return {
+    ...(appData || {}),
+    schools: [...mergedFixed, ...unknownIncoming]
+  };
+}
+
+function pruneStaticAppData(appData = {}) {
+  const { schools, ...mutableData } = appData || {};
+  return mutableData;
+}
+
+function hydrateStore(store) {
+  if (!store?.appData) return store;
+  return {
+    ...store,
+    appData: hydrateStaticSchools(store.appData)
+  };
+}
+
 function frontendSeedStoreData() {
   if (!frontendSeedStore) {
     frontendSeedStore = {
@@ -217,7 +265,7 @@ function buildStore(appData, source = "api") {
     version: 1,
     source,
     updatedAt: new Date().toISOString(),
-    appData
+    appData: pruneStaticAppData(appData)
   };
 }
 
@@ -241,12 +289,7 @@ function assertStoreWriteIsFresh(current, baseUpdatedAt, options = {}) {
 }
 
 function saveLocalStore(appData, source = "api") {
-  const payload = {
-    version: 1,
-    source,
-    updatedAt: new Date().toISOString(),
-    appData
-  };
+  const payload = buildStore(appData, source);
   writeJsonFile(DATA_FILE, payload);
   return payload;
 }
@@ -338,11 +381,11 @@ async function initDatabase() {
 async function readStore() {
   if (!pool || !dbReady) {
     const store = currentStore();
-    return hasAppData(store?.appData) ? store : frontendSeedStoreData();
+    return hasAppData(store?.appData) ? hydrateStore(store) : frontendSeedStoreData();
   }
   const result = await pool.query("select payload from app_state where id = $1", ["main"]);
   const store = result.rows[0] ? result.rows[0].payload : null;
-  return hasAppData(store?.appData) ? store : frontendSeedStoreData();
+  return hasAppData(store?.appData) ? hydrateStore(store) : frontendSeedStoreData();
 }
 
 async function saveStore(appData, source = "api", options = {}) {

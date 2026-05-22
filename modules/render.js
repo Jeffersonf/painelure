@@ -230,11 +230,25 @@
     });
   }
 
+  function schoolCity(school = {}) {
+    return school.city || school.municipio || school.cidade || school.town || school.municipality || "";
+  }
+
+  function schoolCie(school = {}) {
+    return school.cie || school.codigoCie || school.codigo_cie || school.code || school.codigo || "";
+  }
+
+  function schoolSubtitle(school = {}) {
+    const city = schoolCity(school) || "Munic\u00edpio n\u00e3o informado";
+    const cie = schoolCie(school);
+    return cie ? `${city} | CIE ${cie}` : city;
+  }
+
   function renderSchoolCityFilter(schools) {
     const select = P.$("#schoolCityFilter");
     if (!select) return;
     const current = select.value || "all";
-    const cities = [...new Set(schools.map(school => school.city).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const cities = [...new Set(schools.map(schoolCity).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     setSelectOptions(select, [
       { value: "all", label: "Todos" },
       ...cities.map(city => ({ value: P.searchText([city]), label: city }))
@@ -334,7 +348,7 @@
     const title = P.$("#schoolDetailTitle");
     const subtitle = P.$("#schoolDetailSubtitle");
     if (title) title.textContent = school.name;
-    if (subtitle) subtitle.textContent = `${school.city} | CIE ${school.cie}`;
+    if (subtitle) subtitle.textContent = schoolSubtitle(school);
     renderSchoolDetail(school, "#schoolDetailPageBody");
     P.setPage?.("school-detail");
   }
@@ -696,18 +710,18 @@
     renderSchoolCityFilter(schools);
     const safeSchools = schools.filter(school => school && school.name);
     const sorted = [...safeSchools].sort((a, b) =>
-      String(a.city || "").localeCompare(String(b.city || ""))
+      String(schoolCity(a)).localeCompare(String(schoolCity(b)))
       || String(a.name || "").localeCompare(String(b.name || ""))
     );
     grid.innerHTML = `
       <section class="schools-board">
         ${sorted.map(school => `
-        <button class="school-card school-compact-card" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([school.city])}" data-search="${P.searchText([school.name, school.city, school.cie, school.initials])}">
+        <button class="school-card school-compact-card" type="button" data-school-name="${school.name}" data-school-key="${P.searchText([school.name])}" data-city="${P.searchText([schoolCity(school)])}" data-search="${P.searchText([school.name, schoolCity(school), schoolCie(school), school.initials])}">
           <div class="school-compact-main">
             <div class="school-avatar">&#127979;</div>
             <div class="school-compact-title">
               <strong>${school.name}</strong>
-              <small>${school.city} | CIE ${school.cie}</small>
+              <small>${schoolSubtitle(school)}</small>
             </div>
           </div>
         </button>
@@ -756,7 +770,7 @@
           <div class="school-profile-title">
             <div class="school-avatar large">&#127979;</div>
             <div>
-              <span class="eyebrow">${school.city} | CIE ${school.cie}</span>
+              <span class="eyebrow">${schoolSubtitle(school)}</span>
               <strong>Ficha operacional</strong>
             </div>
           </div>
@@ -837,8 +851,8 @@
           ${canEditSchoolData() ? `<article class="box school-edit-card wide">
             <div class="box-head"><div><strong>Editar dados</strong><small>Alteracoes ficam salvas neste painel.</small></div><span class="status-pill info">aberto</span></div>
             <form class="school-edit-form" data-school-edit-form>
-              <label><span>Municipio</span><input name="city" value="${attrValue(school.city)}"></label>
-              <label><span>CIE</span><input name="cie" value="${attrValue(school.cie)}"></label>
+              <label><span>Municipio</span><input name="city" value="${attrValue(schoolCity(school))}"></label>
+              <label><span>CIE</span><input name="cie" value="${attrValue(schoolCie(school))}"></label>
               <label><span>Direcao</span><input name="director" value="${attrValue(profile?.director)}"></label>
               <label><span>Vice-direcao</span><input name="viceDirector" value="${attrValue(profile?.viceDirector)}"></label>
               <label><span>PROATI</span><input name="proati" value="${attrValue(profile?.proati)}"></label>
@@ -954,7 +968,7 @@
         <div>
           <small>Escola selecionada</small>
           <strong>${selectedName}</strong>
-          <p>${school ? `${school.city} | CIE ${school.cie}` : "Escola fora da lista mestre."}</p>
+          <p>${school ? schoolSubtitle(school) : "Escola fora da lista mestre."}</p>
         </div>
         <div class="detail-actions">
           <button class="ghost-btn" type="button" data-open-school="${selectedName}">Abrir escola</button>

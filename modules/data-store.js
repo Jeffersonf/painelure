@@ -38,9 +38,39 @@
     return "";
   }
 
+  function schoolKey(school = {}) {
+    return P.normalize?.(school.name || school.school || school.nome || "") || String(school.name || school.school || school.nome || "").toLowerCase().trim();
+  }
+
+  function staticSchoolCatalog() {
+    return Array.isArray(P.seedData?.schools) ? P.seedData.schools : [];
+  }
+
+  function normalizeSchoolRecord(school = {}) {
+    const fixed = staticSchoolCatalog().find(item => schoolKey(item) === schoolKey(school)) || {};
+    const city = fixed.city || fixed.municipio || fixed.cidade || school.city || school.municipio || school.cidade || school.town || school.municipality || "";
+    const cie = fixed.cie || fixed.codigoCie || fixed.codigo_cie || school.cie || school.codigoCie || school.codigo_cie || school.code || school.codigo || "";
+    return {
+      ...school,
+      ...fixed,
+      city,
+      cie
+    };
+  }
+
+  function normalizeSchools(source = {}) {
+    const fixedSchools = staticSchoolCatalog();
+    const incoming = Array.isArray(source.schools) ? source.schools : [];
+    const incomingByKey = new Map(incoming.map(school => [schoolKey(school), school]));
+    const mergedFixed = fixedSchools.map(fixed => normalizeSchoolRecord({ ...(incomingByKey.get(schoolKey(fixed)) || {}), ...fixed }));
+    const fixedKeys = new Set(mergedFixed.map(schoolKey));
+    const unknownIncoming = incoming.filter(school => schoolKey(school) && !fixedKeys.has(schoolKey(school))).map(normalizeSchoolRecord);
+    return [...mergedFixed, ...unknownIncoming];
+  }
+
   function normalizeAppData(source = {}) {
     return {
-      schools: Array.isArray(source.schools) ? source.schools : [],
+      schools: normalizeSchools(source),
       networkData: source.networkData && typeof source.networkData === "object" ? source.networkData : {},
       schoolInventoryMetrics: source.schoolInventoryMetrics && typeof source.schoolInventoryMetrics === "object" ? source.schoolInventoryMetrics : {},
       schoolProfiles: Array.isArray(source.schoolProfiles) ? source.schoolProfiles : [],
@@ -61,6 +91,11 @@
       users: Array.isArray(source.users) ? source.users : [],
       adminChecks: Array.isArray(source.adminChecks) ? source.adminChecks : []
     };
+  }
+
+  function appDataForBackend(source = getAppData()) {
+    const { schools, ...mutableData } = normalizeAppData(source);
+    return mutableData;
   }
 
   function setAppData(nextData) {
@@ -123,6 +158,7 @@
 
   P.EMPTY_DATA = EMPTY_DATA;
   P.normalizeAppData = normalizeAppData;
+  P.appDataForBackend = appDataForBackend;
   P.setAppData = setAppData;
   P.getAppData = getAppData;
   P.saveAppData = saveAppData;

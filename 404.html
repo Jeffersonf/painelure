@@ -7,7 +7,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "schools-route-fix-20260522";
+      window.PAINELURE_BUILD = "static-schools-fix-20260522";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -693,7 +693,7 @@
   <script src="./data/sources.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/dom.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/ui-catalog.js?v=restore-icons-20260522"></script>
-  <script src="./modules/data-store.js?v=ux-login-sync-20260521"></script>
+  <script src="./modules/data-store.js?v=static-schools-fix-20260522"></script>
   <script src="./modules/identity.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/access-scope.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/month-state.js?v=ux-login-sync-20260521"></script>
@@ -701,9 +701,9 @@
   <script src="./modules/normalizers.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/source-loader.js?v=ux-login-sync-20260521"></script>
   <script src="./config.js?v=ux-login-sync-20260521"></script>
-  <script src="./modules/backend-client.js?v=ux-login-sync-20260521"></script>
-  <script src="./modules/search.js?v=ux-login-sync-20260521"></script>
-  <script src="./modules/render.js?v=schools-route-fix-20260522"></script>
+  <script src="./modules/backend-client.js?v=static-schools-fix-20260522"></script>
+  <script src="./modules/search.js?v=school-city-fix-20260522"></script>
+  <script src="./modules/render.js?v=school-city-fix-20260522"></script>
   <script src="./modules/supervision-render.js?v=ux-login-sync-20260521"></script>
   <script src="./modules/navigation.js?v=schools-route-fix-20260522"></script>
   <script src="./modules/admin-tools.js?v=ux-login-sync-20260521"></script>

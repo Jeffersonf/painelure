@@ -94,7 +94,7 @@
       method: "PUT",
       headers,
       body: JSON.stringify({
-        appData: P.getAppData(),
+        appData: P.appDataForBackend ? P.appDataForBackend() : P.getAppData(),
         baseUpdatedAt: P.backendStatus?.updatedAt || P.localCacheMeta?.backendUpdatedAt || ""
       }),
       timeoutMs: 12000

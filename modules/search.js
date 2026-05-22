@@ -13,6 +13,20 @@
     return normalize(values.filter(Boolean).join(" "));
   }
 
+  function schoolCity(item = {}) {
+    return item.city || item.municipio || item.cidade || item.town || item.municipality || "";
+  }
+
+  function schoolCie(item = {}) {
+    return item.cie || item.codigoCie || item.codigo_cie || item.code || item.codigo || "";
+  }
+
+  function schoolNote(item = {}) {
+    const city = schoolCity(item) || "Munic\u00edpio n\u00e3o informado";
+    const cie = schoolCie(item);
+    return cie ? `${city} | CIE ${cie}` : city;
+  }
+
   function searchableItems() {
     const activePage = P.$(".page.active");
     if (!activePage) return [];
@@ -39,7 +53,7 @@
     });
     return [
       ...pages,
-      ...(data.schools || []).map(item => ({ page: "schools", title: item.name, type: "Escola", note: `${item.city} | CIE ${item.cie}`, focus: item.name })),
+      ...(data.schools || []).map(item => ({ page: "schools", title: item.name, type: "Escola", note: schoolNote(item), focus: item.name })),
       ...Object.keys(data.networkData || {}).map(name => ({ page: "network", title: name, type: "Rede", note: "Infraestrutura e cameras", focus: name })),
       ...(data.schoolAssets || []).map(item => ({
         page: "inventory",
