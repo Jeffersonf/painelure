@@ -54,7 +54,7 @@ Use `CORS_ORIGIN` quando o frontend estiver no GitHub Pages e o backend em outro
 - `GET /api/health`
 - `GET /health`
 - `GET /api/data`
-- `PUT /api/data`
+- `PUT /api/data` exige `baseUpdatedAt` da ultima leitura. Retorna `409 STALE_APP_STATE` se o cliente tentar gravar sobre uma versao mais nova. Scripts administrativos podem enviar `force: true`.
 - `POST /api/import/:tipo`
 - `POST /api/auth/login`
 - `POST /api/auth/logout`

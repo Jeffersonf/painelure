@@ -85,7 +85,7 @@ function send(res, status, body, headers = {}) {
       ? {
           "Access-Control-Allow-Origin": CORS_ORIGIN,
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
         }
       : {}),
     ...headers
@@ -176,7 +176,7 @@ async function seedLocalUsersFromFrontend() {
     contact_id: String(user.contactId || user.contact_id || "").trim(),
     password_hash: hashPassword("1234"),
     avatar: user.avatar || "",
-    preferences: { ...(user.preferences || {}), forcePinChange: true, seededLocal: true }
+    preferences: { ...(user.preferences || {}), pin: "1234", forcePinChange: true, seededLocal: true }
   })).filter(user => user.username);
   if (!users.length) return false;
   await saveLocalUsers(users);
@@ -221,6 +221,25 @@ function buildStore(appData, source = "api") {
   };
 }
 
+function apiError(statusCode, message, metadata = {}) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  error.metadata = metadata;
+  return error;
+}
+
+function assertStoreWriteIsFresh(current, baseUpdatedAt, options = {}) {
+  if (options.force) return;
+  const currentUpdatedAt = String(current?.updatedAt || "");
+  if (!currentUpdatedAt) return;
+  if (String(baseUpdatedAt || "") === currentUpdatedAt) return;
+  throw apiError(409, "Estado online mais novo encontrado. Recarregue antes de salvar.", {
+    code: "STALE_APP_STATE",
+    currentUpdatedAt,
+    baseUpdatedAt: baseUpdatedAt || ""
+  });
+}
+
 function saveLocalStore(appData, source = "api") {
   const payload = {
     version: 1,
@@ -230,6 +249,11 @@ function saveLocalStore(appData, source = "api") {
   };
   writeJsonFile(DATA_FILE, payload);
   return payload;
+}
+
+function saveFreshLocalStore(appData, source = "api", options = {}) {
+  assertStoreWriteIsFresh(currentStore(), options.baseUpdatedAt, options);
+  return saveLocalStore(appData, source);
 }
 
 async function initDatabase() {
@@ -321,9 +345,11 @@ async function readStore() {
   return hasAppData(store?.appData) ? store : frontendSeedStoreData();
 }
 
-async function saveStore(appData, source = "api") {
+async function saveStore(appData, source = "api", options = {}) {
   const payload = buildStore(appData, source);
-  if (!pool || !dbReady) return saveLocalStore(appData, source);
+  if (!pool || !dbReady) return saveFreshLocalStore(appData, source, options);
+  const current = await readStore();
+  assertStoreWriteIsFresh(current, options.baseUpdatedAt, options);
   await pool.query(
     `
       insert into app_state (id, payload, source, updated_at)
@@ -522,6 +548,7 @@ async function storeStatus() {
 
 function publicUser(user) {
   if (!user) return null;
+  const preferences = user.preferences || {};
   return {
     id: user.id,
     username: user.username,
@@ -529,7 +556,8 @@ function publicUser(user) {
     role: user.role,
     contactId: user.contact_id || user.contactId || "",
     avatar: user.avatar || "",
-    preferences: user.preferences || {}
+    pin: preferences.pin || "",
+    preferences
   };
 }
 
@@ -544,6 +572,12 @@ function verifyPassword(password, storedHash) {
   const candidate = hashPassword(password, salt).split("$")[2];
   if (candidate.length !== hash.length) return false;
   return crypto.timingSafeEqual(Buffer.from(candidate, "hex"), Buffer.from(hash, "hex"));
+}
+
+function verifyUserPassword(password, user) {
+  const visiblePin = user?.preferences?.pin;
+  if (visiblePin) return String(password) === String(visiblePin);
+  return verifyPassword(password, user?.password_hash);
 }
 
 function normalizeText(value) {
@@ -713,15 +747,19 @@ async function saveLocalUsers(users) {
 }
 
 async function createUser(input) {
+  const password = String(input.password || crypto.randomBytes(12).toString("hex"));
   const user = {
     id: crypto.randomUUID(),
     username: String(input.username || "").trim().toLowerCase(),
     name: String(input.name || input.username || "Usuario").trim(),
     role: String(input.role || "Consulta").trim(),
     contact_id: String(input.contactId || input.contact_id || "").trim(),
-    password_hash: hashPassword(input.password || crypto.randomBytes(12).toString("hex")),
+    password_hash: hashPassword(password),
     avatar: input.avatar || "",
-    preferences: input.preferences || {}
+    preferences: {
+      ...(input.preferences || {}),
+      pin: input.pin || password
+    }
   };
   if (!user.username) throw new Error("Usuario obrigatorio.");
   if (pool && dbReady) {
@@ -753,7 +791,13 @@ async function updateUser(id, patch) {
     avatar: patch.avatar !== undefined ? String(patch.avatar || "") : current.avatar,
     preferences: patch.preferences !== undefined ? patch.preferences || {} : current.preferences || {}
   };
-  if (patch.password) next.password_hash = hashPassword(patch.password);
+  if (patch.password) {
+    next.password_hash = hashPassword(patch.password);
+    next.preferences = {
+      ...(next.preferences || {}),
+      pin: String(patch.password)
+    };
+  }
   if (pool && dbReady) {
     const result = await pool.query(
       `
@@ -769,6 +813,21 @@ async function updateUser(id, patch) {
   const users = currentUsers().map(user => (user.id === id ? next : user));
   await saveLocalUsers(users);
   return publicUser(next);
+}
+
+async function deleteUser(id) {
+  const current = await findUserById(id);
+  if (!current) throw new Error("Usuario nao encontrado.");
+  for (const [token, session] of sessions.entries()) {
+    if (session?.userId === id) sessions.delete(token);
+  }
+  saveLocalSessions();
+  if (pool && dbReady) {
+    await pool.query("delete from users where id = $1", [id]);
+  } else {
+    await saveLocalUsers(currentUsers().filter(user => user.id !== id));
+  }
+  return publicUser(current);
 }
 
 async function ensureBootstrapUser() {
@@ -1147,7 +1206,7 @@ async function handleApi(req, res, pathname) {
     const password = String(body.password || "");
     if (username && password) {
       const user = await findUserByUsername(username);
-      if (user && verifyPassword(password, user.password_hash)) {
+      if (user && verifyUserPassword(password, user)) {
         const preferences = {
           ...(user.preferences || {}),
           lastLoginAt: new Date().toISOString()
@@ -1216,6 +1275,15 @@ async function handleApi(req, res, pathname) {
     return;
   }
 
+  if (req.method === "DELETE" && pathname.startsWith("/api/users/")) {
+    if (!requireAdmin(req, res, "Apenas administrador pode remover usuarios.")) return;
+    const id = decodeURIComponent(pathname.split("/").pop());
+    const user = await deleteUser(id);
+    await audit(req, "delete", "user", id, "Usuario removido.", { role: user.role });
+    send(res, 200, { ok: true, user });
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/api/sources") {
     send(res, 200, { ok: true, sources: await listOfficialSources() });
     return;
@@ -1264,7 +1332,10 @@ async function handleApi(req, res, pathname) {
   if (req.method === "PUT" && pathname === "/api/data") {
     if (!requireAdmin(req, res, "Apenas administrador pode gravar o estado online.")) return;
     const body = JSON.parse(await readBody(req) || "{}");
-    const data = await saveStore(body.appData || body, "api");
+    const data = await saveStore(body.appData || body, "api", {
+      baseUpdatedAt: body.baseUpdatedAt || "",
+      force: body.force === true
+    });
     await audit(req, "update", "app_state", "main", "Estado do app atualizado.", {});
     send(res, 200, { ok: true, data, storage: await storeStatus() });
     return;
@@ -1286,7 +1357,7 @@ async function handleApi(req, res, pathname) {
     send(res, 200, {
       ok: true,
       rows: rows.length,
-      data: await saveStore(appData, `import:${type}`),
+      data: await saveStore(appData, `import:${type}`, { force: true }),
       storage: await storeStatus()
     });
     return;
@@ -1304,7 +1375,11 @@ const server = http.createServer((req, res) => {
   }
   if (isApiRoute) {
     handleApi(req, res, url.pathname).catch(error => {
-      send(res, 500, { ok: false, error: error.message });
+      send(res, error.statusCode || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.metadata || {})
+      });
     });
     return;
   }

@@ -49,6 +49,7 @@ async function main() {
         password: pin,
         preferences: {
           ...(user.preferences || {}),
+          pin,
           forcePinChange: true,
           initialPinIssuedAt: new Date().toISOString()
         }

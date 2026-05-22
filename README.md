@@ -1,6 +1,6 @@
-# PainelURE 2.0
+# PainelURE
 
-Reconstrucao limpa do PainelURE, separada da versao oficial 1.0.
+Base oficial nova do PainelURE, preparada para substituir o SETECHUB/PainelURE atual sem depender de dados definitivos no navegador.
 
 ## Norte do projeto
 
@@ -9,7 +9,9 @@ O Finanza e a referencia principal de usabilidade, ritmo visual, densidade e pol
 ## Status
 
 - Interface estatica pronta para GitHub Pages.
-- Dados oficiais entram por seeds locais e fontes CSV configuradas.
+- Backend online-first com Postgres, snapshots, auditoria e protecao contra sobrescrita antiga.
+- Migracao do SETECHUB online disponivel por script.
+- PINs ficam no backend em `preferences.pin` para administracao.
 - Credenciais reais nao sao publicadas no frontend.
 
 ## Execucao local
@@ -34,4 +36,10 @@ Se a porta estiver ocupada:
 $env:PORT='4174'; npm start
 ```
 
-Documentacao: `docs/backend.md`.
+Documentacao principal:
+
+- `docs/backend.md`
+- `docs/melhorias-finanza-setechub.md`
+- `docs/migracao-setechub.md`
+- `docs/passo-a-passo-virada-hoje.md`
+- `docs/transicao-oficial.md`

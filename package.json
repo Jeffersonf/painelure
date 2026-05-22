@@ -1,13 +1,16 @@
 {
-  "name": "painelure2",
+  "name": "painelure",
   "version": "2.0.0",
   "private": true,
-  "description": "PainelURE 2.0 frontend estatico com backend local evoluivel.",
+  "description": "PainelURE oficial com frontend estatico, backend online-first e migracao do SETECHUB.",
   "scripts": {
     "start": "node server/index.js",
-    "check": "node scripts/check-js.js && node scripts/check-access-scope.js && node scripts/check-backend-routes.js",
+    "check": "node scripts/check-js.js && node scripts/check-access-scope.js && node scripts/check-backend-routes.js && node scripts/check-official-transition.js",
     "seed:online": "node scripts/seed-online.js",
-    "pins:reset-online": "node scripts/reset-online-pins.js"
+    "pins:reset-online": "node scripts/reset-online-pins.js",
+    "migrate:setechub": "node scripts/migrate-setechub-online.js",
+    "migrate:setechub:online": "node scripts/migrate-setechub-online.js --push",
+    "cutover:today": "node scripts/cutover-today-check.js"
   },
   "engines": {
     "node": ">=18"

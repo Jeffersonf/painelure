@@ -33,7 +33,19 @@
     const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs || API_TIMEOUT);
     try {
       const response = await fetch(url, { ...options, signal: controller.signal, cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        let payload = null;
+        try {
+          payload = await response.json();
+        } catch (error) {
+          payload = null;
+        }
+        const message = payload?.error || `HTTP ${response.status}`;
+        const fetchError = new Error(message);
+        fetchError.status = response.status;
+        fetchError.payload = payload;
+        throw fetchError;
+      }
       return response.json();
     } finally {
       window.clearTimeout(timeout);
@@ -66,6 +78,7 @@
         P.setAppData({ ...(P.getAppData() || {}), ...appData });
         P.applyLoadedSourceData?.();
         P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt || "" };
+        P.saveAppData?.();
       }
       return payload;
     } catch (error) {
@@ -77,12 +90,20 @@
   async function pushBackendData(token) {
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
-    return fetchApi("/api/data", {
+    const payload = await fetchApi("/api/data", {
       method: "PUT",
       headers,
-      body: JSON.stringify({ appData: P.getAppData() }),
+      body: JSON.stringify({
+        appData: P.getAppData(),
+        baseUpdatedAt: P.backendStatus?.updatedAt || P.localCacheMeta?.backendUpdatedAt || ""
+      }),
       timeoutMs: 12000
     });
+    if (payload?.data?.updatedAt) {
+      P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt };
+      P.saveAppData?.();
+    }
+    return payload;
   }
 
   async function loginBackend(credentials) {
@@ -152,6 +173,16 @@
     });
   }
 
+  async function deleteBackendUser(token, id) {
+    const headers = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetchApi(`/api/users/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers,
+      timeoutMs: 4000
+    });
+  }
+
   async function loadBackendHealth() {
     return fetchApi("/api/health", { timeoutMs: 15000 });
   }
@@ -198,6 +229,7 @@
   P.loadBackendUsers = loadBackendUsers;
   P.createBackendUser = createBackendUser;
   P.updateBackendUserById = updateBackendUserById;
+  P.deleteBackendUser = deleteBackendUser;
   P.loadBackendHealth = loadBackendHealth;
   P.loadBackendSources = loadBackendSources;
   P.saveBackendSources = saveBackendSources;

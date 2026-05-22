@@ -121,6 +121,7 @@ async function seedUsers(token, users) {
         contactId: seed.contactId || "",
         preferences: {
           ...(seed.preferences || {}),
+          pin: password,
           forcePinChange: true,
           initialPinIssuedAt: new Date().toISOString()
         }
@@ -148,7 +149,7 @@ async function main() {
   await request("/api/data", {
     method: "PUT",
     headers,
-    body: JSON.stringify({ appData })
+    body: JSON.stringify({ appData, force: true })
   });
 
   await request("/api/sources", {

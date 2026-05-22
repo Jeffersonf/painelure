@@ -20,6 +20,7 @@ function routeBlock(marker) {
   'if (req.method === "GET" && pathname === "/api/users")',
   'if (req.method === "POST" && pathname === "/api/users")',
   'if (req.method === "PUT" && pathname.startsWith("/api/users/"))',
+  'if (req.method === "DELETE" && pathname.startsWith("/api/users/"))',
   'if (req.method === "PUT" && pathname === "/api/sources")',
   'if (req.method === "GET" && pathname === "/api/snapshots")',
   'if (req.method === "GET" && pathname === "/api/audit")',

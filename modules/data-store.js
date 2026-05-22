@@ -73,6 +73,10 @@
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
         if (saved?.version === STORAGE_VERSION && saved?.appData) {
+          P.localCacheMeta = {
+            savedAt: saved.savedAt || "",
+            backendUpdatedAt: saved.backendUpdatedAt || ""
+          };
           if (!hasMeaningfulAppData(saved.appData) && hasMeaningfulAppData(P.seedData)) {
             localStorage.removeItem(STORAGE_KEY);
             return setAppData({ ...(P.mockData || EMPTY_DATA), ...(P.seedData || {}) });
@@ -95,10 +99,15 @@
     const payload = {
       version: STORAGE_VERSION,
       savedAt: new Date().toISOString(),
+      backendUpdatedAt: P.backendStatus?.updatedAt || P.localCacheMeta?.backendUpdatedAt || "",
       appData: getAppData()
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      P.localCacheMeta = {
+        savedAt: payload.savedAt,
+        backendUpdatedAt: payload.backendUpdatedAt
+      };
     } catch (error) {
       console.warn("[PainelURE] Estado local não salvo:", error);
     }

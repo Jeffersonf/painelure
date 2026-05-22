@@ -653,7 +653,8 @@
         setAdminMeta("Estado atual enviado para a API.");
         refreshBackendPanel();
       } catch (error) {
-        setAdminMeta(`Falha ao enviar estado online: ${error.message}`);
+        const reloadHint = error.status === 409 ? " Carregue o estado online e tente novamente." : "";
+        setAdminMeta(`Falha ao enviar estado online: ${error.message}.${reloadHint}`);
       }
     });
 
@@ -692,6 +693,7 @@
               password: "1234",
               preferences: {
                 ...(user.preferences || {}),
+                pin: "1234",
                 forcePinChange: true,
                 initialPinIssuedAt: new Date().toISOString()
               }
@@ -700,6 +702,23 @@
             refreshBackendPanel();
           } catch (error) {
             setAdminMeta(`Falha ao resetar PIN: ${error.message}`);
+          }
+          return;
+        }
+
+        const deleteButton = event.target.closest("[data-delete-backend-user]");
+        if (deleteButton) {
+          const row = deleteButton.closest("[data-user-id]");
+          const user = (P.backendUsersCache || []).find(item => item.id === row?.dataset.userId);
+          if (!row || !user) return;
+          if (!window.confirm(`Remover acesso de ${user.name}?`)) return;
+          try {
+            const token = await ensureBackendToken();
+            await P.deleteBackendUser?.(token, row.dataset.userId);
+            setAdminMeta(`Acesso de ${user.name} removido.`);
+            refreshBackendPanel();
+          } catch (error) {
+            setAdminMeta(`Falha ao remover usuario: ${error.message}`);
           }
           return;
         }
@@ -1154,10 +1173,11 @@
       if (userHost) {
         userHost.innerHTML = users.length ? users.map(user => {
           const pinPending = Boolean(user.preferences?.forcePinChange);
+          const visiblePin = user.pin || user.preferences?.pin || "nao informado";
           const lastLogin = user.preferences?.lastLoginAt ? new Date(user.preferences.lastLoginAt).toLocaleString("pt-BR") : "sem login registrado";
           return `
-          <div class="settings-row compact backend-user-row" data-user-id="${user.id}" data-search="${P.searchText([user.name, user.username, user.role, lastLogin])}">
-            <div><strong>${user.name}</strong><small>${user.username} • ${user.role} • ${lastLogin}</small></div>
+          <div class="settings-row compact backend-user-row" data-user-id="${user.id}" data-search="${P.searchText([user.name, user.username, user.role, visiblePin, lastLogin])}">
+            <div><strong>${user.name}</strong><small>${user.username} • ${user.role} • PIN ${visiblePin} • ${lastLogin}</small></div>
             <div class="settings-actions backend-user-actions">
               <span class="status-pill ${pinPending ? "warn" : "ok"}">${pinPending ? "PIN inicial" : "PIN alterado"}</span>
               <select data-user-role>
@@ -1168,6 +1188,7 @@
                 ${contacts.map(contact => `<option value="${contact.id}"${contact.id === user.contactId ? " selected" : ""}>${contact.name}</option>`).join("")}
               </select>
               <button class="ghost-btn" type="button" data-reset-backend-pin>PIN 1234</button>
+              <button class="ghost-btn" type="button" data-delete-backend-user>Remover</button>
               <button class="ghost-btn" type="button" data-save-backend-user>Salvar</button>
             </div>
           </div>

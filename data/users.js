@@ -62,10 +62,7 @@
 
   [
     { name: "Bruno", role: "CTC", sector: "Tecnologia", email: "itv.setec@educacao.sp.gov.br", phone: "6235" },
-    { name: "Danilo", role: "CTC", sector: "Tecnologia", email: "itv.setec@educacao.sp.gov.br", phone: "6235" },
-    { name: "Eline Fernanda Teobaldo Batagin", role: "PEC - Quimica", sector: "Pedagógico", email: "deitvnpe@educacao.sp.gov.br", phone: "6212" },
-    { name: "Elysane Rodrigues Cardoso Maciel", role: "PEC - Historia", sector: "Pedagógico", email: "deitvnpe@educacao.sp.gov.br", phone: "6218" },
-    { name: "Tatiane Ryden de Mello Graciliano", role: "PEC - Educacao Inclusiva", sector: "Pedagógico", email: "deitvnpe@educacao.sp.gov.br", phone: "6218" }
+    { name: "Danilo", role: "CTC", sector: "Tecnologia", email: "itv.setec@educacao.sp.gov.br", phone: "6235" }
   ].forEach(ensureContact);
 
   const supervisorUsers = (P.seedData.supervisors || []).map((supervisor, index) => mapUser({
@@ -80,15 +77,6 @@
     active: true
   }));
 
-  const pecUsers = [
-    { id: "user-pec-eline-batagin", name: "Eline Fernanda Teobaldo Batagin", login: "eline.batagin", role: "Pedagógico", contactName: "Eline Fernanda Teobaldo Batagin", contactRole: "PEC - Quimica" },
-    { id: "user-pec-elysane-maciel", name: "Elysane Rodrigues Cardoso Maciel", login: "elysane.maciel", role: "Pedagógico", contactName: "Elysane Rodrigues Cardoso Maciel", contactRole: "PEC - Historia" },
-    { id: "user-pec-jaqueline-borelli", name: "Jaqueline de Oliveira Cunha Borelli", login: "jaqueline.borelli", role: "Pedagógico", contactName: "Jaqueline de Oliveira Cunha Borelli", contactRole: "PEC - Arte" },
-    { id: "user-pec-tatiane-graciliano", name: "Tatiane Ryden de Mello Graciliano", login: "tatiane.graciliano", role: "Pedagógico", contactName: "Tatiane Ryden de Mello Graciliano", contactRole: "PEC - Educacao Inclusiva" },
-    { id: "user-pec-jose-netto", name: "Jose do Amaral Netto", login: "jose.netto", role: "Pedagógico", contactName: "Jose do Amaral Netto", contactRole: "PEC - Projetos Especiais" },
-    { id: "user-pec-paula", name: "Paula", login: "paula", role: "Pedagógico", contactName: "Paula", contactRole: "Especialista em Currículo" }
-  ].map(mapUser);
-
   P.seedData.users = [
     mapUser({ id: "user-admin-jefferson", name: "Jefferson", login: "Jefferson", role: "Administrador", contactName: "Jefferson Felipe", contactRole: "Chefe de Seção", email: "jefferson.paula@educacao.sp.gov.br", active: true }),
     mapUser({ id: "user-dirigente", name: "Andre", login: "Andre", role: "Gabinete", contactName: "Andre Dias de Oliveira", contactRole: "Dirigente Regional de Ensino", email: "deitv@educacao.sp.gov.br", active: true }),
@@ -97,7 +85,6 @@
     mapUser({ id: "user-ctc", name: "Gustavo", login: "Gustavo", role: "Técnicos CTC", contactName: "Gustavo", contactRole: "CTC", email: "itv.setec@educacao.sp.gov.br", active: true }),
     mapUser({ id: "user-ctc-bruno", name: "Bruno", login: "Bruno", role: "Técnicos CTC", contactName: "Bruno", contactRole: "CTC", active: true }),
     mapUser({ id: "user-ctc-danilo", name: "Danilo", login: "Danilo", role: "Técnicos CTC", contactName: "Danilo", contactRole: "CTC", active: true }),
-    ...pecUsers,
     ...supervisorUsers
   ];
 })();

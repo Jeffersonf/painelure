@@ -1,4 +1,4 @@
-# Deploy Online Do PainelURE 2.0
+# Deploy Online Do PainelURE
 
 O Finanza atual usa este desenho:
 
@@ -14,13 +14,13 @@ PostgreSQL externo
 
 No Finanza, o guia principal recomenda Supabase PostgreSQL com a API no Render. A v3 tambem documenta Neon como alternativa. O ponto importante: o Render hospeda a API, mas nao deve ser o banco.
 
-## Decisao Para O PainelURE 2.0
+## Decisao Para O PainelURE
 
 Vamos usar:
 
 - GitHub: codigo e historico.
 - GitHub Pages: frontend estatico quando quisermos manter a pagina leve.
-- Render Web Service: API Node (`painelure2-api`).
+- Render Web Service: API Node (`painelure2-api` no primeiro momento; `painelure-api` depois da virada, se quiser renomear).
 - Supabase PostgreSQL: banco inicial recomendado.
 - Neon PostgreSQL: alternativa se o Supabase der limite, pausa ou problema de conexao.
 
@@ -57,7 +57,7 @@ Se o frontend ficar no GitHub Pages e a API no Render, `CORS_ORIGIN` precisa apo
 3. Rodar `db/init.sql` no SQL Editor, ou deixar a API criar as tabelas no primeiro start.
 4. Criar Blueprint no Render usando `render.yaml`.
 5. Preencher as variaveis secretas.
-6. Abrir `https://painelure2-api.onrender.com/api/health`.
+6. Abrir `https://painelure2-api.onrender.com/api/health` ou a URL equivalente da API oficial.
 7. Conferir `storage.mode = postgres` e `storage.ready = true`.
 8. Entrar no painel com `PAINELURE_ADMIN_USER` e `PAINELURE_ADMIN_PASSWORD`.
 9. Criar os usuarios reais no Admin.
