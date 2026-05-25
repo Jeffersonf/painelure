@@ -102,9 +102,9 @@
     const role = normalized(user?.role || P.currentRole?.());
     const contactRole = normalized(user?.contactRole || user?.cargo || user?.position);
     return role.includes("administrador")
-      || role.includes("gabinete")
       || role.includes("dirigente")
       || contactRole.includes("dirigente")
+      || role.includes("seom")
       || role.includes("seintec")
       || role.includes("ctc");
   }
@@ -130,6 +130,17 @@
     return userKeys.some(userKey => bookingKeys.some(bookingKey =>
       bookingKey === userKey || bookingKey.includes(userKey) || userKey.includes(bookingKey)
     ));
+  }
+
+  function publicCarBooking(item = {}) {
+    return {
+      requestId: item.requestId || item.id || "",
+      vehicle: item.vehicle || item.car || item.recurso || "Carro oficial",
+      date: item.date || item.value || "",
+      time: item.time || item.hora || "",
+      status: item.status || "reservado",
+      restricted: true
+    };
   }
 
   function isSupervisorUser(user = activeIdentity()) {
@@ -247,7 +258,7 @@
       ctcVisits: byAccess.ctc
         ? (supervisorScope ? (data.ctcVisits || []).filter(visit => allowed.has(normalized(visit.place))) : (data.ctcVisits || []))
         : [],
-      cars: byAccess.cars ? (data.cars || []) : [],
+      cars: byAccess.cars ? (canViewAllCarBookings() ? (data.cars || []) : (data.cars || []).map(publicCarBooking)) : [],
       contacts: byAccess.contacts ? (data.contacts || []) : [],
       calendar: byAccess.calendar ? (byAccess.cars ? (data.calendar || []) : (data.calendar || []).filter(item => !isCarLikeCalendarItem(item))) : [],
       reports: byAccess.reports ? (data.reports || []) : [],

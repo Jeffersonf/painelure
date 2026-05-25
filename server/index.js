@@ -659,6 +659,28 @@ function canViewCredentials(user = null) {
   return ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => role.includes(item));
 }
 
+function canViewAllCarBookings(user = null) {
+  const role = normalizeText(user?.role || "Consulta");
+  const contactRole = normalizeText(user?.contactRole || user?.cargo || user?.position || "");
+  return role.includes("administrador")
+    || role.includes("dirigente")
+    || contactRole.includes("dirigente")
+    || role.includes("seom")
+    || role.includes("seintec")
+    || role.includes("ctc");
+}
+
+function publicCarBooking(item = {}) {
+  return {
+    requestId: item.requestId || item.id || "",
+    vehicle: item.vehicle || item.car || item.recurso || "Carro oficial",
+    date: item.date || item.value || "",
+    time: item.time || item.hora || "",
+    status: item.status || "reservado",
+    restricted: true
+  };
+}
+
 function supervisorForUser(appData = {}, user = null) {
   if (!user || !isSupervisorRole(user.role)) return null;
   const userKeys = [user.name, user.username, user.contactName, user.supervisorName]
@@ -714,7 +736,7 @@ function scopeAppDataForUser(appData = {}, user = null) {
       ? (supervisorScope ? (appData.ctcVisits || []).filter(visit => allowed.has(normalizeText(visit.place))) : (appData.ctcVisits || []))
       : [],
     contacts: canAccessData("contacts", user) ? (appData.contacts || []) : [],
-    cars: canAccessData("cars", user) ? (appData.cars || []) : [],
+    cars: canAccessData("cars", user) ? (canViewAllCarBookings(user) ? (appData.cars || []) : (appData.cars || []).map(publicCarBooking)) : [],
     calendar: canAccessData("calendar", user) ? (appData.calendar || []) : [],
     reports: canAccessData("reports", user) ? (appData.reports || []) : [],
     profiles: canAccessData("profiles", user) ? (appData.profiles || []) : [],

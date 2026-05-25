@@ -1240,6 +1240,7 @@
   }
 
   function canShowCarDetails(item) {
+    if (item?.restricted) return false;
     return P.canViewCarBookingDetails ? P.canViewCarBookingDetails(item) : true;
   }
 
@@ -1403,11 +1404,11 @@
               const search = details
                 ? P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])
                 : P.searchText([item.vehicle, item.date, item.time]);
-              return `<button class="car-booking-card car-booking-${tone}" type="button" data-car-key="${key}" data-search="${search}">
-                <span class="car-card-icon">&#127979;</span>
-                <span class="car-route"><strong>${details ? (item.destination || "Destino não informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.time || "--:--"} | Solicitação ${item.requestId || "--"}` : `${item.time || "Horário a definir"}`}</small></span>
-                <span class="car-requester"><strong>${details ? (item.requester || "Setor não informado") : "Veículo reservado"}</strong><small>${details ? `${item.vehicle} | ${item.driver || "Condutor a definir"}` : "Detalhes restritos"}</small></span>
-                <em class="status-pill ${tone}">${item.status || "pendente"}</em>
+              return `<button class="car-booking-card car-booking-${tone}${details ? "" : " car-booking-limited"}" type="button" data-car-key="${key}" data-search="${search}">
+                <span class="car-card-icon">&#128663;</span>
+                <span class="car-route"><strong>${details ? (item.destination || "Destino n\u00e3o informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.time || "--:--"} | Solicita\u00e7\u00e3o ${item.requestId || "--"}` : `${date} | ${item.time || "Hor\u00e1rio a definir"}`}</small></span>
+                <span class="car-requester${details ? "" : " restricted-blur"}"><strong>${details ? (item.requester || "Setor n\u00e3o informado") : "Solicitante restrito"}</strong><small>${details ? `${item.vehicle} | ${item.driver || "Condutor a definir"}` : "Destino e condutor protegidos"}</small></span>
+                <em class="status-pill ${details ? tone : "info"}">${details ? (item.status || "pendente") : "reservado"}</em>
               </button>`;
             }).join("")}
           </article>

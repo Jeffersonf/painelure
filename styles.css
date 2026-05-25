@@ -5901,6 +5901,31 @@ html:not(.site-maintenance) .maintenance-message {
   text-transform: uppercase;
 }
 
+.car-booking-limited {
+  border-style: dashed;
+}
+
+.car-booking-limited .car-route {
+  padding-right: 88px;
+}
+
+.restricted-blur {
+  position: relative;
+  max-width: 280px;
+  filter: blur(4px);
+  opacity: .62;
+  user-select: none;
+  pointer-events: none;
+}
+
+.restricted-blur::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sf2) 58%, transparent);
+}
+
 .car-widget-agenda .status-pill {
   position: absolute;
   top: 16px;

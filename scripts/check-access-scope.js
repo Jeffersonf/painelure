@@ -119,8 +119,17 @@ function run() {
   withUser(P, { name: "Gabinete", role: "Gabinete" }, scoped => {
     assert(scoped.calls.length === data.calls.length, "Gabinete deve receber chamados.");
     assert(scoped.cars.length === data.cars.length, "Gabinete deve receber agendamentos de carro.");
+    assert(!P.canViewAllCarBookings(), "Gabinete comum deve ver carros com detalhes restritos.");
     assert(Object.keys(scoped.networkData).length === 0, "Gabinete nao deve receber redes/cameras.");
     assert(scoped.schoolAssets.length === 0, "Gabinete nao deve receber inventario tecnico.");
+  });
+
+  withUser(P, { name: "Dirigente", role: "Gabinete", contactRole: "Dirigente Regional de Ensino" }, () => {
+    assert(P.canViewAllCarBookings(), "Dirigente deve ver detalhes completos de carros.");
+  });
+
+  withUser(P, { name: "SEOM", role: "SEOM" }, () => {
+    assert(P.canViewAllCarBookings(), "SEOM deve ver detalhes completos de carros.");
   });
 
   withUser(P, { name: "Pedagogico", role: "Pedagogico" }, scoped => {
