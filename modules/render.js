@@ -1440,9 +1440,11 @@
               const search = details
                 ? P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])
                 : P.searchText([item.vehicle, item.date, item.time]);
+              const calendarItem = carCalendarEntry(item);
+              const calendarKey = P.searchText([calendarItem.label, calendarItem.value]);
               const displayDate = carDisplayDate(date);
               const requestLabel = carRequestLabel(item.requestId);
-              return `<button class="car-booking-card car-booking-${tone}${details ? "" : " car-booking-limited"}" type="button" data-car-key="${key}" data-search="${search}">
+              return `<button class="car-booking-card car-booking-${tone}${details ? "" : " car-booking-limited"}" type="button" data-car-key="${key}" data-car-calendar-key="${calendarKey}" data-search="${search}">
                 <span class="car-card-icon">${carVehicleEmoji(item.vehicle)}</span>
                 <span class="car-route">
                   <strong>${details ? (item.destination || "Destino n\u00e3o informado") : (item.vehicle || "Carro oficial")}</strong>
@@ -1462,6 +1464,15 @@
         `).join("")}
       </section>
     `;
+    grid.querySelectorAll(".calendar-day [data-calendar-key]").forEach(button => {
+      button.addEventListener("click", () => {
+        const target = grid.querySelector(`[data-car-calendar-key="${button.dataset.calendarKey}"]`);
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.add("focused");
+        window.setTimeout(() => target.classList.remove("focused"), 1600);
+      });
+    });
   }
 
   function renderCalendar(calendar) {
