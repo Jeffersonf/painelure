@@ -144,6 +144,7 @@
       vehicle: item.vehicle || item.car || item.recurso || "Carro oficial",
       date: item.date || item.value || "",
       time: item.time || item.hora || "",
+      returnTime: item.returnTime || item.devolutionTime || item.devolucao || "",
       status: item.status || "reservado",
       restricted: true
     };

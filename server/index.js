@@ -679,6 +679,7 @@ function publicCarBooking(item = {}) {
     vehicle: item.vehicle || item.car || item.recurso || "Carro oficial",
     date: item.date || item.value || "",
     time: item.time || item.hora || "",
+    returnTime: item.returnTime || item.devolutionTime || item.devolucao || "",
     status: item.status || "reservado",
     restricted: true
   };
@@ -1112,16 +1113,21 @@ function normalizeRows(type, rows) {
     });
   }
   if (type === "cars") {
-    return rows.map(row => ({
-      vehicle: firstValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], "Carro oficial"),
-      date: firstValue(row, ["data", "data_da_reserva", "data_x0020_da_x0020_reserva", "data_reserva", "date", "quando"], ""),
-      time: firstValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], ""),
-      requester: firstValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "author"], ""),
-      destination: firstValue(row, ["destino", "local", "destination", "place", "local_destino"], ""),
-      driver: firstValue(row, ["motorista", "driver"], ""),
-      status: firstValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], "pendente"),
-      note: firstValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo"], "")
-    }));
+    return rows.map(row => {
+      const driver = firstValue(row, ["motorista", "driver", "condutor"], "");
+      return {
+        vehicle: firstValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], "Carro oficial"),
+        date: firstValue(row, ["data", "data_da_reserva", "data_x0020_da_x0020_reserva", "data_reserva", "date", "quando"], ""),
+        time: firstValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], ""),
+        returnTime: firstValue(row, ["data_devolucao", "datadevolu_x005f_x00e7_x005f_x005f_x00e3_x005f_o", "data_devolu_x00e7__x00e3_o", "devolucao", "return_time"], ""),
+        requester: firstValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "author", "setor"], ""),
+        destination: firstValue(row, ["localexterno", "local_externo", "destino", "local", "destination", "place", "local_destino"], ""),
+        driver: /^\d+$/.test(driver) ? "" : driver,
+        driverId: /^\d+$/.test(driver) ? driver : "",
+        status: firstValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], "pendente"),
+        note: firstValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo"], "")
+      };
+    });
   }
   if (type === "inventory") {
     return rows.map(row => {

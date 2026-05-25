@@ -63,6 +63,12 @@
     return /^\d+$/.test(text) ? `${label} #${text}` : text;
   }
 
+  function lookupName(value) {
+    const text = valueToText(value);
+    if (!text || /^\d+$/.test(text)) return "";
+    return text;
+  }
+
   function schoolLookupName(value) {
     const text = valueToText(value);
     if (!text) return "";
@@ -356,16 +362,20 @@
     return rows.map(row => {
       const date = firstMatchingValue(row, ["data", "data_da_reserva", "data_x0020_da_x0020_reserva", "data_reserva", "date", "quando"], ["data", "date", "quando"], "");
       const time = firstMatchingValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], ["hora", "horario", "time"], "");
-      const destination = firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino", "escolas"], ["destino", "local", "destination", "place", "escola"], "");
+      const returnDate = firstMatchingValue(row, ["data_devolucao", "datadevolu_x005f_x00e7_x005f_x005f_x00e3_x005f_o", "data_devolu_x00e7__x00e3_o", "datadevolu_x00e7__x00e3_o", "devolucao", "return", "return_time"], ["devolu", "return"], "");
+      const externalPlace = firstMatchingValue(row, ["localexterno", "local_externo", "local_x0020_externo"], ["localexterno", "externo"], "");
+      const destination = externalPlace || firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino", "escolas"], ["destino", "local", "destination", "place", "escola"], "");
       const driver = firstMatchingValue(row, ["motorista", "driver", "condutor"], ["motorista", "driver", "condutor"], "");
       return {
         requestId: firstMatchingValue(row, ["id"], ["id"], ""),
         vehicle: firstMatchingValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], ["carro", "veiculo", "vehicle", "recurso"], "Carro oficial"),
         date: formatDateValue(date),
         time: formatTimeValue(time || date),
+        returnTime: formatTimeValue(returnDate),
         requester: firstMatchingValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "setor", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsavel", "requester", "owner", "setor", "mail"], ""),
         destination: schoolLookupName(destination),
-        driver: lookupLabel(driver, "Condutor"),
+        driver: lookupName(driver),
+        driverId: /^\d+$/.test(valueToText(driver)) ? valueToText(driver) : "",
         status: firstMatchingValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], ["status", "situacao"], "pendente"),
         note: firstMatchingValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ["observacao", "descricao", "motivo", "note"], "")
       };

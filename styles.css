@@ -5814,7 +5814,7 @@ html:not(.site-maintenance) .maintenance-message {
   position: relative;
   min-height: 118px;
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-columns: 48px minmax(180px, .9fr) minmax(360px, 1.35fr) minmax(190px, .85fr);
   gap: 12px 16px;
   align-items: center;
   padding: 18px 16px;
@@ -5842,7 +5842,6 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .car-card-icon {
-  grid-row: 1 / span 2;
   width: 44px;
   height: 44px;
   display: inline-grid;
@@ -5858,6 +5857,9 @@ html:not(.site-maintenance) .maintenance-message {
 .car-widget-agenda .car-route,
 .car-widget-agenda .car-requester {
   min-width: 0;
+}
+
+.car-widget-agenda .car-requester {
   padding-right: 88px;
 }
 
@@ -5890,12 +5892,50 @@ html:not(.site-maintenance) .maintenance-message {
   text-transform: uppercase;
 }
 
+.car-booking-metrics {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(74px, 1fr));
+  gap: 8px;
+}
+
+.car-booking-metrics span {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--bd) 82%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sf) 72%, transparent);
+}
+
+.car-booking-metrics small,
+.car-booking-metrics strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.car-booking-metrics small {
+  color: var(--mt);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.car-booking-metrics strong {
+  margin-top: 4px;
+  color: var(--tx);
+  font-size: 13px;
+  font-weight: 900;
+}
+
 .car-booking-limited {
   border-style: dashed;
 }
 
 .car-booking-limited .car-route {
-  padding-right: 88px;
+  padding-right: 0;
 }
 
 .restricted-blur {
@@ -5949,6 +5989,15 @@ html:not(.site-maintenance) .maintenance-message {
     grid-template-columns: repeat(2, minmax(240px, 1fr));
   }
 
+  .car-widget-agenda .car-day-group .car-booking-card {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .car-booking-metrics,
+  .car-widget-agenda .car-requester {
+    grid-column: 2;
+  }
+
 }
 
 @media (max-width: 720px) {
@@ -5983,6 +6032,10 @@ html:not(.site-maintenance) .maintenance-message {
   .car-widget-agenda .car-route,
   .car-widget-agenda .car-requester {
     padding-right: 74px;
+  }
+
+  .car-booking-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .supervisor-sheet-table {

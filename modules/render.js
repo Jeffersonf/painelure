@@ -1200,11 +1200,13 @@
       vehicle: item.vehicle || item.car || item.recurso || "Carro oficial",
       date: item.date || item.value || "",
       time: item.time || item.hora || "",
+      returnTime: item.returnTime || item.devolutionTime || item.devolucao || "",
       requester: item.requester || item.owner || item.responsavel || "",
       sector: item.sector || item.setor || "",
       category: item.category || item.categoria || "",
       destination: item.destination || item.place || item.local || "",
       driver: item.driver || item.motorista || "",
+      driverId: item.driverId || item.condutorId || item.CondutorId || "",
       status: item.status || "pendente",
       note: item.note || item.description || item.motivo || "",
       source: "cars"
@@ -1214,11 +1216,13 @@
       vehicle: item.vehicle || "Carro oficial",
       date: item.date || item.value || "",
       time: item.time || "",
+      returnTime: item.returnTime || item.devolutionTime || item.devolucao || "",
       requester: item.owner || item.assignee || item.responsible || "",
       sector: item.sector || item.setor || "",
       category: item.category || item.categoria || "",
       destination: item.place || item.local || item.note || "",
       driver: item.driver || "",
+      driverId: item.driverId || item.condutorId || item.CondutorId || "",
       status: item.tone || item.status || "agenda",
       note: item.note || item.label || "",
       source: "calendar"
@@ -1244,18 +1248,32 @@
     return P.canViewCarBookingDetails ? P.canViewCarBookingDetails(item) : true;
   }
 
+  function carVehicleEmoji(vehicle = "") {
+    const key = P.normalize(vehicle || "");
+    if (key.includes("pick")) return "&#128763;";
+    if (key.includes("utilitario") || key.includes("utilit")) return "&#128656;";
+    return "&#128663;";
+  }
+
+  function carDriverLabel(item = {}) {
+    if (item.driver) return item.driver;
+    if (item.driverId) return `Condutor ID ${item.driverId}`;
+    return "Condutor n\u00e3o informado";
+  }
+
   function carCalendarEntry(item) {
     const details = canShowCarDetails(item);
+    const timeLabel = `${item.time || "Hor\u00e1rio a definir"}${item.returnTime ? ` - ${item.returnTime}` : ""}`;
     return {
       label: details
         ? `${item.vehicle} - ${item.destination || item.requester || "reserva"}`
-        : `${item.vehicle} - ${item.time || "horario a definir"}`,
+        : `${item.vehicle} - ${item.time || "hor\u00e1rio a definir"}`,
       value: item.date,
       date: item.date,
       time: item.time,
       note: details
-        ? `${item.time || "Horário a definir"} | ${item.requester || "Solicitante não informado"} | ${item.status || "pendente"}`
-        : `${item.time || "Horario a definir"} | Reserva de veiculo`,
+        ? `${timeLabel} | Solicita\u00e7\u00e3o ${item.requestId || "--"} | ${item.status || "pendente"}`
+        : `${timeLabel} | Reserva de ve\u00edculo`,
       tone: carStatusTone(item.status),
       type: "carro",
       scope: "shared"
@@ -1377,7 +1395,12 @@
     }
     renderSummaryRows("#carSummaryRows", []);
     if (!visible.length) {
-      grid.innerHTML = `<div class="empty-state">${bookings.length ? "Nenhum agendamento de carro encontrado neste filtro." : `Nenhum agendamento de carro em ${P.selectedMonthLabel?.() || "mes selecionado"}.`}</div>`;
+      grid.innerHTML = `
+        <section class="car-calendar-shell">
+          ${calendarBoardMarkup([], { includeDetails: false })}
+        </section>
+        <div class="empty-state">${bookings.length ? "Nenhum agendamento de carro encontrado neste filtro." : `Sem solicita\u00e7\u00f5es at\u00e9 o momento em ${P.selectedMonthLabel?.() || "m\u00eas selecionado"}.`}</div>
+      `;
       return;
     }
     const byDate = visible.reduce((acc, item) => {
@@ -1405,9 +1428,18 @@
                 ? P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])
                 : P.searchText([item.vehicle, item.date, item.time]);
               return `<button class="car-booking-card car-booking-${tone}${details ? "" : " car-booking-limited"}" type="button" data-car-key="${key}" data-search="${search}">
-                <span class="car-card-icon">&#128663;</span>
-                <span class="car-route"><strong>${details ? (item.destination || "Destino n\u00e3o informado") : (item.vehicle || "Carro oficial")}</strong><small>${details ? `${item.time || "--:--"} | Solicita\u00e7\u00e3o ${item.requestId || "--"}` : `${date} | ${item.time || "Hor\u00e1rio a definir"}`}</small></span>
-                <span class="car-requester${details ? "" : " restricted-blur"}"><strong>${details ? (item.requester || "Setor n\u00e3o informado") : "Solicitante restrito"}</strong><small>${details ? `${item.vehicle} | ${item.driver || "Condutor a definir"}` : "Destino e condutor protegidos"}</small></span>
+                <span class="car-card-icon">${carVehicleEmoji(item.vehicle)}</span>
+                <span class="car-route">
+                  <strong>${details ? (item.destination || "Destino n\u00e3o informado") : (item.vehicle || "Carro oficial")}</strong>
+                  <small>${details ? (item.vehicle || "Carro oficial") : "Reserva de ve\u00edculo oficial"}</small>
+                </span>
+                <span class="car-booking-metrics">
+                  <span><small>Data</small><strong>${date || "--"}</strong></span>
+                  <span><small>Retirada</small><strong>${item.time || "--:--"}</strong></span>
+                  <span><small>Devolu\u00e7\u00e3o</small><strong>${item.returnTime || "--:--"}</strong></span>
+                  <span><small>Solicita\u00e7\u00e3o</small><strong>${item.requestId || "--"}</strong></span>
+                </span>
+                <span class="car-requester${details ? "" : " restricted-blur"}"><strong>${details ? (item.requester || "Setor n\u00e3o informado") : "Detalhes protegidos"}</strong><small>${details ? carDriverLabel(item) : "Destino, setor e condutor protegidos"}</small></span>
                 <em class="status-pill ${details ? tone : "info"}">${details ? (item.status || "pendente") : "reservado"}</em>
               </button>`;
             }).join("")}
