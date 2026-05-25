@@ -18,6 +18,8 @@
     calls: [],
     reports: [],
     users: [],
+    accessRules: {},
+    pageMaintenance: {},
     adminChecks: []
   };
   const STORAGE_VERSION = 2;
@@ -89,6 +91,8 @@
       calls: Array.isArray(source.calls) ? source.calls : [],
       reports: Array.isArray(source.reports) ? source.reports : [],
       users: Array.isArray(source.users) ? source.users : [],
+      accessRules: source.accessRules && typeof source.accessRules === "object" ? source.accessRules : {},
+      pageMaintenance: source.pageMaintenance && typeof source.pageMaintenance === "object" ? source.pageMaintenance : {},
       adminChecks: Array.isArray(source.adminChecks) ? source.adminChecks : []
     };
   }

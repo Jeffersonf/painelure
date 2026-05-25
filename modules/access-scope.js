@@ -1,6 +1,6 @@
 (function () {
   const P = window.PainelURE;
-  const ACCESS = {
+  const DEFAULT_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
@@ -12,6 +12,7 @@
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
+  const ACCESS = DEFAULT_ACCESS;
   const ROLE_EMOJI = {
     Administrador: "🛡️",
     Supervisao: "🧭",
@@ -56,8 +57,10 @@
 
   function roleAccess(role) {
     const target = normalized(role);
-    const key = Object.keys(ACCESS).find(name => normalized(name) === target);
-    if (key) return ACCESS[key];
+    const key = Object.keys(DEFAULT_ACCESS).find(name => normalized(name) === target);
+    const customAccess = P.getAppData?.()?.accessRules?.roleAccess || {};
+    if (key && Array.isArray(customAccess[key])) return customAccess[key];
+    if (key) return DEFAULT_ACCESS[key];
     if (target.includes("supervis")) return ACCESS.Supervisao;
     if (target.includes("ctc")) return ACCESS["Tecnicos CTC"];
     if (target.includes("seintec")) return ACCESS.SEINTEC;
@@ -68,6 +71,14 @@
     if (target.includes("pedag") || target.includes("pec")) return ACCESS.Pedagogico;
     if (target.includes("admin")) return ACCESS.Administrador;
     return ACCESS.Consulta;
+  }
+
+  function pageMaintenanceConfig(page) {
+    return P.getAppData?.()?.pageMaintenance?.[page] || {};
+  }
+
+  function isPageInMaintenance(page) {
+    return pageMaintenanceConfig(page).enabled === true;
   }
 
   function roleKey(role) {
@@ -277,6 +288,7 @@
   }
 
   P.DATA_ACCESS = ACCESS;
+  P.DEFAULT_ACCESS = DEFAULT_ACCESS;
   P.ROLE_EMOJI = ROLE_EMOJI;
   P.ROLE_NAMES = ROLE_NAMES;
   P.roleAccess = roleAccess;
@@ -295,5 +307,7 @@
   P.visibleSupervisors = visibleSupervisors;
   P.canViewSchool = canViewSchool;
   P.canViewSupervisor = canViewSupervisor;
+  P.pageMaintenanceConfig = pageMaintenanceConfig;
+  P.isPageInMaintenance = isPageInMaintenance;
   P.scopedData = scopedData;
 })();

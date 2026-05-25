@@ -636,9 +636,11 @@ function isSupervisorRole(role) {
   return normalizeText(role).includes("supervis");
 }
 
-function accessForRole(role) {
+function accessForRole(role, appData = {}) {
   const target = normalizeText(role);
   const key = Object.keys(DATA_ACCESS).find(item => normalizeText(item) === target);
+  const customAccess = appData?.accessRules?.roleAccess || {};
+  if (key && Array.isArray(customAccess[key])) return customAccess[key];
   if (key) return DATA_ACCESS[key];
   if (target.includes("supervis")) return DATA_ACCESS.Supervisao;
   if (target.includes("ctc")) return DATA_ACCESS["Tecnicos CTC"];
@@ -652,8 +654,8 @@ function accessForRole(role) {
   return DATA_ACCESS.Consulta;
 }
 
-function canAccessData(page, user = null) {
-  return accessForRole(user?.role || "Consulta").includes(page);
+function canAccessData(page, user = null, appData = {}) {
+  return accessForRole(user?.role || "Consulta", appData).includes(page);
 }
 
 function canViewCredentials(user = null) {
@@ -728,25 +730,25 @@ function scopeAppDataForUser(appData = {}, user = null) {
     : (appData.supervisors || []);
   return {
     ...appData,
-    schools: canAccessData("schools", user) ? schools : [],
-    supervisors: canAccessData("supervision", user) ? supervisors : [],
-    networkData: canAccessData("network", user) ? networkScopedObject(appData.networkData || {}) : {},
-    schoolInventoryMetrics: canAccessData("inventory", user) ? schoolScopedObject(appData.schoolInventoryMetrics || {}) : {},
-    schoolProfiles: canAccessData("schools", user) ? schoolScopedItems(appData.schoolProfiles || []) : [],
-    schoolAssets: canAccessData("inventory", user) ? schoolScopedItems(appData.schoolAssets || []) : [],
-    inventory: canAccessData("inventory", user) ? schoolScopedItems(appData.inventory || []) : [],
-    calls: canAccessData("calls", user) ? schoolScopedItems(appData.calls || []) : [],
-    ctcVisits: canAccessData("ctc", user)
+    schools: canAccessData("schools", user, appData) ? schools : [],
+    supervisors: canAccessData("supervision", user, appData) ? supervisors : [],
+    networkData: canAccessData("network", user, appData) ? networkScopedObject(appData.networkData || {}) : {},
+    schoolInventoryMetrics: canAccessData("inventory", user, appData) ? schoolScopedObject(appData.schoolInventoryMetrics || {}) : {},
+    schoolProfiles: canAccessData("schools", user, appData) ? schoolScopedItems(appData.schoolProfiles || []) : [],
+    schoolAssets: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.schoolAssets || []) : [],
+    inventory: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.inventory || []) : [],
+    calls: canAccessData("calls", user, appData) ? schoolScopedItems(appData.calls || []) : [],
+    ctcVisits: canAccessData("ctc", user, appData)
       ? (supervisorScope ? (appData.ctcVisits || []).filter(visit => allowed.has(normalizeText(visit.place))) : (appData.ctcVisits || []))
       : [],
-    contacts: canAccessData("contacts", user) ? (appData.contacts || []) : [],
-    cars: canAccessData("cars", user) ? (canViewAllCarBookings(user) ? (appData.cars || []) : (appData.cars || []).map(publicCarBooking)) : [],
-    calendar: canAccessData("calendar", user) ? (appData.calendar || []) : [],
-    reports: canAccessData("reports", user) ? (appData.reports || []) : [],
-    profiles: canAccessData("profiles", user) ? (appData.profiles || []) : [],
-    quality: canAccessData("quality", user) ? (appData.quality || []) : [],
-    users: canAccessData("admin", user) ? (appData.users || []) : [],
-    adminChecks: canAccessData("admin", user) ? (appData.adminChecks || []) : []
+    contacts: canAccessData("contacts", user, appData) ? (appData.contacts || []) : [],
+    cars: canAccessData("cars", user, appData) ? (canViewAllCarBookings(user) ? (appData.cars || []) : (appData.cars || []).map(publicCarBooking)) : [],
+    calendar: canAccessData("calendar", user, appData) ? (appData.calendar || []) : [],
+    reports: canAccessData("reports", user, appData) ? (appData.reports || []) : [],
+    profiles: canAccessData("profiles", user, appData) ? (appData.profiles || []) : [],
+    quality: canAccessData("quality", user, appData) ? (appData.quality || []) : [],
+    users: canAccessData("admin", user, appData) ? (appData.users || []) : [],
+    adminChecks: canAccessData("admin", user, appData) ? (appData.adminChecks || []) : []
   };
 }
 

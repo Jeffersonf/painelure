@@ -21,6 +21,7 @@
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
+  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"];
 
   function currentRole() {
     return P.onlineUser?.()?.role || localStorage.getItem(ROLE_KEY) || P.displayUser?.().role || "Administrador";
@@ -49,6 +50,14 @@
       .map(page => pageLabel(page))
       .filter(Boolean)
       .join(", ");
+  }
+
+  function adminRoleOptions() {
+    return Object.keys(P.DEFAULT_ACCESS || ROLE_ACCESS);
+  }
+
+  function adminPageChoices() {
+    return ADMIN_PAGE_CHOICES.filter(page => P.PAGE_META?.[page]);
   }
 
   function firstAllowedPage(role = currentRole()) {
@@ -420,25 +429,103 @@
     }
   }
 
+  function renderAccessRuleEditor() {
+    const roleSelect = P.$("#accessRoleSelect");
+    const checklist = P.$("#accessPageChecklist");
+    if (!roleSelect || !checklist) return;
+    if (!roleSelect.dataset.ready) {
+      roleSelect.dataset.ready = "true";
+      roleSelect.innerHTML = adminRoleOptions().map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
+      roleSelect.addEventListener("change", renderAccessRuleEditor);
+    }
+    const role = roleSelect.value || adminRoleOptions()[0] || "Consulta";
+    const access = new Set(P.roleAccess?.(role) || ROLE_ACCESS[role] || []);
+    checklist.innerHTML = adminPageChoices().map(page => {
+      const meta = P.pageMeta?.(page) || { label: page, note: "" };
+      return `
+        <label class="admin-check-card">
+          <input type="checkbox" data-access-page="${page}"${access.has(page) ? " checked" : ""}>
+          <span><strong>${meta.icon || ""} ${meta.label}</strong><small>${meta.note || page}</small></span>
+        </label>
+      `;
+    }).join("");
+  }
+
+  function saveAccessRuleEditor() {
+    const role = P.$("#accessRoleSelect")?.value || "Consulta";
+    const selected = P.$all("[data-access-page]")
+      .filter(input => input.checked)
+      .map(input => input.dataset.accessPage);
+    const appData = { ...P.getAppData() };
+    appData.accessRules = {
+      ...(appData.accessRules || {}),
+      roleAccess: {
+        ...(appData.accessRules?.roleAccess || {}),
+        [role]: selected
+      }
+    };
+    P.setAppData(appData);
+    P.saveAppData?.();
+    applyRole(P.currentRole?.() || role);
+    renderAccessRuleEditor();
+    P.renderPage?.("user", { force: true });
+    setAdminMeta(`Acessos de ${P.roleLabel?.(role) || role} atualizados.`);
+  }
+
+  function renderPageMaintenanceEditor() {
+    const pageSelect = P.$("#maintenancePageSelect");
+    const enabledInput = P.$("#maintenanceEnabledInput");
+    const messageInput = P.$("#maintenanceMessageInput");
+    if (!pageSelect || !enabledInput || !messageInput) return;
+    if (!pageSelect.dataset.ready) {
+      pageSelect.dataset.ready = "true";
+      pageSelect.innerHTML = adminPageChoices().map(page => {
+        const meta = P.pageMeta?.(page) || { label: page };
+        return `<option value="${page}">${meta.label}</option>`;
+      }).join("");
+      pageSelect.addEventListener("change", renderPageMaintenanceEditor);
+    }
+    const page = pageSelect.value || "dashboard";
+    const config = P.pageMaintenanceConfig?.(page) || {};
+    enabledInput.checked = config.enabled === true;
+    messageInput.value = config.message || "";
+  }
+
+  function savePageMaintenanceEditor() {
+    const page = P.$("#maintenancePageSelect")?.value || "dashboard";
+    const enabled = Boolean(P.$("#maintenanceEnabledInput")?.checked);
+    const message = P.$("#maintenanceMessageInput")?.value.trim() || "";
+    const appData = { ...P.getAppData() };
+    appData.pageMaintenance = {
+      ...(appData.pageMaintenance || {}),
+      [page]: { enabled, message }
+    };
+    P.setAppData(appData);
+    P.saveAppData?.();
+    P.updatePageMaintenanceNotice?.(P.routePage?.() || "dashboard");
+    renderPageMaintenanceEditor();
+    setAdminMeta(`${P.pageMeta?.(page)?.label || page}: aviso de manutenção ${enabled ? "ativado" : "removido"}.`);
+  }
+
   function bindAdminTools() {
     applySourceOverrides();
     bindAdminCollapsibles();
     const roleSelect = P.$("#activeRoleSelect");
     if (roleSelect && !roleSelect.dataset.bound) {
       roleSelect.dataset.bound = "true";
-      roleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
+      roleSelect.innerHTML = adminRoleOptions().map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
       roleSelect.addEventListener("change", () => applyRole(roleSelect.value));
     }
     const userRoleSelect = P.$("#userRoleSelect");
     if (userRoleSelect && !userRoleSelect.dataset.bound) {
       userRoleSelect.dataset.bound = "true";
-      userRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
+      userRoleSelect.innerHTML = adminRoleOptions().map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
       userRoleSelect.addEventListener("change", () => applyRole(userRoleSelect.value));
     }
     const newUserRoleSelect = P.$("#newUserRoleSelect");
     if (newUserRoleSelect && !newUserRoleSelect.dataset.bound) {
       newUserRoleSelect.dataset.bound = "true";
-      newUserRoleSelect.innerHTML = Object.keys(ROLE_ACCESS).map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
+      newUserRoleSelect.innerHTML = adminRoleOptions().map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
     }
     const activeUserSelect = P.$("#activeUserSelect");
     if (activeUserSelect && !activeUserSelect.dataset.bound) {
@@ -456,6 +543,19 @@
           P.renderPage?.("user", { force: true });
         }
       });
+    }
+
+    renderAccessRuleEditor();
+    renderPageMaintenanceEditor();
+    const saveAccessButton = P.$("#saveAccessRulesBtn");
+    if (saveAccessButton && !saveAccessButton.dataset.bound) {
+      saveAccessButton.dataset.bound = "true";
+      saveAccessButton.addEventListener("click", saveAccessRuleEditor);
+    }
+    const saveMaintenanceButton = P.$("#savePageMaintenanceBtn");
+    if (saveMaintenanceButton && !saveMaintenanceButton.dataset.bound) {
+      saveMaintenanceButton.dataset.bound = "true";
+      saveMaintenanceButton.addEventListener("click", savePageMaintenanceEditor);
     }
 
     P.$("#loginSubmitBtn")?.addEventListener("click", async () => {

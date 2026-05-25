@@ -1261,6 +1261,19 @@
     return "Condutor n\u00e3o informado";
   }
 
+  function carDisplayDate(value = "") {
+    const text = String(value || "").trim();
+    const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+    return text || "--";
+  }
+
+  function carRequestLabel(value = "") {
+    const text = String(value || "").trim();
+    if (!text || P.normalize(text).includes("sharepoint")) return "--";
+    return text;
+  }
+
   function carCalendarEntry(item) {
     const details = canShowCarDetails(item);
     const timeLabel = `${item.time || "Hor\u00e1rio a definir"}${item.returnTime ? ` - ${item.returnTime}` : ""}`;
@@ -1360,15 +1373,15 @@
         const original = refreshButton.textContent;
         refreshButton.disabled = true;
         refreshButton.textContent = "Atualizando...";
-        if (sourceStatus) sourceStatus.textContent = "Atualizando a lista ReservasVeiculos no SharePoint...";
+        if (sourceStatus) sourceStatus.textContent = "Atualizando reservas de carros...";
         try {
           const result = await P.refreshSource?.("cars");
           P.renderSourceStatus?.();
           const rows = result?.rows?.length || 0;
-          if (sourceStatus) sourceStatus.textContent = `SharePoint atualizado: ${rows} item(ns) lido(s) de ReservasVeiculos.`;
+          if (sourceStatus) sourceStatus.textContent = `${rows} reserva(s) atualizada(s).`;
           renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
         } catch (error) {
-          if (sourceStatus) sourceStatus.textContent = error?.message || "Não foi possível atualizar o SharePoint.";
+          if (sourceStatus) sourceStatus.textContent = error?.message || "N\u00e3o foi poss\u00edvel atualizar as reservas.";
         } finally {
           refreshButton.disabled = false;
           refreshButton.textContent = original || "Atualizar";
@@ -1388,10 +1401,10 @@
     if (summaryBox) summaryBox.hidden = true;
     if (sourceStatus && !sourceStatus.textContent.includes("Atualizando")) {
       const status = (P.sourceStatus || []).find(item => item.key === "cars");
-      if (status?.status === "loading") sourceStatus.textContent = "Carregando ReservasVeiculos do SharePoint...";
-      else if (status?.status === "loaded") sourceStatus.textContent = `Fonte SharePoint carregada: ${status.rows?.length || 0} item(ns) de ReservasVeiculos.`;
-      else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "SharePoint não carregado.";
-      else sourceStatus.textContent = P.sources?.cars?.url ? "Fonte: SharePoint ReservasVeiculos. Use Atualizar para recarregar." : "Fonte de carros não configurada.";
+      if (status?.status === "loading") sourceStatus.textContent = "Carregando reservas de carros...";
+      else if (status?.status === "loaded") sourceStatus.textContent = `${status.rows?.length || 0} reserva(s) carregada(s).`;
+      else if (status?.status === "error") sourceStatus.textContent = status.error?.message || "Reservas n\u00e3o carregadas.";
+      else sourceStatus.textContent = P.sources?.cars?.url ? "" : "Fonte de carros n\u00e3o configurada.";
     }
     renderSummaryRows("#carSummaryRows", []);
     if (!visible.length) {
@@ -1417,7 +1430,7 @@
       <section class="car-widget-agenda">
         ${Object.entries(byDate).map(([date, items]) => `
           <article class="car-day-group">
-            <div class="car-day-head"><strong>${date}</strong><small>${items.length} reserva(s)</small></div>
+            <div class="car-day-head"><strong>${carDisplayDate(date)}</strong><small>${items.length} reserva(s)</small></div>
             ${items.map(item => {
               const tone = carStatusTone(item.status);
               const details = canShowCarDetails(item);
@@ -1427,6 +1440,8 @@
               const search = details
                 ? P.searchText([item.vehicle, item.date, item.time, item.destination, item.requester, item.driver, item.status, item.note])
                 : P.searchText([item.vehicle, item.date, item.time]);
+              const displayDate = carDisplayDate(date);
+              const requestLabel = carRequestLabel(item.requestId);
               return `<button class="car-booking-card car-booking-${tone}${details ? "" : " car-booking-limited"}" type="button" data-car-key="${key}" data-search="${search}">
                 <span class="car-card-icon">${carVehicleEmoji(item.vehicle)}</span>
                 <span class="car-route">
@@ -1434,10 +1449,10 @@
                   <small>${details ? (item.vehicle || "Carro oficial") : "Reserva de ve\u00edculo oficial"}</small>
                 </span>
                 <span class="car-booking-metrics">
-                  <span><small>Data</small><strong>${date || "--"}</strong></span>
+                  <span><small>Data</small><strong>${displayDate}</strong></span>
                   <span><small>Retirada</small><strong>${item.time || "--:--"}</strong></span>
                   <span><small>Devolu\u00e7\u00e3o</small><strong>${item.returnTime || "--:--"}</strong></span>
-                  <span><small>Solicita\u00e7\u00e3o</small><strong>${item.requestId || "--"}</strong></span>
+                  <span><small>N\u00ba</small><strong>${requestLabel}</strong></span>
                 </span>
                 <span class="car-requester${details ? "" : " restricted-blur"}"><strong>${details ? (item.requester || "Setor n\u00e3o informado") : "Detalhes protegidos"}</strong><small>${details ? carDriverLabel(item) : "Destino, setor e condutor protegidos"}</small></span>
                 <em class="status-pill ${details ? tone : "info"}">${details ? (item.status || "pendente") : "reservado"}</em>

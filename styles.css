@@ -5028,6 +5028,46 @@ html:not(.site-maintenance) .maintenance-message {
   accent-color: var(--ac);
 }
 
+.admin-check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.admin-check-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--sf2) 74%, var(--sf));
+}
+
+.admin-check-card input {
+  margin-top: 2px;
+  accent-color: var(--ac);
+}
+
+.admin-check-card strong,
+.admin-check-card small {
+  display: block;
+}
+
+.admin-check-card strong {
+  color: var(--tx);
+  font-size: 13px;
+}
+
+.admin-check-card small {
+  margin-top: 4px;
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 750;
+}
+
 .admin-tools label span {
   color: var(--mt);
   font-size: 11px;
@@ -5814,7 +5854,7 @@ html:not(.site-maintenance) .maintenance-message {
   position: relative;
   min-height: 118px;
   display: grid;
-  grid-template-columns: 48px minmax(180px, .9fr) minmax(360px, 1.35fr) minmax(190px, .85fr);
+  grid-template-columns: 48px minmax(0, 1fr);
   gap: 12px 16px;
   align-items: center;
   padding: 18px 16px;
@@ -5860,6 +5900,7 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .car-widget-agenda .car-requester {
+  grid-column: 2;
   padding-right: 88px;
 }
 
@@ -5893,9 +5934,10 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .car-booking-metrics {
+  grid-column: 1 / -1;
   min-width: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(74px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -5926,8 +5968,45 @@ html:not(.site-maintenance) .maintenance-message {
 .car-booking-metrics strong {
   margin-top: 4px;
   color: var(--tx);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.page-maintenance-notice {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, var(--warn) 42%, var(--bd));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--warn) 13%, var(--sf));
+  box-shadow: var(--shadow-soft);
+}
+
+.page-maintenance-notice[hidden] {
+  display: none;
+}
+
+.page-maintenance-notice strong,
+.page-maintenance-notice span {
+  display: block;
+}
+
+.page-maintenance-notice strong {
+  color: var(--tx);
   font-size: 13px;
   font-weight: 900;
+}
+
+.page-maintenance-notice span {
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 750;
 }
 
 .car-booking-limited {

@@ -125,6 +125,23 @@
     showAccessDenied.timer = window.setTimeout(() => toast.classList.remove("show"), 5200);
   }
 
+  function updatePageMaintenanceNotice(id) {
+    let notice = P.$("#pageMaintenanceNotice");
+    const config = P.pageMaintenanceConfig?.(id) || {};
+    const active = config.enabled === true;
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.id = "pageMaintenanceNotice";
+      notice.className = "page-maintenance-notice";
+      notice.setAttribute("role", "status");
+      P.$(".main")?.prepend(notice);
+    }
+    notice.hidden = !active;
+    if (!active) return;
+    const label = pageLabel(id);
+    notice.innerHTML = `<strong>${label} em manutenção</strong><span>${config.message || "Esta categoria está temporariamente em revisão. Os dados podem aparecer incompletos."}</span>`;
+  }
+
   function setPage(id) {
     if (P.canAccess && !P.canAccess(id)) {
       showAccessDenied(id);
@@ -137,6 +154,7 @@
     P.$all(".page").forEach(page => page.classList.toggle("active", page.id === pageId(id)));
     P.$all("[data-page]").forEach(btn => btn.classList.toggle("active", btn.dataset.page === id));
     updateGlobalPageHeading(id);
+    updatePageMaintenanceNotice(id);
     P.applyAccessState?.();
     history.replaceState(null, "", pageRoute(id));
     P.clearSearch();
@@ -208,6 +226,7 @@
   P.setPage = setPage;
   P.showAccessDenied = showAccessDenied;
   P.showToast = showToast;
+  P.updatePageMaintenanceNotice = updatePageMaintenanceNotice;
   P.updateGlobalPageHeading = updateGlobalPageHeading;
   P.bindNavigation = bindNavigation;
   P.routePage = routePage;
