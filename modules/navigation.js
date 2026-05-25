@@ -185,7 +185,9 @@
 
       const jumpButton = event.target.closest("[data-jump]");
       if (jumpButton) {
-        setPage(jumpButton.dataset.jump);
+        const changed = setPage(jumpButton.dataset.jump);
+        const calendarMode = jumpButton.dataset.calendarModeTarget;
+        if (changed && calendarMode) requestAnimationFrame(() => P.setCalendarMode?.(calendarMode));
         P.closeAccountMenu?.();
         return;
       }

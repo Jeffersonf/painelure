@@ -4,13 +4,13 @@
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars"],
+    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
-    Carros: ["cars"],
+    Carros: ["dashboard", "cars", "calendar"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
-    Consulta: ["dashboard", "schools", "contacts"]
+    Consulta: ["dashboard", "schools", "contacts", "calendar"]
   };
   const ACCESS = DEFAULT_ACCESS;
   const ROLE_EMOJI = {

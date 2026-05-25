@@ -515,9 +515,10 @@
   }
 
   function dashboardRow(item, compact = false) {
-    if (P.canAccess && !P.canAccess(item.page)) return "";
+    if (P.canAccess && item.page !== "calendar" && !P.canAccess(item.page)) return "";
+    const modeAttr = item.mode ? ` data-calendar-mode-target="${item.mode}"` : "";
     return `
-      <button class="data-row${compact ? " compact" : ""}" type="button" data-jump="${item.page}" data-search="${P.searchText([item.title, item.note, item.label])}">
+      <button class="data-row${compact ? " compact" : ""}" type="button" data-jump="${item.page}"${modeAttr} data-search="${P.searchText([item.title, item.note, item.label])}">
         <span class="row-icon">${item.icon}</span>
         <span><strong>${item.title}</strong><small>${item.note}</small></span>
         <em class="status-pill ${item.tone}">${item.label}</em>
@@ -541,6 +542,59 @@
     `).join("");
   }
 
+  function roleAllowsDashboardWidget(widget, role) {
+    return widget.roles.includes("*") || widget.roles.some(item => role.includes(item));
+  }
+
+  function dashboardWidgetDefinitions(data, context) {
+    const calendarSource = calendarWithOperationalFallback(data.calendar || [], data);
+    const sharedCalendarCount = monthFiltered(calendarByMode(calendarSource, "shared"), item => item.date || item.value).length;
+    const personalCalendarCount = monthFiltered(calendarByMode(data.calendar || [], "personal"), item => item.date || item.value).length;
+    const supervisionPct = (data.supervisors || []).reduce((acc, item) => {
+      const month = progressParts(item.month);
+      acc.done += month.done;
+      acc.total += month.total;
+      return acc;
+    }, { done: 0, total: 0 });
+    const supervisionValue = supervisionPct.total ? `${Math.round((supervisionPct.done / supervisionPct.total) * 100)}%` : "0%";
+    return [
+      { id: "schools", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "schools", icon: "&#127979;", label: "Escolas", value: data.schools?.length || 0, note: `${data.schools?.length || 0} unidade(s) na base regional`, tone: "info" },
+      { id: "supervision", roles: ["administrador", "gabinete", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisao", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
+      { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
+      { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventario", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
+      { id: "ctc", roles: ["administrador", "setec", "ctc"], page: "ctc", icon: "&#128736;&#65039;", label: "CTC", value: context.ctcVisits, note: context.ctcVisits ? "Visitas tecnicas no mes" : "Sem visitas no recorte", tone: context.ctcVisits ? "info" : "ok" },
+      { id: "calls", roles: ["administrador", "gabinete", "setec", "ctc"], page: "calls", icon: "&#128229;", label: "Chamados", value: context.openCalls, note: context.openCalls ? "Chamados em acompanhamento" : "Fila sem pendencias", tone: context.openCalls ? "warn" : "ok" },
+      { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mes", tone: context.carCount ? "info" : "ok" },
+      { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
+      { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mes" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
+      { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuario" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
+      { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatorios", value: P.selectedMonthLabel?.() || "Mes", note: "Consolidado administrativo", tone: "info" }
+    ];
+  }
+
+  function dashboardWidgetsForRole(data, context) {
+    const role = currentRoleKey();
+    return dashboardWidgetDefinitions(data, context).filter(widget => {
+      if (!roleAllowsDashboardWidget(widget, role)) return false;
+      if (widget.page === "calendar") return true;
+      return !P.canAccess || P.canAccess(widget.page);
+    });
+  }
+
+  function dashboardWidgetMarkup(widget) {
+    const modeAttr = widget.mode ? ` data-calendar-mode-target="${widget.mode}"` : "";
+    return `
+      <button class="dashboard-widget-card dashboard-widget-${widget.tone}" type="button" data-jump="${widget.page}"${modeAttr} data-search="${P.searchText([widget.label, widget.note, widget.value])}">
+        <span class="dashboard-widget-icon">${widget.icon}</span>
+        <span class="dashboard-widget-copy">
+          <small>${widget.label}</small>
+          <strong>${widget.value}</strong>
+          <em>${widget.note}</em>
+        </span>
+      </button>
+    `;
+  }
+
   function renderDashboard(data) {
     P.bindMonthControls?.();
     const monthLabel = P.selectedMonthLabel?.() || "Maio 2026";
@@ -553,7 +607,9 @@
     const openCalls = (data.calls || []).filter(item => item.status !== "resolvido").length;
     const ctcVisits = monthFiltered(data.ctcVisits || [], item => item.date).length;
     const officialSources = (P.sourceStatus || []).filter(item => item.status === "loaded").length;
-    const profile = dashboardProfile(data, { networkCount, calendarCount, missingNetwork, inventoryAlerts, pendingVisits, openCalls, ctcVisits });
+    const context = { networkCount, calendarCount, carCount, missingNetwork, inventoryAlerts, pendingVisits, openCalls, ctcVisits };
+    const profile = dashboardProfile(data, context);
+    const dashboardWidgets = dashboardWidgetsForRole(data, context);
     const sourceNote = officialSources
       ? `${officialSources} fonte(s) atualizada(s)`
       : "base local pronta para consulta";
@@ -566,6 +622,19 @@
     setText("#shortcutInventoryNote", profile.shortcuts?.inventory || (inventoryAlerts ? `${inventoryAlerts} unidade(s) em manutenção/defeito` : `${data.schoolAssets.length} linha(s) consolidadas`));
     setText("#shortcutSupervisionNote", profile.shortcuts?.supervision || (pendingVisits ? `${pendingVisits} visita(s) pendente(s)` : `${data.supervisors.length} responsavel(is) ativos`));
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
+    const shortcutGrid = P.$(".shortcut-grid");
+    if (shortcutGrid) {
+      shortcutGrid.innerHTML = dashboardWidgets.slice(0, 8).map(widget => {
+        const modeAttr = widget.mode ? ` data-calendar-mode-target="${widget.mode}"` : "";
+        return `
+          <button class="shortcut-card" type="button" data-jump="${widget.page}"${modeAttr}>
+            <span>${widget.icon}</span>
+            <strong>${widget.label}</strong>
+            <small>${widget.note}</small>
+          </button>
+        `;
+      }).join("");
+    }
 
     const decisions = [
       missingNetwork
@@ -605,19 +674,8 @@
 
     const command = P.$("#dashboardCommand");
     if (command) {
-      const supervisionPct = (data.supervisors || []).reduce((acc, item) => {
-        const month = progressParts(item.month);
-        acc.done += month.done;
-        acc.total += month.total;
-        return acc;
-      }, { done: 0, total: 0 });
-      const agendaFallbackCount = monthFiltered(calendarWithOperationalFallback(data.calendar || [], data), item => item.date || item.value).length;
-      const commandItems = [
-        { label: "Escolas", value: data.schools?.length || 0, note: `${networkCount}/${data.schools?.length || 0} com rede`, page: "schools", tone: missingNetwork ? "info" : "ok" },
-        { label: "Supervisão", value: supervisionPct.total ? `${Math.round((supervisionPct.done / supervisionPct.total) * 100)}%` : "0%", note: `${pendingVisits} visita(s) pendente(s)`, page: "supervision", tone: pendingVisits ? "warn" : "ok" },
-        { label: "Carros", value: carCount, note: carCount ? "reservas no mes" : "sem reserva no mes", page: "cars", tone: carCount ? "info" : "warn" },
-        { label: "Agenda", value: agendaFallbackCount, note: calendarCount ? "fonte carregada" : "com fallback operacional", page: "calendar", tone: calendarCount ? "ok" : "info" }
-      ];
+      const focusWidget = dashboardWidgets.find(item => item.page !== "calendar") || dashboardWidgets[0] || { page: "calendar", mode: "shared" };
+      const focusModeAttr = focusWidget.mode ? ` data-calendar-mode-target="${focusWidget.mode}"` : "";
       command.innerHTML = `
         <article class="command-primary command-${profile.notice === "Base operacional pronta" ? "info" : "ok"}">
           <div>
@@ -625,24 +683,40 @@
             <strong>${profile.title}</strong>
             <p>${profile.note}</p>
           </div>
-          <button class="ghost-btn" type="button" data-jump="${currentRoleKey().includes("supervis") ? "supervision" : "schools"}">Abrir foco</button>
+          <button class="ghost-btn" type="button" data-jump="${focusWidget.page}"${focusModeAttr}>Abrir foco</button>
         </article>
-        <div class="command-metrics">
-          ${commandItems.map(item => `
-            <button class="command-metric command-metric-${item.tone}" type="button" data-jump="${item.page}">
-              <small>${item.label}</small>
-              <strong>${item.value}</strong>
-              <span>${item.note}</span>
-            </button>
-          `).join("")}
+        <div class="dashboard-widget-grid">
+          ${dashboardWidgets.map(dashboardWidgetMarkup).join("")}
         </div>
       `;
     }
 
     const decisionRows = P.$("#decisionRows");
     const agendaRows = P.$("#agendaRows");
-    if (decisionRows) decisionRows.innerHTML = [profileDecision, ...decisions].map(item => dashboardRow(item)).join("");
-    if (agendaRows) agendaRows.innerHTML = agenda.map(item => dashboardRow(item, true)).join("");
+    const widgetRows = dashboardWidgets
+      .filter(item => item.page !== "calendar")
+      .map(item => ({
+        icon: item.icon,
+        title: item.label,
+        note: item.note,
+        label: String(item.value),
+        tone: item.tone,
+        page: item.page,
+        mode: item.mode
+      }));
+    const calendarRows = dashboardWidgets
+      .filter(item => item.page === "calendar")
+      .map(item => ({
+        icon: item.icon,
+        title: `Calendario ${item.label.toLowerCase()}`,
+        note: item.note,
+        label: String(item.value),
+        tone: item.tone,
+        page: "calendar",
+        mode: item.mode
+      }));
+    if (decisionRows) decisionRows.innerHTML = [profileDecision, ...widgetRows, ...decisions].map(item => dashboardRow(item)).join("");
+    if (agendaRows) agendaRows.innerHTML = [...calendarRows, ...agenda].map(item => dashboardRow(item, true)).join("");
   }
 
   function renderUser(data) {
@@ -1512,6 +1586,14 @@
     });
   }
 
+  function setCalendarMode(mode = "shared") {
+    const target = P.$(`[data-calendar-mode="${mode}"]`) || P.$("[data-calendar-mode]");
+    if (!target) return;
+    P.$all("[data-calendar-mode]").forEach(tab => tab.classList.toggle("active", tab === target));
+    const data = P.scopedData?.(P.getAppData()) || P.getAppData();
+    renderCalendar(data.calendar || []);
+  }
+
   function addCalendarKey(keys, value, options = {}) {
     const key = P.normalize ? P.normalize(value) : String(value || "").toLowerCase().trim();
     if (!key) return;
@@ -1941,4 +2023,5 @@
   P.renderReports = renderReports;
   P.renderAdmin = renderAdmin;
   P.calendarByMode = calendarByMode;
+  P.setCalendarMode = setCalendarMode;
 })();

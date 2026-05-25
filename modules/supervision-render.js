@@ -69,7 +69,7 @@
     if (key.includes("verde") || key === "ok" || key.includes("meta_ok")) return { label: "VERDE", tone: "ok" };
     if (key.includes("vermelho") || key.includes("critico") || key.includes("atras")) return { label: "VERMELHO", tone: "danger" };
     if (key.includes("amarelo")) return { label: "AMARELO", tone: "warn" };
-    if (key.includes("aviso") || key.includes("atenc")) return { label: "AVISO!", tone: "warn" };
+    if (key.includes("aviso") || key.includes("atenc")) return { label: "AMARELO", tone: "warn" };
     const cleanLabel = text.replace(/_/g, " ").replace(/[^\p{L}\p{N}\s!]/gu, "").replace(/\s+/g, " ").trim().toUpperCase();
     return cleanLabel ? { label: cleanLabel, tone: "info" } : indicatorMeta(fallbackParts);
   }

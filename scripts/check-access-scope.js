@@ -105,7 +105,7 @@ function run() {
     assert(Object.keys(scoped.networkData).length > 0, "SETEC deve receber redes/cameras.");
     assert(scoped.schoolAssets.length > 0, "SETEC deve receber inventario.");
     assert(hasCredentials(scoped.networkData), "SETEC deve receber credenciais.");
-    assert(scoped.calendar.length === 0, "SETEC nao deve receber calendario pela matriz atual.");
+    assert(scoped.calendar.length === data.calendar.length, "SETEC deve receber calendario compartilhado/pessoal.");
   });
 
   withUser(P, { name: "SEINTEC", role: "SEINTEC" }, scoped => {
@@ -136,8 +136,8 @@ function run() {
     assert(scoped.cars.length === data.cars.length, "Perfil Carros deve receber agendamentos.");
     assert(scoped.schools.length === 0, "Perfil Carros nao deve receber escolas.");
     assert(scoped.contacts.length === 0, "Perfil Carros nao deve receber contatos.");
-    assert(scoped.calendar.length === 0, "Perfil Carros nao deve receber calendario.");
-    assert(P.roleAccess("Carros").length === 1 && P.roleAccess("Carros")[0] === "cars", "Perfil Carros deve acessar apenas categoria carros.");
+    assert(scoped.calendar.length === data.calendar.length, "Perfil Carros deve receber calendario compartilhado/pessoal.");
+    assert(P.roleAccess("Carros").includes("dashboard") && P.roleAccess("Carros").includes("cars") && P.roleAccess("Carros").includes("calendar"), "Perfil Carros deve acessar painel, carros e calendario.");
   });
 
   withUser(P, { name: "Pedagogico", role: "Pedagogico" }, scoped => {
@@ -178,11 +178,12 @@ function run() {
   assertAccess(P, "Administrador", ["admin", "network", "inventory", "profiles"], []);
   assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision"], ["network", "inventory", "cars", "reports", "admin"]);
   assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars"], ["reports", "admin", "profiles"]);
-  assertAccess(P, "SETEC", ["network", "inventory"], ["reports", "admin", "calendar"]);
-  assertAccess(P, "SEINTEC", ["network", "inventory", "cars"], ["reports", "admin", "calls"]);
+  assertAccess(P, "SETEC", ["network", "inventory", "calendar"], ["reports", "admin"]);
+  assertAccess(P, "SEINTEC", ["network", "inventory", "cars", "calendar"], ["reports", "admin", "calls"]);
   assertAccess(P, "Gabinete", ["calls", "calendar", "cars"], ["reports", "network", "inventory", "admin"]);
   assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar"], ["reports", "network", "inventory", "cars", "admin"]);
-  assertAccess(P, "Consulta", ["schools", "contacts"], ["reports", "network", "inventory", "admin"]);
+  assertAccess(P, "Consulta", ["schools", "contacts", "calendar"], ["reports", "network", "inventory", "admin"]);
+  assertAccess(P, "Carros", ["dashboard", "cars", "calendar"], ["schools", "contacts", "network", "inventory", "admin"]);
 
   console.log("Escopo de acesso OK");
 }
