@@ -239,7 +239,6 @@
                   <col class="supervisor-col-week">
                   <col class="supervisor-col-indicator">
                   <col class="supervisor-col-indicator">
-                  <col class="supervisor-col-action">
                 </colgroup>
                 <thead>
                   <tr>
@@ -250,7 +249,6 @@
                     <th>Semana</th>
                     <th>Indicador semana</th>
                     <th>Indicador mes</th>
-                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,7 +263,6 @@
                       <td>${metrics.currentWeek || "--"}</td>
                       <td><span class="diag-pill pill-${metrics.weeklyIndicator.tone}">${metrics.weeklyIndicator.label}</span></td>
                       <td><span class="diag-pill pill-${metrics.monthlyIndicator.tone}">${metrics.monthlyIndicator.label}</span></td>
-                      <td><button class="btn btn-g btn-sm supervisor-open-btn" type="button">Abrir</button></td>
                     </tr>`;
                   }).join("")}
                 </tbody>

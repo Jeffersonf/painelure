@@ -119,7 +119,7 @@ function run() {
   withUser(P, { name: "Gabinete", role: "Gabinete" }, scoped => {
     assert(scoped.calls.length === data.calls.length, "Gabinete deve receber chamados.");
     assert(scoped.cars.length === data.cars.length, "Gabinete deve receber agendamentos de carro.");
-    assert(!P.canViewAllCarBookings(), "Gabinete comum deve ver carros com detalhes restritos.");
+    assert(P.canViewAllCarBookings(), "Gabinete deve ver detalhes completos de carros.");
     assert(Object.keys(scoped.networkData).length === 0, "Gabinete nao deve receber redes/cameras.");
     assert(scoped.schoolAssets.length === 0, "Gabinete nao deve receber inventario tecnico.");
   });
@@ -130,6 +130,14 @@ function run() {
 
   withUser(P, { name: "SEOM", role: "SEOM" }, () => {
     assert(P.canViewAllCarBookings(), "SEOM deve ver detalhes completos de carros.");
+  });
+
+  withUser(P, { name: "Rodolfo", role: "Carros" }, scoped => {
+    assert(scoped.cars.length === data.cars.length, "Perfil Carros deve receber agendamentos.");
+    assert(scoped.schools.length === 0, "Perfil Carros nao deve receber escolas.");
+    assert(scoped.contacts.length === 0, "Perfil Carros nao deve receber contatos.");
+    assert(scoped.calendar.length === 0, "Perfil Carros nao deve receber calendario.");
+    assert(P.roleAccess("Carros").length === 1 && P.roleAccess("Carros")[0] === "cars", "Perfil Carros deve acessar apenas categoria carros.");
   });
 
   withUser(P, { name: "Pedagogico", role: "Pedagogico" }, scoped => {

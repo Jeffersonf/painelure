@@ -50,6 +50,7 @@ const DATA_ACCESS = {
   SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
   Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
   SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
+  Carros: ["cars"],
   Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
   Consulta: ["dashboard", "schools", "contacts"]
 };
@@ -645,6 +646,7 @@ function accessForRole(role) {
   if (target.includes("setec")) return DATA_ACCESS.SETEC;
   if (target.includes("gabinete") || target.includes("dirigente")) return DATA_ACCESS.Gabinete;
   if (target.includes("seom")) return DATA_ACCESS.SEOM;
+  if (target.includes("carro")) return DATA_ACCESS.Carros;
   if (target.includes("pedag") || target.includes("pec")) return DATA_ACCESS.Pedagogico;
   if (target.includes("admin")) return DATA_ACCESS.Administrador;
   return DATA_ACCESS.Consulta;
@@ -663,6 +665,7 @@ function canViewAllCarBookings(user = null) {
   const role = normalizeText(user?.role || "Consulta");
   const contactRole = normalizeText(user?.contactRole || user?.cargo || user?.position || "");
   return role.includes("administrador")
+    || role.includes("gabinete")
     || role.includes("dirigente")
     || contactRole.includes("dirigente")
     || role.includes("seom")

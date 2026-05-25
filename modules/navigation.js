@@ -197,6 +197,11 @@
       setPage(initial);
       return true;
     }
+    const fallback = P.firstAllowedPage?.();
+    if (fallback && fallback !== "dashboard") {
+      setPage(fallback);
+      return true;
+    }
     return false;
   }
 

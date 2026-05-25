@@ -1834,6 +1834,7 @@ html:not(.site-maintenance) .maintenance-message {
 .status-pill {
   min-width: 58px;
   display: inline-flex;
+  align-items: center;
   justify-content: center;
   padding: 4px 9px;
   border: 1px solid var(--bd);
@@ -3946,7 +3947,6 @@ html:not(.site-maintenance) .maintenance-message {
 .supervisor-col-goal { width: 13%; }
 .supervisor-col-week { width: 7%; }
 .supervisor-col-indicator { width: 16%; }
-.supervisor-col-action { width: 7%; }
 
 .supervisor-sheet-table th,
 .supervisor-sheet-table td {
@@ -4031,9 +4031,8 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .diag-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-grid;
+  place-items: center;
   min-height: 28px;
   padding: 0 12px;
   border: 1px solid rgba(200,245,90,.18);
@@ -4075,6 +4074,7 @@ html:not(.site-maintenance) .maintenance-message {
   min-height: 30px;
   margin: 0 auto;
   padding: 0;
+  line-height: 30px;
   letter-spacing: .055em;
   box-shadow: 0 10px 22px rgba(0,0,0,.24);
 }
@@ -4096,17 +4096,6 @@ html:not(.site-maintenance) .maintenance-message {
 .supervisor-sheet-table th:nth-child(5),
 .supervisor-sheet-table td:nth-child(5) {
   text-align: center;
-}
-
-.supervisor-sheet-table td:nth-child(8) {
-  text-align: center;
-}
-
-.supervisor-open-btn {
-  min-width: 54px;
-  min-height: 34px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--sf2) 82%, transparent);
 }
 
 .supervisor-sheet-table .pill-ok,

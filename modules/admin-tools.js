@@ -17,6 +17,7 @@
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
+    Carros: ["cars"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
@@ -50,6 +51,11 @@
       .join(", ");
   }
 
+  function firstAllowedPage(role = currentRole()) {
+    const pages = accessForRole(role).filter(page => !["profiles", "quality", "admin"].includes(page));
+    return pages[0] || "dashboard";
+  }
+
   function applyAccessState(role = currentRole()) {
     P.$all("[data-page], [data-jump]").forEach(button => {
       const page = button.dataset.page || button.dataset.jump;
@@ -70,7 +76,7 @@
     applyAccessState(role);
     const active = P.$(".page.active");
     const activeId = active?.id?.replace("page-", "");
-    if (activeId && !canAccess(activeId, role)) P.setPage("dashboard");
+    if (activeId && !canAccess(activeId, role)) P.setPage(firstAllowedPage(role));
     const roleSelect = P.$("#activeRoleSelect");
     if (roleSelect) roleSelect.value = role;
     const userRoleSelect = P.$("#userRoleSelect");
@@ -1205,6 +1211,7 @@
   P.currentRole = currentRole;
   P.canAccess = canAccess;
   P.allowedPageLabels = allowedPageLabels;
+  P.firstAllowedPage = firstAllowedPage;
   P.applyAccessState = applyAccessState;
   P.applyRole = applyRole;
   P.closeAccountMenu = closeAccountMenu;

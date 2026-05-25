@@ -8,6 +8,7 @@
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
+    Carros: ["cars"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts"]
   };
@@ -19,6 +20,7 @@
     SEINTEC: "📡",
     Gabinete: "📌",
     SEOM: "🏗️",
+    Carros: "🚗",
     Pedagogico: "📚",
     Consulta: "👁️"
   };
@@ -30,6 +32,7 @@
     SEINTEC: "SEINTEC",
     Gabinete: "Gabinete",
     SEOM: "SEOM",
+    Carros: "Carros",
     Pedagogico: "Pedagógico",
     Consulta: "Consulta"
   };
@@ -61,6 +64,7 @@
     if (target.includes("setec")) return ACCESS.SETEC;
     if (target.includes("gabinete") || target.includes("dirigente")) return ACCESS.Gabinete;
     if (target.includes("seom")) return ACCESS.SEOM;
+    if (target.includes("carro")) return ACCESS.Carros;
     if (target.includes("pedag") || target.includes("pec")) return ACCESS.Pedagogico;
     if (target.includes("admin")) return ACCESS.Administrador;
     return ACCESS.Consulta;
@@ -75,6 +79,7 @@
       || (target.includes("setec") && "SETEC")
       || ((target.includes("gabinete") || target.includes("dirigente")) && "Gabinete")
       || (target.includes("seom") && "SEOM")
+      || (target.includes("carro") && "Carros")
       || ((target.includes("pedag") || target.includes("pec")) && "Pedagogico")
       || (target.includes("admin") && "Administrador")
       || "Consulta";
@@ -102,6 +107,7 @@
     const role = normalized(user?.role || P.currentRole?.());
     const contactRole = normalized(user?.contactRole || user?.cargo || user?.position);
     return role.includes("administrador")
+      || role.includes("gabinete")
       || role.includes("dirigente")
       || contactRole.includes("dirigente")
       || role.includes("seom")
