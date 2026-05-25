@@ -55,7 +55,9 @@ function withUser(P, user, callback) {
   P.contactForUser = () => ({
     id: user.contactId || user.contact_id || "",
     name: user.contactName || user.name || "",
-    email: user.email || ""
+    email: user.email || "",
+    sector: user.sector || user.setor || "",
+    category: user.category || user.categoria || ""
   });
   P.currentRole = () => user.role;
   callback(P.scopedData(P.getAppData()));
@@ -138,6 +140,25 @@ function run() {
     assert(scoped.contacts.length === 0, "Perfil Carros nao deve receber contatos.");
     assert(scoped.calendar.length === data.calendar.length, "Perfil Carros deve receber calendario compartilhado/pessoal.");
     assert(P.roleAccess("Carros").includes("dashboard") && P.roleAccess("Carros").includes("cars") && P.roleAccess("Carros").includes("calendar"), "Perfil Carros deve acessar painel, carros e calendario.");
+  });
+
+  withUser(P, { name: "Rodolfo", role: "Carros", sector: "SEAFIN", category: "SEAFIN" }, scoped => {
+    const seafinBooking = { requestId: "1", sector: "SEAFIN", destination: "Reuniao financeira", requester: "SEAFIN" };
+    const segreBooking = { requestId: "2", sector: "SEGRE", destination: "Documento interno", requester: "SEGRE" };
+    assert(P.canViewCarBookingDetails(seafinBooking), "SEAFIN deve ver detalhes completos do proprio setor.");
+    assert(!P.canViewCarBookingDetails(segreBooking), "SEAFIN nao deve ver detalhes completos de SEGRE.");
+    const scopedSeafin = P.scopedData({ ...data, cars: [seafinBooking, segreBooking] }).cars;
+    assert(scopedSeafin[0].destination === "Reuniao financeira", "Agendamento do proprio setor deve permanecer completo.");
+    assert(scopedSeafin[1].restricted === true && !scopedSeafin[1].destination, "Agendamento de outro setor deve ficar mascarado.");
+  });
+
+  withUser(P, { name: "Nelson", role: "Carros", sector: "SEFIN", category: "SEFIN" }, () => {
+    assert(P.canViewCarBookingDetails({ sector: "SEAFIN", requester: "SEAFIN" }), "SEFIN deve casar com agendamento marcado como SEAFIN.");
+    assert(!P.canViewAllCarBookings(), "SEFIN nao deve ver todos os setores.");
+  });
+
+  withUser(P, { name: "Daniel", role: "Carros", sector: "SEFISC", category: "SEFISC" }, () => {
+    assert(P.canViewAllCarBookings(), "SEFISC deve ter visualizacao geral dos carros.");
   });
 
   withUser(P, { name: "Pedagogico", role: "Pedagogico" }, scoped => {

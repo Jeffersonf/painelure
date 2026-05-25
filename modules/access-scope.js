@@ -117,33 +117,53 @@
   function canViewAllCarBookings(user = activeIdentity()) {
     const role = normalized(user?.role || P.currentRole?.());
     const contactRole = normalized(user?.contactRole || user?.cargo || user?.position);
+    const sector = normalized([user?.sector, user?.setor, user?.category, user?.categoria].filter(Boolean).join(" "));
     return role.includes("administrador")
       || role.includes("gabinete")
       || role.includes("dirigente")
       || contactRole.includes("dirigente")
+      || sector.includes("sefisc")
       || role.includes("seom")
       || role.includes("seintec")
       || role.includes("ctc");
   }
 
+  function carSectorKeys(values = []) {
+    const keys = values.map(normalized).filter(Boolean);
+    if (keys.some(key => key.includes("sefin") || key.includes("seafin"))) {
+      keys.push("sefin", "seafin");
+    }
+    return [...new Set(keys)];
+  }
+
   function canViewCarBookingDetails(booking = {}, user = activeIdentity()) {
     if (canViewAllCarBookings(user)) return true;
-    const userKeys = [
+    const contact = P.contactForUser?.(user) || {};
+    const display = P.displayUser?.(user) || {};
+    const userKeys = carSectorKeys([
       user?.role,
       user?.sector,
       user?.setor,
       user?.contactRole,
       user?.category,
-      user?.categoria
-    ].map(normalized).filter(Boolean);
-    const bookingKeys = [
+      user?.categoria,
+      contact.sector,
+      contact.setor,
+      contact.category,
+      contact.categoria,
+      display.sector,
+      display.setor,
+      display.category,
+      display.categoria
+    ]);
+    const bookingKeys = carSectorKeys([
       booking.requester,
       booking.sector,
       booking.setor,
       booking.category,
       booking.categoria,
       booking.owner
-    ].map(normalized).filter(Boolean);
+    ]);
     return userKeys.some(userKey => bookingKeys.some(bookingKey =>
       bookingKey === userKey || bookingKey.includes(userKey) || userKey.includes(bookingKey)
     ));
@@ -276,7 +296,7 @@
       ctcVisits: byAccess.ctc
         ? (supervisorScope ? (data.ctcVisits || []).filter(visit => allowed.has(normalized(visit.place))) : (data.ctcVisits || []))
         : [],
-      cars: byAccess.cars ? (canViewAllCarBookings() ? (data.cars || []) : (data.cars || []).map(publicCarBooking)) : [],
+      cars: byAccess.cars ? (canViewAllCarBookings() ? (data.cars || []) : (data.cars || []).map(item => canViewCarBookingDetails(item) ? item : publicCarBooking(item))) : [],
       contacts: byAccess.contacts ? (data.contacts || []) : [],
       calendar: byAccess.calendar ? (byAccess.cars ? (data.calendar || []) : (data.calendar || []).filter(item => !isCarLikeCalendarItem(item))) : [],
       reports: byAccess.reports ? (data.reports || []) : [],
