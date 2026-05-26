@@ -300,22 +300,26 @@
     P.closeAccountMenu?.();
   }
 
-  function activateOnlineUser(token, user) {
+  function activateOnlineUser(token, user, options = {}) {
     backendToken = token;
     localStorage.setItem(TOKEN_KEY, backendToken);
     sessionStorage.setItem(TOKEN_KEY, backendToken);
     P.setOnlineUser?.(user);
     localStorage.setItem(ROLE_KEY, user.role || "Consulta");
+    if (options.render === false) return user;
     applyRole(user.role || "Consulta");
     applyUserAvatar();
     P.renderPage?.("user", { force: true });
     P.renderApp?.();
+    refreshActiveUserSelect();
+    return user;
   }
 
-  async function loadScopedBackendData() {
+  async function loadScopedBackendData(options = {}) {
     if (!backendToken || !P.loadBackendData) return null;
     const payload = await P.loadBackendData(backendToken);
-    if (payload?.data?.appData) P.renderApp?.();
+    if (payload?.data?.appData && options.render !== false) P.renderApp?.();
+    refreshActiveUserSelect();
     return payload;
   }
 
@@ -336,11 +340,11 @@
       throw error;
     }
     if (!result?.token || !result?.user) throw new Error("Login nao retornou usuario.");
+    activateOnlineUser(result.token, result.user, { render: false });
+    P.showToast?.("Sincronizando", "Carregando a base oficial antes de abrir o painel.", "info", { delay: 3200 });
+    const syncPayload = await loadScopedBackendData({ render: false });
     activateOnlineUser(result.token, result.user);
-    P.showToast?.("Online", "Sessao conectada ao servidor.", "ok");
-    loadScopedBackendData()
-      .then(() => P.showToast?.("Atualizado", "Dados sincronizados com o servidor.", "ok"))
-      .catch(error => P.showToast?.("Erro ao sincronizar", friendlyAuthError(error), "danger"));
+    P.showToast?.("Online", syncPayload?.data?.appData ? "Sessao conectada com dados oficiais." : "Sessao conectada; servidor sem dados novos.", "ok");
     if (result.user.preferences?.forcePinChange) {
       showPinChange(true);
       showLoginStatus("Troque o PIN inicial para continuar.");
@@ -391,26 +395,29 @@
     }
     const cachedUser = P.onlineUser?.();
     if (cachedUser) {
-      activateLocalSession(cachedUser.role || currentRole());
-      document.documentElement.classList.remove("auth-pending");
-      P.loadBackendUser(backendToken)
-        .then(payload => {
-          const user = payload?.user || cachedUser;
-          P.setOnlineUser?.(user);
-          localStorage.setItem(ROLE_KEY, user.role || "Consulta");
-          applyRole(user.role || "Consulta");
-          showPinChange(Boolean(user.preferences?.forcePinChange));
-          loadScopedBackendData().catch(() => {});
-        })
-        .catch(error => {
-          if (!authErrorIsInvalidSession(error)) return;
+      try {
+        const payload = await P.loadBackendUser(backendToken);
+        const user = payload?.user || cachedUser;
+        activateOnlineUser(backendToken, user, { render: false });
+        await loadScopedBackendData({ render: false });
+        activateOnlineUser(backendToken, user);
+        showPinChange(Boolean(user.preferences?.forcePinChange));
+        return user;
+      } catch (error) {
+        if (authErrorIsInvalidSession(error)) {
           backendToken = "";
           localStorage.removeItem(TOKEN_KEY);
           sessionStorage.removeItem(TOKEN_KEY);
           P.clearOnlineUser?.();
           setAuthenticated(false);
-        });
-      return cachedUser;
+          return null;
+        }
+        activateLocalSession(cachedUser.role || currentRole());
+        P.showToast?.("Offline", "Nao foi possivel sincronizar agora. Mantendo sessao local.", "warn");
+        return cachedUser;
+      } finally {
+        document.documentElement.classList.remove("auth-pending");
+      }
     }
     try {
       const payload = await P.loadBackendUser(backendToken);
@@ -420,16 +427,10 @@
         preferences: {}
       } : null);
       if (user) {
-        localStorage.setItem(TOKEN_KEY, backendToken);
-        sessionStorage.setItem(TOKEN_KEY, backendToken);
-        P.setOnlineUser?.(user);
-        localStorage.setItem(ROLE_KEY, user.role || "Consulta");
-        applyRole(user.role || "Consulta");
-        applyUserAvatar();
-        P.renderPage?.("user", { force: true });
+        activateOnlineUser(backendToken, user, { render: false });
+        await loadScopedBackendData({ render: false });
+        activateOnlineUser(backendToken, user);
         showPinChange(Boolean(user.preferences?.forcePinChange));
-        loadScopedBackendData().catch(() => {});
-        if (!user.preferences?.forcePinChange) P.renderApp?.();
       }
       return user || null;
     } catch (error) {
@@ -548,12 +549,9 @@
       newUserRoleSelect.innerHTML = adminRoleOptions().map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
     }
     const activeUserSelect = P.$("#activeUserSelect");
+    refreshActiveUserSelect();
     if (activeUserSelect && !activeUserSelect.dataset.bound) {
       activeUserSelect.dataset.bound = "true";
-      activeUserSelect.innerHTML = (P.users?.() || []).map(user => {
-        const display = P.displayUser?.(user) || user;
-        return `<option value="${user.id}">${display.shortName || display.name} • ${P.roleLabel?.(user.role) || user.role}</option>`;
-      }).join("");
       activeUserSelect.addEventListener("change", () => {
         const user = P.setActiveUser?.(activeUserSelect.value);
         if (user) {

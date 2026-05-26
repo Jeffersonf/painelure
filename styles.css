@@ -805,16 +805,19 @@ html:not(.site-maintenance) .maintenance-message {
 
 .app-toast {
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
+  grid-template-columns: 34px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
   border: 1px solid var(--bd);
   border-left: 4px solid var(--ac2);
-  border-radius: 10px;
+  border-radius: 14px;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .018)),
     color-mix(in srgb, var(--sf) 94%, transparent);
   box-shadow: 0 18px 48px rgba(0, 0, 0, .28);
   opacity: 0;
+  pointer-events: auto;
   transform: translateY(8px);
   transition: opacity .18s ease, transform .18s ease;
 }
@@ -824,29 +827,80 @@ html:not(.site-maintenance) .maintenance-message {
   transform: translateY(0);
 }
 
+.app-toast > i {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .07);
+  color: var(--tx);
+  font-style: normal;
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.toast-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
 .app-toast strong {
   color: var(--tx);
   font-size: 13px;
   font-weight: 900;
 }
 
-.app-toast span {
+.toast-copy span {
   color: var(--tx2);
   font-size: 12px;
   font-weight: 750;
   line-height: 1.35;
 }
 
+.app-toast button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--mt);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app-toast button:hover {
+  background: rgba(255, 255, 255, .07);
+  color: var(--tx);
+}
+
 .app-toast.toast-ok {
   border-left-color: var(--ok);
+}
+
+.app-toast.toast-ok > i {
+  background: rgba(75, 215, 115, .14);
+  color: var(--ok);
 }
 
 .app-toast.toast-warn {
   border-left-color: var(--warn);
 }
 
+.app-toast.toast-warn > i {
+  background: rgba(255, 211, 65, .14);
+  color: var(--warn);
+}
+
 .app-toast.toast-danger {
   border-left-color: var(--danger);
+}
+
+.app-toast.toast-danger > i {
+  background: rgba(255, 72, 72, .14);
+  color: var(--danger);
 }
 
 .sidebar-card {

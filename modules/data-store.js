@@ -70,6 +70,22 @@
     return [...mergedFixed, ...unknownIncoming];
   }
 
+  function userKey(user = {}) {
+    return P.normalize?.(user.id || user.username || user.login || user.name || "") || String(user.id || user.username || user.login || user.name || "").toLowerCase().trim();
+  }
+
+  function mergeUsersWithSeed(users = []) {
+    const incoming = Array.isArray(users) ? users : [];
+    const seedUsers = Array.isArray(P.seedData?.users) ? P.seedData.users : [];
+    const byKey = new Map(incoming.map(user => [userKey(user), user]));
+    seedUsers.forEach(seed => {
+      const key = userKey(seed);
+      if (!key || byKey.has(key)) return;
+      byKey.set(key, seed);
+    });
+    return [...byKey.values()];
+  }
+
   function normalizeAppData(source = {}) {
     return {
       schools: normalizeSchools(source),
@@ -90,7 +106,7 @@
       cars: Array.isArray(source.cars) ? source.cars : [],
       calls: Array.isArray(source.calls) ? source.calls : [],
       reports: Array.isArray(source.reports) ? source.reports : [],
-      users: Array.isArray(source.users) ? source.users : [],
+      users: mergeUsersWithSeed(source.users),
       accessRules: source.accessRules && typeof source.accessRules === "object" ? source.accessRules : {},
       pageMaintenance: source.pageMaintenance && typeof source.pageMaintenance === "object" ? source.pageMaintenance : {},
       adminChecks: Array.isArray(source.adminChecks) ? source.adminChecks : []
