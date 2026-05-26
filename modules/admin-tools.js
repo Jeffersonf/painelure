@@ -13,13 +13,13 @@
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars"],
+    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
-    Carros: ["cars"],
+    Carros: ["dashboard", "cars", "calendar"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
-    Consulta: ["dashboard", "schools", "contacts"]
+    Consulta: ["dashboard", "schools", "contacts", "calendar"]
   };
   const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"];
 
@@ -58,6 +58,26 @@
 
   function adminPageChoices() {
     return ADMIN_PAGE_CHOICES.filter(page => P.PAGE_META?.[page]);
+  }
+
+  function userOptionLabel(user) {
+    const display = P.displayUser?.(user) || user || {};
+    const sector = user?.sector || user?.setor || user?.category || user?.categoria || display.sector || "";
+    return [
+      display.shortName || display.name || user?.name || user?.login || "Usuario",
+      sector,
+      P.roleLabel?.(user?.role) || user?.role || "Consulta"
+    ].filter(Boolean).join(" • ");
+  }
+
+  function refreshActiveUserSelect() {
+    const activeUserSelect = P.$("#activeUserSelect");
+    if (!activeUserSelect) return;
+    const currentValue = activeUserSelect.value || P.activeUser?.()?.id || "";
+    activeUserSelect.innerHTML = (P.users?.() || []).map(user => `<option value="${user.id}">${userOptionLabel(user)}</option>`).join("");
+    if (currentValue && [...activeUserSelect.options].some(option => option.value === currentValue)) {
+      activeUserSelect.value = currentValue;
+    }
   }
 
   function firstAllowedPage(role = currentRole()) {
