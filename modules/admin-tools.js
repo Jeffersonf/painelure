@@ -278,26 +278,29 @@
     P.renderApp?.();
   }
 
-  async function logoutOnline() {
-    if (backendToken) await P.logoutBackend?.(backendToken).catch(() => {});
+  function logoutOnline() {
+    const token = backendToken;
     backendToken = "";
     localStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(TOKEN_KEY);
     P.clearOnlineUser?.();
+    P.closeAccountMenu?.();
+    setAuthenticated(false);
+    document.documentElement.classList.remove("auth-pending");
     const localUser = P.activeUser?.();
     applyRole(localUser?.role || "Administrador");
     applyUserAvatar();
     P.renderPage?.("user", { force: true });
-    setAuthenticated(false);
     if (P.$("#loginForm")) P.$("#loginForm").hidden = false;
     if (P.$("#pinChangeForm")) P.$("#pinChangeForm").hidden = true;
     showLoginStatus("Sessao encerrada.");
+    P.showToast?.("Sessao encerrada", "Voce saiu do PainelURE.", "ok", { delay: 2600 });
     const userInput = P.$("#loginUserInput");
     const pinInput = P.$("#loginPinInput");
     if (userInput) userInput.value = "";
     if (pinInput) pinInput.value = "";
     window.setTimeout(() => userInput?.focus?.(), 0);
-    P.closeAccountMenu?.();
+    if (token) P.logoutBackend?.(token).catch(() => {});
   }
 
   function activateOnlineUser(token, user, options = {}) {
@@ -635,8 +638,8 @@
     P.$("#onlineLogoutBtn")?.addEventListener("click", logoutOnline);
     P.$("#sidebarLogoutBtn")?.addEventListener("click", logoutOnline);
 
-    P.$("#restoreAdminBtn")?.addEventListener("click", async () => {
-      if (backendToken) await P.logoutBackend?.(backendToken).catch(() => {});
+    P.$("#restoreAdminBtn")?.addEventListener("click", () => {
+      const token = backendToken;
       backendToken = "";
       localStorage.removeItem(TOKEN_KEY);
       sessionStorage.removeItem(TOKEN_KEY);
@@ -647,6 +650,7 @@
       applyRole("Administrador");
       applyUserAvatar();
       P.renderPage?.("user", { force: true });
+      if (token) P.logoutBackend?.(token).catch(() => {});
     });
 
     P.$("#avatarInput")?.addEventListener("change", event => {
