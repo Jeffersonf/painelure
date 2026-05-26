@@ -157,8 +157,24 @@ function run() {
     assert(!P.canViewAllCarBookings(), "SEFIN nao deve ver todos os setores.");
   });
 
+  withUser(P, { name: "Priscila", role: "Carros", sector: "SEGRE", category: "SEGRE" }, () => {
+    assert(P.canViewCarBookingDetails({ sector: "SEVESC", requester: "SEVESC" }), "SEGRE deve ver detalhes do agrupamento Rede Escolar.");
+    assert(P.canViewCarBookingDetails({ sector: "SEMAT", requester: "SEMAT" }), "SEGRE deve ver SEMAT dentro do mesmo agrupamento.");
+    assert(!P.canViewCarBookingDetails({ sector: "SEFIN", requester: "SEFIN" }), "SEGRE nao deve ver detalhes de Financas.");
+  });
+
+  withUser(P, { name: "Hector", role: "Carros", sector: "SEPES", category: "SEPES" }, () => {
+    assert(P.canViewCarBookingDetails({ sector: "SEAPE", requester: "SEAPE" }), "SEPES deve ver detalhes do agrupamento Recursos Humanos.");
+    assert(P.canViewCarBookingDetails({ sector: "SEFREP", requester: "SEFREP" }), "SEPES deve ver SEFREP dentro do mesmo agrupamento.");
+    assert(!P.canViewCarBookingDetails({ sector: "SEGRE", requester: "SEGRE" }), "SEPES nao deve ver detalhes de Rede Escolar.");
+  });
+
   withUser(P, { name: "Daniel", role: "Carros", sector: "SEFISC", category: "SEFISC" }, () => {
     assert(P.canViewAllCarBookings(), "SEFISC deve ter visualizacao geral dos carros.");
+  });
+
+  withUser(P, { name: "Tecnologia", role: "Carros", sector: "CTC", category: "CTC" }, () => {
+    assert(P.canViewAllCarBookings(), "Tecnologia deve ter visualizacao geral dos carros.");
   });
 
   withUser(P, { name: "Pedagogico", role: "Pedagogico" }, scoped => {
@@ -205,6 +221,10 @@ function run() {
   assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar"], ["reports", "network", "inventory", "cars", "admin"]);
   assertAccess(P, "Consulta", ["schools", "contacts", "calendar"], ["reports", "network", "inventory", "admin"]);
   assertAccess(P, "Carros", ["dashboard", "cars", "calendar"], ["schools", "contacts", "network", "inventory", "admin"]);
+  assertAccess(P, "SEGRE", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
+  assertAccess(P, "SEPES", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
+  assertAccess(P, "SEFIN", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
+  assertAccess(P, "SEFISC", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
 
   console.log("Escopo de acesso OK");
 }

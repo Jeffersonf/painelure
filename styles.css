@@ -820,6 +820,7 @@ html:not(.site-maintenance) .maintenance-message {
   pointer-events: auto;
   transform: translateY(8px);
   transition: opacity .18s ease, transform .18s ease;
+  overflow: hidden;
 }
 
 .app-toast.show {
@@ -885,6 +886,15 @@ html:not(.site-maintenance) .maintenance-message {
   color: var(--ok);
 }
 
+.app-toast.toast-info {
+  border-left-color: var(--ac2);
+}
+
+.app-toast.toast-info > i {
+  background: rgba(90, 245, 200, .14);
+  color: var(--ac2);
+}
+
 .app-toast.toast-warn {
   border-left-color: var(--warn);
 }
@@ -901,6 +911,22 @@ html:not(.site-maintenance) .maintenance-message {
 .app-toast.toast-danger > i {
   background: rgba(255, 72, 72, .14);
   color: var(--danger);
+}
+
+.toast-life {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 2px;
+  margin: 0 -12px -12px;
+  background: linear-gradient(90deg, var(--ac), var(--ac2));
+  transform-origin: left center;
+  animation: toast-life var(--toast-delay, 4200ms) linear forwards;
+}
+
+@keyframes toast-life {
+  to {
+    transform: scaleX(0);
+  }
 }
 
 .sidebar-card {
@@ -1397,6 +1423,107 @@ html:not(.site-maintenance) .maintenance-message {
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sync-banner {
+  min-width: 280px;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 9px 10px;
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--sf) 88%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+
+.sync-banner:empty {
+  display: none;
+}
+
+.sync-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 999px;
+  background: var(--mt);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, .04);
+}
+
+.sync-ok .sync-dot {
+  background: var(--ok);
+}
+
+.sync-warn .sync-dot {
+  background: var(--warn);
+}
+
+.sync-loading .sync-dot {
+  background: var(--ac2);
+  animation: pulse-dot 1s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  50% {
+    opacity: .45;
+    transform: scale(.82);
+  }
+}
+
+.sync-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.sync-copy strong,
+.sync-copy small,
+.sync-admin-note,
+.source-admin-note {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync-copy strong {
+  color: var(--tx);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.sync-copy small,
+.sync-admin-note,
+.source-admin-note {
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.sync-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+}
+
+.sync-actions button,
+.source-retry-btn {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 211, 65, .34);
+  border-radius: 999px;
+  background: rgba(255, 211, 65, .10);
+  color: var(--warn);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.sync-actions button:disabled,
+.source-retry-btn:disabled {
+  cursor: progress;
+  opacity: .72;
 }
 
 .notice-card {
@@ -1933,6 +2060,10 @@ html:not(.site-maintenance) .maintenance-message {
 
 .data-row.compact {
   min-height: 56px;
+}
+
+.data-row:has(.source-retry-btn) {
+  grid-template-columns: 40px minmax(0, 1fr) auto auto;
 }
 
 .row-icon {
@@ -5584,6 +5715,20 @@ html:not(.site-maintenance) .maintenance-message {
   .global-month-bar .month-switcher {
     width: 100%;
     grid-template-columns: 40px minmax(0, 1fr) 40px;
+  }
+
+  .sync-banner {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin-left: 0;
+    align-items: flex-start;
+  }
+
+  .sync-copy strong,
+  .sync-copy small,
+  .sync-admin-note {
+    white-space: normal;
   }
 
   .global-page-heading strong,

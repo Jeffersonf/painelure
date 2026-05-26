@@ -15,8 +15,20 @@
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar"],
+    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
+    Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
+    SEFISC: ["dashboard", "cars", "calendar"],
+    SEGRE: ["dashboard", "cars", "calendar"],
+    SEVESC: ["dashboard", "cars", "calendar"],
+    SEMAT: ["dashboard", "cars", "calendar"],
+    SEPES: ["dashboard", "cars", "calendar"],
+    SEFREP: ["dashboard", "cars", "calendar"],
+    SEAPE: ["dashboard", "cars", "calendar"],
+    SEAFIM: ["dashboard", "cars", "calendar"],
+    SEFIN: ["dashboard", "cars", "calendar"],
+    SECOMSE: ["dashboard", "cars", "calendar"],
     Carros: ["dashboard", "cars", "calendar"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts", "calendar"]
@@ -328,11 +340,16 @@
 
   async function syncOfficialDataBeforeOpen() {
     showLoginStatus("Sincronizando dados oficiais...");
-    const backendPayload = await loadScopedBackendData({ render: false });
+    let backendPayload = null;
+    try {
+      backendPayload = await loadScopedBackendData({ render: false });
+    } catch (error) {
+      P.showToast?.("Base online indisponivel", "Entrando com dados locais; tente sincronizar novamente no painel.", "warn", { delay: 6200 });
+    }
     if (P.loadConfiguredSources) {
-      showLoginStatus("Sincronizando planilhas e SharePoint...");
-      P.showToast?.("Sincronizando", "Atualizando carros, supervisao e demais fontes oficiais.", "info", { delay: 4200 });
-      const results = await P.loadConfiguredSources({ includeManual: true });
+      showLoginStatus("Sincronizando carros...");
+      P.showToast?.("Sincronizando", "Atualizando carros e supervisao antes de abrir.", "info", { delay: 4200 });
+      const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision"], order: ["cars", "supervision"] });
       const failed = (results || []).filter(item => item.status === "error");
       if (failed.length) {
         const labels = failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ");
@@ -340,6 +357,8 @@
       }
     }
     P.saveAppData?.();
+    P.renderSourceStatus?.();
+    P.renderGlobalSyncBanner?.();
     return backendPayload;
   }
 
@@ -895,11 +914,12 @@
     P.$("#reloadSourcesBtn")?.addEventListener("click", () => {
       const meta = P.$("#adminBackupMeta");
       if (meta) meta.textContent = "Atualizando fontes em segundo plano...";
-      P.loadConfiguredSources?.()
+      P.loadConfiguredSources?.({ includeManual: true, order: ["cars", "supervision", "calendar", "contacts", "schools", "network", "inventory"] })
         .then(() => {
           P.renderApp?.();
           applyRole();
           renderSourceStatus();
+          renderGlobalSyncBanner();
           if (meta) meta.textContent = "Fontes atualizadas.";
         })
         .catch(error => {
@@ -925,6 +945,45 @@
     });
 
     const sourceEditorList = P.$("#sourceEditorList");
+    if (!document.documentElement.dataset.sourceRetryBound) {
+      document.documentElement.dataset.sourceRetryBound = "true";
+      document.addEventListener("click", async event => {
+        const button = event.target.closest("[data-retry-source]");
+        if (!button) return;
+        const key = button.dataset.retrySource;
+        const label = P.sources?.[key]?.label || key;
+        const original = button.textContent;
+        try {
+          button.disabled = true;
+          button.textContent = "Sincronizando...";
+          P.sourceStatus = [
+            ...(P.sourceStatus || []).filter(item => item.key !== key),
+            { key, status: "loading", updatedAt: new Date().toISOString() }
+          ];
+          renderSourceStatus();
+          renderGlobalSyncBanner();
+          const result = await P.refreshSource?.(key);
+          P.saveAppData?.();
+          P.renderApp?.();
+          applyRole();
+          P.showToast?.("Fonte atualizada", `${label}: ${result?.rows?.length || 0} linha(s).`, "ok");
+          setAdminMeta(`${label} sincronizado novamente.`);
+        } catch (error) {
+          P.sourceStatus = [
+            ...(P.sourceStatus || []).filter(item => item.key !== key),
+            { key, status: "error", error, updatedAt: new Date().toISOString() }
+          ];
+          P.showToast?.("Falha na fonte", `${label}: ${error?.message || "nao foi possivel sincronizar"}.`, "warn", { delay: 6200 });
+          setAdminMeta(`Falha ao sincronizar ${label}: ${error.message}`);
+        } finally {
+          renderSourceStatus();
+          renderGlobalSyncBanner();
+          button.disabled = false;
+          button.textContent = original || "Tentar novamente";
+        }
+      });
+    }
+
     if (sourceEditorList && !sourceEditorList.dataset.bound) {
       sourceEditorList.dataset.bound = "true";
       sourceEditorList.addEventListener("click", async event => {
@@ -948,13 +1007,15 @@
           P.renderApp?.();
           applyRole();
           renderSourceStatus();
+          renderGlobalSyncBanner();
           setAdminMeta(`${P.sources?.[key]?.label || key} sincronizado: ${result?.rows?.length || 0} linha(s).`);
         } catch (error) {
           P.sourceStatus = [
             ...(P.sourceStatus || []).filter(item => item.key !== key),
-            { key, status: "error", error }
+            { key, status: "error", error, updatedAt: new Date().toISOString() }
           ];
           renderSourceStatus();
+          renderGlobalSyncBanner();
           setAdminMeta(`Falha ao sincronizar ${P.sources?.[key]?.label || key}: ${error.message}`);
         } finally {
           button.disabled = false;
@@ -1001,6 +1062,7 @@
     applyPrefs();
     renderSourceEditor();
     renderSourceStatus();
+    renderGlobalSyncBanner();
     refreshBackendPanel();
   }
 
@@ -1153,6 +1215,40 @@
     ].filter(Boolean).join(" | ");
   }
 
+  function sourceStatusLabel(status) {
+    const labels = {
+      loaded: "sincronizada",
+      official: "oficial",
+      configured: "configurada",
+      loading: "sincronizando",
+      error: "falhou",
+      skipped: "manual",
+      pending: "pendente"
+    };
+    return labels[status] || status || "pendente";
+  }
+
+  function sourceStatusTone(item = {}) {
+    if (item.status === "loaded" || item.status === "official") return "ok";
+    if (item.status === "error") return "warn";
+    if (item.status === "loading") return "info";
+    return "info";
+  }
+
+  function sourceUpdatedLabel(item = {}) {
+    if (!item.updatedAt) return "";
+    try {
+      return new Date(item.updatedAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function sourceRequiresAdminAttention(source = {}) {
+    const url = String(source.url || "").toLowerCase();
+    return source.type === "sharepoint-list" || url.includes("sharepoint.com");
+  }
+
   function renderSourceEditor() {
     const host = P.$("#sourceEditorList");
     if (!host) return;
@@ -1191,19 +1287,70 @@
       const source = P.sources?.[item.key] || {};
       const label = source.label || item.key;
       const ok = item.status === "loaded" || item.status === "official";
-      const status = item.reason === "manual" ? "manual" : item.status === "skipped" || item.status === "pending" ? "pendente" : item.status;
+      const status = item.reason === "manual" ? "manual" : item.status === "skipped" || item.status === "pending" ? "pendente" : sourceStatusLabel(item.status);
+      const when = sourceUpdatedLabel(item);
       const detail = [
         source.url ? "fonte configurada" : "sem URL configurada",
-        sourceMetaLine(source, true)
+        sourceMetaLine(source, true),
+        when && `ultima tentativa ${when}`,
+        item.status === "error" && (item.error?.message || "falha ao sincronizar")
       ].filter(Boolean).join(" | ");
+      const retry = item.status === "error"
+        ? `<button class="ghost-btn source-retry-btn" type="button" data-retry-source="${item.key}">Tentar novamente</button>`
+        : "";
+      const adminNote = currentRole() === "Administrador" && sourceRequiresAdminAttention(source)
+        ? `<small class="source-admin-note">Aviso admin: links privados do SharePoint podem exigir permissao ou backend autenticado.</small>`
+        : "";
       return `
         <div class="data-row compact" data-search="${P.searchText([label, status, detail])}">
           <span class="row-icon">&#8635;</span>
-          <span><strong>${label}</strong><small>${detail}</small></span>
-          <em class="status-pill ${ok ? "ok" : "info"}">${status}</em>
+          <span><strong>${label}</strong><small>${detail}</small>${adminNote}</span>
+          ${retry}
+          <em class="status-pill ${ok ? "ok" : sourceStatusTone(item)}">${status}</em>
         </div>
       `;
     }).join("");
+  }
+
+  function renderGlobalSyncBanner() {
+    const host = P.$("#globalSyncBanner");
+    if (!host) return;
+    const statuses = P.sourceStatus?.length ? P.sourceStatus : [];
+    const importantKeys = ["cars", "supervision"];
+    const important = importantKeys.map(key => statuses.find(item => item.key === key)).filter(Boolean);
+    const failed = statuses.filter(item => item.status === "error");
+    const loading = statuses.filter(item => item.status === "loading");
+    const loaded = statuses.filter(item => item.status === "loaded");
+    const latest = statuses
+      .map(sourceUpdatedLabel)
+      .filter(Boolean)[0] || "";
+    const stale = failed.length > 0;
+    const title = loading.length
+      ? "Sincronizando fontes"
+      : stale
+        ? "Dados oficiais com aviso"
+        : loaded.length
+          ? "Dados oficiais sincronizados"
+          : "Fontes oficiais aguardando";
+    const detail = loading.length
+      ? loading.map(item => P.sources?.[item.key]?.label || item.key).join(", ")
+      : failed.length
+        ? `${failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ")} falhou. Dados antigos seguem visiveis.`
+        : important.length
+          ? important.map(item => `${P.sources?.[item.key]?.label || item.key}: ${sourceStatusLabel(item.status)}`).join(" | ")
+          : "Carros primeiro, supervisao depois; demais fontes entram aos poucos.";
+    const buttons = failed.map(item => `
+      <button type="button" data-retry-source="${item.key}">Sincronizar ${P.sources?.[item.key]?.label || item.key}</button>
+    `).join("");
+    const adminNote = currentRole() === "Administrador" && failed.some(item => sourceRequiresAdminAttention(P.sources?.[item.key]))
+      ? `<small class="sync-admin-note">Aviso admin: confirme permissao dos links privados do SharePoint se a falha repetir.</small>`
+      : "";
+    host.className = `sync-banner ${loading.length ? "sync-loading" : stale ? "sync-warn" : loaded.length ? "sync-ok" : "sync-idle"}`;
+    host.innerHTML = `
+      <span class="sync-dot" aria-hidden="true"></span>
+      <span class="sync-copy"><strong>${title}</strong><small>${detail}${latest ? ` | ${latest}` : ""}</small>${adminNote}</span>
+      ${buttons ? `<span class="sync-actions">${buttons}</span>` : ""}
+    `;
   }
 
   function formatDateTime(value) {
@@ -1250,6 +1397,7 @@
         });
         renderSourceEditor();
         renderSourceStatus();
+        renderGlobalSyncBanner();
       }
     } catch (error) {
       if (statusLine) statusLine.textContent = `API indisponível: ${error.message}`;
@@ -1360,6 +1508,7 @@
   P.bindAdminTools = bindAdminTools;
   P.restoreBackendSession = restoreBackendSession;
   P.renderSourceStatus = renderSourceStatus;
+  P.renderGlobalSyncBanner = renderGlobalSyncBanner;
   P.renderSourceEditor = renderSourceEditor;
   P.refreshBackendPanel = refreshBackendPanel;
   P.applyPrefs = applyPrefs;

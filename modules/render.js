@@ -1451,11 +1451,13 @@
         try {
           const result = await P.refreshSource?.("cars");
           P.renderSourceStatus?.();
+          P.renderGlobalSyncBanner?.();
           const rows = result?.rows?.length || 0;
           if (sourceStatus) sourceStatus.textContent = `${rows} reserva(s) atualizada(s).`;
           renderCars(P.scopedData?.(P.getAppData()) || P.getAppData());
         } catch (error) {
           if (sourceStatus) sourceStatus.textContent = error?.message || "N\u00e3o foi poss\u00edvel atualizar as reservas.";
+          P.renderGlobalSyncBanner?.();
         } finally {
           refreshButton.disabled = false;
           refreshButton.textContent = original || "Atualizar";

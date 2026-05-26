@@ -81,17 +81,20 @@
       stack.setAttribute("aria-live", "polite");
       document.body.appendChild(stack);
     }
-    const icons = { ok: "✓", warn: "!", danger: "!", info: "i" };
+    const icons = { ok: "OK", warn: "!", danger: "!", info: "i" };
+    const delay = Number(options.delay || 4200);
     const toast = document.createElement("div");
     toast.className = `app-toast toast-${tone || "info"}`;
     toast.setAttribute("role", tone === "danger" ? "alert" : "status");
+    toast.style.setProperty("--toast-delay", `${delay}ms`);
     toast.innerHTML = `
       <i aria-hidden="true">${icons[tone] || icons.info}</i>
       <span class="toast-copy">
         <strong>${title || "Aviso"}</strong>
         ${message ? `<span>${message}</span>` : ""}
       </span>
-      <button type="button" aria-label="Fechar aviso">×</button>
+      <button type="button" aria-label="Fechar aviso">x</button>
+      <b class="toast-life" aria-hidden="true"></b>
     `;
     toast.querySelector("button")?.addEventListener("click", () => {
       toast.classList.remove("show");
@@ -99,7 +102,6 @@
     });
     stack.appendChild(toast);
     window.setTimeout(() => toast.classList.add("show"), 20);
-    const delay = Number(options.delay || 4200);
     window.setTimeout(() => {
       toast.classList.remove("show");
       window.setTimeout(() => toast.remove(), 180);

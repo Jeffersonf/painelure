@@ -6,8 +6,20 @@
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar"],
+    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
+    Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
+    SEFISC: ["dashboard", "cars", "calendar"],
+    SEGRE: ["dashboard", "cars", "calendar"],
+    SEVESC: ["dashboard", "cars", "calendar"],
+    SEMAT: ["dashboard", "cars", "calendar"],
+    SEPES: ["dashboard", "cars", "calendar"],
+    SEFREP: ["dashboard", "cars", "calendar"],
+    SEAPE: ["dashboard", "cars", "calendar"],
+    SEAFIM: ["dashboard", "cars", "calendar"],
+    SEFIN: ["dashboard", "cars", "calendar"],
+    SECOMSE: ["dashboard", "cars", "calendar"],
     Carros: ["dashboard", "cars", "calendar"],
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
     Consulta: ["dashboard", "schools", "contacts", "calendar"]
@@ -65,8 +77,19 @@
     if (target.includes("ctc")) return ACCESS["Tecnicos CTC"];
     if (target.includes("seintec")) return ACCESS.SEINTEC;
     if (target.includes("setec")) return ACCESS.SETEC;
+    if (target.includes("ctc")) return ACCESS.CTC;
     if (target.includes("gabinete") || target.includes("dirigente")) return ACCESS.Gabinete;
     if (target.includes("seom")) return ACCESS.SEOM;
+    if (target.includes("sefisc")) return ACCESS.SEFISC;
+    if (target.includes("segre")) return ACCESS.SEGRE;
+    if (target.includes("sevesc")) return ACCESS.SEVESC;
+    if (target.includes("semat")) return ACCESS.SEMAT;
+    if (target.includes("sepes")) return ACCESS.SEPES;
+    if (target.includes("sefrep")) return ACCESS.SEFREP;
+    if (target.includes("seape")) return ACCESS.SEAPE;
+    if (target.includes("seafim") || target.includes("seafin")) return ACCESS.SEAFIM;
+    if (target.includes("sefin")) return ACCESS.SEFIN;
+    if (target.includes("secomse")) return ACCESS.SECOMSE;
     if (target.includes("carro")) return ACCESS.Carros;
     if (target.includes("pedag") || target.includes("pec")) return ACCESS.Pedagogico;
     if (target.includes("admin")) return ACCESS.Administrador;
@@ -90,6 +113,16 @@
       || (target.includes("setec") && "SETEC")
       || ((target.includes("gabinete") || target.includes("dirigente")) && "Gabinete")
       || (target.includes("seom") && "SEOM")
+      || (target.includes("sefisc") && "SEFISC")
+      || (target.includes("segre") && "SEGRE")
+      || (target.includes("sevesc") && "SEVESC")
+      || (target.includes("semat") && "SEMAT")
+      || (target.includes("sepes") && "SEPES")
+      || (target.includes("sefrep") && "SEFREP")
+      || (target.includes("seape") && "SEAPE")
+      || ((target.includes("seafim") || target.includes("seafin")) && "SEAFIM")
+      || (target.includes("sefin") && "SEFIN")
+      || (target.includes("secomse") && "SECOMSE")
       || (target.includes("carro") && "Carros")
       || ((target.includes("pedag") || target.includes("pec")) && "Pedagogico")
       || (target.includes("admin") && "Administrador")
@@ -114,25 +147,41 @@
     return ["administrador", "ctc", "setec", "seintec"].some(item => key.includes(item));
   }
 
+  const SECTOR_GROUPS = {
+    tecnologia: ["seintec", "setec", "ctc", "tecnologia"],
+    redeEscolar: ["segre", "sevesc", "semat", "rede escolar", "pedagogico", "pedagogica", "pedagog"],
+    recursosHumanos: ["sepes", "sefrep", "seape", "recursos humanos", "rh", "pessoas"],
+    financas: ["seafim", "seafin", "sefin", "secomse", "financas", "financeiro", "compras", "pagamento"],
+    obras: ["seom", "sefisc", "obras"]
+  };
+
+  function sectorGroup(values = []) {
+    const text = values.map(normalized).filter(Boolean).join(" ");
+    if (!text) return "";
+    return Object.entries(SECTOR_GROUPS).find(([, aliases]) => aliases.some(alias => text.includes(alias)))?.[0] || "";
+  }
+
   function canViewAllCarBookings(user = activeIdentity()) {
     const role = normalized(user?.role || P.currentRole?.());
     const contactRole = normalized(user?.contactRole || user?.cargo || user?.position);
-    const sector = normalized([user?.sector, user?.setor, user?.category, user?.categoria].filter(Boolean).join(" "));
+    const contact = P.contactForUser?.(user) || {};
+    const group = sectorGroup([user?.sector, user?.setor, user?.category, user?.categoria, contact.sector, contact.role, contactRole]);
     return role.includes("administrador")
       || role.includes("gabinete")
       || role.includes("dirigente")
       || contactRole.includes("dirigente")
-      || sector.includes("sefisc")
+      || group === "tecnologia"
+      || group === "obras"
       || role.includes("seom")
       || role.includes("seintec")
+      || role.includes("setec")
       || role.includes("ctc");
   }
 
   function carSectorKeys(values = []) {
     const keys = values.map(normalized).filter(Boolean);
-    if (keys.some(key => key.includes("sefin") || key.includes("seafin"))) {
-      keys.push("sefin", "seafin");
-    }
+    const group = sectorGroup(keys);
+    if (group) keys.push(group);
     return [...new Set(keys)];
   }
 
@@ -319,6 +368,8 @@
   P.canViewCredentials = canViewCredentials;
   P.canViewAllCarBookings = canViewAllCarBookings;
   P.canViewCarBookingDetails = canViewCarBookingDetails;
+  P.sectorGroup = sectorGroup;
+  P.SECTOR_GROUPS = SECTOR_GROUPS;
   P.isSupervisorRole = isSupervisorRole;
   P.isSupervisorUser = isSupervisorUser;
   P.supervisorForCurrentUser = supervisorForCurrentUser;

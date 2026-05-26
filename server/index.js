@@ -48,9 +48,21 @@ const DATA_ACCESS = {
   "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
   SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
+  CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
   Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
+  Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
   SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
-  Carros: ["cars"],
+  SEFISC: ["dashboard", "cars", "calendar"],
+  SEGRE: ["dashboard", "cars", "calendar"],
+  SEVESC: ["dashboard", "cars", "calendar"],
+  SEMAT: ["dashboard", "cars", "calendar"],
+  SEPES: ["dashboard", "cars", "calendar"],
+  SEFREP: ["dashboard", "cars", "calendar"],
+  SEAPE: ["dashboard", "cars", "calendar"],
+  SEAFIM: ["dashboard", "cars", "calendar"],
+  SEFIN: ["dashboard", "cars", "calendar"],
+  SECOMSE: ["dashboard", "cars", "calendar"],
+  Carros: ["dashboard", "cars", "calendar"],
   Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
   Consulta: ["dashboard", "schools", "contacts"]
 };
@@ -648,6 +660,16 @@ function accessForRole(role, appData = {}) {
   if (target.includes("setec")) return DATA_ACCESS.SETEC;
   if (target.includes("gabinete") || target.includes("dirigente")) return DATA_ACCESS.Gabinete;
   if (target.includes("seom")) return DATA_ACCESS.SEOM;
+  if (target.includes("sefisc")) return DATA_ACCESS.SEFISC;
+  if (target.includes("segre")) return DATA_ACCESS.SEGRE;
+  if (target.includes("sevesc")) return DATA_ACCESS.SEVESC;
+  if (target.includes("semat")) return DATA_ACCESS.SEMAT;
+  if (target.includes("sepes")) return DATA_ACCESS.SEPES;
+  if (target.includes("sefrep")) return DATA_ACCESS.SEFREP;
+  if (target.includes("seape")) return DATA_ACCESS.SEAPE;
+  if (target.includes("seafim") || target.includes("seafin")) return DATA_ACCESS.SEAFIM;
+  if (target.includes("sefin")) return DATA_ACCESS.SEFIN;
+  if (target.includes("secomse")) return DATA_ACCESS.SECOMSE;
   if (target.includes("carro")) return DATA_ACCESS.Carros;
   if (target.includes("pedag") || target.includes("pec")) return DATA_ACCESS.Pedagogico;
   if (target.includes("admin")) return DATA_ACCESS.Administrador;
@@ -663,16 +685,65 @@ function canViewCredentials(user = null) {
   return ["administrador", "tecnicos ctc", "setec", "seintec"].some(item => role.includes(item));
 }
 
+const SECTOR_GROUPS = {
+  tecnologia: ["seintec", "setec", "ctc", "tecnologia"],
+  redeEscolar: ["segre", "sevesc", "semat", "rede escolar", "pedagogico", "pedagogica", "pedagog"],
+  recursosHumanos: ["sepes", "sefrep", "seape", "recursos humanos", "rh", "pessoas"],
+  financas: ["seafim", "seafin", "sefin", "secomse", "financas", "financeiro", "compras", "pagamento"],
+  obras: ["seom", "sefisc", "obras"]
+};
+
+function sectorGroup(values = []) {
+  const text = values.map(normalizeText).filter(Boolean).join(" ");
+  if (!text) return "";
+  return Object.entries(SECTOR_GROUPS).find(([, aliases]) => aliases.some(alias => text.includes(alias)))?.[0] || "";
+}
+
+function carSectorKeys(values = []) {
+  const keys = values.map(normalizeText).filter(Boolean);
+  const group = sectorGroup(keys);
+  if (group) keys.push(group);
+  return [...new Set(keys)];
+}
+
 function canViewAllCarBookings(user = null) {
   const role = normalizeText(user?.role || "Consulta");
   const contactRole = normalizeText(user?.contactRole || user?.cargo || user?.position || "");
+  const group = sectorGroup([user?.sector, user?.setor, user?.category, user?.categoria, user?.contactRole, user?.contactName]);
   return role.includes("administrador")
     || role.includes("gabinete")
     || role.includes("dirigente")
     || contactRole.includes("dirigente")
+    || group === "tecnologia"
+    || group === "obras"
     || role.includes("seom")
+    || role.includes("setec")
     || role.includes("seintec")
     || role.includes("ctc");
+}
+
+function canViewCarBookingDetails(booking = {}, user = null) {
+  if (canViewAllCarBookings(user)) return true;
+  const userKeys = carSectorKeys([
+    user?.role,
+    user?.sector,
+    user?.setor,
+    user?.contactRole,
+    user?.category,
+    user?.categoria,
+    user?.contactName
+  ]);
+  const bookingKeys = carSectorKeys([
+    booking.requester,
+    booking.sector,
+    booking.setor,
+    booking.category,
+    booking.categoria,
+    booking.owner
+  ]);
+  return userKeys.some(userKey => bookingKeys.some(bookingKey =>
+    bookingKey === userKey || bookingKey.includes(userKey) || userKey.includes(bookingKey)
+  ));
 }
 
 function publicCarBooking(item = {}) {
@@ -742,7 +813,9 @@ function scopeAppDataForUser(appData = {}, user = null) {
       ? (supervisorScope ? (appData.ctcVisits || []).filter(visit => allowed.has(normalizeText(visit.place))) : (appData.ctcVisits || []))
       : [],
     contacts: canAccessData("contacts", user, appData) ? (appData.contacts || []) : [],
-    cars: canAccessData("cars", user, appData) ? (canViewAllCarBookings(user) ? (appData.cars || []) : (appData.cars || []).map(publicCarBooking)) : [],
+    cars: canAccessData("cars", user, appData)
+      ? (appData.cars || []).map(item => canViewCarBookingDetails(item, user) ? item : publicCarBooking(item))
+      : [],
     calendar: canAccessData("calendar", user, appData) ? (appData.calendar || []) : [],
     reports: canAccessData("reports", user, appData) ? (appData.reports || []) : [],
     profiles: canAccessData("profiles", user, appData) ? (appData.profiles || []) : [],

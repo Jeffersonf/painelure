@@ -54,6 +54,7 @@
     const label = P.sources?.[key]?.label || key;
     P.showToast?.("Atualizando", `${label} em sincronizacao.`, "info", { delay: 2400 });
     const result = await loadSource(key);
+    result.updatedAt = new Date().toISOString();
     if (result.status === "loaded" && result.data) {
       applySourceData(appData, key, result.data);
       P.setAppData(appData);
@@ -96,12 +97,12 @@
     if (current?.status === "loaded" || current?.status === "loading") return current;
     P.sourceStatus = [
       ...(P.sourceStatus || []).filter(item => item.key !== key),
-      { key, status: "loading" }
+      { key, status: "loading", updatedAt: new Date().toISOString() }
     ];
     try {
       return await refreshSource(key);
     } catch (error) {
-      const result = { key, status: "error", error };
+      const result = { key, status: "error", error, updatedAt: new Date().toISOString() };
       P.sourceStatus = [
         ...(P.sourceStatus || []).filter(item => item.key !== key),
         result
@@ -116,21 +117,27 @@
     const results = [];
     const includeManual = options.includeManual === true;
     const onlyKeys = Array.isArray(options.keys) && options.keys.length ? new Set(options.keys) : null;
+    const orderedKeys = options.order || ["cars", "supervision", "calendar", "contacts", "schools", "network", "inventory"];
+    const keys = [
+      ...orderedKeys.filter(key => P.sources?.[key]),
+      ...Object.keys(P.sources || {}).filter(key => !orderedKeys.includes(key))
+    ];
 
-    for (const key of Object.keys(P.sources || {})) {
+    for (const key of keys) {
       try {
         if (onlyKeys && !onlyKeys.has(key)) continue;
         if (!includeManual && P.sources[key]?.metadata?.autoLoad === false) {
-          results.push({ key, status: "skipped", rows: [], data: null, reason: "manual" });
+          results.push({ key, status: "skipped", rows: [], data: null, reason: "manual", updatedAt: new Date().toISOString() });
           continue;
         }
         const result = await loadSource(key);
+        result.updatedAt = new Date().toISOString();
         results.push(result);
         if (result.status === "loaded" && result.data) {
           applySourceData(nextData, key, result.data);
         }
       } catch (error) {
-        results.push({ key, status: "error", error });
+        results.push({ key, status: "error", error, updatedAt: new Date().toISOString() });
         console.warn(`[PainelURE] Fonte ${key} falhou:`, error);
       }
     }
