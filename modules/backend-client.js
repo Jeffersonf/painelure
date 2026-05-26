@@ -28,6 +28,14 @@
     return base ? `${base}${path}` : `.${path}`;
   }
 
+  function delay(ms) {
+    return new Promise(resolve => window.setTimeout(resolve, ms));
+  }
+
+  function looksTransient(error) {
+    return /aborted|network|failed to fetch|HTTP 502|HTTP 503|HTTP 504/i.test(String(error?.message || error || ""));
+  }
+
   async function fetchJson(url, options = {}) {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs || API_TIMEOUT);
@@ -107,12 +115,19 @@
   }
 
   async function loginBackend(credentials) {
-    return fetchApi("/api/auth/login", {
+    const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(credentials || {}),
-      timeoutMs: 8000
-    });
+      timeoutMs: 60000
+    };
+    try {
+      return await fetchApi("/api/auth/login", options);
+    } catch (error) {
+      if (!looksTransient(error)) throw error;
+      await delay(1600);
+      return fetchApi("/api/auth/login", options);
+    }
   }
 
   async function loadBackendUser(token) {

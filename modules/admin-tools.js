@@ -326,6 +326,23 @@
     return payload;
   }
 
+  async function syncOfficialDataBeforeOpen() {
+    showLoginStatus("Sincronizando dados oficiais...");
+    const backendPayload = await loadScopedBackendData({ render: false });
+    if (P.loadConfiguredSources) {
+      showLoginStatus("Sincronizando planilhas e SharePoint...");
+      P.showToast?.("Sincronizando", "Atualizando carros, supervisao e demais fontes oficiais.", "info", { delay: 4200 });
+      const results = await P.loadConfiguredSources({ includeManual: true });
+      const failed = (results || []).filter(item => item.status === "error");
+      if (failed.length) {
+        const labels = failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ");
+        P.showToast?.("Sincronizacao parcial", `${labels} nao respondeu agora.`, "warn", { delay: 6200 });
+      }
+    }
+    P.saveAppData?.();
+    return backendPayload;
+  }
+
   async function submitLogin(username, password) {
     showLoginStatus("");
     if (!username || !password) throw new Error("Informe nome e PIN.");
@@ -345,7 +362,7 @@
     if (!result?.token || !result?.user) throw new Error("Login nao retornou usuario.");
     activateOnlineUser(result.token, result.user, { render: false });
     P.showToast?.("Sincronizando", "Carregando a base oficial antes de abrir o painel.", "info", { delay: 3200 });
-    const syncPayload = await loadScopedBackendData({ render: false });
+    const syncPayload = await syncOfficialDataBeforeOpen();
     activateOnlineUser(result.token, result.user);
     P.showToast?.("Online", syncPayload?.data?.appData ? "Sessao conectada com dados oficiais." : "Sessao conectada; servidor sem dados novos.", "ok");
     if (result.user.preferences?.forcePinChange) {
@@ -402,7 +419,7 @@
         const payload = await P.loadBackendUser(backendToken);
         const user = payload?.user || cachedUser;
         activateOnlineUser(backendToken, user, { render: false });
-        await loadScopedBackendData({ render: false });
+        await syncOfficialDataBeforeOpen();
         activateOnlineUser(backendToken, user);
         showPinChange(Boolean(user.preferences?.forcePinChange));
         return user;
@@ -431,7 +448,7 @@
       } : null);
       if (user) {
         activateOnlineUser(backendToken, user, { render: false });
-        await loadScopedBackendData({ render: false });
+        await syncOfficialDataBeforeOpen();
         activateOnlineUser(backendToken, user);
         showPinChange(Boolean(user.preferences?.forcePinChange));
       }

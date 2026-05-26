@@ -111,13 +111,16 @@
     }
   }
 
-  async function loadConfiguredSources() {
+  async function loadConfiguredSources(options = {}) {
     const nextData = { ...P.getAppData() };
     const results = [];
+    const includeManual = options.includeManual === true;
+    const onlyKeys = Array.isArray(options.keys) && options.keys.length ? new Set(options.keys) : null;
 
     for (const key of Object.keys(P.sources || {})) {
       try {
-        if (P.sources[key]?.metadata?.autoLoad === false) {
+        if (onlyKeys && !onlyKeys.has(key)) continue;
+        if (!includeManual && P.sources[key]?.metadata?.autoLoad === false) {
           results.push({ key, status: "skipped", rows: [], data: null, reason: "manual" });
           continue;
         }
