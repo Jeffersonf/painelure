@@ -55,16 +55,26 @@
     P.showToast?.("Atualizando", `${label} em sincronizacao.`, "info", { delay: 2400 });
     const result = await loadSource(key);
     result.updatedAt = new Date().toISOString();
-    if (result.status === "loaded" && result.data) {
+    if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
       applySourceData(appData, key, result.data);
       P.setAppData(appData);
+    } else if (result.status === "loaded" && !hasMeaningfulSourceData(result.data)) {
+      result.status = "empty";
+      result.warning = "Fonte retornou vazia; dados anteriores foram mantidos.";
     }
     P.sourceStatus = [
       ...(P.sourceStatus || []).filter(item => item.key !== key),
       result
     ];
     if (result.status === "loaded") P.showToast?.("Atualizado", `${label}: ${result.rows?.length || 0} linha(s) carregada(s).`, "ok");
+    if (result.status === "empty") P.showToast?.("Fonte vazia", `${label} nao substituiu os dados atuais.`, "warn", { delay: 5200 });
     return result;
+  }
+
+  function hasMeaningfulSourceData(data) {
+    if (Array.isArray(data)) return data.length > 0;
+    if (data && typeof data === "object") return Object.keys(data).length > 0;
+    return Boolean(data);
   }
 
   function applySourceData(appData, key, data) {
@@ -133,8 +143,11 @@
         const result = await loadSource(key);
         result.updatedAt = new Date().toISOString();
         results.push(result);
-        if (result.status === "loaded" && result.data) {
+        if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
           applySourceData(nextData, key, result.data);
+        } else if (result.status === "loaded" && !hasMeaningfulSourceData(result.data)) {
+          result.status = "empty";
+          result.warning = "Fonte retornou vazia; dados anteriores foram mantidos.";
         }
       } catch (error) {
         results.push({ key, status: "error", error, updatedAt: new Date().toISOString() });

@@ -3,15 +3,31 @@
 
   function valueToText(value) {
     if (value === null || value === undefined) return "";
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const text = valueToText(item);
+        if (text) return text;
+      }
+      return "";
+    }
     if (typeof value === "object") {
-      return value.Title || value.Name || value.LookupValue || value.Email || value.EMail || value.label || value.value || "";
+      return value.Title || value.Name || value.LookupValue || value.lookupValue || value.Email || value.EMail || value.label || value.value || "";
     }
     return String(value).trim();
   }
 
+  function lookupId(value) {
+    if (Array.isArray(value)) {
+      const found = value.find(item => item?.lookupId || item?.LookupId || item?.ID || item?.Id);
+      return found ? String(found.lookupId || found.LookupId || found.ID || found.Id || "") : "";
+    }
+    if (value && typeof value === "object") return String(value.lookupId || value.LookupId || value.ID || value.Id || "");
+    return "";
+  }
+
   function firstValue(row, keys, fallback = "") {
     for (const key of keys) {
-      const value = row[key];
+      const value = row[key] !== undefined ? row[key] : Object.entries(row || {}).find(([candidate]) => P.normalize(candidate) === P.normalize(key))?.[1];
       const text = valueToText(value);
       if (text) return text;
     }
@@ -72,10 +88,7 @@
   function schoolLookupName(value) {
     const text = valueToText(value);
     if (!text) return "";
-    if (/^\d+$/.test(text)) {
-      const school = P.seedData?.schools?.[Number(text) - 1];
-      return school?.name || `Escola #${text}`;
-    }
+    if (/^\d+$/.test(text)) return "";
     return text;
   }
 
@@ -364,20 +377,27 @@
       const time = firstMatchingValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], ["hora", "horario", "time"], "");
       const returnDate = firstMatchingValue(row, ["data_devolucao", "datadevolu_x005f_x00e7_x005f_x005f_x00e3_x005f_o", "data_devolu_x00e7__x00e3_o", "datadevolu_x00e7__x00e3_o", "devolucao", "return", "return_time"], ["devolu", "return"], "");
       const externalPlace = firstMatchingValue(row, ["localexterno", "local_externo", "local_x0020_externo"], ["localexterno", "externo"], "");
-      const destination = externalPlace || firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino", "escolas"], ["destino", "local", "destination", "place", "escola"], "");
+      const school = firstMatchingValue(row, ["escolas", "escola", "school", "unidade"], ["escola", "school", "unidade"], "");
+      const motive = firstMatchingValue(row, ["motivovisita", "motivo_visita", "motivo", "finalidade", "objetivo"], ["motivo", "finalidade", "objetivo"], "");
+      const destination = externalPlace || schoolLookupName(school) || firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino"], ["destino", "destination", "place"], "") || motive;
       const driver = firstMatchingValue(row, ["motorista", "driver", "condutor"], ["motorista", "driver", "condutor"], "");
+      const sector = firstMatchingValue(row, ["setor", "categoria", "area", "departamento"], ["setor", "categoria", "area", "departamento"], "");
+      const requester = sector || firstMatchingValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsavel", "requester", "owner", "mail"], "");
+      const timeValue = formatTimeValue(time || date);
       return {
         requestId: firstMatchingValue(row, ["id"], ["id"], ""),
         vehicle: firstMatchingValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], ["carro", "veiculo", "vehicle", "recurso"], "Carro oficial"),
         date: formatDateValue(date),
-        time: formatTimeValue(time || date),
+        time: !time && timeValue === "00:00" ? "" : timeValue,
         returnTime: formatTimeValue(returnDate),
-        requester: firstMatchingValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "setor", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsavel", "requester", "owner", "setor", "mail"], ""),
-        destination: schoolLookupName(destination),
+        requester,
+        sector,
+        destination,
         driver: lookupName(driver),
-        driverId: /^\d+$/.test(valueToText(driver)) ? valueToText(driver) : "",
+        driverId: lookupId(row.condutor || row.Condutor || driver) || (/^\d+$/.test(valueToText(driver)) ? valueToText(driver) : ""),
         status: firstMatchingValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], ["status", "situacao"], "pendente"),
-        note: firstMatchingValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ["observacao", "descricao", "motivo", "note"], "")
+        note: firstMatchingValue(row, ["observacao", "observacoes", "coment_x00e1_riogestor", "comentario_gestor", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ["observacao", "coment", "descricao", "motivo", "note"], ""),
+        sourceFields: Object.keys(row || {}).sort()
       };
     });
   }

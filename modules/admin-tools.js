@@ -1218,6 +1218,7 @@
   function sourceStatusLabel(status) {
     const labels = {
       loaded: "sincronizada",
+      empty: "vazia",
       official: "oficial",
       configured: "configurada",
       loading: "sincronizando",
@@ -1230,6 +1231,7 @@
 
   function sourceStatusTone(item = {}) {
     if (item.status === "loaded" || item.status === "official") return "ok";
+    if (item.status === "empty") return "warn";
     if (item.status === "error") return "warn";
     if (item.status === "loading") return "info";
     return "info";
@@ -1293,6 +1295,7 @@
         source.url ? "fonte configurada" : "sem URL configurada",
         sourceMetaLine(source, true),
         when && `ultima tentativa ${when}`,
+        item.status === "empty" && (item.warning || "fonte vazia; dados atuais mantidos"),
         item.status === "error" && (item.error?.message || "falha ao sincronizar")
       ].filter(Boolean).join(" | ");
       const retry = item.status === "error"
@@ -1319,12 +1322,13 @@
     const importantKeys = ["cars", "supervision"];
     const important = importantKeys.map(key => statuses.find(item => item.key === key)).filter(Boolean);
     const failed = statuses.filter(item => item.status === "error");
+    const empty = statuses.filter(item => item.status === "empty");
     const loading = statuses.filter(item => item.status === "loading");
     const loaded = statuses.filter(item => item.status === "loaded");
     const latest = statuses
       .map(sourceUpdatedLabel)
       .filter(Boolean)[0] || "";
-    const stale = failed.length > 0;
+    const stale = failed.length > 0 || empty.length > 0;
     const title = loading.length
       ? "Sincronizando fontes"
       : stale
@@ -1336,6 +1340,8 @@
       ? loading.map(item => P.sources?.[item.key]?.label || item.key).join(", ")
       : failed.length
         ? `${failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ")} falhou. Dados antigos seguem visiveis.`
+        : empty.length
+          ? `${empty.map(item => P.sources?.[item.key]?.label || item.key).join(", ")} retornou vazio. Dados antigos foram mantidos.`
         : important.length
           ? important.map(item => `${P.sources?.[item.key]?.label || item.key}: ${sourceStatusLabel(item.status)}`).join(" | ")
           : "Carros primeiro, supervisao depois; demais fontes entram aos poucos.";

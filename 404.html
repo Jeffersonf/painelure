@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "source-status-groups-20260526";
+      window.PAINELURE_BUILD = "diagnostics-release-20260526";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -41,7 +41,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=source-status-groups-20260526">
+  <link rel="stylesheet" href="./styles.css?v=diagnostics-release-20260526">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -639,6 +639,11 @@
           <div class="settings-list" id="sourceStatusList"></div>
         </section>
 
+        <section class="settings-section span-2" data-admin-collapsible data-admin-open="true">
+          <div class="settings-title">Diagnóstico de carros</div>
+          <div class="settings-list" id="carDataDiagnostics"></div>
+        </section>
+
         <section class="settings-section" data-admin-collapsible>
           <div class="settings-title">ImportaÃ§Ã£o manual</div>
           <div class="settings-row">
@@ -693,33 +698,33 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=source-status-groups-20260526"></script>
-  <script src="./data/schools.js?v=source-status-groups-20260526"></script>
-  <script src="./data/school-profiles.js?v=source-status-groups-20260526"></script>
-  <script src="./data/school-operational.js?v=source-status-groups-20260526"></script>
-  <script src="./data/inventory.js?v=source-status-groups-20260526"></script>
-  <script src="./data/supervision.js?v=source-status-groups-20260526"></script>
-  <script src="./data/contacts.js?v=source-status-groups-20260526"></script>
-  <script src="./data/users.js?v=source-status-groups-20260526"></script>
-  <script src="./data/governance.js?v=source-status-groups-20260526"></script>
-  <script src="./data/operations.js?v=source-status-groups-20260526"></script>
-  <script src="./data/sources.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/dom.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/ui-catalog.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/data-store.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/identity.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/access-scope.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/month-state.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/csv.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/normalizers.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/source-loader.js?v=source-status-groups-20260526"></script>
-  <script src="./config.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/backend-client.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/search.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/render.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/supervision-render.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/navigation.js?v=source-status-groups-20260526"></script>
-  <script src="./modules/admin-tools.js?v=source-status-groups-20260526"></script>
-  <script src="./app.js?v=source-status-groups-20260526"></script>
+  <script src="./data/mock.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/schools.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/school-profiles.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/school-operational.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/inventory.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/supervision.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/contacts.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/users.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/governance.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/operations.js?v=diagnostics-release-20260526"></script>
+  <script src="./data/sources.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/dom.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/ui-catalog.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/data-store.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/identity.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/access-scope.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/month-state.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/csv.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/normalizers.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/source-loader.js?v=diagnostics-release-20260526"></script>
+  <script src="./config.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/backend-client.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/search.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/render.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/supervision-render.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/navigation.js?v=diagnostics-release-20260526"></script>
+  <script src="./modules/admin-tools.js?v=diagnostics-release-20260526"></script>
+  <script src="./app.js?v=diagnostics-release-20260526"></script>
 </body>
 </html>

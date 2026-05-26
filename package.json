@@ -5,7 +5,7 @@
   "description": "PainelURE oficial com frontend estatico, backend online-first e migracao do SETECHUB.",
   "scripts": {
     "start": "node server/index.js",
-    "check": "node scripts/check-js.js && node scripts/check-access-scope.js && node scripts/check-backend-routes.js && node scripts/check-official-transition.js",
+    "check": "node scripts/check-js.js && node scripts/check-access-scope.js && node scripts/check-car-normalizer.js && node scripts/check-backend-routes.js && node scripts/check-official-transition.js",
     "seed:online": "node scripts/seed-online.js",
     "pins:reset-online": "node scripts/reset-online-pins.js",
     "migrate:setechub": "node scripts/migrate-setechub-online.js",

@@ -1923,8 +1923,21 @@
   function renderAdmin(items) {
     const grid = P.$("#adminGrid");
     const overview = P.$("#adminOverview");
+    const carDiagnostics = P.$("#carDataDiagnostics");
     if (!grid && !overview) return;
     const data = P.getAppData();
+    const cars = P.carBookings?.(data) || [];
+    const carSource = P.sourceResult?.("cars") || {};
+    const rawCarRows = Array.isArray(carSource.rows) ? carSource.rows : [];
+    const rawCarColumns = [...new Set(rawCarRows.flatMap(row => Object.keys(row || {})))].sort((a, b) => a.localeCompare(b));
+    const missingCar = {
+      destination: cars.filter(item => !item.destination).length,
+      date: cars.filter(item => !item.date).length,
+      time: cars.filter(item => !item.time).length,
+      returnTime: cars.filter(item => !item.returnTime).length,
+      requester: cars.filter(item => !item.requester && !item.sector).length,
+      driver: cars.filter(item => !item.driver && !item.driverId).length
+    };
     const sources = Object.entries(P.sources || {});
     const configuredSources = sources.filter(([, source]) => source.url).length;
     const officialSources = sources.filter(([, source]) => source.status === "official").length;
@@ -1938,6 +1951,7 @@
       { icon: "US", label: "Usuários", value: String(data.users.length), note: `${linkedUsers} vinculado(s) a contatos`, tone: data.users.length ? "ok" : "warn" },
       { icon: "ES", label: "Escolas", value: String(data.schools.length), note: "unidades na base atual", tone: data.schools.length ? "ok" : "warn" },
       { icon: "FT", label: "Fontes", value: `${configuredSources}/${sources.length}`, note: `${officialSources} oficial(is)`, tone: configuredSources ? "ok" : "warn" },
+      { icon: "CR", label: "Carros", value: String(cars.length), note: `${rawCarRows.length || cars.length} linha(s) de origem`, tone: cars.length ? "ok" : "warn" },
       { icon: "RD", label: "Redes", value: String(networkCount), note: "escolas com infraestrutura", tone: networkCount ? "info" : "warn" },
       { icon: "BK", label: "Backups", value: "auto", note: "snapshots antes de gravações", tone: "info" }
     ];
@@ -1983,6 +1997,38 @@
       },
       { label: "Perfis ativos", status: P.ROLE_ACCESS ? "ok" : "danger", note: P.ROLE_ACCESS ? `${Object.keys(P.ROLE_ACCESS).length} perfil(is)` : "matriz indisponível" }
     ];
+    if (carDiagnostics) {
+      const missingRows = [
+        ["Destino", missingCar.destination],
+        ["Data", missingCar.date],
+        ["Retirada", missingCar.time],
+        ["Devolucao", missingCar.returnTime],
+        ["Setor", missingCar.requester],
+        ["Condutor", missingCar.driver]
+      ];
+      const missingTotal = Object.values(missingCar).reduce((sum, count) => sum + count, 0);
+      const fieldText = rawCarColumns.length
+        ? rawCarColumns.slice(0, 22).join(", ") + (rawCarColumns.length > 22 ? ` +${rawCarColumns.length - 22}` : "")
+        : "Sincronize carros para ver as colunas originais.";
+      carDiagnostics.innerHTML = `
+        <div class="settings-row">
+          <div><strong>Fonte de carros</strong><small>${carSource.status ? `Status ${carSource.status}` : "Ainda sem sincronizacao nesta sessao."} | ${rawCarRows.length || cars.length} linha(s)</small></div>
+          <span class="status-pill ${cars.length ? "ok" : "warn"}">${cars.length ? "ok" : "revisar"}</span>
+        </div>
+        <div class="settings-row">
+          <div><strong>Campos vazios</strong><small>${missingRows.map(([label, count]) => `${label}: ${count}`).join(" | ")}</small></div>
+          <span class="status-pill ${missingTotal ? "warn" : "ok"}">${missingTotal ? "revisar" : "ok"}</span>
+        </div>
+        <div class="settings-row">
+          <div><strong>Colunas detectadas</strong><small>${fieldText}</small></div>
+          <span class="status-pill info">origem</span>
+        </div>
+        <div class="settings-row">
+          <div><strong>Regra anti-perda</strong><small>Fonte vazia nao sobrescreve dados bons; o painel mantem o ultimo estado valido e mostra aviso.</small></div>
+          <span class="status-pill ok">ativo</span>
+        </div>
+      `;
+    }
     const rows = [...systemChecks, ...items];
     if (!grid) return;
     grid.innerHTML = rows.length ? rows.map(item => `

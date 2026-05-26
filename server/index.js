@@ -1120,9 +1120,35 @@ async function fetchSharePointListRows(sourceUrl) {
   return Array.isArray(payload.value) ? payload.value : [];
 }
 
+function valueToText(value) {
+  if (value === null || value === undefined) return "";
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const text = valueToText(item);
+      if (text) return text;
+    }
+    return "";
+  }
+  if (typeof value === "object") return String(value.Title || value.Name || value.LookupValue || value.lookupValue || value.Email || value.EMail || value.label || value.value || "").trim();
+  return String(value).trim();
+}
+
+function lookupId(value) {
+  if (Array.isArray(value)) {
+    const found = value.find(item => item?.lookupId || item?.LookupId || item?.ID || item?.Id);
+    return found ? String(found.lookupId || found.LookupId || found.ID || found.Id || "") : "";
+  }
+  if (value && typeof value === "object") return String(value.lookupId || value.LookupId || value.ID || value.Id || "");
+  return "";
+}
+
 function firstValue(row, keys, fallback = "") {
   for (const key of keys) {
-    if (row[key] !== undefined && String(row[key]).trim()) return String(row[key]).trim();
+    const value = row[key] !== undefined
+      ? row[key]
+      : Object.entries(row || {}).find(([candidate]) => normalizeText(candidate) === normalizeText(key))?.[1];
+    const text = valueToText(value);
+    if (text) return text;
   }
   return fallback;
 }
@@ -1190,17 +1216,25 @@ function normalizeRows(type, rows) {
   if (type === "cars") {
     return rows.map(row => {
       const driver = firstValue(row, ["motorista", "driver", "condutor"], "");
+      const sector = firstValue(row, ["setor", "categoria", "area", "departamento"], "");
+      const requester = sector || firstValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "author", "e_x002d_mail"], "");
+      const destination = firstValue(row, ["localexterno", "local_externo", "destino", "local", "destination", "place", "local_destino", "escolas"], "")
+        || firstValue(row, ["motivovisita", "motivo_visita", "motivo", "finalidade", "objetivo"], "");
+      const time = firstValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], "");
       return {
+        requestId: firstValue(row, ["id"], ""),
         vehicle: firstValue(row, ["carro", "veiculo", "ve_x00ed_culo", "vehicle", "recurso", "title"], "Carro oficial"),
         date: firstValue(row, ["data", "data_da_reserva", "data_x0020_da_x0020_reserva", "data_reserva", "date", "quando"], ""),
-        time: firstValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], ""),
+        time,
         returnTime: firstValue(row, ["data_devolucao", "datadevolu_x005f_x00e7_x005f_x005f_x00e3_x005f_o", "data_devolu_x00e7__x00e3_o", "devolucao", "return_time"], ""),
-        requester: firstValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "author", "setor"], ""),
-        destination: firstValue(row, ["localexterno", "local_externo", "destino", "local", "destination", "place", "local_destino"], ""),
+        requester,
+        sector,
+        destination,
         driver: /^\d+$/.test(driver) ? "" : driver,
-        driverId: /^\d+$/.test(driver) ? driver : "",
+        driverId: lookupId(row.condutor || row.Condutor || driver) || (/^\d+$/.test(driver) ? driver : ""),
         status: firstValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], "pendente"),
-        note: firstValue(row, ["observacao", "observacoes", "descri_x00e7__x00e3_o", "descricao", "note", "motivo"], "")
+        note: firstValue(row, ["observacao", "observacoes", "coment_x00e1_riogestor", "comentario_gestor", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ""),
+        sourceFields: Object.keys(row || {}).sort()
       };
     });
   }
