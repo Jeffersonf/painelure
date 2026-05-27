@@ -290,6 +290,16 @@
     P.renderApp?.();
   }
 
+  function restoreCachedSession(user) {
+    const role = user?.role || currentRole() || "Consulta";
+    setAuthenticated(true);
+    applyRole(role);
+    applyUserAvatar();
+    P.renderApp?.();
+    refreshActiveUserSelect();
+    showLoginStatus("Sessao restaurada. Sincronizando dados oficiais...");
+  }
+
   function logoutOnline() {
     const token = backendToken;
     backendToken = "";
@@ -430,6 +440,7 @@
       return null;
     }
     const cachedUser = P.onlineUser?.();
+    if (cachedUser) restoreCachedSession(cachedUser);
     if (cachedUser) {
       try {
         const payload = await P.loadBackendUser(backendToken);
@@ -448,13 +459,16 @@
           setAuthenticated(false);
           return null;
         }
-        activateLocalSession(cachedUser.role || currentRole());
-        P.showToast?.("Offline", "Nao foi possivel sincronizar agora. Mantendo sessao local.", "warn");
+        restoreCachedSession(cachedUser);
+        P.showToast?.("Offline", "Nao foi possivel sincronizar agora. Mantendo sessao local.", "warn", { delay: 9000 });
         return cachedUser;
       } finally {
         document.documentElement.classList.remove("auth-pending");
       }
     }
+    setAuthenticated(true);
+    activateLocalSession(P.activeUser?.()?.role || localStorage.getItem(ROLE_KEY) || "Consulta");
+    showLoginStatus("Sessao salva encontrada. Validando servidor...");
     try {
       const payload = await P.loadBackendUser(backendToken);
       const user = payload?.user || P.onlineUser?.() || (payload?.session ? {
