@@ -402,6 +402,19 @@
     });
   }
 
+  function normalizeSatisfactionRows(rows) {
+    return rows.map(row => ({
+      title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfacao"),
+      audience: firstValue(row, ["publico", "audiencia", "audience", "destinatario"], "Publico nao informado"),
+      status: firstValue(row, ["status", "situacao", "andamento"], "ativa"),
+      score: firstValue(row, ["nota", "media", "score", "avaliacao", "satisfacao"], ""),
+      responses: numberFrom(row, ["respostas", "responses", "total", "quantidade"], 0),
+      link: firstValue(row, ["link", "url", "formulario", "forms"], ""),
+      period: firstValue(row, ["periodo", "prazo", "data", "competencia"], ""),
+      note: firstValue(row, ["observacao", "observacoes", "descricao", "note"], "")
+    }));
+  }
+
   P.normalizers = {
     contacts: normalizeContactRows,
     schools: normalizeSchoolRows,
@@ -409,6 +422,7 @@
     supervision: normalizeSupervisorRows,
     network: normalizeNetworkRows,
     calendar: normalizeCalendarRows,
+    satisfaction: normalizeSatisfactionRows,
     cars: normalizeCarRows
   };
 })();

@@ -43,28 +43,28 @@ let dbReady = false;
 let dbError = "";
 let frontendSeedStore = null;
 const DATA_ACCESS = {
-  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-  "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "reports"],
-  "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-  SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "reports"],
-  SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "reports"],
-  CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-  Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
-  Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "reports"],
-  SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "reports"],
-  SEFISC: ["dashboard", "cars", "calendar"],
-  SEGRE: ["dashboard", "cars", "calendar"],
-  SEVESC: ["dashboard", "cars", "calendar"],
-  SEMAT: ["dashboard", "cars", "calendar"],
-  SEPES: ["dashboard", "cars", "calendar"],
-  SEFREP: ["dashboard", "cars", "calendar"],
-  SEAPE: ["dashboard", "cars", "calendar"],
-  SEAFIM: ["dashboard", "cars", "calendar"],
-  SEFIN: ["dashboard", "cars", "calendar"],
-  SECOMSE: ["dashboard", "cars", "calendar"],
-  Carros: ["dashboard", "cars", "calendar"],
-  Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
-  Consulta: ["dashboard", "schools", "contacts"]
+  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+  "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
+  "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+  SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
+  SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "satisfaction", "reports"],
+  CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+  Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
+  Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
+  SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "satisfaction", "reports"],
+  SEFISC: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEGRE: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEVESC: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEMAT: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEPES: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEFREP: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEAPE: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEAFIM: ["dashboard", "cars", "calendar", "satisfaction"],
+  SEFIN: ["dashboard", "cars", "calendar", "satisfaction"],
+  SECOMSE: ["dashboard", "cars", "calendar", "satisfaction"],
+  Carros: ["dashboard", "cars", "calendar", "satisfaction"],
+  Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
+  Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
 };
 const pool = DATABASE_URL
   ? new Pool({
@@ -817,6 +817,7 @@ function scopeAppDataForUser(appData = {}, user = null) {
       ? (appData.cars || []).map(item => canViewCarBookingDetails(item, user) ? item : publicCarBooking(item))
       : [],
     calendar: canAccessData("calendar", user, appData) ? (appData.calendar || []) : [],
+    satisfaction: canAccessData("satisfaction", user, appData) ? (appData.satisfaction || []) : [],
     reports: canAccessData("reports", user, appData) ? (appData.reports || []) : [],
     profiles: canAccessData("profiles", user, appData) ? (appData.profiles || []) : [],
     quality: canAccessData("quality", user, appData) ? (appData.quality || []) : [],
@@ -1237,6 +1238,18 @@ function normalizeRows(type, rows) {
         sourceFields: Object.keys(row || {}).sort()
       };
     });
+  }
+  if (type === "satisfaction") {
+    return rows.map(row => ({
+      title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfacao"),
+      audience: firstValue(row, ["publico", "audiencia", "audience", "destinatario"], "Publico nao informado"),
+      status: firstValue(row, ["status", "situacao", "andamento"], "ativa"),
+      score: firstValue(row, ["nota", "media", "score", "avaliacao", "satisfacao"], ""),
+      responses: numberFrom(row, ["respostas", "responses", "total", "quantidade"], 0),
+      link: firstValue(row, ["link", "url", "formulario", "forms"], ""),
+      period: firstValue(row, ["periodo", "prazo", "data", "competencia"], ""),
+      note: firstValue(row, ["observacao", "observacoes", "descricao", "note"], "")
+    }));
   }
   if (type === "inventory") {
     return rows.map(row => {

@@ -11,6 +11,7 @@
     supervisors: [],
     contacts: [],
     calendar: [],
+    satisfaction: [],
     profiles: [],
     quality: [],
     ctcVisits: [],
@@ -100,6 +101,7 @@
         photo: cleanContactPhoto(contact.photo)
       })) : [],
       calendar: Array.isArray(source.calendar) ? source.calendar : [],
+      satisfaction: Array.isArray(source.satisfaction) ? source.satisfaction : [],
       profiles: Array.isArray(source.profiles) ? source.profiles : [],
       quality: Array.isArray(source.quality) ? source.quality : [],
       ctcVisits: Array.isArray(source.ctcVisits) ? source.ctcVisits : [],

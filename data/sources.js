@@ -45,6 +45,13 @@
       status: "pending",
       metadata: { domain: "Calendario", cadence: "mensal", owner: "Gabinete" }
     },
+    satisfaction: {
+      label: "Pesquisa de satisfacao",
+      type: "csv",
+      url: "",
+      status: "pending",
+      metadata: { domain: "Pesquisa de satisfacao", cadence: "por campanha", owner: "Gabinete" }
+    },
     cars: {
       label: "Agendamento de carros",
       type: "sharepoint-list",

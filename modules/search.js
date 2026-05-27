@@ -46,6 +46,7 @@
       "ctc",
       "cars",
       "calls",
+      "satisfaction",
       "reports"
     ].map(page => {
       const meta = P.pageMeta(page);
@@ -83,7 +84,14 @@
           focus: details ? searchText([item.vehicle, item.date, item.time, item.destination, item.requester]) : searchText([item.vehicle, item.date, item.time])
         };
       }),
-      ...(data.calls || []).map(item => ({ page: "calls", title: item.title, type: "Chamado", note: item.school || item.status, focus: item.title }))
+      ...(data.calls || []).map(item => ({ page: "calls", title: item.title, type: "Chamado", note: item.school || item.status, focus: item.title })),
+      ...(data.satisfaction || []).map(item => ({
+        page: "satisfaction",
+        title: item.title,
+        type: "Pesquisa",
+        note: item.audience || item.status || item.period,
+        focus: searchText([item.title, item.audience, item.status, item.period])
+      }))
     ].filter(item => !P.canAccess || P.canAccess(item.page));
   }
 

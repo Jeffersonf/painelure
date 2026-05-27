@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark">
 <head>
   <meta charset="utf-8">
@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "cars-layout-source-20260527";
+      window.PAINELURE_BUILD = "satisfaction-category-20260527";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -41,7 +41,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=cars-layout-source-20260527">
+  <link rel="stylesheet" href="./styles.css?v=satisfaction-category-20260527">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -105,6 +105,7 @@
       <button class="nav-item" type="button" data-page="schools"><span>&#127979;</span>Escolas</button>
       <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>SupervisÃ£o</button>
       <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
+      <button class="nav-item" type="button" data-page="satisfaction"><span>&#128221;</span>Pesquisa</button>
       <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
     </nav>
 
@@ -118,6 +119,7 @@
         <button type="button" data-jump="ctc"><span>&#128736;&#65039; CTC</span></button>
         <button type="button" data-jump="calls"><span>&#128229; Cham.</span></button>
         <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
+        <button type="button" data-jump="satisfaction"><span>&#128221; Pesquisa</span></button>
         <button type="button" data-jump="reports"><span>&#128200; Relat.</span></button>
       </div>
     </section>
@@ -444,6 +446,17 @@
       <div class="calendar-grid" id="calendarGrid"></div>
     </section>
 
+    <section class="page" id="page-satisfaction">
+      <header class="page-header compact">
+        <div><h1>Pesquisa de satisfaÃ§Ã£o</h1><p>FormulÃ¡rios, respostas e devolutivas das campanhas oficiais.</p></div>
+      </header>
+      <article class="box summary-box">
+        <div class="box-head"><div><strong>Resumo das pesquisas</strong><small>Campanhas e respostas consolidadas</small></div></div>
+        <div class="row-list compact" id="satisfactionSummaryRows"></div>
+      </article>
+      <div class="calendar-grid" id="satisfactionGrid"></div>
+    </section>
+
     <section class="page" id="page-reports">
       <header class="page-header compact">
         <div><h1>RelatÃ³rios</h1><p>Resumo rÃ¡pido da operaÃ§Ã£o.</p></div>
@@ -655,6 +668,7 @@
                 <option value="network">Redes e cÃ¢meras</option>
                 <option value="cars">Carros</option>
                 <option value="calendar">CalendÃ¡rio</option>
+                <option value="satisfaction">Pesquisa de satisfaÃ§Ã£o</option>
                 <option value="supervision">SupervisÃ£o</option>
               </select>
               <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
@@ -698,33 +712,33 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/schools.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/school-profiles.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/school-operational.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/inventory.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/supervision.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/contacts.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/users.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/governance.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/operations.js?v=cars-layout-source-20260527"></script>
-  <script src="./data/sources.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/dom.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/ui-catalog.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/data-store.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/identity.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/access-scope.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/month-state.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/csv.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/normalizers.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/source-loader.js?v=cars-layout-source-20260527"></script>
-  <script src="./config.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/backend-client.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/search.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/render.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/supervision-render.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/navigation.js?v=cars-layout-source-20260527"></script>
-  <script src="./modules/admin-tools.js?v=cars-layout-source-20260527"></script>
-  <script src="./app.js?v=cars-layout-source-20260527"></script>
+  <script src="./data/mock.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/schools.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/school-profiles.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/school-operational.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/inventory.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/supervision.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/contacts.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/users.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/governance.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/operations.js?v=satisfaction-category-20260527"></script>
+  <script src="./data/sources.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/dom.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/ui-catalog.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/data-store.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/identity.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/access-scope.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/month-state.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/csv.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/normalizers.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/source-loader.js?v=satisfaction-category-20260527"></script>
+  <script src="./config.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/backend-client.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/search.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/render.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/supervision-render.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/navigation.js?v=satisfaction-category-20260527"></script>
+  <script src="./modules/admin-tools.js?v=satisfaction-category-20260527"></script>
+  <script src="./app.js?v=satisfaction-category-20260527"></script>
 </body>
 </html>

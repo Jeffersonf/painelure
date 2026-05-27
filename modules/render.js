@@ -568,6 +568,7 @@
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
       { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mes" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
       { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuario" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
+      { id: "satisfaction", roles: ["*"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Area pronta para formularios", tone: data.satisfaction?.length ? "info" : "warn" },
       { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatorios", value: P.selectedMonthLabel?.() || "Mes", note: "Consolidado administrativo", tone: "info" }
     ];
   }
@@ -1881,6 +1882,51 @@
     renderSummaryRows("#callSummaryRows", rows);
   }
 
+  function satisfactionTone(status = "") {
+    const text = P.normalize?.(status) || String(status || "").toLowerCase();
+    if (text.includes("encerr") || text.includes("finaliz")) return "ok";
+    if (text.includes("planej") || text.includes("pend")) return "warn";
+    if (text.includes("cancel")) return "danger";
+    return "info";
+  }
+
+  function renderSatisfaction(items = []) {
+    const grid = P.$("#satisfactionGrid");
+    if (!grid) return;
+    const list = Array.isArray(items) ? items : [];
+    const active = list.filter(item => !["encerrada", "finalizada", "cancelada"].some(term => (P.normalize?.(item.status) || "").includes(term))).length;
+    const responses = list.reduce((sum, item) => sum + Number(item.responses || 0), 0);
+    const links = list.filter(item => item.link).length;
+    renderSummaryRows("#satisfactionSummaryRows", [
+      { icon: "PS", title: "Pesquisas", note: "Campanhas cadastradas", label: String(list.length), tone: list.length ? "info" : "warn" },
+      { icon: "RP", title: "Respostas", note: "Total consolidado na base", label: String(responses), tone: responses ? "ok" : "warn" },
+      { icon: "AT", title: "Ativas", note: "Campanhas em acompanhamento", label: String(active), tone: active ? "info" : "ok" },
+      { icon: "LK", title: "Formularios", note: "Links oficiais disponiveis", label: String(links), tone: links ? "ok" : "warn" }
+    ]);
+    grid.innerHTML = list.length ? list.map(item => {
+      const tone = satisfactionTone(item.status);
+      const search = P.searchText([item.title, item.audience, item.status, item.period, item.note]);
+      return `
+        <article class="detail-widget" data-search="${search}">
+          <div>
+            <small>${item.period || "Periodo a definir"}</small>
+            <strong>${item.title || "Pesquisa de satisfacao"}</strong>
+            <p>${item.note || item.audience || "Aguardando fonte oficial da pesquisa."}</p>
+            <div class="mini-metrics">
+              <span><b>Publico</b>${item.audience || "Nao informado"}</span>
+              <span><b>Respostas</b>${Number(item.responses || 0)}</span>
+              <span><b>Nota</b>${item.score || "sem media"}</span>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <span class="status-pill ${tone}">${item.status || "ativa"}</span>
+            ${item.link ? `<a class="ghost-btn" href="${item.link}" target="_blank" rel="noopener">Abrir formulario</a>` : ""}
+          </div>
+        </article>
+      `;
+    }).join("") : `<div class="empty-state">Nenhuma pesquisa de satisfacao cadastrada. Cadastre a fonte oficial no Painel admin quando o formulario estiver pronto.</div>`;
+  }
+
   function renderReports(data) {
     const grid = P.$("#reportsGrid");
     const list = P.$("#reportsList");
@@ -2070,6 +2116,7 @@
   P.renderCars = renderCars;
   P.renderProfiles = renderProfiles;
   P.renderQuality = renderQuality;
+  P.renderSatisfaction = renderSatisfaction;
   P.renderCtc = renderCtc;
   P.renderCalls = renderCalls;
   P.renderReports = renderReports;

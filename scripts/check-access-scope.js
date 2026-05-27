@@ -213,13 +213,13 @@ function run() {
   });
 
   assertAccess(P, "Administrador", ["admin", "network", "inventory", "profiles"], []);
-  assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision"], ["network", "inventory", "cars", "reports", "admin"]);
-  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars"], ["reports", "admin", "profiles"]);
-  assertAccess(P, "SETEC", ["network", "inventory", "calendar"], ["reports", "admin"]);
-  assertAccess(P, "SEINTEC", ["network", "inventory", "cars", "calendar"], ["reports", "admin", "calls"]);
-  assertAccess(P, "Gabinete", ["calls", "calendar", "cars"], ["reports", "network", "inventory", "admin"]);
-  assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar"], ["reports", "network", "inventory", "cars", "admin"]);
-  assertAccess(P, "Consulta", ["schools", "contacts", "calendar"], ["reports", "network", "inventory", "admin"]);
+  assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision", "satisfaction"], ["network", "inventory", "cars", "reports", "admin"]);
+  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars", "satisfaction"], ["reports", "admin", "profiles"]);
+  assertAccess(P, "SETEC", ["network", "inventory", "calendar", "satisfaction"], ["reports", "admin"]);
+  assertAccess(P, "SEINTEC", ["network", "inventory", "cars", "calendar", "satisfaction"], ["reports", "admin", "calls"]);
+  assertAccess(P, "Gabinete", ["calls", "calendar", "cars", "satisfaction"], ["reports", "network", "inventory", "admin"]);
+  assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar", "satisfaction"], ["reports", "network", "inventory", "cars", "admin"]);
+  assertAccess(P, "Consulta", ["schools", "contacts", "calendar", "satisfaction"], ["reports", "network", "inventory", "admin"]);
   assertAccess(P, "Carros", ["dashboard", "cars", "calendar"], ["schools", "contacts", "network", "inventory", "admin"]);
   assertAccess(P, "SEGRE", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
   assertAccess(P, "SEPES", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);

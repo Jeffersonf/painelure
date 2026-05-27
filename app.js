@@ -30,6 +30,9 @@
     calendar(data) {
       P.renderCalendar(data.calendar);
     },
+    satisfaction(data) {
+      P.renderSatisfaction(data.satisfaction);
+    },
     profiles(data) {
       P.renderProfiles(data.profiles);
     },

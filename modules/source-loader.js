@@ -127,7 +127,7 @@
     const results = [];
     const includeManual = options.includeManual === true;
     const onlyKeys = Array.isArray(options.keys) && options.keys.length ? new Set(options.keys) : null;
-    const orderedKeys = options.order || ["cars", "supervision", "calendar", "contacts", "schools", "network", "inventory"];
+    const orderedKeys = options.order || ["cars", "supervision", "satisfaction", "calendar", "contacts", "schools", "network", "inventory"];
     const keys = [
       ...orderedKeys.filter(key => P.sources?.[key]),
       ...Object.keys(P.sources || {}).filter(key => !orderedKeys.includes(key))

@@ -13,6 +13,7 @@
     supervision: "supervisao",
     contacts: "contatos",
     calendar: "calendario",
+    satisfaction: "pesquisa-de-satisfacao",
     reports: "relatorios",
     cars: "carros",
     ctc: "ctc",

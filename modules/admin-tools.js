@@ -10,30 +10,30 @@
   let backendToken = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || "";
 
   const ROLE_ACCESS = {
-    Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"],
-    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar"],
-    "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar"],
-    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"],
-    Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
-    Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar"],
-    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar"],
-    SEFISC: ["dashboard", "cars", "calendar"],
-    SEGRE: ["dashboard", "cars", "calendar"],
-    SEVESC: ["dashboard", "cars", "calendar"],
-    SEMAT: ["dashboard", "cars", "calendar"],
-    SEPES: ["dashboard", "cars", "calendar"],
-    SEFREP: ["dashboard", "cars", "calendar"],
-    SEAPE: ["dashboard", "cars", "calendar"],
-    SEAFIM: ["dashboard", "cars", "calendar"],
-    SEFIN: ["dashboard", "cars", "calendar"],
-    SECOMSE: ["dashboard", "cars", "calendar"],
-    Carros: ["dashboard", "cars", "calendar"],
-    Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar"],
-    Consulta: ["dashboard", "schools", "contacts", "calendar"]
+    Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+    Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
+    "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar", "satisfaction"],
+    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "satisfaction"],
+    SEFISC: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEGRE: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEVESC: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEMAT: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEPES: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEFREP: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEAPE: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEAFIM: ["dashboard", "cars", "calendar", "satisfaction"],
+    SEFIN: ["dashboard", "cars", "calendar", "satisfaction"],
+    SECOMSE: ["dashboard", "cars", "calendar", "satisfaction"],
+    Carros: ["dashboard", "cars", "calendar", "satisfaction"],
+    Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
+    Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
-  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "reports", "profiles", "quality", "admin"];
+  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"];
 
   function currentRole() {
     return P.onlineUser?.()?.role || localStorage.getItem(ROLE_KEY) || P.displayUser?.().role || "Administrador";
@@ -347,9 +347,9 @@
       P.showToast?.("Base online indisponivel", "Entrando com dados locais; tente sincronizar novamente no painel.", "warn", { delay: 6200 });
     }
     if (P.loadConfiguredSources) {
-      showLoginStatus("Sincronizando carros...");
-      P.showToast?.("Sincronizando", "Atualizando carros e supervisao antes de abrir.", "info", { delay: 4200 });
-      const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision"], order: ["cars", "supervision"] });
+      showLoginStatus("Sincronizando fontes oficiais...");
+      P.showToast?.("Sincronizando", "Atualizando carros, supervisao e pesquisas antes de abrir.", "info", { delay: 4200 });
+      const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision", "satisfaction"], order: ["cars", "supervision", "satisfaction"] });
       const failed = (results || []).filter(item => item.status === "error");
       if (failed.length) {
         const labels = failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ");
@@ -914,7 +914,7 @@
     P.$("#reloadSourcesBtn")?.addEventListener("click", () => {
       const meta = P.$("#adminBackupMeta");
       if (meta) meta.textContent = "Atualizando fontes em segundo plano...";
-      P.loadConfiguredSources?.({ includeManual: true, order: ["cars", "supervision", "calendar", "contacts", "schools", "network", "inventory"] })
+      P.loadConfiguredSources?.({ includeManual: true, order: ["cars", "supervision", "satisfaction", "calendar", "contacts", "schools", "network", "inventory"] })
         .then(() => {
           P.renderApp?.();
           applyRole();
@@ -1105,7 +1105,7 @@
   function defaultPrefs() {
     return {
       widgets: { shortcuts: true, metrics: true, operations: true },
-      shortcuts: { network: true, inventory: true, ctc: true, calls: true, cars: true, calendar: true, reports: true }
+      shortcuts: { network: true, inventory: true, ctc: true, calls: true, cars: true, calendar: true, satisfaction: true, reports: true }
     };
   }
 
@@ -1319,7 +1319,7 @@
     const host = P.$("#globalSyncBanner");
     if (!host) return;
     const statuses = P.sourceStatus?.length ? P.sourceStatus : [];
-    const importantKeys = ["cars", "supervision"];
+    const importantKeys = ["cars", "supervision", "satisfaction"];
     const important = importantKeys.map(key => statuses.find(item => item.key === key)).filter(Boolean);
     const failed = statuses.filter(item => item.status === "error");
     const empty = statuses.filter(item => item.status === "empty");

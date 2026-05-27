@@ -3566,6 +3566,33 @@ html:not(.site-maintenance) .maintenance-message {
   font-size: 12px;
 }
 
+.mini-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.mini-metrics span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--bd2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .025);
+  color: var(--tx);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.mini-metrics b {
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
 .table-card {
   overflow: hidden;
 }

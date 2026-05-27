@@ -31,4 +31,17 @@
     { label: "Modo apresentação", status: "ok", note: "Interface pode ocultar áreas administrativas locais para reunião." },
     { label: "QA visual", status: "ok", note: "Checklist cobre desktop, mobile, tema claro/escuro e dados vazios." }
   ];
+
+  P.seedData.satisfaction = [
+    {
+      title: "Pesquisa de satisfa\u00e7\u00e3o institucional",
+      audience: "Diretores, equipes escolares e setores da URE",
+      status: "planejada",
+      score: "",
+      responses: 0,
+      link: "",
+      period: "A definir",
+      note: "Espa\u00e7o reservado para formul\u00e1rio oficial, acompanhamento das respostas e devolutivas."
+    }
+  ];
 })();
