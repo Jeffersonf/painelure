@@ -47,7 +47,7 @@ const DATA_ACCESS = {
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
   "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
-  SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "satisfaction", "reports"],
+  SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality"],
   CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
   Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
   Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
@@ -66,6 +66,7 @@ const DATA_ACCESS = {
   Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
   Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
 };
+const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => page !== "admin");
 const pool = DATABASE_URL
   ? new Pool({
       connectionString: DATABASE_URL,
@@ -652,6 +653,10 @@ function accessForRole(role, appData = {}) {
   const target = normalizeText(role);
   const key = Object.keys(DATA_ACCESS).find(item => normalizeText(item) === target);
   const customAccess = appData?.accessRules?.roleAccess || {};
+  if (key === "SEINTEC" || target.includes("seintec")) {
+    const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
+    return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
+  }
   if (key && Array.isArray(customAccess[key])) return customAccess[key];
   if (key) return DATA_ACCESS[key];
   if (target.includes("supervis")) return DATA_ACCESS.Supervisao;

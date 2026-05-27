@@ -58,6 +58,7 @@
     if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
       applySourceData(appData, key, result.data);
       P.setAppData(appData);
+      P.saveAppData?.();
     } else if (result.status === "loaded" && !hasMeaningfulSourceData(result.data)) {
       result.status = "empty";
       result.warning = "Fonte retornou vazia; dados anteriores foram mantidos.";
@@ -157,6 +158,9 @@
 
     P.setAppData(nextData);
     P.sourceStatus = results;
+    if (results.some(result => result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data))) {
+      P.saveAppData?.();
+    }
     return results;
   }
 

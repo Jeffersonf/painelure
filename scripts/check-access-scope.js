@@ -115,7 +115,10 @@ function run() {
     assert(scoped.schoolAssets.length > 0, "SEINTEC deve receber inventario.");
     assert(scoped.cars.length === data.cars.length, "SEINTEC deve receber agendamentos de carro.");
     assert(hasCredentials(scoped.networkData), "SEINTEC deve receber credenciais.");
-    assert(scoped.calls.length === 0, "SEINTEC nao deve receber chamados pela matriz atual.");
+    assert(scoped.calls.length === data.calls.length, "SEINTEC deve receber chamados.");
+    assert(scoped.supervisors.length === data.supervisors.length, "SEINTEC deve receber supervisao.");
+    assert(scoped.users.length === 0, "SEINTEC nao deve receber usuarios admin.");
+    assert(!P.roleAccess("SEINTEC").includes("admin"), "SEINTEC nao deve acessar admin.");
   });
 
   withUser(P, { name: "Gabinete", role: "Gabinete" }, scoped => {
@@ -216,7 +219,7 @@ function run() {
   assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision", "satisfaction"], ["network", "inventory", "cars", "reports", "admin"]);
   assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars", "satisfaction"], ["reports", "admin", "profiles"]);
   assertAccess(P, "SETEC", ["network", "inventory", "calendar", "satisfaction"], ["reports", "admin"]);
-  assertAccess(P, "SEINTEC", ["network", "inventory", "cars", "calendar", "satisfaction"], ["reports", "admin", "calls"]);
+  assertAccess(P, "SEINTEC", ["network", "inventory", "ctc", "calls", "cars", "supervision", "calendar", "satisfaction", "reports", "profiles", "quality"], ["admin"]);
   assertAccess(P, "Gabinete", ["calls", "calendar", "cars", "satisfaction"], ["reports", "network", "inventory", "admin"]);
   assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar", "satisfaction"], ["reports", "network", "inventory", "cars", "admin"]);
   assertAccess(P, "Consulta", ["schools", "contacts", "calendar", "satisfaction"], ["reports", "network", "inventory", "admin"]);

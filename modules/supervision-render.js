@@ -301,7 +301,9 @@
       refreshButton.textContent = "Atualizando...";
       try {
         await P.refreshSource?.("supervision");
-        renderSupervisors(P.scopedData?.(P.getAppData())?.supervisors || P.getAppData().supervisors);
+        P.renderSourceStatus?.();
+        P.renderGlobalSyncBanner?.();
+        P.renderApp?.();
       } finally {
         refreshButton.disabled = false;
         refreshButton.textContent = original || "Atualizar planilha";

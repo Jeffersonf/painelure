@@ -14,7 +14,7 @@
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar", "satisfaction"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality"],
     CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],

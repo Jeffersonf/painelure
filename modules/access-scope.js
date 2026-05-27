@@ -5,7 +5,7 @@
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar", "satisfaction"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality"],
     CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -25,6 +25,7 @@
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
   const ACCESS = DEFAULT_ACCESS;
+  const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => page !== "admin");
   const ROLE_EMOJI = {
     Administrador: "🛡️",
     Supervisao: "🧭",
@@ -83,6 +84,10 @@
     const target = normalized(role);
     const key = Object.keys(DEFAULT_ACCESS).find(name => normalized(name) === target);
     const customAccess = P.getAppData?.()?.accessRules?.roleAccess || {};
+    if (key === "SEINTEC" || target.includes("seintec")) {
+      const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
+      return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
+    }
     if (key && Array.isArray(customAccess[key])) return customAccess[key];
     if (key) return DEFAULT_ACCESS[key];
     if (target.includes("supervis")) return ACCESS.Supervisao;
