@@ -153,8 +153,8 @@
     const localWeekVisits = (item.visits || []).filter(visit => selectedDateWeek(supervisorVisitDate(visit.date)) === selectedWeek).length;
     const weeklyVisits = officialMonth && Number.isFinite(Number(supervisor.weeklyVisits)) ? Number(supervisor.weeklyVisits) : localWeekVisits;
     const monthlyVisits = officialMonth && Number.isFinite(Number(supervisor.monthlyVisits)) ? Number(supervisor.monthlyVisits) : item.visitCount;
-    const weeklyIndicator = officialMonth ? (supervisor.weeklyIndicator || "aviso") : supervisorIndicatorFromGoal(weeklyVisits, weeklyGoal);
-    const monthlyIndicator = officialMonth ? (supervisor.monthlyIndicator || "aviso") : supervisorIndicatorFromGoal(monthlyVisits, monthlyGoal);
+    const weeklyIndicator = supervisorIndicatorFromGoal(weeklyVisits, weeklyGoal);
+    const monthlyIndicator = supervisorIndicatorFromGoal(monthlyVisits, monthlyGoal);
     return {
       assigned: Number(supervisor.assignedSchoolCount || item.assignedSchools.length || 0),
       currentWeek: selectedWeek,
