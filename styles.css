@@ -1569,6 +1569,56 @@ html:not(.site-maintenance) .maintenance-message {
   text-transform: uppercase;
 }
 
+.inventory-school-grid {
+  margin-bottom: 14px;
+}
+
+.inventory-schools-board {
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+
+.inventory-school-card {
+  min-height: 132px;
+}
+
+.inventory-school-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.inventory-school-metrics span {
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid var(--bd2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .026);
+}
+
+.inventory-school-metrics span.warn {
+  border-color: rgba(245, 200, 90, .28);
+  background: rgba(245, 200, 90, .08);
+}
+
+.inventory-school-metrics b,
+.inventory-school-metrics small {
+  display: block;
+}
+
+.inventory-school-metrics b {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.inventory-school-metrics small {
+  margin-top: 4px;
+  color: var(--mt);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .network-widget-grid {
   grid-column: 1 / -1;
   display: grid;

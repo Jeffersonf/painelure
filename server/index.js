@@ -45,7 +45,7 @@ let frontendSeedStore = null;
 const DATA_ACCESS = {
   Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
-  "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+  "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
   SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "satisfaction", "reports"],
   CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -655,7 +655,7 @@ function accessForRole(role, appData = {}) {
   if (key && Array.isArray(customAccess[key])) return customAccess[key];
   if (key) return DATA_ACCESS[key];
   if (target.includes("supervis")) return DATA_ACCESS.Supervisao;
-  if (target.includes("ctc")) return DATA_ACCESS["Tecnicos CTC"];
+  if (target.includes("ctc")) return DATA_ACCESS["Técnicos CTC"];
   if (target.includes("seintec")) return DATA_ACCESS.SEINTEC;
   if (target.includes("setec")) return DATA_ACCESS.SETEC;
   if (target.includes("gabinete") || target.includes("dirigente")) return DATA_ACCESS.Gabinete;
@@ -927,7 +927,7 @@ async function createUser(input) {
 
 async function updateUser(id, patch) {
   const current = await findUserById(id);
-  if (!current) throw new Error("Usuário nao encontrado.");
+  if (!current) throw new Error("Usuário não encontrado.");
   const next = {
     ...current,
     name: patch.name !== undefined ? String(patch.name).trim() : current.name,
@@ -962,7 +962,7 @@ async function updateUser(id, patch) {
 
 async function deleteUser(id) {
   const current = await findUserById(id);
-  if (!current) throw new Error("Usuário nao encontrado.");
+  if (!current) throw new Error("Usuário não encontrado.");
   for (const [token, session] of sessions.entries()) {
     if (session?.userId === id) sessions.delete(token);
   }
@@ -1091,7 +1091,7 @@ function sharePointListApiFromPage(pageUrl, html = "") {
   const contextListUrl = html.match(/"listUrl":"([^"]+)"/)?.[1]?.replace(/\\\//g, "/");
   const direct = parsed.pathname.match(/^(.*)\/Lists\/([^/]+)\/AllItems\.aspx$/i);
   const listPath = contextListUrl || (direct ? `${decodeURIComponent(direct[1])}/Lists/${decodeURIComponent(direct[2])}` : "");
-  if (!listPath) throw new Error("Nao foi possivel identificar a lista do SharePoint.");
+  if (!listPath) throw new Error("Não foi possível identificar a lista do SharePoint.");
   const sitePath = listPath.split("/Lists/")[0];
   const escapedListPath = listPath.replace(/'/g, "''");
   const query = new URLSearchParams({ "$top": "5000", "$expand": "FieldValuesAsText" });
@@ -1181,14 +1181,14 @@ function normalizeRows(type, rows) {
         cie: firstValue(row, ["cie", "codigo", "codigo_cie"], ""),
         initials: firstValue(row, ["iniciais", "initials"], initialsFromName(name)),
         fiche: numberFrom(row, ["ficha", "ficha_pct", "percentual"], 0),
-        items: numberFrom(row, ["itens", "items", "inventario"], 0),
+        items: numberFrom(row, ["itens", "items", "inventário"], 0),
         status: firstValue(row, ["status"], "ok").toLowerCase().includes("aten") ? "warn" : "ok"
       };
     });
   }
   if (type === "contacts") {
     return rows.map(row => ({
-      name: firstValue(row, ["nome", "name", "contato", "responsavel"], "Sem nome"),
+      name: firstValue(row, ["nome", "name", "contato", "responsável"], "Sem nome"),
       role: firstValue(row, ["cargo", "funcao", "role", "descricao"], "Contato"),
       sector: firstValue(row, ["setor", "categoria", "departamento", "area"], "Tecnologia"),
       email: firstValue(row, ["email", "e_mail", "mail"], ""),
@@ -1202,12 +1202,12 @@ function normalizeRows(type, rows) {
       return {
         label: firstValue(row, ["titulo", "evento", "label", "nome"], "Evento"),
         value: firstValue(row, ["data", "quando", "date", "value"], "sem data"),
-        note: firstValue(row, ["observacao", "descricao", "local", "note"], ""),
+        note: firstValue(row, ["observação", "descricao", "local", "note"], ""),
         tone: firstValue(row, ["status", "tone"], eventType || "info"),
         type: eventType,
         scope,
-        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "usuário", "user"], ""),
-        assignee: firstValue(row, ["atribuido", "assignee", "destinatario"], ""),
+        owner: firstValue(row, ["responsável", "dono", "owner", "usuário", "usuário", "user"], ""),
+        assignee: firstValue(row, ["atribuido", "assignee", "destinatário"], ""),
         contactId: firstValue(row, ["contact_id", "id_contato", "contato_id"], ""),
         ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id", "id_usuário", "usuário_id"], ""),
         ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email_usuário", "email"], "")
@@ -1218,7 +1218,7 @@ function normalizeRows(type, rows) {
     return rows.map(row => {
       const driver = firstValue(row, ["nome_condutor", "condutor_nome", "nome_do_condutor", "motorista", "driver", "condutor"], "");
       const sector = firstValue(row, ["setor", "categoria", "area", "departamento"], "");
-      const requester = sector || firstValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "author", "e_x002d_mail"], "");
+      const requester = sector || firstValue(row, ["solicitante", "responsável", "responsavel_pela_reserva", "requester", "owner", "author", "e_x002d_mail"], "");
       const destination = firstValue(row, ["localexterno", "local_externo", "destino", "local", "destination", "place", "local_destino", "escolas"], "")
         || firstValue(row, ["motivovisita", "motivo_visita", "motivo", "finalidade", "objetivo"], "");
       const time = firstValue(row, ["hora", "horario", "horario_da_reserva", "horario_x0020_da_x0020_reserva", "time"], "");
@@ -1234,7 +1234,7 @@ function normalizeRows(type, rows) {
         driver: !driver || /^\d+$/.test(driver) || /^true|false$/i.test(driver) ? "" : driver,
         driverId: lookupId(row.condutor || row.Condutor || driver) || (/^\d+$/.test(driver) ? driver : ""),
         status: firstValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], "pendente"),
-        note: firstValue(row, ["observacao", "observacoes", "coment_x00e1_riogestor", "comentario_gestor", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ""),
+        note: firstValue(row, ["observação", "observacoes", "coment_x00e1_riogestor", "comentario_gestor", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ""),
         sourceFields: Object.keys(row || {}).sort()
       };
     });
@@ -1242,13 +1242,13 @@ function normalizeRows(type, rows) {
   if (type === "satisfaction") {
     return rows.map(row => ({
       title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfação"),
-      audience: firstValue(row, ["publico", "audiencia", "audience", "destinatario"], "Público não informado"),
+      audience: firstValue(row, ["público", "audiência", "audience", "destinatário"], "Público não informado"),
       status: firstValue(row, ["status", "situacao", "andamento"], "ativa"),
-      score: firstValue(row, ["nota", "media", "score", "avaliacao", "satisfacao"], ""),
+      score: firstValue(row, ["nota", "média", "score", "avaliacao", "satisfacao"], ""),
       responses: numberFrom(row, ["respostas", "responses", "total", "quantidade"], 0),
       link: firstValue(row, ["link", "url", "formulario", "formulário", "forms"], ""),
-      period: firstValue(row, ["periodo", "prazo", "data", "competencia"], ""),
-      note: firstValue(row, ["observacao", "observacoes", "descricao", "note"], "")
+      period: firstValue(row, ["período", "prazo", "data", "competencia"], ""),
+      note: firstValue(row, ["observação", "observacoes", "descricao", "note"], "")
     }));
   }
   if (type === "inventory") {
@@ -1258,7 +1258,7 @@ function normalizeRows(type, rows) {
         school: firstValue(row, ["escola", "school", "unidade"], "Escola sem nome"),
         name: firstValue(row, ["tipo", "equipamento", "item", "nome"], "Item"),
         sourceName: firstValue(row, ["nome_original", "descricao", "patrimonio", "modelo"], ""),
-        notes: firstValue(row, ["observacao", "observacoes", "nota", "quantidade", "qtd"], ""),
+        notes: firstValue(row, ["observação", "observacoes", "nota", "quantidade", "qtd"], ""),
         status: status.includes("defeito") ? "defeito" : status.includes("manut") ? "manutencao" : "ok"
       };
     });
@@ -1273,7 +1273,7 @@ function normalizeRows(type, rows) {
         network: [],
         ips: [],
         cameras: [],
-        credentials: ["Acesso restrito", "Nao publicado no frontend estatico", "Solicitar ao CTC, SETEC ou SEINTEC"]
+        credentials: ["Acesso restrito", "Não publicado no frontend estático", "Solicitar ao CTC, SETEC ou SEINTEC"]
       };
       pushUnique(entry.network, firstValue(row, ["rede", "network", "gateway", "wifi"], ""));
       pushUnique(entry.ips, firstValue(row, ["ip", "ips", "cie", "banda"], ""));
@@ -1353,11 +1353,11 @@ async function currentSessionUser(req) {
 
 function requireAuth(req, res) {
   if (isAuthorized(req)) return true;
-  send(res, 401, { ok: false, error: "Nao autorizado." });
+  send(res, 401, { ok: false, error: "Não autorizado." });
   return false;
 }
 
-function requireAdmin(req, res, message = "Apenas administrador pode executar esta acao.") {
+function requireAdmin(req, res, message = "Apenas administrador pode executar esta ação.") {
   if (!requireAuth(req, res)) return false;
   if (isAdminRequest(req)) return true;
   send(res, 403, { ok: false, error: message });
@@ -1374,7 +1374,7 @@ function safeStaticPath(urlPath) {
 function serveStatic(req, res, urlPath) {
   const file = safeStaticPath(urlPath);
   if (!file || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-    send(res, 404, "Nao encontrado.");
+    send(res, 404, "Não encontrado.");
     return;
   }
   const ext = path.extname(file);

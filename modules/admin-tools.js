@@ -12,7 +12,7 @@
   const ROLE_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
-    "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "contacts", "cars", "calendar", "satisfaction"],
     CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -263,8 +263,8 @@
     if (/HTTP 401|invalido|invalid/i.test(message)) return "Nome ou PIN incorretos.";
     if (/reinicie o servidor local/i.test(message)) return "Servidor local antigo detectado. Feche o terminal antigo e rode npm start na pasta painelure2.";
     if (/HTTP 405|method/i.test(message)) return "API não encontrada nesta página. Atualize e tente novamente.";
-    if (/aborted|network|failed to fetch/i.test(message)) return "Nao foi possivel conectar ao servidor.";
-    return message || "Nao foi possivel entrar.";
+    if (/aborted|network|failed to fetch/i.test(message)) return "Não foi possível conectar ao servidor.";
+    return message || "Não foi possível entrar.";
   }
 
   function showPinChange(required = true) {
@@ -386,7 +386,7 @@
       }
       throw error;
     }
-    if (!result?.token || !result?.user) throw new Error("Login nao retornou usuário.");
+    if (!result?.token || !result?.user) throw new Error("Login não retornou usuário.");
     activateOnlineUser(result.token, result.user, { render: false });
     const syncPayload = await syncOfficialDataBeforeOpen();
     activateOnlineUser(result.token, result.user);
@@ -406,11 +406,11 @@
     const pin = P.$("#newPinInput")?.value || "";
     const confirm = P.$("#confirmPinInput")?.value || "";
     showLoginStatus("");
-    if (pin.length < 4) throw new Error("Use um PIN com pelo menos 4 digitos.");
+    if (pin.length < 4) throw new Error("Use um PIN com pelo menos 4 dígitos.");
     if (pin === "1234") throw new Error("Escolha um PIN diferente do inicial.");
     if (pin !== confirm) throw new Error("Os PINs não conferem.");
     const user = P.onlineUser?.();
-    if (!backendToken || !user) throw new Error("Sessão online nao encontrada.");
+    if (!backendToken || !user) throw new Error("Sessão online não encontrada.");
     const preferences = {
       ...(user.preferences || {}),
       forcePinChange: false,
@@ -460,7 +460,7 @@
           return null;
         }
         restoreCachedSession(cachedUser);
-        P.showToast?.("Offline", "Nao foi possivel sincronizar agora. Mantendo sessao local.", "warn", { delay: 9000 });
+        P.showToast?.("Offline", "Não foi possível sincronizar agora. Mantendo sessão local.", "warn", { delay: 9000 });
         return cachedUser;
       } finally {
         document.documentElement.classList.remove("auth-pending");
@@ -597,6 +597,11 @@
     if (newUserRoleSelect && !newUserRoleSelect.dataset.bound) {
       newUserRoleSelect.dataset.bound = "true";
       newUserRoleSelect.innerHTML = adminRoleOptions().map(role => `<option value="${role}">${P.roleLabel?.(role) || role}</option>`).join("");
+    }
+    const backendUserSearch = P.$("#backendUserSearchInput");
+    if (backendUserSearch && !backendUserSearch.dataset.bound) {
+      backendUserSearch.dataset.bound = "true";
+      backendUserSearch.addEventListener("input", () => refreshBackendPanel());
     }
     const activeUserSelect = P.$("#activeUserSelect");
     refreshActiveUserSelect();
@@ -995,7 +1000,7 @@
             ...(P.sourceStatus || []).filter(item => item.key !== key),
             { key, status: "error", error, updatedAt: new Date().toISOString() }
           ];
-          P.showToast?.("Falha na fonte", `${label}: ${error?.message || "nao foi possivel sincronizar"}.`, "warn", { delay: 6200 });
+          P.showToast?.("Falha na fonte", `${label}: ${error?.message || "não foi possível sincronizar"}.`, "warn", { delay: 6200 });
           setAdminMeta(`Falha ao sincronizar ${label}: ${error.message}`);
         } finally {
           renderSourceStatus();
@@ -1202,7 +1207,7 @@
       P.sources[key] = {
         ...P.sources[key],
         type: next.type || P.sources[key].type || "csv",
-        url: next.url ?? P.sources[key].url ?? "",
+        url: next.url || P.sources[key].url || "",
         metadata: {
           ...(P.sources[key].metadata || {}),
           autoLoad: next.autoLoad === undefined ? P.sources[key].metadata?.autoLoad : Boolean(next.autoLoad)
@@ -1280,7 +1285,7 @@
     host.innerHTML = Object.entries(P.sources || {}).map(([key, source]) => {
       const locked = Boolean(source.metadata?.locked);
       const override = sourceOverride(overrides, key);
-      const value = locked ? source.url ?? "" : override.url ?? source.url ?? "";
+      const value = locked ? (source.url || "") : (override.url || source.url || "");
       const type = locked ? source.type || "csv" : override.type || source.type || "csv";
       const autoLoad = locked ? source.metadata?.autoLoad !== false : (override.autoLoad ?? source.metadata?.autoLoad) !== false;
       const metaLine = sourceMetaLine(source) || `${source.status || "pending"} | ${source.type || "csv"}`;
@@ -1324,7 +1329,7 @@
         ? `<button class="ghost-btn source-retry-btn" type="button" data-retry-source="${item.key}">Tentar novamente</button>`
         : "";
       const adminNote = currentRole() === "Administrador" && sourceRequiresAdminAttention(source)
-        ? `<small class="source-admin-note">Aviso admin: links privados do SharePoint podem exigir permissao ou backend autenticado.</small>`
+        ? `<small class="source-admin-note">Aviso admin: links privados do SharePoint podem exigir permissão ou backend autenticado.</small>`
         : "";
       return `
         <div class="data-row compact" data-search="${P.searchText([label, status, detail])}">
@@ -1366,12 +1371,12 @@
           ? `${empty.map(item => P.sources?.[item.key]?.label || item.key).join(", ")} retornou vazio. Dados antigos foram mantidos.`
         : important.length
           ? important.map(item => `${P.sources?.[item.key]?.label || item.key}: ${sourceStatusLabel(item.status)}`).join(" | ")
-          : "Carros primeiro, supervisao depois; demais fontes entram aos poucos.";
+          : "Carros primeiro, supervisão depois; demais fontes entram aos poucos.";
     const buttons = failed.map(item => `
       <button type="button" data-retry-source="${item.key}">Sincronizar ${P.sources?.[item.key]?.label || item.key}</button>
     `).join("");
     const adminNote = currentRole() === "Administrador" && failed.some(item => sourceRequiresAdminAttention(P.sources?.[item.key]))
-      ? `<small class="sync-admin-note">Aviso admin: confirme permissao dos links privados do SharePoint se a falha repetir.</small>`
+      ? `<small class="sync-admin-note">Aviso admin: confirme permissão dos links privados do SharePoint se a falha repetir.</small>`
       : "";
     host.className = `sync-banner ${loading.length ? "sync-loading" : stale ? "sync-warn" : loaded.length ? "sync-ok" : "sync-idle"}`;
     host.innerHTML = `
@@ -1475,7 +1480,7 @@
       if (importHost) {
         importHost.innerHTML = imports.length ? imports.map(item => `
           <div class="settings-row compact" data-search="${P.searchText([item.sourceKey, item.detail, item.status, item.rowsCount])}">
-            <div><strong>${item.sourceKey || "importacao"}</strong><small>${item.rowsCount || 0} linha(s) | ${item.detail || "sem detalhe"} | ${formatDateTime(item.createdAt)}</small></div>
+            <div><strong>${item.sourceKey || "importação"}</strong><small>${item.rowsCount || 0} linha(s) | ${item.detail || "sem detalhe"} | ${formatDateTime(item.createdAt)}</small></div>
             <span class="status-pill ${item.status === "ok" ? "ok" : "warn"}">${item.status || "registro"}</span>
           </div>
         `).join("") : `<div class="settings-row compact"><div><strong>Nenhuma importação online</strong><small>As importações feitas pela API aparecem aqui.</small></div></div>`;
@@ -1491,10 +1496,14 @@
       P.backendUsersCache = users;
       const roleOptions = Object.keys(ROLE_ACCESS);
       const contacts = P.getAppData().contacts || [];
+      const userQuery = P.normalize(P.$("#backendUserSearchInput")?.value || "");
+      const visibleUsers = userQuery
+        ? users.filter(user => P.searchText([user.name, user.username, user.role, user.pin, user.preferences?.pin]).includes(userQuery))
+        : users;
       if (userHost) {
-        userHost.innerHTML = users.length ? users.map(user => {
+        userHost.innerHTML = visibleUsers.length ? visibleUsers.map(user => {
           const pinPending = Boolean(user.preferences?.forcePinChange);
-          const visiblePin = user.pin || user.preferences?.pin || "nao informado";
+          const visiblePin = user.pin || user.preferences?.pin || "não informado";
           const lastLogin = user.preferences?.lastLoginAt ? new Date(user.preferences.lastLoginAt).toLocaleString("pt-BR") : "sem login registrado";
           return `
           <div class="settings-row compact backend-user-row" data-user-id="${user.id}" data-search="${P.searchText([user.name, user.username, user.role, visiblePin, lastLogin])}">
@@ -1514,7 +1523,7 @@
             </div>
           </div>
         `;
-        }).join("") : `<div class="settings-row compact"><div><strong>Nenhum usuário online</strong><small>Crie o primeiro usuário acima ou configure bootstrap no .env.</small></div></div>`;
+        }).join("") : `<div class="settings-row compact"><div><strong>Nenhum usuário encontrado</strong><small>${users.length ? "Ajuste a busca para ver outros usuários." : "Crie o primeiro usuário acima ou configure bootstrap no .env."}</small></div></div>`;
       }
     } catch (error) {
       if (userHost) userHost.innerHTML = `<div class="settings-row compact"><div><strong>Usuários protegidos</strong><small>Use a chave administrativa para listar usuários.</small></div></div>`;

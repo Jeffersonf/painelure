@@ -10,21 +10,21 @@
       email: "e905227a@educacao.sp.gov.br",
       viceDirector: "Aparecida de Fatima Dom. Oliveira Almeida; Flaviane Cristiane Bispo; Silmara Regina Soares Conceicao",
       goe: "Jose Rubens Ortolan Gomes",
-      notes: "Horario: 12:00 as 23:00. E-mail pedagogico: e905227p@educacao.sp.gov.br. Supervisor: Magda Gisele Silva Oliveira."
+      notes: "Horário: 12:00 as 23:00. E-mail pedagógico: e905227p@educacao.sp.gov.br. Supervisor: Magda Gisele Silva Oliveira."
     },
     {
       school: "EE Doutor Antonio Deffune",
       phone: "(15) 3526-7271",
       email: "e049323a@educacao.sp.gov.br",
       viceDirector: "Maria Cristina Mendes de Melo",
-      notes: "Horario: 12:00 as 23:00. E-mail pedagogico: e049323p@educacao.sp.gov.br."
+      notes: "Horário: 12:00 as 23:00. E-mail pedagógico: e049323p@educacao.sp.gov.br."
     },
     {
       school: "PEI EE Professora Celia Vasques Ferrari Duch",
       phone: "(15) 3534-1192",
       email: "e039731a@educacao.sp.gov.br",
       director: "Paulo Sergio Vieira",
-      notes: "Horario: 12:40 as 23:00. E-mail pedagogico: e039731p@educacao.sp.gov.br."
+      notes: "Horário: 12:40 as 23:00. E-mail pedagógico: e039731p@educacao.sp.gov.br."
     },
     {
       school: "PEI EE Professora Cinira Daniel da Silva",
@@ -34,32 +34,32 @@
       director: "Cassia Avila Bueno da Silva",
       viceDirector: "Elizangela Justina de Paula Oliveira Costa",
       goe: "Daiany Abreu Barros",
-      notes: "Horario: 12:00 as 23:00. E-mail pedagogico: e035348p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaca."
+      notes: "Horário: 12:00 as 23:00. E-mail pedagógico: e035348p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaça."
     },
     {
       school: "EE Bairro Ferreira dos Matos",
       phone: "(15) 3544-6226",
       email: "e915087a@educacao.sp.gov.br",
-      notes: "Horario: 12:30 as 23:00. E-mail pedagogico: e915087p@educacao.sp.gov.br. Supervisor: Daiane Aparecida de Oliveira Ribeiro."
+      notes: "Horário: 12:30 as 23:00. E-mail pedagógico: e915087p@educacao.sp.gov.br. Supervisor: Daiane Aparecida de Oliveira Ribeiro."
     },
     {
       school: "PEI EE Professora Francelina Franco",
       phone: "(15) 3546-1242",
-      viceDirector: "Elder Fogaca de Lara",
+      viceDirector: "Elder Fogaça de Lara",
       goe: "Nelia Aparecida de Oliveira Alves",
-      notes: "Horario: 07:00 as 23:00. Supervisor: Edilene Silva Almeida Oliveira."
+      notes: "Horário: 07:00 as 23:00. Supervisor: Edilene Silva Almeida Oliveira."
     },
     {
       school: "EE Professor Gerson de Barros Margarido",
       phone: "(15) 3624-7011",
       email: "e043412a@educacao.sp.gov.br",
-      notes: "Horario: 12:00 as 23:00. E-mail pedagogico: e043412p@educacao.sp.gov.br."
+      notes: "Horário: 12:00 as 23:00. E-mail pedagógico: e043412p@educacao.sp.gov.br."
     },
     {
       school: "EE Bairro Boa Vista Intervales",
       phone: "(15) 3444-6100",
       email: "e915075a@educacao.sp.gov.br",
-      notes: "Horario: 07:00 as 17:40. E-mail pedagogico: e915075p@educacao.sp.gov.br. Supervisor: Maria Luiza Brisolla de Queiroz."
+      notes: "Horário: 07:00 as 17:40. E-mail pedagógico: e915075p@educacao.sp.gov.br. Supervisor: Maria Luiza Brizolla de Queiroz."
     },
     {
       school: "PEI EE Jeminiano David Muzel",
@@ -68,7 +68,7 @@
       director: "Elaine Cristina Araujo Toledo",
       viceDirector: "Janaina Aparecida Pereira Ribeiro",
       goe: "Gizeli Duarte de Oliveira",
-      notes: "E-mail pedagogico: e015477p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaca."
+      notes: "E-mail pedagógico: e015477p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaça."
     },
     {
       school: "PEI EE Professor Joao Baptista do Amaral Vasconcellos",
@@ -76,7 +76,7 @@
       email: "e910077a@educacao.sp.gov.br",
       director: "Alessandra Ap. Souto Martinho J. de Oliveira",
       goe: "Dalva Maria Garcia",
-      notes: "Horario: 07:00 as 23:00. E-mail pedagogico: e910077p@educacao.sp.gov.br."
+      notes: "Horário: 07:00 as 23:00. E-mail pedagógico: e910077p@educacao.sp.gov.br."
     },
     {
       school: "PEI EE Professor Jose Vasques Ferrari",
@@ -85,7 +85,7 @@
       email: "e015519a@educacao.sp.gov.br",
       viceDirector: "Vera Leticia Faria da Cruz",
       goe: "Ana Cristina Poglisch Santos",
-      notes: "Horario: 07:30 as 17:00. E-mail pedagogico: e015519p@educacao.sp.gov.br. Supervisor: Maria Luiza Brisolla de Queiroz."
+      notes: "Horário: 07:30 as 17:00. E-mail pedagógico: e015519p@educacao.sp.gov.br. Supervisor: Maria Luiza Brizolla de Queiroz."
     },
     {
       school: "PEI EE Professora Nicota Soares",
@@ -94,7 +94,7 @@
       email: "e015489a@educacao.sp.gov.br",
       director: "Myrna Weruska Pereira de Souza",
       goe: "Valquiria dos Santos Pereira Rosa",
-      notes: "Horario: 07:00 as 17:00. E-mail pedagogico: e015489p@educacao.sp.gov.br. Supervisor: Daiane Aparecida de Oliveira Ribeiro."
+      notes: "Horário: 07:00 as 17:00. E-mail pedagógico: e015489p@educacao.sp.gov.br. Supervisor: Daiane Aparecida de Oliveira Ribeiro."
     },
     {
       school: "PEI EE Oscar Kurtz Camargo",
@@ -103,7 +103,7 @@
       email: "e015076a@educacao.sp.gov.br",
       director: "Milena Ferreira de Almeida Chrischner Figueiredo",
       goe: "Amanda Caroline Ferreira Monticeli",
-      notes: "Horario: 07:00 as 23:00. E-mail pedagogico: e015076p@educacao.sp.gov.br. Supervisor: Magda Gisele Silva Oliveira."
+      notes: "Horário: 07:00 as 23:00. E-mail pedagógico: e015076p@educacao.sp.gov.br. Supervisor: Magda Gisele Silva Oliveira."
     },
     {
       school: "PEI EE Otavio Ferrari",
@@ -111,7 +111,7 @@
       email: "e015404a@educacao.sp.gov.br",
       director: "Fabiano Jose Santos Ferraz",
       goe: "Marcelo Jose Fonseca de Lima",
-      notes: "E-mail pedagogico: e015404p@educacao.sp.gov.br."
+      notes: "E-mail pedagógico: e015404p@educacao.sp.gov.br."
     },
     {
       school: "PEI EE Padre Arlindo Vieira",
@@ -119,7 +119,7 @@
       email: "e015118a@educacao.sp.gov.br",
       director: "Edicleia Pontes de Jesus",
       goe: "Luana Aparecida da Cruz Prestes Queiroz",
-      notes: "Horario: 07:30 as 17:00. E-mail pedagogico: e015118p@educacao.sp.gov.br."
+      notes: "Horário: 07:30 as 17:00. E-mail pedagógico: e015118p@educacao.sp.gov.br."
     },
     {
       school: "EE Doutor Raul Venturelli",
@@ -129,7 +129,7 @@
       director: "Elisete de Fatima Siqueira",
       viceDirector: "Silvia Cristina de Oliveira Barros; Simone Paula dos Reis Rodrigues",
       goe: "Sergio de Proenca Ramos",
-      notes: "Horario: 07:00 as 23:00. E-mail pedagogico: e015222p@educacao.sp.gov.br."
+      notes: "Horário: 07:00 as 23:00. E-mail pedagógico: e015222p@educacao.sp.gov.br."
     },
     {
       school: "PEI EE Ricardo Campolim de Almeida Neto",
@@ -137,13 +137,13 @@
       email: "e915117a@educacao.sp.gov.br",
       director: "Rodrigo Manoel Ferreira Marques",
       goe: "Wilson Rodrigues Cordeiro",
-      notes: "Horario: 12:00 as 23:00. E-mail pedagogico: e915117p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaca."
+      notes: "Horário: 12:00 as 23:00. E-mail pedagógico: e915117p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaça."
     },
     {
       school: "EE Professor Silverio Monteiro",
       phone: "(15) 5704-3611",
       email: "e035336a@educacao.sp.gov.br",
-      notes: "Horario: 12:00 as 23:00. E-mail pedagogico: e035336p@educacao.sp.gov.br."
+      notes: "Horário: 12:00 as 23:00. E-mail pedagógico: e035336p@educacao.sp.gov.br."
     },
     {
       school: "PEI EE Simpliciano Campolim de Almeida",
@@ -151,13 +151,13 @@
       email: "e015428a@educacao.sp.gov.br",
       director: "Antonio dos Santos Junior",
       goe: "Donizeth Lopes de Camargo Junior",
-      notes: "Horario: 07:00 as 23:00. E-mail pedagogico: e015428p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaca."
+      notes: "Horário: 07:00 as 23:00. E-mail pedagógico: e015428p@educacao.sp.gov.br. Supervisor: Adilson Manoel Fogaça."
     },
     {
       school: "EE Bairro Turvo dos Almeidas",
       phone: "(15) 3379-7199",
       email: "e926036a@educacao.sp.gov.br",
-      notes: "Horario: 12:30 as 23:00. E-mail pedagogico: e926036p@educacao.sp.gov.br. Supervisor: Maria Luiza Brisolla de Queiroz."
+      notes: "Horário: 12:30 as 23:00. E-mail pedagógico: e926036p@educacao.sp.gov.br. Supervisor: Maria Luiza Brizolla de Queiroz."
     },
     {
       school: "PEI EE Professora Zulmira de Oliveira",
@@ -165,7 +165,7 @@
       email: "e015544a@educacao.sp.gov.br",
       director: "Maria Aparecida Miranda Melo",
       goe: "Pedro Henrique Pinheiro Barros",
-      notes: "Horario: 07:00 as 23:00. E-mail pedagogico: e015544p@educacao.sp.gov.br."
+      notes: "Horário: 07:00 as 23:00. E-mail pedagógico: e015544p@educacao.sp.gov.br."
     }
   ];
 

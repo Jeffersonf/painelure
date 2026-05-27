@@ -132,7 +132,7 @@
   Object.values(networkData).forEach(data => {
     data.credentials = [
       "Acesso restrito",
-      "Nao publicado no frontend estatico",
+      "Não publicado no frontend estático",
       "Solicitar ao CTC, SETEC ou SEINTEC"
     ];
   });

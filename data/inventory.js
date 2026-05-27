@@ -74,7 +74,7 @@
   },
   {
     "school": "PEI EE Otavio Ferrari",
-    "name": "Equipamento nao informado",
+    "name": "Equipamento não informado",
     "sourceName": "Sem marca",
     "status": "ok",
     "notes": "Sem marca: 4 (3 + 1)"
@@ -467,7 +467,7 @@
   {
     "school": "EE Bairro Ferreira dos Matos",
     "name": "Monitor",
-    "sourceName": "Equipamento nao informado",
+    "sourceName": "Equipamento não informado",
     "status": "ok",
     "notes": "1 unidade(s) | status original: Funcionando | BlueMonitor: 1"
   },
@@ -600,7 +600,7 @@
   {
     "school": "EE Professor Gerson de Barros Margarido",
     "name": "Monitor",
-    "sourceName": "Equipamento nao informado",
+    "sourceName": "Equipamento não informado",
     "status": "ok",
     "notes": "1 unidade(s) | status original: Funcionando | BlueMonitor: 0"
   },
@@ -705,7 +705,7 @@
   {
     "school": "PEI EE Oscar Kurtz Camargo",
     "name": "Monitor",
-    "sourceName": "Equipamento nao informado",
+    "sourceName": "Equipamento não informado",
     "status": "ok",
     "notes": "1 unidade(s) | status original: Funcionando | BlueMonitor: 1"
   },

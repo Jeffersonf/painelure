@@ -88,7 +88,7 @@
 
   function supervisorSourceFooter() {
     const selected = P.selectedMonthLabel?.() || "mês selecionado";
-    const source = P.sources?.supervision?.label || "planilha oficial de supervisao";
+    const source = P.sources?.supervision?.label || "planilha oficial de supervisão";
     const updated = new Date().toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -121,7 +121,7 @@
     const schools = supervisor.assignedSchools || [];
     return Array.from({ length: fallbackCount }, (_, index) => ({
       date: "",
-      school: schools[index % Math.max(1, schools.length)] || "Escola nao informada",
+      school: schools[index % Math.max(1, schools.length)] || "Escola não informada",
       type: "Visita"
     }));
   }
@@ -172,8 +172,8 @@
     const official = P.sources?.supervision?.monthKey ? P.selectedMonthLabel?.(P.sources.supervision.monthKey) : "";
     return `
       <article class="supervisor-no-data-warning" role="status">
-        <strong>Nao ha dados de supervisao para ${selected}</strong>
-        <p>${official ? `A planilha oficial carregada atualmente e de ${official}.` : "Nenhuma fonte mensal oficial esta carregada para este periodo."} Selecione um mes com registros ou sincronize uma fonte oficial deste mes.</p>
+        <strong>Não há dados de supervisão para ${selected}</strong>
+        <p>${official ? `A planilha oficial carregada atualmente é de ${official}.` : "Nenhuma fonte mensal oficial está carregada para este período."} Selecione um mês com registros ou sincronize uma fonte oficial deste mês.</p>
       </article>
     `;
   }
@@ -183,7 +183,7 @@
     return `
       <article class="supervisor-april-warning" role="note">
         <strong>Aviso importante sobre abril</strong>
-        <p>A planilha de abril foi usada apenas como teste de importacao e validacao do painel. Abril nao sera considerado para acompanhamento oficial; a partir de maio a supervisao usa a planilha oficial nova.</p>
+        <p>A planilha de abril foi usada apenas como teste de importação e validação do painel. Abril não será considerado para acompanhamento oficial; a partir de maio a supervisão usa a planilha oficial nova.</p>
       </article>
     `;
   }
@@ -248,7 +248,7 @@
                     <th>Meta mensal</th>
                     <th>Semana</th>
                     <th>Indicador semana</th>
-                    <th>Indicador mes</th>
+                    <th>Indicador mês</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -332,7 +332,7 @@
         <article class="box">
           <div class="school-record-nav">
             <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordProfile">Resumo</button>
-            <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordCalendar">Calendario</button>
+            <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordCalendar">Calendário</button>
             <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisited">Visitadas</button>
             <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordPending">Faltantes</button>
             <button class="btn btn-g btn-sm" type="button" data-scroll-target="supervisorRecordVisitTable">Registros</button>
@@ -343,7 +343,7 @@
         </article>
         <div class="setechub-two-col">
           <div class="box">
-            <div class="box-head"><div><strong>Meta mensal</strong><small>Se cumpriu a meta de visitas do mes atual.</small></div></div>
+            <div class="box-head"><div><strong>Meta mensal</strong><small>Se cumpriu a meta de visitas do mês atual.</small></div></div>
             <div class="stack-list"><div class="setechub-command-score"><strong>${coverage}%</strong><span class="diag-pill ${coverage >= 80 ? "pill-ok" : "pill-warn"}">Cobertura</span></div></div>
           </div>
           <div class="box">
@@ -359,7 +359,7 @@
           </div>
         </div>
         <div class="box" id="supervisorRecordCalendar">
-          <div class="box-head"><div><strong>Calendario de visitas</strong><small>Dias com registro de visita para este supervisor.</small></div></div>
+          <div class="box-head"><div><strong>Calendário de visitas</strong><small>Dias com registro de visita para este supervisor.</small></div></div>
           <div class="supervisor-calendar-grid">${supervisorVisitCalendarMarkup(visits)}</div>
         </div>
         <div class="setechub-two-col">

@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "forgot-pin-help-20260527";
+      window.PAINELURE_BUILD = "polish-admin-inventory-20260527";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=forgot-pin-help-20260527">
+  <link rel="stylesheet" href="./styles.css?v=polish-admin-inventory-20260527">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -212,7 +212,7 @@
       <div class="manager-strip">
         <div>
           <strong>Pagina inicial da URE</strong>
-          <span id="dashboardSummary">consulta rapida | dados locais primeiro | fontes oficiais em segundo plano</span>
+          <span id="dashboardSummary">consulta rápida | dados locais primeiro | fontes oficiais em segundo plano</span>
         </div>
       </div>
 
@@ -312,10 +312,6 @@
       </header>
       <div class="selector-panel">
         <label>
-          <span>Escola</span>
-          <select id="inventorySelect"></select>
-        </label>
-        <label>
           <span>Filtro</span>
           <input id="inventoryFilterInput" type="search" placeholder="Equipamento, status ou observação">
         </label>
@@ -330,10 +326,7 @@
         </label>
         <button class="ghost-btn filter-reset" type="button" id="inventoryFilterReset">Limpar</button>
       </div>
-      <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo do inventário</strong><small>Triagem da escola selecionada</small></div></div>
-        <div class="row-list compact" id="inventorySummaryRows"></div>
-      </article>
+      <div class="inventory-school-grid" id="inventorySchoolGrid"></div>
       <div class="box">
         <div class="box-head"><div><strong>Equipamentos em acompanhamento</strong><small>Status resumido para triagem</small></div></div>
         <div class="inventory-grid" id="inventoryGrid"></div>
@@ -664,6 +657,12 @@
               <button class="ghost-btn" type="button" id="createBackendUserBtn">Criar</button>
             </div>
           </div>
+          <div class="settings-row compact">
+            <div><strong>Buscar usuário</strong><small>Filtre por nome, login, perfil ou PIN visível.</small></div>
+            <div class="settings-actions wide">
+              <input id="backendUserSearchInput" type="search" placeholder="Digite nome, setor, login ou PIN">
+            </div>
+          </div>
           <div class="settings-list" id="backendUserList"></div>
         </section>
 
@@ -761,33 +760,33 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/schools.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/school-profiles.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/school-operational.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/inventory.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/supervision.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/contacts.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/users.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/governance.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/operations.js?v=forgot-pin-help-20260527"></script>
-  <script src="./data/sources.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/dom.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/ui-catalog.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/data-store.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/identity.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/access-scope.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/month-state.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/csv.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/normalizers.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/source-loader.js?v=forgot-pin-help-20260527"></script>
-  <script src="./config.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/backend-client.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/search.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/render.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/supervision-render.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/navigation.js?v=forgot-pin-help-20260527"></script>
-  <script src="./modules/admin-tools.js?v=forgot-pin-help-20260527"></script>
-  <script src="./app.js?v=forgot-pin-help-20260527"></script>
+  <script src="./data/mock.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/schools.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/school-profiles.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/school-operational.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/inventory.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/supervision.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/contacts.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/users.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/governance.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/operations.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./data/sources.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/dom.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/ui-catalog.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/data-store.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/identity.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/access-scope.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/month-state.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/csv.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/normalizers.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/source-loader.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./config.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/backend-client.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/search.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/render.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/supervision-render.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/navigation.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./modules/admin-tools.js?v=polish-admin-inventory-20260527"></script>
+  <script src="./app.js?v=polish-admin-inventory-20260527"></script>
 </body>
 </html>

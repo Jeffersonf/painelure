@@ -112,7 +112,7 @@
 
   function normalizeContactRows(rows) {
     return rows.map(row => {
-      const name = firstValue(row, ["nome", "name", "contato", "responsavel"], "Sem nome");
+      const name = firstValue(row, ["nome", "name", "contato", "responsável"], "Sem nome");
       return {
         name,
         role: firstValue(row, ["cargo", "funcao", "role", "descricao"], "Contato"),
@@ -132,7 +132,7 @@
         cie: firstValue(row, ["cie", "codigo", "codigo_cie"], ""),
         initials: firstValue(row, ["iniciais", "initials"], initialsFromName(name)),
         fiche: numberFrom(row, ["ficha", "ficha_pct", "percentual"], 0),
-        items: numberFrom(row, ["itens", "items", "inventario"], 0),
+        items: numberFrom(row, ["itens", "items", "inventário"], 0),
         status: firstValue(row, ["status"], "ok").toLowerCase().includes("aten") ? "warn" : "ok"
       };
     });
@@ -146,7 +146,7 @@
           school: firstValue(row, ["escola", "school", "unidade"], "Escola sem nome"),
           name: firstValue(row, ["tipo", "equipamento", "item", "nome"], "Item"),
           sourceName: firstValue(row, ["nome_original", "descricao", "patrimonio", "modelo"], ""),
-          notes: firstValue(row, ["observacao", "observacoes", "nota", "quantidade", "qtd"], ""),
+          notes: firstValue(row, ["observação", "observacoes", "nota", "quantidade", "qtd"], ""),
           status: statusText.includes("defeito") ? "defeito" : statusText.includes("manut") ? "manutencao" : "ok"
         };
       });
@@ -154,7 +154,7 @@
     return rows.map(row => ({
       label: firstValue(row, ["tipo", "equipamento", "item", "nome"], "Item"),
       value: firstValue(row, ["quantidade", "qtd", "total"], "0"),
-      note: firstValue(row, ["observacao", "observacoes", "status", "nota"], ""),
+      note: firstValue(row, ["observação", "observacoes", "status", "nota"], ""),
       tone: firstValue(row, ["status"], "").toLowerCase().includes("manut") ? "warn" : "ok"
     }));
   }
@@ -280,7 +280,7 @@
       if (date) {
         const week = weekOfMonth(date);
         item.weekVisits.set(week, (item.weekVisits.get(week) || 0) + (canonicalSchools.length || 1));
-        (canonicalSchools.length ? canonicalSchools : ["Escola nao informada"]).forEach(school => {
+        (canonicalSchools.length ? canonicalSchools : ["Escola não informada"]).forEach(school => {
           item.records.push({
             date: formatDateValue(firstValue(row, ["data_da_visita", "data", "date"], "")),
             school,
@@ -340,7 +340,7 @@
         network: [],
         ips: [],
         cameras: [],
-        credentials: ["Acesso restrito", "Nao publicado no frontend estatico", "Solicitar ao CTC, SETEC ou SEINTEC"]
+        credentials: ["Acesso restrito", "Não publicado no frontend estático", "Solicitar ao CTC, SETEC ou SEINTEC"]
       };
 
       pushUnique(entry.network, firstValue(row, ["rede", "network", "gateway", "wifi"], ""));
@@ -358,12 +358,12 @@
       return {
         label: firstValue(row, ["titulo", "evento", "label", "nome"], "Evento"),
         value: firstValue(row, ["data", "quando", "date", "value"], "sem data"),
-        note: firstValue(row, ["observacao", "descricao", "local", "note"], ""),
+        note: firstValue(row, ["observação", "descricao", "local", "note"], ""),
         tone: firstValue(row, ["status", "tone"], type || "info"),
         type,
         scope,
-        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "usuário", "user"], ""),
-        assignee: firstValue(row, ["atribuido", "assignee", "destinatario"], ""),
+        owner: firstValue(row, ["responsável", "dono", "owner", "usuário", "usuário", "user"], ""),
+        assignee: firstValue(row, ["atribuido", "assignee", "destinatário"], ""),
         contactId: firstValue(row, ["contact_id", "id_contato", "contato_id"], ""),
         ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id", "id_usuário", "usuário_id"], ""),
         ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email_usuário", "email"], "")
@@ -382,7 +382,7 @@
       const destination = externalPlace || schoolLookupName(school) || firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino"], ["destino", "destination", "place"], "") || motive;
       const driver = firstMatchingValue(row, ["nome_condutor", "condutor_nome", "nome_do_condutor", "motorista", "driver", "condutor"], ["nome_condutor", "condutor_nome", "nome_do_condutor", "motorista", "driver", "condutor"], "");
       const sector = firstMatchingValue(row, ["setor", "categoria", "area", "departamento"], ["setor", "categoria", "area", "departamento"], "");
-      const requester = sector || firstMatchingValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsavel", "requester", "owner", "mail"], "");
+      const requester = sector || firstMatchingValue(row, ["solicitante", "responsável", "responsavel_pela_reserva", "requester", "owner", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsável", "requester", "owner", "mail"], "");
       const timeValue = formatTimeValue(time || date);
       return {
         requestId: firstMatchingValue(row, ["id"], ["id"], ""),
@@ -396,7 +396,7 @@
         driver: lookupName(driver),
         driverId: lookupId(row.condutor || row.Condutor || driver) || (/^\d+$/.test(valueToText(driver)) ? valueToText(driver) : ""),
         status: firstMatchingValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], ["status", "situacao"], "pendente"),
-        note: firstMatchingValue(row, ["observacao", "observacoes", "coment_x00e1_riogestor", "comentario_gestor", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ["observacao", "coment", "descricao", "motivo", "note"], ""),
+        note: firstMatchingValue(row, ["observação", "observacoes", "coment_x00e1_riogestor", "comentario_gestor", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ["observação", "coment", "descricao", "motivo", "note"], ""),
         sourceFields: Object.keys(row || {}).sort()
       };
     });
@@ -405,13 +405,13 @@
   function normalizeSatisfactionRows(rows) {
     return rows.map(row => ({
       title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfação"),
-      audience: firstValue(row, ["publico", "audiencia", "audience", "destinatario"], "Publico nao informado"),
+      audience: firstValue(row, ["público", "audiência", "audience", "destinatário"], "Público não informado"),
       status: firstValue(row, ["status", "situacao", "andamento"], "ativa"),
-      score: firstValue(row, ["nota", "media", "score", "avaliacao", "satisfacao"], ""),
+      score: firstValue(row, ["nota", "média", "score", "avaliacao", "satisfacao"], ""),
       responses: numberFrom(row, ["respostas", "responses", "total", "quantidade"], 0),
       link: firstValue(row, ["link", "url", "formulario", "formulário", "forms"], ""),
-      period: firstValue(row, ["periodo", "prazo", "data", "competencia"], ""),
-      note: firstValue(row, ["observacao", "observacoes", "descricao", "note"], "")
+      period: firstValue(row, ["período", "prazo", "data", "competencia"], ""),
+      note: firstValue(row, ["observação", "observacoes", "descricao", "note"], "")
     }));
   }
 

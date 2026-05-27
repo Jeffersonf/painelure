@@ -4,7 +4,7 @@
 
   P.seedData.calendar = [
     { label: "Apresentação da versão 1.0", value: "08/05/2026", note: "Versão oficial preservada na raiz do projeto.", tone: "ok" },
-    { label: "PainelURE", value: "pronto para oficial", note: "Base nova preparada para assumir o repositório oficial apos migracao e validacao.", tone: "ok" },
+    { label: "PainelURE", value: "pronto para oficial", note: "Base nova preparada para assumir o repositório oficial após migração e validação.", tone: "ok" },
     { label: "Calendário URE", value: "preparado", note: "Estrutura pronta para conectar a agenda institucional.", tone: "info" }
   ];
 

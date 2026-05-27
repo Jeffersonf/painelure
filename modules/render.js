@@ -32,7 +32,7 @@
     const role = currentRoleKey();
     if (role.includes("supervis")) {
       return {
-        title: "Carteira de supervisao",
+        title: "Carteira de supervisão",
         note: `${data.schools.length} escola(s) sob acompanhamento no mês.`,
         notice: "Visão filtrada para sua supervisão",
         noticeNote: "A página mostra apenas suas escolas, suas metas e os canais de apoio disponíveis.",
@@ -47,7 +47,7 @@
     if (role.includes("ctc") || role.includes("setec") || role.includes("seintec")) {
       return {
         title: "Operação técnica",
-        note: `${context.networkCount} rede(s) mapeada(s), ${data.schoolAssets.length} item(ns) de inventario.`,
+        note: `${context.networkCount} rede(s) mapeada(s), ${data.schoolAssets.length} item(ns) de inventário.`,
         notice: "Base técnica pronta para consulta",
         noticeNote: "Redes, IPs, câmeras, inventário e chamados aparecem no mesmo fluxo operacional.",
         shortcuts: null
@@ -58,16 +58,16 @@
         title: "Acompanhamento do gabinete",
         note: `${context.openCalls} chamado(s) em acompanhamento e ${context.calendarCount} evento(s) na agenda.`,
         notice: "Fila administrativa consolidada",
-        noticeNote: "Chamados, escolas, contatos e agenda ficam priorizados para resposta rapida.",
+        noticeNote: "Chamados, escolas, contatos e agenda ficam priorizados para resposta rápida.",
         shortcuts: null
       };
     }
     if (role.includes("pedagog")) {
       return {
-        title: "Acompanhamento pedagogico",
+        title: "Acompanhamento pedagógico",
         note: `${data.schools.length} escola(s), ${data.supervisors.length} supervisor(es) e agenda institucional.`,
         notice: "Visão escolar e de supervisão",
-        noticeNote: "Escolas, supervisao, contatos e calendario ficam em primeiro plano.",
+        noticeNote: "Escolas, supervisão, contatos e calendário ficam em primeiro plano.",
         shortcuts: null
       };
     }
@@ -313,7 +313,7 @@
     if (text.includes("recarga") || text.includes("plataforma")) return "Recarga";
     if (text.includes("smartphone") || text.includes("celular")) return "Smartphones";
     if (text.includes("adm") || text.includes("administrativo")) return "PC adm";
-    if (text.includes("pc") || text.includes("desktop") || text.includes("pedagogico")) return "PC pedagogico";
+    if (text.includes("pc") || text.includes("desktop") || text.includes("pedagogico")) return "PC pedagógico";
     return "Outros";
   }
 
@@ -444,13 +444,11 @@
   function focusInventoryAsset(key, schoolName = "") {
     P.setPage?.("inventory");
     requestAnimationFrame(() => {
-      const select = P.$("#inventorySelect");
       const filter = P.$("#inventoryFilterInput");
       const status = P.$("#inventoryStatusSelect");
-      if (select && schoolName) select.value = schoolName;
       if (filter) filter.value = "";
       if (status) status.value = "";
-      renderInventory(P.getAppData());
+      renderInventory(P.getAppData(), schoolName);
       const target = P.$(`[data-inventory-key="${key}"]`);
       if (!target) return;
       P.$all(".data-row.focused").forEach(row => row.classList.remove("focused"));
@@ -710,7 +708,7 @@
       .filter(item => item.page === "calendar")
       .map(item => ({
         icon: item.icon,
-        title: `Calendario ${item.label.toLowerCase()}`,
+        title: `Calendário ${item.label.toLowerCase()}`,
         note: item.note,
         label: String(item.value),
         tone: item.tone,
@@ -853,7 +851,7 @@
           <div class="school-profile-owner">
             <small>Supervisor</small>
             <strong>${supervisor?.name || "Não vinculado"}</strong>
-            <span class="status-pill ${supervisor ? "info" : "warn"}">${supervisor ? "supervisao" : "pendente"}</span>
+            <span class="status-pill ${supervisor ? "info" : "warn"}">${supervisor ? "supervisão" : "pendente"}</span>
           </div>
         </article>
 
@@ -912,9 +910,9 @@
                 <span class="row-icon">&#128187;</span>
                 <span><strong>${asset.name}</strong><small>${asset.description || `${asset.quantity || 0} unidade(s)`}</small></span>
                 <em class="status-pill ${statusClass(asset.status)}">${asset.status || "base"}</em>
-              </button>`).join("") : `<div class="empty-state">Sem linhas de inventario para esta escola.</div>`}
+              </button>`).join("") : `<div class="empty-state">Sem linhas de inventário para esta escola.</div>`}
             </div>
-            ${!P.canAccess || P.canAccess("inventory") ? `<button class="ghost-btn block" type="button" data-open-inventory="${school.name}">Abrir inventario completo</button>` : ""}
+            ${!P.canAccess || P.canAccess("inventory") ? `<button class="ghost-btn block" type="button" data-open-inventory="${school.name}">Abrir inventário completo</button>` : ""}
           </article>
 
           <article class="box school-profile-card">
@@ -937,7 +935,7 @@
               <label><span>Celular</span><input name="mobile" value="${attrValue(profile?.mobile)}"></label>
               <label><span>Email</span><input name="email" value="${attrValue(profile?.email)}"></label>
               <label class="wide"><span>Endereço</span><input name="address" value="${attrValue(profile?.address)}"></label>
-              <label class="wide"><span>Observacoes</span><textarea name="notes">${attrValue(profile?.notes)}</textarea></label>
+              <label class="wide"><span>Observa??es</span><textarea name="notes">${attrValue(profile?.notes)}</textarea></label>
               <button class="ghost-btn" type="submit">Salvar dados</button>
             </form>
           </article>` : ""}
@@ -983,11 +981,10 @@
     }
     P.setPage?.("inventory");
     requestAnimationFrame(() => {
-      const select = P.$("#inventorySelect");
-      if (!select) return;
-      select.value = name;
-      renderInventory(P.getAppData());
-      select.focus();
+      renderInventory(P.getAppData(), name);
+      const target = P.$(`[data-inventory-school-key="${P.searchText([name])}"]`);
+      target?.focus?.();
+      target?.scrollIntoView?.({ behavior: "smooth", block: "center" });
     });
   }
 
@@ -1137,36 +1134,15 @@
       focusSupervisor(event.currentTarget.dataset.openSupervisor);
     });
   }
-
-  function renderInventoryOperationalSummary(assets, selectedSchool, selectedAssets, totals) {
-    const globalTotals = inventoryTotals(assets);
-    const schools = new Set(assets.map(asset => asset.school).filter(Boolean)).size;
-    const categoryCount = new Set(selectedAssets.map(asset => assetCategory(asset))).size;
-    const rows = [
-      { icon: "&#128187;", title: "Inventário da escola", note: `${totals.lines} linha(s), ${totals.units} unidade(s) e ${categoryCount} categoria(s).`, label: `${totals.units}`, tone: "info" },
-      { icon: "&#128736;&#65039;", title: "Manutenção/defeito", note: totals.alertUnits ? `${totals.alertUnits} unidade(s) fora de OK em ${selectedSchool}.` : "Todos os itens filtrados estao OK.", label: `${totals.alertUnits}`, tone: totals.alertUnits ? "warn" : "ok" },
-      { icon: "&#127979;", title: "Base carregada", note: `${schools} escola(s) com inventario e ${globalTotals.lines} linha(s) totais.`, label: `${schools}`, tone: "info" },
-      { icon: "&#9989;", title: "Conferencia", note: `${globalTotals.alertUnits} unidade(s) fora de OK na base completa.`, label: globalTotals.alertUnits ? "acompanhar" : "ok", tone: globalTotals.alertUnits ? "warn" : "ok" }
-    ];
-    renderSummaryRows("#inventorySummaryRows", rows);
-  }
-
-  function renderInventory(data) {
+  function renderInventory(data, requestedSchool = "") {
     const grid = P.$("#inventoryGrid");
-    const select = P.$("#inventorySelect");
+    const schoolGrid = P.$("#inventorySchoolGrid");
     if (!grid) return;
     const assets = data.schoolAssets || [];
     if (!assets.length) {
-      renderSummaryRows("#inventorySummaryRows", [
-        { icon: "&#128187;", title: "Inventário", note: "Nenhuma linha carregada para o perfil atual.", label: "vazio", tone: "warn" }
-      ]);
-      grid.innerHTML = `<div class="empty-state">Nenhum dado de inventario carregado ainda.</div>`;
+      if (schoolGrid) schoolGrid.innerHTML = "";
+      grid.innerHTML = `<div class="empty-state">Nenhum dado de inventário carregado ainda.</div>`;
       return;
-    }
-    if (select && !select.options.length) {
-      const schools = [...new Set(assets.map(asset => asset.school))].sort((a, b) => a.localeCompare(b));
-      select.innerHTML = schools.map(name => `<option value="${name}">${name}</option>`).join("");
-      select.onchange = () => renderInventory(P.getAppData());
     }
     const filterInput = P.$("#inventoryFilterInput");
     const statusSelect = P.$("#inventoryStatusSelect");
@@ -1183,7 +1159,42 @@
       if (statusSelect) statusSelect.value = "";
       renderInventory(P.getAppData());
     });
-    const selectedSchool = select?.value || assets[0].school;
+    const schoolNames = [...new Set(assets.map(asset => asset.school).filter(Boolean))].sort((a, b) => {
+      const schoolA = findSchool(a);
+      const schoolB = findSchool(b);
+      return String(schoolCity(schoolA)).localeCompare(String(schoolCity(schoolB))) || String(a).localeCompare(String(b));
+    });
+    const current = requestedSchool || grid.dataset.selectedInventorySchool || schoolNames[0] || assets[0].school;
+    const selectedSchool = schoolNames.includes(current) ? current : schoolNames[0] || assets[0].school;
+    grid.dataset.selectedInventorySchool = selectedSchool;
+    if (schoolGrid) {
+      schoolGrid.innerHTML = `<section class="schools-board inventory-schools-board">
+        ${schoolNames.map(name => {
+          const schoolAssetsForCard = assets.filter(asset => asset.school === name);
+          const cardTotals = inventoryTotals(schoolAssetsForCard);
+          const school = findSchool(name);
+          return `
+            <button class="school-card school-compact-card inventory-school-card ${name === selectedSchool ? "active" : ""}" type="button" data-inventory-school="${name}" data-inventory-school-key="${P.searchText([name])}" data-search="${P.searchText([name, schoolCity(school), schoolCie(school)])}">
+              <div class="school-compact-main">
+                <div class="school-avatar">&#128187;</div>
+                <div class="school-compact-title">
+                  <strong>${name}</strong>
+                  <small>${school ? schoolSubtitle(school) : "Escola fora da lista mestre."}</small>
+                </div>
+              </div>
+              <div class="inventory-school-metrics">
+                <span><b>${cardTotals.lines}</b><small>linhas</small></span>
+                <span><b>${cardTotals.units}</b><small>unidades</small></span>
+                <span class="${cardTotals.alertUnits ? "warn" : ""}"><b>${cardTotals.alertUnits}</b><small>alertas</small></span>
+              </div>
+            </button>
+          `;
+        }).join("")}
+      </section>`;
+      schoolGrid.querySelectorAll("[data-inventory-school]").forEach(button => {
+        button.addEventListener("click", () => renderInventory(P.getAppData(), button.dataset.inventorySchool));
+      });
+    }
     const query = P.normalize(filterInput?.value || "");
     const statusFilter = statusSelect?.value || "";
     const selectedAssets = assets.filter(asset => {
@@ -1193,7 +1204,6 @@
       return P.searchText([asset.name, asset.sourceName, asset.notes, asset.status]).includes(query);
     });
     const totals = inventoryTotals(selectedAssets);
-    renderInventoryOperationalSummary(assets, selectedSchool, selectedAssets, totals);
     const network = data.networkData?.[selectedSchool];
     const supervisor = supervisorForSchool(selectedSchool);
     const categories = Object.entries(selectedAssets.reduce((acc, asset) => {
@@ -1260,7 +1270,7 @@
         </article>
       `).join("")}
       <article class="inventory-list box">
-        <div class="box-head"><div><strong>Itens da escola</strong><small>${selectedAssets.length} linha(s) do inventario</small></div></div>
+        <div class="box-head"><div><strong>Itens da escola</strong><small>${selectedAssets.length} linha(s) do inventário</small></div></div>
         <div class="row-list">
           ${selectedAssets.map(asset => `
             <div class="data-row" data-inventory-key="${P.searchText([asset.school, asset.sourceName || asset.name, asset.notes])}" data-search="${P.searchText([asset.school, asset.name, asset.sourceName, asset.notes, asset.status])}">
@@ -1342,7 +1352,7 @@
       date: item.date || item.value || "",
       time: item.time || item.hora || "",
       returnTime: item.returnTime || item.devolutionTime || item.devolucao || "",
-      requester: item.requester || item.owner || item.responsavel || "",
+      requester: item.requester || item.owner || item["responsável"] || item.responsavel || "",
       sector: item.sector || item.setor || "",
       category: item.category || item.categoria || "",
       destination: item.destination || item.place || item.local || "",
@@ -1723,7 +1733,7 @@
   function calendarByMode(calendar, mode) {
     const userKeys = calendarCurrentUserKeys();
     const personalModes = new Set(["personal", "pessoal", "privado", "individual"]);
-    const sharedModes = new Set(["shared", "compartilhado", "geral", "publico", "publico ure", "ure"]);
+    const sharedModes = new Set(["shared", "compartilhado", "geral", "público", "público ure", "ure"]);
     return (calendar || []).filter(item => {
       const ownerKeys = calendarItemOwnerKeys(item);
       const markerKeys = [item.scope, item.type, item.category, item.categoria].map(calendarModeKey).filter(Boolean);
@@ -1795,7 +1805,7 @@
       { icon: "AG", title: mode === "personal" ? "Agenda pessoal" : "Agenda compartilhada", note: `${calendar.length} evento(s) ou prazo(s) disponíveis.`, label: `${calendar.length}`, tone: calendar.length ? "info" : "warn" },
       { icon: "CR", title: "Recursos compartilhados", note: `${calendar.filter(item => P.normalize([item.label, item.note].join(" ")).includes("carro")).length} item(ns) relacionados a carro oficial.`, label: "recurso", tone: "info" },
       { icon: "PZ", title: "Prazos", note: `${calendar.filter(item => P.normalize([item.label, item.note].join(" ")).includes("prazo")).length} item(ns) com sinal de prazo institucional.`, label: "prazo", tone: "warn" },
-      { icon: "OK", title: "Fonte", note: calendar.length ? "Agenda pronta para consulta no recorte atual." : "Aguardando fonte oficial do calendario URE.", label: calendar.length ? "ok" : "pendente", tone: calendar.length ? "ok" : "warn" }
+      { icon: "OK", title: "Fonte", note: calendar.length ? "Agenda pronta para consulta no recorte atual." : "Aguardando fonte oficial do calendário URE.", label: calendar.length ? "ok" : "pendente", tone: calendar.length ? "ok" : "warn" }
     ];
     renderSummaryRows("#calendarSummaryRows", rows);
   }
@@ -1997,7 +2007,7 @@
       { icon: "PS", title: "Pesquisas", note: "Campanhas cadastradas", label: String(list.length), tone: list.length ? "info" : "warn" },
       { icon: "RP", title: "Respostas", note: "Total consolidado na base", label: String(responses), tone: responses ? "ok" : "warn" },
       { icon: "AT", title: "Ativas", note: "Campanhas em acompanhamento", label: String(active), tone: active ? "info" : "ok" },
-      { icon: "LK", title: "Formularios", note: "Links oficiais disponíveis", label: String(links), tone: links ? "ok" : "warn" }
+      { icon: "LK", title: "Formulários", note: "Links oficiais disponíveis", label: String(links), tone: links ? "ok" : "warn" }
     ]);
     grid.innerHTML = list.length ? list.map(item => {
       const tone = satisfactionTone(item.status);
@@ -2009,9 +2019,9 @@
             <strong>${item.title || "Pesquisa de satisfação"}</strong>
             <p>${item.note || item.audience || "Aguardando fonte oficial da pesquisa."}</p>
             <div class="mini-metrics">
-              <span><b>Publico</b>${item.audience || "Nao informado"}</span>
+              <span><b>Público</b>${item.audience || "Não informado"}</span>
               <span><b>Respostas</b>${Number(item.responses || 0)}</span>
-              <span><b>Nota</b>${item.score || "sem media"}</span>
+              <span><b>Nota</b>${item.score || "sem média"}</span>
             </div>
           </div>
           <div class="detail-actions">
@@ -2020,7 +2030,7 @@
           </div>
         </article>
       `;
-    }).join("") : `<div class="empty-state">Nenhuma pesquisa de satisfacao cadastrada. Cadastre a fonte oficial no Painel admin quando o formulário estiver pronto.</div>`;
+    }).join("") : `<div class="empty-state">Nenhuma pesquisa de satisfação cadastrada. Cadastre a fonte oficial no Painel admin quando o formulário estiver pronto.</div>`;
   }
 
   function renderReports(data) {
@@ -2179,7 +2189,7 @@
         : "Sincronize carros para ver as colunas originais.";
       carDiagnostics.innerHTML = `
         <div class="settings-row">
-          <div><strong>Fonte de carros</strong><small>${carSource.status ? `Status ${carSource.status}` : "Ainda sem sincronização nesta sessao."} | ${rawCarRows.length || cars.length} linha(s)</small></div>
+          <div><strong>Fonte de carros</strong><small>${carSource.status ? `Status ${carSource.status}` : "Ainda sem sincronização nesta sessão."} | ${rawCarRows.length || cars.length} linha(s)</small></div>
           <span class="status-pill ${cars.length ? "ok" : "warn"}">${cars.length ? "ok" : "revisar"}</span>
         </div>
         <div class="settings-row">

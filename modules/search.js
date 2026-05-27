@@ -66,7 +66,7 @@
       })),
       ...(data.supervisors || []).map(item => ({ page: "supervision", title: item.name, type: "Supervisão", note: item.email || `${item.schools} escola(s)`, focus: item.name })),
       ...(data.contacts || []).map(item => ({ page: "contacts", title: item.name, type: item.sector, note: item.role || item.email, focus: item.name, sector: item.sector })),
-      ...(data.calendar || []).map(item => ({ page: "calendar", title: item.label, type: "Calendario", note: item.note || item.value, focus: searchText([item.label, item.value]) })),
+      ...(data.calendar || []).map(item => ({ page: "calendar", title: item.label, type: "Calendário", note: item.note || item.value, focus: searchText([item.label, item.value]) })),
       ...(data.ctcVisits || []).map(item => ({
         page: "ctc",
         title: `${item.owner} em ${item.place}`,
@@ -78,7 +78,7 @@
         const details = P.canViewCarBookingDetails ? P.canViewCarBookingDetails(item) : true;
         return {
           page: "cars",
-          title: details ? `${item.vehicle} - ${item.destination || item.requester || "Agendamento"}` : `${item.vehicle} - ${item.time || "Horario a definir"}`,
+          title: details ? `${item.vehicle} - ${item.destination || item.requester || "Agendamento"}` : `${item.vehicle} - ${item.time || "Horário a definir"}`,
           type: "Carros",
           note: details ? `${item.date || "sem data"} ${item.time || ""} | ${item.status || "pendente"}` : `${item.date || "sem data"} ${item.time || ""}`,
           focus: details ? searchText([item.vehicle, item.date, item.time, item.destination, item.requester]) : searchText([item.vehicle, item.date, item.time])

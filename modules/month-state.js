@@ -80,7 +80,7 @@
       const details = [
         "Painel, carros, agenda e CTC filtram por data.",
         supervisionMonth && supervisionMonth !== selected ? `Supervisão oficial disponível em ${monthLabel(supervisionMonth)}.` : "Supervisão usa o mês selecionado quando houver fonte mensal.",
-        !calendarReady && "Calendario oficial pendente: agenda usa fallback operacional.",
+        !calendarReady && "Calendário oficial pendente: agenda usa fallback operacional.",
         !carsReady && "Carros usa base local ate conectar fonte oficial."
       ].filter(Boolean);
       note.textContent = details.join(" ");

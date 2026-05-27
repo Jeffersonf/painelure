@@ -44,7 +44,7 @@
       const panelRows = await P.fetchCsv(googleSheetGidCsvUrl(source.url, panelGid));
       return { visitRows, panelRows };
     } catch (error) {
-      console.warn("[PainelURE] Painel oficial de supervisao nao carregado:", error);
+      console.warn("[PainelURE] Painel oficial de supervisão não carregado:", error);
       return { visitRows, panelRows: [] };
     }
   }
@@ -67,7 +67,7 @@
       result
     ];
     if (result.status === "loaded") P.showToast?.("Atualizado", `${label}: ${result.rows?.length || 0} linha(s) carregada(s).`, "ok", { delay: 7600 });
-    if (result.status === "empty") P.showToast?.("Fonte vazia", `${label} nao substituiu os dados atuais.`, "warn", { delay: 9000 });
+    if (result.status === "empty") P.showToast?.("Fonte vazia", `${label} não substituiu os dados atuais.`, "warn", { delay: 9000 });
     return result;
   }
 

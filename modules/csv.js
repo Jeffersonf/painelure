@@ -81,7 +81,7 @@
   }
 
   async function fetchCsv(url, options = {}) {
-    if (!url) throw new Error("Fonte CSV nao configurada.");
+    if (!url) throw new Error("Fonte CSV não configurada.");
     const timeoutMs = options.timeoutMs || 6000;
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
@@ -138,12 +138,12 @@
     }
     if (!response.ok) throw new Error(`Proxy SharePoint falhou: ${response.status}`);
     const payload = await response.json();
-    if (!payload.ok) throw new Error(payload.error || "SharePoint nao retornou dados.");
+    if (!payload.ok) throw new Error(payload.error || "SharePoint não retornou dados.");
     return (payload.rows || []).map(normalizeRowKeys);
   }
 
   async function fetchSharePointList(url, options = {}) {
-    if (!url) throw new Error("Fonte SharePoint nao configurada.");
+    if (!url) throw new Error("Fonte SharePoint não configurada.");
     try {
       return await fetchSharePointViaProxy(url, options);
     } catch (proxyError) {
