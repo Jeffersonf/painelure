@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "network-widgets-20260527";
+      window.PAINELURE_BUILD = "network-school-cards-20260527";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=network-widgets-20260527">
+  <link rel="stylesheet" href="./styles.css?v=network-school-cards-20260527">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -302,16 +302,7 @@
       <header class="page-header compact">
         <div><h1>Redes e Câmeras</h1><p>Infraestrutura, IPs e câmeras por escola.</p></div>
       </header>
-      <div class="selector-panel">
-        <label>
-          <span>Escola</span>
-          <select id="networkSelect"></select>
-        </label>
-      </div>
-      <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo de redes</strong><small>Infraestrutura técnica por escola</small></div></div>
-        <div class="row-list compact" id="networkSummaryRows"></div>
-      </article>
+      <div class="network-school-grid" id="networkSchoolGrid"></div>
       <div class="network-layout" id="networkLayout"></div>
     </section>
 
@@ -770,33 +761,33 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=network-widgets-20260527"></script>
-  <script src="./data/schools.js?v=network-widgets-20260527"></script>
-  <script src="./data/school-profiles.js?v=network-widgets-20260527"></script>
-  <script src="./data/school-operational.js?v=network-widgets-20260527"></script>
-  <script src="./data/inventory.js?v=network-widgets-20260527"></script>
-  <script src="./data/supervision.js?v=network-widgets-20260527"></script>
-  <script src="./data/contacts.js?v=network-widgets-20260527"></script>
-  <script src="./data/users.js?v=network-widgets-20260527"></script>
-  <script src="./data/governance.js?v=network-widgets-20260527"></script>
-  <script src="./data/operations.js?v=network-widgets-20260527"></script>
-  <script src="./data/sources.js?v=network-widgets-20260527"></script>
-  <script src="./modules/dom.js?v=network-widgets-20260527"></script>
-  <script src="./modules/ui-catalog.js?v=network-widgets-20260527"></script>
-  <script src="./modules/data-store.js?v=network-widgets-20260527"></script>
-  <script src="./modules/identity.js?v=network-widgets-20260527"></script>
-  <script src="./modules/access-scope.js?v=network-widgets-20260527"></script>
-  <script src="./modules/month-state.js?v=network-widgets-20260527"></script>
-  <script src="./modules/csv.js?v=network-widgets-20260527"></script>
-  <script src="./modules/normalizers.js?v=network-widgets-20260527"></script>
-  <script src="./modules/source-loader.js?v=network-widgets-20260527"></script>
-  <script src="./config.js?v=network-widgets-20260527"></script>
-  <script src="./modules/backend-client.js?v=network-widgets-20260527"></script>
-  <script src="./modules/search.js?v=network-widgets-20260527"></script>
-  <script src="./modules/render.js?v=network-widgets-20260527"></script>
-  <script src="./modules/supervision-render.js?v=network-widgets-20260527"></script>
-  <script src="./modules/navigation.js?v=network-widgets-20260527"></script>
-  <script src="./modules/admin-tools.js?v=network-widgets-20260527"></script>
-  <script src="./app.js?v=network-widgets-20260527"></script>
+  <script src="./data/mock.js?v=network-school-cards-20260527"></script>
+  <script src="./data/schools.js?v=network-school-cards-20260527"></script>
+  <script src="./data/school-profiles.js?v=network-school-cards-20260527"></script>
+  <script src="./data/school-operational.js?v=network-school-cards-20260527"></script>
+  <script src="./data/inventory.js?v=network-school-cards-20260527"></script>
+  <script src="./data/supervision.js?v=network-school-cards-20260527"></script>
+  <script src="./data/contacts.js?v=network-school-cards-20260527"></script>
+  <script src="./data/users.js?v=network-school-cards-20260527"></script>
+  <script src="./data/governance.js?v=network-school-cards-20260527"></script>
+  <script src="./data/operations.js?v=network-school-cards-20260527"></script>
+  <script src="./data/sources.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/dom.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/ui-catalog.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/data-store.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/identity.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/access-scope.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/month-state.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/csv.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/normalizers.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/source-loader.js?v=network-school-cards-20260527"></script>
+  <script src="./config.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/backend-client.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/search.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/render.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/supervision-render.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/navigation.js?v=network-school-cards-20260527"></script>
+  <script src="./modules/admin-tools.js?v=network-school-cards-20260527"></script>
+  <script src="./app.js?v=network-school-cards-20260527"></script>
 </body>
 </html>

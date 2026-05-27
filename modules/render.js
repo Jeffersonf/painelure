@@ -374,11 +374,11 @@
     }
     P.setPage?.("network");
     requestAnimationFrame(() => {
-      const select = P.$("#networkSelect");
-      if (!select) return;
-      select.value = name;
-      renderNetwork(P.getAppData().networkData);
-      select.focus();
+      renderNetwork(P.getAppData().networkData, name);
+      const target = P.$(`[data-network-school-key="${P.searchText([name])}"]`);
+      if (!target) return;
+      target.focus();
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
     });
   }
 
@@ -992,40 +992,65 @@
   }
 
   function renderNetworkOptions(networkData) {
-    const select = P.$("#networkSelect");
-    if (!select) return;
     const data = networkData || {};
-    select.innerHTML = Object.keys(data).map(name => `<option value="${name}">${name}</option>`).join("");
-    select.onchange = () => renderNetwork(data);
-    renderNetwork(data);
+    const grid = P.$("#networkSchoolGrid");
+    const names = Object.keys(data);
+    if (grid) {
+      const sorted = names.sort((a, b) => {
+        const schoolA = findSchool(a);
+        const schoolB = findSchool(b);
+        return String(schoolCity(schoolA)).localeCompare(String(schoolCity(schoolB)))
+          || String(a).localeCompare(String(b));
+      });
+      grid.innerHTML = sorted.length ? `
+        <section class="schools-board network-schools-board">
+          ${sorted.map((name, index) => {
+            const school = findSchool(name);
+            const item = data[name] || {};
+            const cameras = item.cameras || item.câmeras || [];
+            return `
+              <button class="school-card school-compact-card network-school-card ${index === 0 ? "active" : ""}" type="button" data-network-school="${name}" data-network-school-key="${P.searchText([name])}" data-search="${P.searchText([name, schoolCity(school), schoolCie(school)])}">
+                <div class="school-compact-main">
+                  <div class="school-avatar">&#127979;</div>
+                  <div class="school-compact-title">
+                    <strong>${name}</strong>
+                    <small>${school ? schoolSubtitle(school) : "Escola fora da lista mestre."}</small>
+                  </div>
+                </div>
+                <div class="network-school-metrics">
+                  <span><b>${item.network?.length || 0}</b><small>redes</small></span>
+                  <span><b>${item.ips?.length || 0}</b><small>IPs</small></span>
+                  <span><b>${cameras.length}</b><small>câmeras</small></span>
+                </div>
+              </button>
+            `;
+          }).join("")}
+        </section>
+      ` : `<div class="empty-state">Nenhuma escola com dados de rede cadastrada ainda.</div>`;
+      grid.querySelectorAll("[data-network-school]").forEach(button => {
+        button.addEventListener("click", () => renderNetwork(data, button.dataset.networkSchool));
+      });
+    }
+    renderNetwork(data, names[0]);
   }
 
-  function renderNetworkOperationalSummary(networkData, selectedName, selectedData) {
-    const names = Object.keys(networkData || {});
-    const cameraItems = selectedData?.cameras || selectedData?.câmeras || [];
-    const rows = [
-      { icon: "RD", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
-      { icon: "IP", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
-      { icon: "CM", title: "Câmeras", note: `${cameraItems.length} informação(ões) de câmeras disponíveis.`, label: cameraItems.length ? "ok" : "base", tone: cameraItems.length ? "ok" : "info" },
-      { icon: "CR", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais técnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
-    ];
-    renderSummaryRows("#networkSummaryRows", rows);
-  }
-
-  function renderNetwork(networkData) {
-    const select = P.$("#networkSelect");
+  function renderNetwork(networkData, requestedName = "") {
     const layout = P.$("#networkLayout");
-    if (!select || !layout) return;
+    if (!layout) return;
     const names = Object.keys(networkData || {});
-    const selectedName = select.value || names[0] || "";
+    const selectedName = requestedName || layout.dataset.selectedNetworkSchool || names[0] || "";
     const data = networkData?.[selectedName] || networkData?.[names[0]];
-    renderNetworkOperationalSummary(networkData, selectedName, data);
+    const effectiveName = networkData?.[selectedName] ? selectedName : names[0] || "";
+    layout.dataset.selectedNetworkSchool = effectiveName;
+    P.$all("[data-network-school]").forEach(button => {
+      button.classList.toggle("active", button.dataset.networkSchool === effectiveName);
+    });
     if (!data) {
       layout.innerHTML = `<div class="empty-state">Nenhum dado de rede cadastrado ainda.</div>`;
       return;
     }
-    const school = findSchool(selectedName);
-    const supervisor = supervisorForSchool(selectedName);
+    const school = findSchool(effectiveName);
+    const supervisor = supervisorForSchool(effectiveName);
     const cameraItems = data.cameras || data.câmeras || [];
     const credentialItems = data.credentials || [];
     const widgets = [
@@ -1046,7 +1071,7 @@
         <div class="box-head">
           <div>
             <strong>${title}</strong>
-            <small>${selectedName}</small>
+            <small>${effectiveName}</small>
           </div>
           <span class="status-pill ${tone}">${label}</span>
         </div>
@@ -1065,7 +1090,7 @@
       <article class="network-summary network-school-strip">
         <div>
           <small>Escola selecionada</small>
-          <strong>${selectedName}</strong>
+          <strong>${effectiveName}</strong>
           <p>${school ? schoolSubtitle(school) : "Escola fora da lista mestre."}</p>
         </div>
         <div class="network-score">
@@ -1074,8 +1099,8 @@
           <span><b>${cameraItems.length}</b><small>câmeras</small></span>
         </div>
         <div class="detail-actions">
-          <button class="ghost-btn" type="button" data-open-school="${selectedName}">Abrir escola</button>
-          <button class="ghost-btn" type="button" data-open-inventory="${selectedName}">Abrir inventário</button>
+          <button class="ghost-btn" type="button" data-open-school="${effectiveName}">Abrir escola</button>
+          <button class="ghost-btn" type="button" data-open-inventory="${effectiveName}">Abrir inventário</button>
           <button class="ghost-btn" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
         </div>
       </article>
