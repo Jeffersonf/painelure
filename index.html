@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "sidebar-encoding-20260527";
+      window.PAINELURE_BUILD = "ure-redesign-20260527";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=sidebar-encoding-20260527">
+  <link rel="stylesheet" href="./styles.css?v=ure-redesign-20260527">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -380,10 +380,23 @@
         <button class="ghost-btn filter-reset" type="button" id="ctcFilterReset">Limpar</button>
         <p id="ctcFilterSummary">Visitas técnicas carregadas.</p>
       </div>
-      <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo técnico</strong><small>Visitas e escolas no recorte atual</small></div></div>
-        <div class="row-list compact" id="ctcSummaryRows"></div>
-      </article>
+      <section class="ctc-workspace">
+        <article class="box summary-box ctc-summary-card">
+          <div class="box-head"><div><strong>Resumo técnico</strong><small>Visitas e escolas no recorte atual</small></div></div>
+          <div class="row-list compact" id="ctcSummaryRows"></div>
+        </article>
+        <article class="box ctc-scheduler-card">
+          <div class="box-head"><div><strong>Agendar visita CTC</strong><small>Cadastre a agenda dos técnicos no painel.</small></div><span class="status-pill info">local</span></div>
+          <form class="ctc-scheduler-form" id="ctcVisitForm">
+            <label><span>Técnico</span><input id="ctcNewOwner" type="text" placeholder="Nome do técnico" required></label>
+            <label><span>Data</span><input id="ctcNewDate" type="date" required></label>
+            <label><span>Hora</span><input id="ctcNewTime" type="time" required></label>
+            <label><span>Escola</span><select id="ctcNewSchool" required></select></label>
+            <label class="wide"><span>Objetivo</span><input id="ctcNewObjective" type="text" placeholder="Rede, câmera, inventário, suporte..." required></label>
+            <button class="ghost-btn" type="submit">Adicionar visita</button>
+          </form>
+        </article>
+      </section>
       <div class="calendar-grid" id="ctcGrid"></div>
     </section>
 
@@ -492,11 +505,25 @@
       <header class="page-header compact">
         <div><h1>Relatórios</h1><p>Resumo rápido da operação.</p></div>
       </header>
-      <div class="metric-grid" id="reportsGrid"></div>
-      <div class="box">
-        <div class="box-head"><div><strong>Resumo operacional</strong><small>Indicadores derivados da base carregada</small></div></div>
-        <div class="row-list" id="reportsList"></div>
-      </div>
+      <section class="reports-hero-panel">
+        <div>
+          <span class="eyebrow">Próxima etapa</span>
+          <strong>Central de relatórios</strong>
+          <p>Estrutura preparada para consolidar exportações, indicadores oficiais e recortes por setor.</p>
+        </div>
+        <button class="ghost-btn" type="button" data-jump="admin">Configurar fontes</button>
+      </section>
+      <div class="metric-grid reports-metric-grid" id="reportsGrid"></div>
+      <section class="reports-layout">
+        <div class="box">
+          <div class="box-head"><div><strong>Resumo operacional</strong><small>Indicadores derivados da base carregada</small></div></div>
+          <div class="row-list" id="reportsList"></div>
+        </div>
+        <div class="box">
+          <div class="box-head"><div><strong>Relatórios previstos</strong><small>Fila pensada para a próxima atualização</small></div></div>
+          <div class="row-list" id="reportsPlanList"></div>
+        </div>
+      </section>
     </section>
 
     <section class="page" id="page-user">
@@ -743,33 +770,33 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/schools.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/school-profiles.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/school-operational.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/inventory.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/supervision.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/contacts.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/users.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/governance.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/operations.js?v=sidebar-encoding-20260527"></script>
-  <script src="./data/sources.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/dom.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/ui-catalog.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/data-store.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/identity.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/access-scope.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/month-state.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/csv.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/normalizers.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/source-loader.js?v=sidebar-encoding-20260527"></script>
-  <script src="./config.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/backend-client.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/search.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/render.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/supervision-render.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/navigation.js?v=sidebar-encoding-20260527"></script>
-  <script src="./modules/admin-tools.js?v=sidebar-encoding-20260527"></script>
-  <script src="./app.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/mock.js?v=ure-redesign-20260527"></script>
+  <script src="./data/schools.js?v=ure-redesign-20260527"></script>
+  <script src="./data/school-profiles.js?v=ure-redesign-20260527"></script>
+  <script src="./data/school-operational.js?v=ure-redesign-20260527"></script>
+  <script src="./data/inventory.js?v=ure-redesign-20260527"></script>
+  <script src="./data/supervision.js?v=ure-redesign-20260527"></script>
+  <script src="./data/contacts.js?v=ure-redesign-20260527"></script>
+  <script src="./data/users.js?v=ure-redesign-20260527"></script>
+  <script src="./data/governance.js?v=ure-redesign-20260527"></script>
+  <script src="./data/operations.js?v=ure-redesign-20260527"></script>
+  <script src="./data/sources.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/dom.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/ui-catalog.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/data-store.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/identity.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/access-scope.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/month-state.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/csv.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/normalizers.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/source-loader.js?v=ure-redesign-20260527"></script>
+  <script src="./config.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/backend-client.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/search.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/render.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/supervision-render.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/navigation.js?v=ure-redesign-20260527"></script>
+  <script src="./modules/admin-tools.js?v=ure-redesign-20260527"></script>
+  <script src="./app.js?v=ure-redesign-20260527"></script>
 </body>
 </html>

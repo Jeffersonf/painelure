@@ -679,8 +679,9 @@
       const focusModeAttr = focusWidget.mode ? ` data-calendar-mode-target="${focusWidget.mode}"` : "";
       command.innerHTML = `
         <article class="command-primary command-${profile.notice === "Base operacional pronta" ? "info" : "ok"}">
+          <img class="command-logo" src="./assets/ure-logo.svg" alt="Logo da URE Itapeva">
           <div>
-            <span class="eyebrow">Comando do mes</span>
+            <span class="eyebrow">Comando do mês</span>
             <strong>${profile.title}</strong>
             <p>${profile.note}</p>
           </div>
@@ -1001,10 +1002,11 @@
 
   function renderNetworkOperationalSummary(networkData, selectedName, selectedData) {
     const names = Object.keys(networkData || {});
+    const cameraItems = selectedData?.cameras || selectedData?.câmeras || [];
     const rows = [
       { icon: "RD", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
       { icon: "IP", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
-      { icon: "CM", title: "Câmeras", note: `${selectedData?.câmeras?.length || 0} informação(ões) de câmeras disponíveis.`, label: selectedData?.câmeras?.length ? "ok" : "base", tone: selectedData?.câmeras?.length ? "ok" : "info" },
+      { icon: "CM", title: "Câmeras", note: `${cameraItems.length} informação(ões) de câmeras disponíveis.`, label: cameraItems.length ? "ok" : "base", tone: cameraItems.length ? "ok" : "info" },
       { icon: "CR", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais técnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
     ];
     renderSummaryRows("#networkSummaryRows", rows);
@@ -1024,11 +1026,12 @@
     }
     const school = findSchool(selectedName);
     const supervisor = supervisorForSchool(selectedName);
+    const cameraItems = data.cameras || data.câmeras || [];
     const credentialItems = data.credentials || [];
     const widgets = [
-      ["Informacoes sobre redes", data.network || [], "RD", "info", "Publico CTC"],
-      ["Informacoes sobre IPs", data.ips || [], "IP", "info", "Publico CTC"],
-      ["Informacoes sobre câmeras", data.câmeras || [], "CM", "info", "Publico CTC"],
+      ["Rede administrativa e pedagógica", data.network || [], "RD", "info", "infra"],
+      ["IPs, banda e CIE", data.ips || [], "IP", "info", "endereços"],
+      ["Câmeras e DVR", cameraItems, "CM", "ok", "monitoramento"],
       ["Credenciais", data.credentials || [], "CR", "warn", "Restrito"]
     ].filter(([, items]) => items.length);
     if (credentialItems.length && !canViewCredentials()) {
@@ -1039,20 +1042,26 @@
     }
 
     layout.innerHTML = `
-      <article class="network-summary">
+      <article class="network-summary network-hero-card">
         <div>
           <small>Escola selecionada</small>
           <strong>${selectedName}</strong>
           <p>${school ? schoolSubtitle(school) : "Escola fora da lista mestre."}</p>
         </div>
+        <div class="network-score">
+          <span><b>${data.network?.length || 0}</b><small>redes</small></span>
+          <span><b>${data.ips?.length || 0}</b><small>IPs</small></span>
+          <span><b>${cameraItems.length}</b><small>câmeras</small></span>
+        </div>
         <div class="detail-actions">
           <button class="ghost-btn" type="button" data-open-school="${selectedName}">Abrir escola</button>
-          <button class="ghost-btn" type="button" data-open-inventory="${selectedName}">Abrir inventario</button>
+          <button class="ghost-btn" type="button" data-open-inventory="${selectedName}">Abrir inventário</button>
           <button class="ghost-btn" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
         </div>
       </article>
+      <section class="network-card-grid">
       ${widgets.map(([title, items, icon, tone, label]) => `
-      <article class="detail-widget" data-search="${P.searchText([title, ...items])}">
+      <article class="detail-widget network-info-card" data-search="${P.searchText([title, ...items])}">
         <div>
           <small>${title}</small>
           <strong>${icon} ${items[0]}</strong>
@@ -1060,7 +1069,8 @@
         </div>
         <span class="status-pill ${tone}">${label}</span>
       </article>
-    `).join("")}`;
+    `).join("")}
+      </section>`;
     layout.querySelector("[data-open-school]")?.addEventListener("click", event => {
       focusSchool(event.currentTarget.dataset.openSchool);
     });
@@ -1764,9 +1774,38 @@
     `).join("") : `<div class="empty-state">Checklist de qualidade não carregado.</div>`;
   }
 
+  function bindCtcVisitForm() {
+    const form = P.$("#ctcVisitForm");
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = "true";
+    const schoolSelect = P.$("#ctcNewSchool");
+    if (schoolSelect && !schoolSelect.options.length) {
+      const schools = (P.getAppData().schools || []).map(school => school.name).filter(Boolean).sort((a, b) => a.localeCompare(b));
+      schoolSelect.innerHTML = schools.map(name => `<option value="${name}">${name}</option>`).join("");
+    }
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      const data = P.getAppData();
+      const visit = {
+        owner: P.$("#ctcNewOwner")?.value.trim() || "Técnico CTC",
+        date: P.$("#ctcNewDate")?.value || new Date().toISOString().slice(0, 10),
+        time: P.$("#ctcNewTime")?.value || "08:00",
+        place: P.$("#ctcNewSchool")?.value || "",
+        objective: P.$("#ctcNewObjective")?.value.trim() || "Visita técnica"
+      };
+      if (!visit.place) return;
+      P.setAppData({ ...data, ctcVisits: [...(data.ctcVisits || []), visit] });
+      P.saveAppData?.();
+      form.reset();
+      P.showToast?.("Visita CTC agendada", `${visit.owner} em ${visit.place}.`, "ok", { delay: 5000 });
+      renderCtc(P.getAppData().ctcVisits);
+    });
+  }
+
   function renderCtc(visits) {
     const grid = P.$("#ctcGrid");
     if (!grid) return;
+    bindCtcVisitForm();
     const ownerFilter = P.$("#ctcOwnerFilter");
     const schoolFilter = P.$("#ctcSchoolFilter");
     const monthVisits = monthFiltered(visits, visit => visit.date);
@@ -1794,11 +1833,12 @@
     if (summary) summary.textContent = `${visible.length}/${monthVisits.length} visita(s) visíveis em ${P.selectedMonthLabel?.() || "mês selecionado"}.`;
 
     grid.innerHTML = visible.length ? visible.map(visit => `
-      <article class="detail-widget" data-ctc-key="${P.searchText([visit.owner, visit.date, visit.time, visit.place])}" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
+      <article class="detail-widget ctc-visit-card" data-ctc-key="${P.searchText([visit.owner, visit.date, visit.time, visit.place])}" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
+        <div class="ctc-date-box"><strong>${formatDate(visit.date)}</strong><small>${visit.time || "--:--"}</small></div>
         <div>
-          <small>${visit.date} | ${visit.time}</small>
-          <strong>CT ${visit.owner}</strong>
-          <p>${visit.place} | ${visit.objective}</p>
+          <small>${visit.owner || "Técnico CTC"}</small>
+          <strong>${visit.place}</strong>
+          <p>${visit.objective}</p>
         </div>
         <div class="detail-actions">
           <button class="ghost-btn" type="button" data-open-school="${visit.place}">Abrir escola</button>
@@ -1930,6 +1970,7 @@
   function renderReports(data) {
     const grid = P.$("#reportsGrid");
     const list = P.$("#reportsList");
+    const plan = P.$("#reportsPlanList");
     if (!grid || !list) return;
     const alerts = Object.values(data.schoolInventoryMetrics || {}).reduce((sum, item) => sum + Number(item.alerts || 0), 0);
     const networkCount = Object.keys(data.networkData || {}).length;
@@ -1968,6 +2009,23 @@
         <em class="status-pill ${status}">${status === "ok" ? "ok" : "revisar"}</em>
       </div>
     `).join("");
+    if (plan) {
+      const planned = [
+        ["Relatório por setor", "Filtros por Tecnologia, Rede Escolar, RH, Finanças e Obras."],
+        ["Exportação mensal", "Pacote PDF/Excel com indicadores e bases oficiais."],
+        ["Carros oficiais", "Reservas, condutores, setores, retirada e devolução."],
+        ["Inventário técnico", "Itens por escola, alertas e evolução de manutenção."],
+        ["Supervisão", "Indicadores semanais e mensais por supervisor."],
+        ["Pesquisa de satisfação", "Campanhas, respostas, médias e devolutivas."]
+      ];
+      plan.innerHTML = planned.map(([title, note], index) => `
+        <div class="data-row compact">
+          <span class="row-icon">${String(index + 1).padStart(2, "0")}</span>
+          <span><strong>${title}</strong><small>${note}</small></span>
+          <em class="status-pill info">planejado</em>
+        </div>
+      `).join("");
+    }
   }
 
   function renderAdmin(items) {
