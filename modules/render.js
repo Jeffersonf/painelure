@@ -1522,18 +1522,22 @@
               const requestLabel = carRequestLabel(item.requestId);
               return `<button class="car-booking-card car-booking-${tone}${details ? "" : " car-booking-limited"}" type="button" data-car-key="${key}" data-car-calendar-key="${calendarKey}" data-search="${search}">
                 <span class="car-card-icon">${carVehicleEmoji(item.vehicle)}</span>
-                <span class="car-route">
-                  <strong>${details ? (item.destination || "Destino n\u00e3o informado") : (item.vehicle || "Carro oficial")}</strong>
-                  <small>${details ? (item.vehicle || "Carro oficial") : "Reserva de ve\u00edculo oficial"}</small>
+                <span class="car-card-body">
+                  <span class="car-card-headline">
+                    <span class="car-route">
+                      <strong>${details ? (item.destination || "Destino n\u00e3o informado") : (item.vehicle || "Carro oficial")}</strong>
+                      <small>${details ? (item.vehicle || "Carro oficial") : "Reserva de ve\u00edculo oficial"}</small>
+                    </span>
+                    <em class="status-pill ${details ? tone : "info"}">${details ? (item.status || "pendente") : "reservado"}</em>
+                  </span>
+                  <span class="car-booking-metrics">
+                    <span><small>Data</small><strong>${displayDate}</strong></span>
+                    <span><small>Retirada</small><strong>${item.time || "--:--"}</strong></span>
+                    <span><small>Devolu\u00e7\u00e3o</small><strong>${item.returnTime || "--:--"}</strong></span>
+                    <span><small>N\u00ba</small><strong>${requestLabel}</strong></span>
+                  </span>
+                  <span class="car-requester${details ? "" : " restricted-blur"}"><strong>${details ? (item.requester || "Setor n\u00e3o informado") : "Detalhes protegidos"}</strong><small>${details ? carDriverLabel(item) : "Destino, setor e condutor protegidos"}</small></span>
                 </span>
-                <span class="car-booking-metrics">
-                  <span><small>Data</small><strong>${displayDate}</strong></span>
-                  <span><small>Retirada</small><strong>${item.time || "--:--"}</strong></span>
-                  <span><small>Devolu\u00e7\u00e3o</small><strong>${item.returnTime || "--:--"}</strong></span>
-                  <span><small>N\u00ba</small><strong>${requestLabel}</strong></span>
-                </span>
-                <span class="car-requester${details ? "" : " restricted-blur"}"><strong>${details ? (item.requester || "Setor n\u00e3o informado") : "Detalhes protegidos"}</strong><small>${details ? carDriverLabel(item) : "Destino, setor e condutor protegidos"}</small></span>
-                <em class="status-pill ${details ? tone : "info"}">${details ? (item.status || "pendente") : "reservado"}</em>
               </button>`;
             }).join("")}
           </article>

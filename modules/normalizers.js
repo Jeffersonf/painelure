@@ -81,7 +81,7 @@
 
   function lookupName(value) {
     const text = valueToText(value);
-    if (!text || /^\d+$/.test(text)) return "";
+    if (!text || /^\d+$/.test(text) || /^true|false$/i.test(text)) return "";
     return text;
   }
 
@@ -380,7 +380,7 @@
       const school = firstMatchingValue(row, ["escolas", "escola", "school", "unidade"], ["escola", "school", "unidade"], "");
       const motive = firstMatchingValue(row, ["motivovisita", "motivo_visita", "motivo", "finalidade", "objetivo"], ["motivo", "finalidade", "objetivo"], "");
       const destination = externalPlace || schoolLookupName(school) || firstMatchingValue(row, ["destino", "local", "destination", "place", "local_destino"], ["destino", "destination", "place"], "") || motive;
-      const driver = firstMatchingValue(row, ["motorista", "driver", "condutor"], ["motorista", "driver", "condutor"], "");
+      const driver = firstMatchingValue(row, ["nome_condutor", "condutor_nome", "nome_do_condutor", "motorista", "driver", "condutor"], ["nome_condutor", "condutor_nome", "nome_do_condutor", "motorista", "driver", "condutor"], "");
       const sector = firstMatchingValue(row, ["setor", "categoria", "area", "departamento"], ["setor", "categoria", "area", "departamento"], "");
       const requester = sector || firstMatchingValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "e_x002d_mail", "e_x005f_x002d_x005f_mail"], ["solicitante", "responsavel", "requester", "owner", "mail"], "");
       const timeValue = formatTimeValue(time || date);

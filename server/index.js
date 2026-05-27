@@ -1215,7 +1215,7 @@ function normalizeRows(type, rows) {
   }
   if (type === "cars") {
     return rows.map(row => {
-      const driver = firstValue(row, ["motorista", "driver", "condutor"], "");
+      const driver = firstValue(row, ["nome_condutor", "condutor_nome", "nome_do_condutor", "motorista", "driver", "condutor"], "");
       const sector = firstValue(row, ["setor", "categoria", "area", "departamento"], "");
       const requester = sector || firstValue(row, ["solicitante", "responsavel", "responsavel_pela_reserva", "requester", "owner", "author", "e_x002d_mail"], "");
       const destination = firstValue(row, ["localexterno", "local_externo", "destino", "local", "destination", "place", "local_destino", "escolas"], "")
@@ -1230,7 +1230,7 @@ function normalizeRows(type, rows) {
         requester,
         sector,
         destination,
-        driver: /^\d+$/.test(driver) ? "" : driver,
+        driver: !driver || /^\d+$/.test(driver) || /^true|false$/i.test(driver) ? "" : driver,
         driverId: lookupId(row.condutor || row.Condutor || driver) || (/^\d+$/.test(driver) ? driver : ""),
         status: firstValue(row, ["status", "situacao", "situa_x00e7__x00e3_o", "tone"], "pendente"),
         note: firstValue(row, ["observacao", "observacoes", "coment_x00e1_riogestor", "comentario_gestor", "descri_x00e7__x00e3_o", "descricao", "note", "motivo", "motivovisita"], ""),

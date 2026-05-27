@@ -6133,11 +6133,11 @@ html:not(.site-maintenance) .maintenance-message {
 
 .car-widget-agenda .car-day-group .car-booking-card {
   position: relative;
-  min-height: 118px;
+  min-height: 176px;
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr);
-  gap: 12px 16px;
-  align-items: center;
+  gap: 0 16px;
+  align-items: start;
   padding: 18px 16px;
   border: 1px solid color-mix(in srgb, var(--bd) 82%, transparent);
   border-radius: 14px;
@@ -6180,9 +6180,23 @@ html:not(.site-maintenance) .maintenance-message {
   min-width: 0;
 }
 
+.car-card-body {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.car-card-headline {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+}
+
 .car-widget-agenda .car-requester {
-  grid-column: 2;
-  padding-right: 88px;
+  grid-column: auto;
+  padding-right: 0;
 }
 
 .car-widget-agenda .car-route strong,
@@ -6215,7 +6229,7 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .car-booking-metrics {
-  grid-column: 1 / -1;
+  grid-column: auto;
   min-width: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -6316,9 +6330,11 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .car-widget-agenda .status-pill {
-  position: absolute;
-  top: 16px;
-  right: 14px;
+  position: static;
+  min-width: 74px;
+  max-width: 112px;
+  align-self: start;
+  white-space: nowrap;
 }
 
 @media (max-width: 980px) {
@@ -6353,11 +6369,6 @@ html:not(.site-maintenance) .maintenance-message {
     grid-template-columns: 44px minmax(0, 1fr);
   }
 
-  .car-booking-metrics,
-  .car-widget-agenda .car-requester {
-    grid-column: 2;
-  }
-
 }
 
 @media (max-width: 720px) {
@@ -6386,12 +6397,12 @@ html:not(.site-maintenance) .maintenance-message {
   }
 
   .car-widget-agenda .car-day-group .car-booking-card {
-    min-height: 112px;
+    min-height: 176px;
   }
 
   .car-widget-agenda .car-route,
   .car-widget-agenda .car-requester {
-    padding-right: 74px;
+    padding-right: 0;
   }
 
   .car-booking-metrics {

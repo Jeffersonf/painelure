@@ -36,6 +36,7 @@ const [booking] = sandbox.window.PainelURE.normalizers.cars([{
   DataDevolu_x00e7__x00e3_o: "22/05/2026 16:30",
   LocalExterno: "Empresa de transporte",
   MotivoVisita: "Reuniao administrativa",
+  Nome_Condutor: "Maria Condutora",
   Condutor: [{ lookupId: 7, lookupValue: "" }],
   Status: "Aprovado",
   Ve_x00ed_culo: "Veiculo Utilitario"
@@ -45,7 +46,8 @@ assert(booking.requestId === "48", "Deve preservar numero da solicitacao.");
 assert(booking.vehicle === "Veiculo Utilitario", "Deve ler veiculo com campo interno SharePoint.");
 assert(booking.requester === "SEAFIN" && booking.sector === "SEAFIN", "Deve priorizar setor como solicitante.");
 assert(booking.destination === "Empresa de transporte", "Deve priorizar local externo como destino.");
-assert(booking.driverId === "7", "Deve preservar ID do condutor quando nome nao vier do SharePoint.");
+assert(booking.driver === "Maria Condutora", "Deve ler nome do condutor quando a planilha trouxer coluna propria.");
+assert(booking.driverId === "7", "Deve preservar ID do condutor mesmo quando tambem houver nome.");
 assert(booking.time === "16:00", "Deve extrair hora de retirada da data.");
 assert(booking.returnTime === "16:30", "Deve extrair hora de devolucao.");
 
