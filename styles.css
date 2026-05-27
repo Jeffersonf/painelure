@@ -158,10 +158,6 @@ html.site-maintenance body .mobile-nav {
   display: none;
 }
 
-html.auth-pending .login-screen {
-  visibility: hidden;
-}
-
 html.site-maintenance.auth-pending .login-screen {
   visibility: visible;
 }

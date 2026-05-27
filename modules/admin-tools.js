@@ -253,7 +253,7 @@
     activateLocalSession(role);
     showPinChange(false);
     const text = reason || "Servidor indisponivel. Voce entrou no modo local e a sincronizacao pode ser feita depois.";
-    P.showToast?.("Modo offline", text, "warn", { delay: 5200 });
+    P.showToast?.("Modo offline", text, "warn", { delay: 9000 });
     showLoginStatus(text);
     return user;
   }
@@ -344,16 +344,15 @@
     try {
       backendPayload = await loadScopedBackendData({ render: false });
     } catch (error) {
-      P.showToast?.("Base online indisponivel", "Entrando com dados locais; tente sincronizar novamente no painel.", "warn", { delay: 6200 });
+      P.showToast?.("Base online indisponivel", "Entrando com dados locais; tente sincronizar novamente no painel.", "warn", { delay: 9000 });
     }
     if (P.loadConfiguredSources) {
       showLoginStatus("Sincronizando fontes oficiais...");
-      P.showToast?.("Sincronizando", "Atualizando carros, supervisao e pesquisas antes de abrir.", "info", { delay: 4200 });
       const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision", "satisfaction"], order: ["cars", "supervision", "satisfaction"] });
       const failed = (results || []).filter(item => item.status === "error");
       if (failed.length) {
         const labels = failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ");
-        P.showToast?.("Sincronizacao parcial", `${labels} nao respondeu agora.`, "warn", { delay: 6200 });
+        P.showToast?.("Sincronizacao parcial", `${labels} nao respondeu agora.`, "warn", { delay: 9000 });
       }
     }
     P.saveAppData?.();
@@ -366,7 +365,6 @@
     showLoginStatus("");
     if (!username || !password) throw new Error("Informe nome e PIN.");
     showLoginStatus("Conectando ao servidor...");
-    P.showToast?.("Atualizando sessao", "Validando usuario no servidor.", "info", { delay: 2200 });
     let result = null;
     try {
       result = await P.loginBackend?.({ username, password });
@@ -380,10 +378,9 @@
     }
     if (!result?.token || !result?.user) throw new Error("Login nao retornou usuario.");
     activateOnlineUser(result.token, result.user, { render: false });
-    P.showToast?.("Sincronizando", "Carregando a base oficial antes de abrir o painel.", "info", { delay: 3200 });
     const syncPayload = await syncOfficialDataBeforeOpen();
     activateOnlineUser(result.token, result.user);
-    P.showToast?.("Online", syncPayload?.data?.appData ? "Sessao conectada com dados oficiais." : "Sessao conectada; servidor sem dados novos.", "ok");
+    P.showToast?.("Online", syncPayload?.data?.appData ? "Sessao conectada com dados oficiais." : "Sessao conectada; servidor sem dados novos.", "ok", { delay: 7600 });
     if (result.user.preferences?.forcePinChange) {
       showPinChange(true);
       showLoginStatus("Troque o PIN inicial para continuar.");

@@ -83,7 +83,7 @@
       document.body.appendChild(stack);
     }
     const icons = { ok: "OK", warn: "!", danger: "!", info: "i" };
-    const delay = Number(options.delay || 4200);
+    const delay = Number(options.delay || 7600);
     const toast = document.createElement("div");
     toast.className = `app-toast toast-${tone || "info"}`;
     toast.setAttribute("role", tone === "danger" ? "alert" : "status");

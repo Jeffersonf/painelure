@@ -80,16 +80,14 @@
 
   function loadSourcesInBackground() {
     const run = () => {
-      P.showToast?.("Atualizando", "Fontes oficiais em segundo plano.", "info", { delay: 2400 });
       P.loadConfiguredSources()
         .then(() => {
           refreshRenderedPages();
           P.renderSourceStatus?.();
-          P.showToast?.("Atualizado", "Fontes oficiais sincronizadas.", "ok");
         })
         .catch(error => {
           console.warn("[PainelURE] Fontes oficiais carregam em segundo plano:", error);
-          P.showToast?.("Erro", "Alguma fonte oficial nao respondeu agora.", "danger");
+          P.showToast?.("Sincronizacao parcial", "Alguma fonte oficial nao respondeu agora.", "warn", { delay: 9000 });
         });
     };
 
@@ -114,14 +112,13 @@
         .then(payload => {
           if (payload?.data?.appData) {
             refreshRenderedPages();
-            P.showToast?.("Online", "Dados do servidor carregados.", "ok");
           } else {
-            P.showToast?.("Offline", "Servidor nao respondeu. Mantendo dados locais.", "warn");
+            P.showToast?.("Modo local", "Servidor nao respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
           }
         })
         .catch(error => {
           console.warn("[PainelURE] Backend carregando em segundo plano:", error);
-          P.showToast?.("Offline", "Servidor nao respondeu. Mantendo dados locais.", "warn");
+          P.showToast?.("Modo local", "Servidor nao respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
         });
     };
 

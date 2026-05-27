@@ -52,7 +52,7 @@
   async function refreshSource(key) {
     const appData = { ...P.getAppData() };
     const label = P.sources?.[key]?.label || key;
-    P.showToast?.("Atualizando", `${label} em sincronizacao.`, "info", { delay: 2400 });
+    P.showToast?.("Atualizando", `${label} em sincronizacao.`, "info", { delay: 7600 });
     const result = await loadSource(key);
     result.updatedAt = new Date().toISOString();
     if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
@@ -66,8 +66,8 @@
       ...(P.sourceStatus || []).filter(item => item.key !== key),
       result
     ];
-    if (result.status === "loaded") P.showToast?.("Atualizado", `${label}: ${result.rows?.length || 0} linha(s) carregada(s).`, "ok");
-    if (result.status === "empty") P.showToast?.("Fonte vazia", `${label} nao substituiu os dados atuais.`, "warn", { delay: 5200 });
+    if (result.status === "loaded") P.showToast?.("Atualizado", `${label}: ${result.rows?.length || 0} linha(s) carregada(s).`, "ok", { delay: 7600 });
+    if (result.status === "empty") P.showToast?.("Fonte vazia", `${label} nao substituiu os dados atuais.`, "warn", { delay: 9000 });
     return result;
   }
 
@@ -117,7 +117,7 @@
         ...(P.sourceStatus || []).filter(item => item.key !== key),
         result
       ];
-      P.showToast?.("Erro", `${P.sources?.[key]?.label || key}: ${error?.message || "falha na sincronizacao"}.`, "danger");
+      P.showToast?.("Erro", `${P.sources?.[key]?.label || key}: ${error?.message || "falha na sincronizacao"}.`, "danger", { delay: 10000 });
       throw error;
     }
   }
