@@ -1029,20 +1029,40 @@
     const cameraItems = data.cameras || data.câmeras || [];
     const credentialItems = data.credentials || [];
     const widgets = [
-      ["Rede administrativa e pedagógica", data.network || [], "RD", "info", "infra"],
-      ["IPs, banda e CIE", data.ips || [], "IP", "info", "endereços"],
-      ["Câmeras e DVR", cameraItems, "CM", "ok", "monitoramento"],
-      ["Credenciais", data.credentials || [], "CR", "warn", "Restrito"]
-    ].filter(([, items]) => items.length);
+      ["network", "Rede administrativa e pedagógica", data.network || [], "RD", "info", "redes"],
+      ["ips", "IPs, banda e CIE", data.ips || [], "IP", "info", "endereços"],
+      ["cameras", "Câmeras e DVR", cameraItems, "CM", "ok", "monitoramento"],
+      ["credentials", "Credenciais", data.credentials || [], "CR", "warn", "restrito"]
+    ].filter(([, , items]) => items.length);
     if (credentialItems.length && !canViewCredentials()) {
-      const credentialIndex = widgets.findIndex(([title]) => title === "Credenciais");
+      const credentialIndex = widgets.findIndex(([key]) => key === "credentials");
       if (credentialIndex >= 0) {
-        widgets[credentialIndex] = ["Credenciais protegidas", ["Disponivel apenas para Administrador, SETEC, SEINTEC e Técnicos CTC."], "CR", "warn", "Restrito"];
+        widgets[credentialIndex] = ["credentials", "Credenciais protegidas", ["Disponível apenas para Administrador, SETEC, SEINTEC e Técnicos CTC."], "CR", "warn", "restrito"];
       }
     }
+    const activeKey = widgets[0]?.[0] || "network";
+    const detailMarkup = widgets.map(([key, title, items, icon, tone, label]) => `
+      <article class="network-detail-panel ${key === activeKey ? "is-active" : ""}" data-network-panel="${key}">
+        <div class="box-head">
+          <div>
+            <strong>${title}</strong>
+            <small>${selectedName}</small>
+          </div>
+          <span class="status-pill ${tone}">${label}</span>
+        </div>
+        <div class="network-detail-list">
+          ${items.map((item, index) => `
+            <span>
+              <small>${icon} ${String(index + 1).padStart(2, "0")}</small>
+              <strong>${item}</strong>
+            </span>
+          `).join("")}
+        </div>
+      </article>
+    `).join("");
 
     layout.innerHTML = `
-      <article class="network-summary network-hero-card">
+      <article class="network-summary network-school-strip">
         <div>
           <small>Escola selecionada</small>
           <strong>${selectedName}</strong>
@@ -1059,18 +1079,29 @@
           <button class="ghost-btn" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
         </div>
       </article>
-      <section class="network-card-grid">
-      ${widgets.map(([title, items, icon, tone, label]) => `
-      <article class="detail-widget network-info-card" data-search="${P.searchText([title, ...items])}">
+      <section class="network-widget-grid" aria-label="Dados de rede e câmeras">
+      ${widgets.map(([key, title, items, icon, tone, label], index) => `
+      <button class="network-mini-widget ${index === 0 ? "is-active" : ""}" type="button" data-network-detail="${key}" data-search="${P.searchText([title, ...items])}">
+        <span class="network-mini-icon">${icon}</span>
         <div>
           <small>${title}</small>
-          <strong>${icon} ${items[0]}</strong>
-          <p>${items.slice(1).join(" | ")}</p>
+          <strong>${items.length}</strong>
+          <p>${items[0]}</p>
         </div>
         <span class="status-pill ${tone}">${label}</span>
-      </article>
+      </button>
     `).join("")}
+      </section>
+      <section class="network-detail-zone">
+        ${detailMarkup}
       </section>`;
+    layout.querySelectorAll("[data-network-detail]").forEach(button => {
+      button.addEventListener("click", event => {
+        const key = event.currentTarget.dataset.networkDetail;
+        layout.querySelectorAll("[data-network-detail]").forEach(item => item.classList.toggle("is-active", item === event.currentTarget));
+        layout.querySelectorAll("[data-network-panel]").forEach(panel => panel.classList.toggle("is-active", panel.dataset.networkPanel === key));
+      });
+    });
     layout.querySelector("[data-open-school]")?.addEventListener("click", event => {
       focusSchool(event.currentTarget.dataset.openSchool);
     });
