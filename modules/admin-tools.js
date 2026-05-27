@@ -654,6 +654,17 @@
       });
     });
 
+    const forgotPinButton = P.$("#forgotPinBtn");
+    if (forgotPinButton && !forgotPinButton.dataset.bound) {
+      forgotPinButton.dataset.bound = "true";
+      forgotPinButton.addEventListener("click", () => {
+        const name = P.$("#loginUserInput")?.value.trim();
+        const target = name ? ` de ${name}` : "";
+        showLoginStatus(`Solicite ao administrador o reset do PIN${target}. O novo acesso será 1234 e pedirá troca no próximo login.`);
+        P.showToast?.("Reset de PIN", "Peça ao administrador para usar Painel Admin > Usuários e PINs online > Resetar PIN para 1234.", "info", { delay: 10000 });
+      });
+    }
+
     P.$("#pinChangeSubmitBtn")?.addEventListener("click", async () => {
       try {
         await submitPinChange();
