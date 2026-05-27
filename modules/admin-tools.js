@@ -1497,7 +1497,7 @@
                 <option value="">Sem contato</option>
                 ${contacts.map(contact => `<option value="${contact.id}"${contact.id === user.contactId ? " selected" : ""}>${contact.name}</option>`).join("")}
               </select>
-              <button class="ghost-btn" type="button" data-reset-backend-pin>PIN 1234</button>
+              <button class="ghost-btn" type="button" data-reset-backend-pin>Resetar PIN para 1234</button>
               <button class="ghost-btn" type="button" data-delete-backend-user>Remover</button>
               <button class="ghost-btn" type="button" data-save-backend-user>Salvar</button>
             </div>

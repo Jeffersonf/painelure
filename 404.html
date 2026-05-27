@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "network-school-cards-20260527";
+      window.PAINELURE_BUILD = "pin-reset-label-20260527";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=network-school-cards-20260527">
+  <link rel="stylesheet" href="./styles.css?v=pin-reset-label-20260527">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -655,7 +655,7 @@
         <section class="settings-section span-2" data-admin-collapsible data-admin-open="true">
           <div class="settings-title">Usuários e PINs online</div>
           <div class="settings-row">
-            <div><strong>Novo usuário</strong><small>Cria acesso no backend. O PIN fica visível no admin quando salvo em preferences.pin.</small></div>
+            <div><strong>Novo usuário</strong><small>Cria acesso no backend. Na lista abaixo, use "Resetar PIN para 1234" quando alguém esquecer o acesso.</small></div>
             <div class="settings-actions user-create-actions">
               <input id="newUserNameInput" type="text" placeholder="Nome">
               <input id="newUserLoginInput" type="text" placeholder="Login">
@@ -761,33 +761,33 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=network-school-cards-20260527"></script>
-  <script src="./data/schools.js?v=network-school-cards-20260527"></script>
-  <script src="./data/school-profiles.js?v=network-school-cards-20260527"></script>
-  <script src="./data/school-operational.js?v=network-school-cards-20260527"></script>
-  <script src="./data/inventory.js?v=network-school-cards-20260527"></script>
-  <script src="./data/supervision.js?v=network-school-cards-20260527"></script>
-  <script src="./data/contacts.js?v=network-school-cards-20260527"></script>
-  <script src="./data/users.js?v=network-school-cards-20260527"></script>
-  <script src="./data/governance.js?v=network-school-cards-20260527"></script>
-  <script src="./data/operations.js?v=network-school-cards-20260527"></script>
-  <script src="./data/sources.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/dom.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/ui-catalog.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/data-store.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/identity.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/access-scope.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/month-state.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/csv.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/normalizers.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/source-loader.js?v=network-school-cards-20260527"></script>
-  <script src="./config.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/backend-client.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/search.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/render.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/supervision-render.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/navigation.js?v=network-school-cards-20260527"></script>
-  <script src="./modules/admin-tools.js?v=network-school-cards-20260527"></script>
-  <script src="./app.js?v=network-school-cards-20260527"></script>
+  <script src="./data/mock.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/schools.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/school-profiles.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/school-operational.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/inventory.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/supervision.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/contacts.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/users.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/governance.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/operations.js?v=pin-reset-label-20260527"></script>
+  <script src="./data/sources.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/dom.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/ui-catalog.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/data-store.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/identity.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/access-scope.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/month-state.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/csv.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/normalizers.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/source-loader.js?v=pin-reset-label-20260527"></script>
+  <script src="./config.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/backend-client.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/search.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/render.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/supervision-render.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/navigation.js?v=pin-reset-label-20260527"></script>
+  <script src="./modules/admin-tools.js?v=pin-reset-label-20260527"></script>
+  <script src="./app.js?v=pin-reset-label-20260527"></script>
 </body>
 </html>
