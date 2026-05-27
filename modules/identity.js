@@ -22,7 +22,7 @@
   }
 
   function firstName(name) {
-    return String(name || "Usuario").trim().split(/\s+/).filter(Boolean)[0] || "Usuario";
+    return String(name || "Usuário").trim().split(/\s+/).filter(Boolean)[0] || "Usuário";
   }
 
   function users() {
@@ -87,8 +87,8 @@
     const contact = contactForUser(user);
     return {
       id: user?.id || "",
-      name: contact?.name || user?.name || "Usuario",
-      shortName: firstName(user?.name || contact?.name || "Usuario"),
+      name: contact?.name || user?.name || "Usuário",
+      shortName: firstName(user?.name || contact?.name || "Usuário"),
       role: user?.role || "Consulta",
       login: user?.login || user?.username || "",
       contactId: contact?.id || user?.contactId || "",

@@ -52,7 +52,7 @@
   async function refreshSource(key) {
     const appData = { ...P.getAppData() };
     const label = P.sources?.[key]?.label || key;
-    P.showToast?.("Atualizando", `${label} em sincronizacao.`, "info", { delay: 7600 });
+    P.showToast?.("Atualizando", `${label} em sincronização.`, "info", { delay: 7600 });
     const result = await loadSource(key);
     result.updatedAt = new Date().toISOString();
     if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
@@ -117,7 +117,7 @@
         ...(P.sourceStatus || []).filter(item => item.key !== key),
         result
       ];
-      P.showToast?.("Erro", `${P.sources?.[key]?.label || key}: ${error?.message || "falha na sincronizacao"}.`, "danger", { delay: 10000 });
+      P.showToast?.("Erro", `${P.sources?.[key]?.label || key}: ${error?.message || "falha na sincronização"}.`, "danger", { delay: 10000 });
       throw error;
     }
   }

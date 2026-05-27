@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "session-restore-20260527";
+      window.PAINELURE_BUILD = "sidebar-encoding-20260527";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=session-restore-20260527">
+  <link rel="stylesheet" href="./styles.css?v=sidebar-encoding-20260527">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -132,10 +132,10 @@
     <div class="global-search" id="globalSearchResults"></div>
 
     <div class="nav-label">Menu</div>
-    <nav class="nav" aria-label="NavegaÃƒÂ§ÃƒÂ£o principal">
+    <nav class="nav" aria-label="Navegação principal">
       <button class="nav-item active" type="button" data-page="dashboard"><span>&#128202;</span>Painel</button>
       <button class="nav-item" type="button" data-page="schools"><span>&#127979;</span>Escolas</button>
-      <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>SupervisÃƒÂ£o</button>
+      <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>Supervisão</button>
       <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
       <button class="nav-item" type="button" data-page="satisfaction"><span>&#128221;</span>Pesquisa</button>
       <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
@@ -143,16 +143,15 @@
 
     <section class="sidebar-card">
       <div class="sidebar-card-head">
-        <span>Atalhos fixos</span>
+        <span>Ferramentas</span>
       </div>
       <div class="sidebar-shortcuts labeled">
         <button type="button" data-jump="network"><span>&#127760; Redes</span></button>
-        <button type="button" data-jump="inventory"><span>&#128187; Invent.</span></button>
+        <button type="button" data-jump="inventory"><span>&#128187; Inventário</span></button>
         <button type="button" data-jump="ctc"><span>&#128736;&#65039; CTC</span></button>
-        <button type="button" data-jump="calls"><span>&#128229; Cham.</span></button>
+        <button type="button" data-jump="calls"><span>&#128229; Chamados</span></button>
         <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
-        <button type="button" data-jump="satisfaction"><span>&#128221; Pesquisa</span></button>
-        <button type="button" data-jump="reports"><span>&#128200; Relat.</span></button>
+        <button type="button" data-jump="reports"><span>&#128200; Relatórios</span></button>
       </div>
     </section>
     <div class="account">
@@ -177,26 +176,26 @@
     <div class="global-month-bar">
       <div class="global-page-heading" aria-live="polite">
         <strong id="globalPageTitle">Painel</strong>
-        <small id="globalPageNote">Centro do dia para consultar escolas, redes, inventÃƒÂ¡rio, visitas e agenda da URE.</small>
+        <small id="globalPageNote">Centro do dia para consultar escolas, redes, inventário, visitas e agenda da URE.</small>
       </div>
       <div class="sync-banner" id="globalSyncBanner" aria-live="polite"></div>
-      <div class="month-switcher" aria-label="Selecionar mes global">
+      <div class="month-switcher" aria-label="Selecionar mês global">
         <button class="month-step" type="button" data-month-prev aria-label="Mes anterior">&lsaquo;</button>
         <button class="month-pill" type="button" data-month-current>Maio 2026</button>
-        <button class="month-step" type="button" data-month-next aria-label="Proximo mes">&rsaquo;</button>
+        <button class="month-step" type="button" data-month-next aria-label="Próximo mês">&rsaquo;</button>
       </div>
     </div>
     <section class="page active" id="page-dashboard">
       <header class="page-header">
         <div>
           <h1>Painel</h1>
-        <p>Centro do dia para consultar escolas, redes, inventÃƒÂ¡rio, visitas e agenda da URE.</p>
+        <p>Centro do dia para consultar escolas, redes, inventário, visitas e agenda da URE.</p>
         </div>
         <div class="header-actions">
-          <div class="month-switcher" aria-label="Selecionar mes">
+          <div class="month-switcher" aria-label="Selecionar mês">
             <button class="month-step" type="button" id="prevMonthBtn" data-month-prev aria-label="Mes anterior">&lsaquo;</button>
             <button class="month-pill" type="button" id="currentMonthBtn" data-month-current>Maio 2026</button>
-            <button class="month-step" type="button" id="nextMonthBtn" data-month-next aria-label="Proximo mes">&rsaquo;</button>
+            <button class="month-step" type="button" id="nextMonthBtn" data-month-next aria-label="Próximo mês">&rsaquo;</button>
           </div>
         </div>
       </header>
@@ -205,9 +204,9 @@
         <span class="notice-icon">i</span>
         <span>
           <strong id="dashboardNoticeTitle">Base operacional carregada</strong>
-          <small id="dashboardNoticeNote">Escolas, supervisÃƒÂ£o, inventÃƒÂ¡rio e redes disponÃƒÂ­veis para consulta. CalendÃƒÂ¡rio aguarda fonte oficial.</small>
+          <small id="dashboardNoticeNote">Escolas, supervisão, inventário e redes disponíveis para consulta. Calendário aguarda fonte oficial.</small>
         </span>
-        <em>RelatÃƒÂ³rios</em>
+        <em>Relatórios</em>
       </button>
 
       <div class="manager-strip">
@@ -222,28 +221,28 @@
       <section class="workbench widget" data-widget-area="shortcuts">
         <div class="widget-head">
           <div>
-            <strong>Acesso rÃƒÂ¡pido</strong>
+            <strong>Acesso rápido</strong>
           </div>
         </div>
         <div class="shortcut-grid">
           <button class="shortcut-card" type="button" data-jump="schools">
             <span>&#127979;</span>
             <strong>Escolas</strong>
-            <small id="shortcutSchoolsNote">Unidades, fichas e inventÃƒÂ¡rio por escola</small>
+            <small id="shortcutSchoolsNote">Unidades, fichas e inventário por escola</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="network">
             <span>&#127760;</span>
-            <strong>Redes e CÃƒÂ¢meras</strong>
+            <strong>Redes e Câmeras</strong>
             <small id="shortcutNetworkNote">Rede, IPs, DVR e infraestrutura</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="inventory">
             <span>&#128187;</span>
-            <strong>InventÃƒÂ¡rio</strong>
+            <strong>Inventário</strong>
             <small id="shortcutInventoryNote">Equipamentos e status por escola</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="supervision">
             <span>&#129517;</span>
-            <strong>SupervisÃƒÂ£o</strong>
+            <strong>Supervisão</strong>
             <small id="shortcutSupervisionNote">Metas, visitas e escolas vinculadas</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="cars">
@@ -258,8 +257,8 @@
         <article class="box">
           <div class="box-head">
             <div>
-              <strong>PrÃƒÂ³ximas decisÃƒÂµes</strong>
-              <small>O que merece atencao hoje</small>
+              <strong>Próximas decisões</strong>
+              <small>O que merece atenção hoje</small>
             </div>
           </div>
           <div class="row-list" id="decisionRows"></div>
@@ -269,7 +268,7 @@
           <div class="box-head">
             <div>
               <strong>Agenda geral</strong>
-              <small>CalendÃƒÂ¡rio operacional da URE</small>
+              <small>Calendário operacional da URE</small>
             </div>
             <button class="ghost-btn" type="button" data-jump="calendar">Ver</button>
           </div>
@@ -301,7 +300,7 @@
 
     <section class="page" id="page-network">
       <header class="page-header compact">
-        <div><h1>Redes e CÃƒÂ¢meras</h1><p>Infraestrutura, IPs e cÃƒÂ¢meras por escola.</p></div>
+        <div><h1>Redes e Câmeras</h1><p>Infraestrutura, IPs e câmeras por escola.</p></div>
       </header>
       <div class="selector-panel">
         <label>
@@ -310,7 +309,7 @@
         </label>
       </div>
       <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo de redes</strong><small>Infraestrutura tÃƒÂ©cnica por escola</small></div></div>
+        <div class="box-head"><div><strong>Resumo de redes</strong><small>Infraestrutura técnica por escola</small></div></div>
         <div class="row-list compact" id="networkSummaryRows"></div>
       </article>
       <div class="network-layout" id="networkLayout"></div>
@@ -318,7 +317,7 @@
 
     <section class="page" id="page-inventory">
       <header class="page-header compact">
-        <div><h1>InventÃƒÂ¡rio</h1><p>Equipamentos e status por escola.</p></div>
+        <div><h1>Inventário</h1><p>Equipamentos e status por escola.</p></div>
       </header>
       <div class="selector-panel">
         <label>
@@ -327,21 +326,21 @@
         </label>
         <label>
           <span>Filtro</span>
-          <input id="inventoryFilterInput" type="search" placeholder="Equipamento, status ou observaÃƒÂ§ÃƒÂ£o">
+          <input id="inventoryFilterInput" type="search" placeholder="Equipamento, status ou observação">
         </label>
         <label>
           <span>Status</span>
           <select id="inventoryStatusSelect">
             <option value="">Todos</option>
             <option value="ok">OK</option>
-            <option value="manutencao">ManutenÃƒÂ§ÃƒÂ£o</option>
+            <option value="manutencao">Manutenção</option>
             <option value="defeito">Defeito</option>
           </select>
         </label>
         <button class="ghost-btn filter-reset" type="button" id="inventoryFilterReset">Limpar</button>
       </div>
       <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo do inventÃƒÂ¡rio</strong><small>Triagem da escola selecionada</small></div></div>
+        <div class="box-head"><div><strong>Resumo do inventário</strong><small>Triagem da escola selecionada</small></div></div>
         <div class="row-list compact" id="inventorySummaryRows"></div>
       </article>
       <div class="box">
@@ -360,14 +359,14 @@
     <section class="page" id="page-supervisor-detail">
       <header class="page-header compact detail-page-header">
         <button class="back-btn" type="button" data-back>&lsaquo;</button>
-        <div><h1 id="supervisorDetailTitle">Supervisor</h1><p id="supervisorDetailSubtitle">Metas, vÃƒÂ­nculos e acompanhamento.</p></div>
+        <div><h1 id="supervisorDetailTitle">Supervisor</h1><p id="supervisorDetailSubtitle">Metas, vínculos e acompanhamento.</p></div>
       </header>
       <div class="supervisor-detail" id="supervisorDetailPageBody"></div>
     </section>
 
     <section class="page" id="page-ctc">
       <header class="page-header compact">
-        <div><h1>TÃƒÂ©cnicos CTC</h1><p>Agenda tÃƒÂ©cnica, visitas e demandas.</p></div>
+        <div><h1>Técnicos CTC</h1><p>Agenda técnica, visitas e demandas.</p></div>
       </header>
       <div class="selector-panel operation-filters">
         <label>
@@ -379,10 +378,10 @@
           <select id="ctcSchoolFilter"></select>
         </label>
         <button class="ghost-btn filter-reset" type="button" id="ctcFilterReset">Limpar</button>
-        <p id="ctcFilterSummary">Visitas tÃƒÂ©cnicas carregadas.</p>
+        <p id="ctcFilterSummary">Visitas técnicas carregadas.</p>
       </div>
       <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo tecnico</strong><small>Visitas e escolas no recorte atual</small></div></div>
+        <div class="box-head"><div><strong>Resumo técnico</strong><small>Visitas e escolas no recorte atual</small></div></div>
         <div class="row-list compact" id="ctcSummaryRows"></div>
       </article>
       <div class="calendar-grid" id="ctcGrid"></div>
@@ -435,7 +434,7 @@
         <p id="carSourceStatus"></p>
       </div>
       <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo dos carros</strong><small>Agenda puxada da base de carros e do calendÃƒÂ¡rio</small></div></div>
+        <div class="box-head"><div><strong>Resumo dos carros</strong><small>Agenda puxada da base de carros e do calendário</small></div></div>
         <div class="row-list compact" id="carSummaryRows"></div>
       </article>
       <div class="calendar-grid car-grid" id="carGrid"></div>
@@ -453,11 +452,11 @@
         <button type="button" data-sector="Compras">Compras</button>
         <button type="button" data-sector="Pagamento">Pagamento</button>
         <button type="button" data-sector="RH">RH</button>
-        <button type="button" data-sector="Supervis&atilde;o">SupervisÃƒÂ£o</button>
-        <button type="button" data-sector="Pedag&oacute;gico">Pedagogico</button>
+        <button type="button" data-sector="Supervis&atilde;o">Supervisão</button>
+        <button type="button" data-sector="Pedag&oacute;gico">Pedagógico</button>
       </div>
       <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo dos contatos</strong><small>Canais disponÃƒÂ­veis no recorte atual</small></div></div>
+        <div class="box-head"><div><strong>Resumo dos contatos</strong><small>Canais disponíveis no recorte atual</small></div></div>
         <div class="row-list compact" id="contactSummaryRows"></div>
       </article>
       <div class="contact-grid" id="contactGrid"></div>
@@ -465,7 +464,7 @@
 
     <section class="page" id="page-calendar">
       <header class="page-header compact">
-        <div><h1>CalendÃƒÂ¡rio URE</h1><p>Eventos e recursos compartilhados da Diretoria de Ensino.</p></div>
+        <div><h1>Calendário URE</h1><p>Eventos e recursos compartilhados da Diretoria de Ensino.</p></div>
       </header>
       <div class="contact-tabs calendar-tabs">
         <button class="active" type="button" data-calendar-mode="shared">Compartilhado</button>
@@ -480,7 +479,7 @@
 
     <section class="page" id="page-satisfaction">
       <header class="page-header compact">
-        <div><h1>Pesquisa de satisfaÃƒÂ§ÃƒÂ£o</h1><p>FormulÃƒÂ¡rios, respostas e devolutivas das campanhas oficiais.</p></div>
+        <div><h1>Pesquisa de satisfação</h1><p>Formulários, respostas e devolutivas das campanhas oficiais.</p></div>
       </header>
       <article class="box summary-box">
         <div class="box-head"><div><strong>Resumo das pesquisas</strong><small>Campanhas e respostas consolidadas</small></div></div>
@@ -491,7 +490,7 @@
 
     <section class="page" id="page-reports">
       <header class="page-header compact">
-        <div><h1>RelatÃƒÂ³rios</h1><p>Resumo rÃƒÂ¡pido da operaÃƒÂ§ÃƒÂ£o.</p></div>
+        <div><h1>Relatórios</h1><p>Resumo rápido da operação.</p></div>
       </header>
       <div class="metric-grid" id="reportsGrid"></div>
       <div class="box">
@@ -510,27 +509,27 @@
           <div class="account-hero">
             <div class="avatar large user-avatar" id="userAvatar">JE</div>
             <div>
-              <small id="userIdentitySource">Usuario local</small>
+              <small id="userIdentitySource">Usuário local</small>
               <strong id="userNameLabel">Jefferson</strong>
               <span id="userRoleSummary">Administrador</span>
             </div>
           </div>
           <div class="settings-row">
-            <div><strong>Contato vinculado</strong><small id="userContactSummary">Dados sincronizados com a pÃƒÂ¡gina Contatos.</small></div>
+            <div><strong>Contato vinculado</strong><small id="userContactSummary">Dados sincronizados com a página Contatos.</small></div>
             <span class="status-pill info" id="userContactStatus">Vinculado</span>
           </div>
           <div class="settings-row">
-            <div><strong>SessÃƒÂ£o online</strong><small id="onlineSessionSummary">Entre com usuÃƒÂ¡rio do backend quando a API estiver ativa.</small></div>
+            <div><strong>Sessão online</strong><small id="onlineSessionSummary">Entre com usuário do backend quando a API estiver ativa.</small></div>
             <div class="settings-actions online-login-actions">
-              <input id="onlineLoginInput" type="text" placeholder="Usuario">
+              <input id="onlineLoginInput" type="text" placeholder="Usuário">
               <input id="onlinePasswordInput" type="password" placeholder="Senha">
               <button class="ghost-btn" type="button" id="onlineLoginBtn">Entrar</button>
               <button class="ghost-btn" type="button" id="onlineLogoutBtn">Sair</button>
             </div>
           </div>
           <div class="settings-row">
-            <div><strong>UsuÃƒÂ¡rio ativo</strong><small>UsuÃƒÂ¡rios herdados da base anterior e vinculados aos contatos.</small></div>
-            <select id="activeUserSelect" aria-label="Trocar usuario ativo"></select>
+            <div><strong>Usuário ativo</strong><small>Usuários herdados da base anterior e vinculados aos contatos.</small></div>
+            <select id="activeUserSelect" aria-label="Trocar usuário ativo"></select>
           </div>
           <div class="settings-row">
             <div><strong>Perfil ativo</strong><small id="userAccessSummary">Acesso completo ao PainelURE.</small></div>
@@ -552,7 +551,7 @@
             </div>
           </div>
           <div class="settings-row">
-            <div><strong>AdministraÃƒÂ§ÃƒÂ£o</strong><small>Backups, fontes oficiais, importaÃƒÂ§ÃƒÂµes e operaÃƒÂ§ÃƒÂ£o do painel.</small></div>
+            <div><strong>Administração</strong><small>Backups, fontes oficiais, importações e operação do painel.</small></div>
             <button class="ghost-btn" type="button" data-jump="admin">Abrir admin</button>
           </div>
         </section>
@@ -565,21 +564,21 @@
 
     <section class="page" id="page-profiles">
       <header class="page-header compact">
-        <div><h1>Perfis</h1><p>Acessos por categoria de usuario.</p></div>
+        <div><h1>Perfis</h1><p>Acessos por categoria de usuário.</p></div>
       </header>
       <div class="calendar-grid" id="profilesGrid"></div>
     </section>
 
     <section class="page" id="page-quality">
       <header class="page-header compact">
-        <div><h1>Qualidade</h1><p>Checklist de publicaÃƒÂ§ÃƒÂ£o e riscos.</p></div>
+        <div><h1>Qualidade</h1><p>Checklist de publicação e riscos.</p></div>
       </header>
       <div class="calendar-grid" id="qualityGrid"></div>
     </section>
 
     <section class="page" id="page-admin">
       <header class="page-header compact">
-        <div><h1>Admin oficial</h1><p>Controle online, usuÃƒÂ¡rios, PINs, fontes oficiais, backups e auditoria.</p></div>
+        <div><h1>Admin oficial</h1><p>Controle online, usuários, PINs, fontes oficiais, backups e auditoria.</p></div>
         <div class="header-actions">
           <button class="ghost-btn" type="button" id="backendHealthBtn">Verificar API</button>
           <button class="ghost-btn" type="button" id="reloadSourcesBtn">Atualizar fontes</button>
@@ -587,14 +586,14 @@
       </header>
       <div class="settings-shell admin-layout">
         <section class="settings-section span-2 admin-overview-section" data-admin-collapsible data-admin-open="true">
-          <div class="settings-title">VisÃƒÂ£o geral</div>
+          <div class="settings-title">Visão geral</div>
           <div class="admin-overview-grid" id="adminOverview"></div>
           <div class="settings-row">
             <div><strong>Conta atual</strong><small id="adminAccountLine">Jefferson | Administrador</small></div>
             <span class="status-pill ok">Admin</span>
           </div>
           <div class="settings-row">
-            <div><strong>Perfil ativo</strong><small>Use apenas para conferir permissÃƒÂµes antes de liberar usuÃƒÂ¡rios.</small></div>
+            <div><strong>Perfil ativo</strong><small>Use apenas para conferir permissões antes de liberar usuários.</small></div>
             <select id="activeRoleSelect"></select>
           </div>
         </section>
@@ -602,26 +601,26 @@
         <section class="settings-section" data-admin-collapsible data-admin-open="true">
           <div class="settings-title">Servidor online</div>
           <div class="settings-row">
-            <div><strong>Status da API</strong><small id="backendStatusLine">Aguardando verificaÃƒÂ§ÃƒÂ£o.</small></div>
+            <div><strong>Status da API</strong><small id="backendStatusLine">Aguardando verificação.</small></div>
             <span class="status-pill info">API</span>
           </div>
           <div class="settings-row">
-            <div><strong>Estado oficial</strong><small id="adminBackupMeta">Nenhuma aÃƒÂ§ÃƒÂ£o administrativa nesta sessÃƒÂ£o.</small></div>
+            <div><strong>Estado oficial</strong><small id="adminBackupMeta">Nenhuma ação administrativa nesta sessão.</small></div>
             <div class="settings-actions">
               <button class="ghost-btn" type="button" id="backendPullBtn">Carregar online</button>
               <button class="ghost-btn" type="button" id="backendPushBtn">Salvar online</button>
             </div>
           </div>
           <div class="settings-row">
-            <div><strong>Regra principal</strong><small>Postgres/API ÃƒÂ© a fonte oficial. O navegador sÃƒÂ³ deve funcionar como cache.</small></div>
+            <div><strong>Regra principal</strong><small>Postgres/API é a fonte oficial. O navegador só deve funcionar como cache.</small></div>
             <span class="status-pill info">online-first</span>
           </div>
         </section>
 
         <section class="settings-section" data-admin-collapsible data-admin-open="true">
-          <div class="settings-title">ContingÃƒÂªncia local</div>
+          <div class="settings-title">Contingência local</div>
           <div class="settings-row">
-            <div><strong>Backup manual</strong><small>Use antes de manutenÃƒÂ§ÃƒÂµes, importaÃƒÂ§ÃƒÂµes grandes ou testes fora do fluxo online.</small></div>
+            <div><strong>Backup manual</strong><small>Use antes de manutenções, importações grandes ou testes fora do fluxo online.</small></div>
             <div class="settings-actions">
               <button class="ghost-btn" type="button" id="localSaveBtn">Salvar cache</button>
               <button class="ghost-btn" type="button" id="backupExportBtn">Exportar JSON</button>
@@ -630,15 +629,15 @@
             </div>
           </div>
           <div class="settings-row">
-            <div><strong>Limpeza do navegador</strong><small>Remove somente alteraÃƒÂ§ÃƒÂµes/cache deste computador.</small></div>
+            <div><strong>Limpeza do navegador</strong><small>Remove somente alterações/cache deste computador.</small></div>
             <button class="ghost-btn" type="button" id="resetLocalBtn">Limpar cache</button>
           </div>
         </section>
 
         <section class="settings-section span-2" data-admin-collapsible data-admin-open="true">
-          <div class="settings-title">UsuÃƒÂ¡rios e PINs online</div>
+          <div class="settings-title">Usuários e PINs online</div>
           <div class="settings-row">
-            <div><strong>Novo usuÃƒÂ¡rio</strong><small>Cria acesso no backend. O PIN fica visÃƒÂ­vel no admin quando salvo em preferences.pin.</small></div>
+            <div><strong>Novo usuário</strong><small>Cria acesso no backend. O PIN fica visível no admin quando salvo em preferences.pin.</small></div>
             <div class="settings-actions user-create-actions">
               <input id="newUserNameInput" type="text" placeholder="Nome">
               <input id="newUserLoginInput" type="text" placeholder="Login">
@@ -651,7 +650,7 @@
         </section>
 
         <section class="settings-section span-2" data-admin-collapsible data-admin-open="true">
-          <div class="settings-title">Acessos e manutenÃƒÂ§ÃƒÂ£o por categoria</div>
+          <div class="settings-title">Acessos e manutenção por categoria</div>
           <div class="settings-row">
             <div><strong>Acessos por perfil</strong><small>Selecione um perfil e marque quais categorias ficam liberadas.</small></div>
             <div class="settings-actions wide">
@@ -661,7 +660,7 @@
           </div>
           <div class="admin-check-grid" id="accessPageChecklist"></div>
           <div class="settings-row">
-            <div><strong>Aviso de manutenÃƒÂ§ÃƒÂ£o</strong><small>Mostra um aviso visual na categoria selecionada, sem tirar seu acesso de admin.</small></div>
+            <div><strong>Aviso de manutenção</strong><small>Mostra um aviso visual na categoria selecionada, sem tirar seu acesso de admin.</small></div>
             <div class="settings-actions wide">
               <select id="maintenancePageSelect"></select>
               <label class="check-row"><input type="checkbox" id="maintenanceEnabledInput"><span>Exibir aviso</span></label>
@@ -685,30 +684,30 @@
         </section>
 
         <section class="settings-section span-2" data-admin-collapsible data-admin-open="true">
-          <div class="settings-title">DiagnÃƒÂ³stico de carros</div>
+          <div class="settings-title">Diagnóstico de carros</div>
           <div class="settings-list" id="carDataDiagnostics"></div>
         </section>
 
         <section class="settings-section" data-admin-collapsible>
-          <div class="settings-title">ImportaÃƒÂ§ÃƒÂ£o manual</div>
+          <div class="settings-title">Importação manual</div>
           <div class="settings-row">
-            <div><strong>CSV de emergÃƒÂªncia</strong><small>Use apenas quando SharePoint/Excel online nÃƒÂ£o estiver disponÃƒÂ­vel.</small></div>
+            <div><strong>CSV de emergência</strong><small>Use apenas quando SharePoint/Excel online não estiver disponível.</small></div>
             <div class="settings-actions">
               <select id="importTargetSelect">
                 <option value="schools">Escolas</option>
                 <option value="contacts">Contatos</option>
-                <option value="network">Redes e cÃƒÂ¢meras</option>
+                <option value="network">Redes e câmeras</option>
                 <option value="cars">Carros</option>
-                <option value="calendar">CalendÃƒÂ¡rio</option>
-                <option value="satisfaction">Pesquisa de satisfaÃƒÂ§ÃƒÂ£o</option>
-                <option value="supervision">SupervisÃƒÂ£o</option>
+                <option value="calendar">Calendário</option>
+                <option value="satisfaction">Pesquisa de satisfação</option>
+                <option value="supervision">Supervisão</option>
               </select>
               <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
               <input id="csvImportInput" type="file" accept=".csv,text/csv" hidden>
             </div>
           </div>
           <div class="settings-row">
-            <div><strong>CalendÃƒÂ¡rio oficial</strong><small>URL pÃƒÂºblica CSV para agenda institucional.</small></div>
+            <div><strong>Calendário oficial</strong><small>URL pública CSV para agenda institucional.</small></div>
             <div class="settings-actions wide">
               <input id="calendarSourceInput" type="url" placeholder="https://.../pub?output=csv">
               <button class="ghost-btn" type="button" id="saveCalendarSourceBtn">Salvar</button>
@@ -725,52 +724,52 @@
           <div class="settings-list" id="backendAuditList"></div>
         </section>
         <section class="settings-section span-2" data-admin-collapsible>
-          <div class="settings-title">HistÃƒÂ³rico de importaÃƒÂ§ÃƒÂµes</div>
+          <div class="settings-title">Histórico de importações</div>
           <div class="settings-list" id="backendImportList"></div>
         </section>
 
         <section class="settings-section span-2" data-admin-collapsible>
-          <div class="settings-title">DiagnÃƒÂ³stico automÃƒÂ¡tico</div>
+          <div class="settings-title">Diagnóstico automático</div>
           <div class="calendar-grid admin-diagnostics" id="adminGrid"></div>
         </section>
       </div>
     </section>
   </main>
 
-  <nav class="mobile-nav" aria-label="NavegaÃƒÂ§ÃƒÂ£o mobile">
+  <nav class="mobile-nav" aria-label="Navegação mobile">
     <button class="active" type="button" data-page="dashboard">&#128202;<span>Painel</span></button>
     <button type="button" data-page="schools">&#127979;<span>Escolas</span></button>
-    <button type="button" data-page="supervision">&#129517;<span>SupervisÃƒÂ£o</span></button>
+    <button type="button" data-page="supervision">&#129517;<span>Supervisão</span></button>
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=session-restore-20260527"></script>
-  <script src="./data/schools.js?v=session-restore-20260527"></script>
-  <script src="./data/school-profiles.js?v=session-restore-20260527"></script>
-  <script src="./data/school-operational.js?v=session-restore-20260527"></script>
-  <script src="./data/inventory.js?v=session-restore-20260527"></script>
-  <script src="./data/supervision.js?v=session-restore-20260527"></script>
-  <script src="./data/contacts.js?v=session-restore-20260527"></script>
-  <script src="./data/users.js?v=session-restore-20260527"></script>
-  <script src="./data/governance.js?v=session-restore-20260527"></script>
-  <script src="./data/operations.js?v=session-restore-20260527"></script>
-  <script src="./data/sources.js?v=session-restore-20260527"></script>
-  <script src="./modules/dom.js?v=session-restore-20260527"></script>
-  <script src="./modules/ui-catalog.js?v=session-restore-20260527"></script>
-  <script src="./modules/data-store.js?v=session-restore-20260527"></script>
-  <script src="./modules/identity.js?v=session-restore-20260527"></script>
-  <script src="./modules/access-scope.js?v=session-restore-20260527"></script>
-  <script src="./modules/month-state.js?v=session-restore-20260527"></script>
-  <script src="./modules/csv.js?v=session-restore-20260527"></script>
-  <script src="./modules/normalizers.js?v=session-restore-20260527"></script>
-  <script src="./modules/source-loader.js?v=session-restore-20260527"></script>
-  <script src="./config.js?v=session-restore-20260527"></script>
-  <script src="./modules/backend-client.js?v=session-restore-20260527"></script>
-  <script src="./modules/search.js?v=session-restore-20260527"></script>
-  <script src="./modules/render.js?v=session-restore-20260527"></script>
-  <script src="./modules/supervision-render.js?v=session-restore-20260527"></script>
-  <script src="./modules/navigation.js?v=session-restore-20260527"></script>
-  <script src="./modules/admin-tools.js?v=session-restore-20260527"></script>
-  <script src="./app.js?v=session-restore-20260527"></script>
+  <script src="./data/mock.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/schools.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/school-profiles.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/school-operational.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/inventory.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/supervision.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/contacts.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/users.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/governance.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/operations.js?v=sidebar-encoding-20260527"></script>
+  <script src="./data/sources.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/dom.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/ui-catalog.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/data-store.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/identity.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/access-scope.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/month-state.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/csv.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/normalizers.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/source-loader.js?v=sidebar-encoding-20260527"></script>
+  <script src="./config.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/backend-client.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/search.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/render.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/supervision-render.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/navigation.js?v=sidebar-encoding-20260527"></script>
+  <script src="./modules/admin-tools.js?v=sidebar-encoding-20260527"></script>
+  <script src="./app.js?v=sidebar-encoding-20260527"></script>
 </body>
 </html>

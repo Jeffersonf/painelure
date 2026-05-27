@@ -55,16 +55,16 @@
     return [
       ...pages,
       ...(data.schools || []).map(item => ({ page: "schools", title: item.name, type: "Escola", note: schoolNote(item), focus: item.name })),
-      ...Object.keys(data.networkData || {}).map(name => ({ page: "network", title: name, type: "Rede", note: "Infraestrutura e cameras", focus: name })),
+      ...Object.keys(data.networkData || {}).map(name => ({ page: "network", title: name, type: "Rede", note: "Infraestrutura e câmeras", focus: name })),
       ...(data.schoolAssets || []).map(item => ({
         page: "inventory",
         title: item.sourceName || item.name,
-        type: "Inventario",
+        type: "Inventário",
         note: `${item.school} | ${item.status}`,
         focus: searchText([item.school, item.sourceName || item.name, item.notes]),
         school: item.school
       })),
-      ...(data.supervisors || []).map(item => ({ page: "supervision", title: item.name, type: "Supervisao", note: item.email || `${item.schools} escola(s)`, focus: item.name })),
+      ...(data.supervisors || []).map(item => ({ page: "supervision", title: item.name, type: "Supervisão", note: item.email || `${item.schools} escola(s)`, focus: item.name })),
       ...(data.contacts || []).map(item => ({ page: "contacts", title: item.name, type: item.sector, note: item.role || item.email, focus: item.name, sector: item.sector })),
       ...(data.calendar || []).map(item => ({ page: "calendar", title: item.label, type: "Calendario", note: item.note || item.value, focus: searchText([item.label, item.value]) })),
       ...(data.ctcVisits || []).map(item => ({

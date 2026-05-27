@@ -33,13 +33,13 @@
     if (role.includes("supervis")) {
       return {
         title: "Carteira de supervisao",
-        note: `${data.schools.length} escola(s) sob acompanhamento no mes.`,
+        note: `${data.schools.length} escola(s) sob acompanhamento no mês.`,
         notice: "Visão filtrada para sua supervisão",
         noticeNote: "A página mostra apenas suas escolas, suas metas e os canais de apoio disponíveis.",
         shortcuts: {
           schools: `${data.schools.length} escola(s) vinculada(s)`,
-          network: "Restrito ao perfil tecnico",
-          inventory: "Restrito ao perfil tecnico",
+          network: "Restrito ao perfil técnico",
+          inventory: "Restrito ao perfil técnico",
           supervision: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "metas em dia"
         }
       };
@@ -113,14 +113,14 @@
 
   function schoolMissingProfileFields(name) {
     const labels = {
-      director: "direcao",
-      viceDirector: "vice-direcao",
+      director: "direção",
+      viceDirector: "vice-direção",
       proati: "PROATI",
       goe: "GOE",
       phone: "telefone",
       mobile: "celular",
       email: "email",
-      address: "endereco",
+      address: "endereço",
       notes: "observacoes"
     };
     const profile = schoolProfile(name);
@@ -294,14 +294,14 @@
 
   function assetStatusLabel(status) {
     if (status === "defeito") return "defeito";
-    if (status === "manutencao") return "manutencao";
+    if (status === "manutencao") return "manutenção";
     return "ok";
   }
 
   function assetPriority(asset) {
     const units = assetUnits(asset);
     if (asset.status === "defeito") return { tone: "warn", label: "defeito", note: `${units} unidade(s) com defeito.` };
-    if (asset.status === "manutencao") return { tone: "warn", label: "manutencao", note: `${units} unidade(s) em manutencao.` };
+    if (asset.status === "manutencao") return { tone: "warn", label: "manutenção", note: `${units} unidade(s) em manutenção.` };
     return { tone: "ok", label: "ok", note: `${units} unidade(s) OK.` };
   }
 
@@ -559,17 +559,17 @@
     const supervisionValue = supervisionPct.total ? `${Math.round((supervisionPct.done / supervisionPct.total) * 100)}%` : "0%";
     return [
       { id: "schools", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "schools", icon: "&#127979;", label: "Escolas", value: data.schools?.length || 0, note: `${data.schools?.length || 0} unidade(s) na base regional`, tone: "info" },
-      { id: "supervision", roles: ["administrador", "gabinete", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisao", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
+      { id: "supervision", roles: ["administrador", "gabinete", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
-      { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventario", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
-      { id: "ctc", roles: ["administrador", "setec", "ctc"], page: "ctc", icon: "&#128736;&#65039;", label: "CTC", value: context.ctcVisits, note: context.ctcVisits ? "Visitas tecnicas no mes" : "Sem visitas no recorte", tone: context.ctcVisits ? "info" : "ok" },
-      { id: "calls", roles: ["administrador", "gabinete", "setec", "ctc"], page: "calls", icon: "&#128229;", label: "Chamados", value: context.openCalls, note: context.openCalls ? "Chamados em acompanhamento" : "Fila sem pendencias", tone: context.openCalls ? "warn" : "ok" },
-      { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mes", tone: context.carCount ? "info" : "ok" },
+      { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventário", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
+      { id: "ctc", roles: ["administrador", "setec", "ctc"], page: "ctc", icon: "&#128736;&#65039;", label: "CTC", value: context.ctcVisits, note: context.ctcVisits ? "Visitas técnicas no mês" : "Sem visitas no recorte", tone: context.ctcVisits ? "info" : "ok" },
+      { id: "calls", roles: ["administrador", "gabinete", "setec", "ctc"], page: "calls", icon: "&#128229;", label: "Chamados", value: context.openCalls, note: context.openCalls ? "Chamados em acompanhamento" : "Fila sem pendências", tone: context.openCalls ? "warn" : "ok" },
+      { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
-      { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mes" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
-      { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuario" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
-      { id: "satisfaction", roles: ["*"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Area pronta para formularios", tone: data.satisfaction?.length ? "info" : "warn" },
-      { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatorios", value: P.selectedMonthLabel?.() || "Mes", note: "Consolidado administrativo", tone: "info" }
+      { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mês" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
+      { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuário" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
+      { id: "satisfaction", roles: ["*"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Área pronta para formulários", tone: data.satisfaction?.length ? "info" : "warn" },
+      { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatórios", value: P.selectedMonthLabel?.() || "Mês", note: "Consolidado administrativo", tone: "info" }
     ];
   }
 
@@ -621,7 +621,7 @@
     setText("#shortcutSchoolsNote", profile.shortcuts?.schools || `${data.schools.length} unidade(s) na base regional`);
     setText("#shortcutNetworkNote", profile.shortcuts?.network || (missingNetwork ? `${missingNetwork} escola(s) ainda sem rede` : `${networkCount} rede(s) mapeada(s)`));
     setText("#shortcutInventoryNote", profile.shortcuts?.inventory || (inventoryAlerts ? `${inventoryAlerts} unidade(s) em manutenção/defeito` : `${data.schoolAssets.length} linha(s) consolidadas`));
-    setText("#shortcutSupervisionNote", profile.shortcuts?.supervision || (pendingVisits ? `${pendingVisits} visita(s) pendente(s)` : `${data.supervisors.length} responsavel(is) ativos`));
+    setText("#shortcutSupervisionNote", profile.shortcuts?.supervision || (pendingVisits ? `${pendingVisits} visita(s) pendente(s)` : `${data.supervisors.length} responsável(is) ativos`));
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
     const shortcutGrid = P.$(".shortcut-grid");
     if (shortcutGrid) {
@@ -655,13 +655,13 @@
         : { icon: "&#128197;", title: "Calendário preparado", note: "Área pronta para a agenda institucional da URE.", label: "Agenda", tone: "info", page: "calendar" },
       ctcVisits
         ? { icon: "&#128736;&#65039;", title: "Visitas técnicas previstas", note: `${ctcVisits} compromisso(s) técnico(s) na base atual.`, label: "CTC", tone: "info", page: "ctc" }
-        : { icon: "&#128736;&#65039;", title: "Agenda CTC pronta", note: "Area preparada para rotas e compromissos tecnicos.", label: "CTC", tone: "info", page: "ctc" },
+        : { icon: "&#128736;&#65039;", title: "Agenda CTC pronta", note: "Área preparada para rotas e compromissos técnicos.", label: "CTC", tone: "info", page: "ctc" },
       openCalls
         ? { icon: "&#128229;", title: "Chamados em acompanhamento", note: `${openCalls} chamado(s) ainda não resolvido(s).`, label: "Fila", tone: "warn", page: "calls" }
-        : { icon: "&#128229;", title: "Fila de chamados estavel", note: "Sem pendencia aberta na base atual.", label: "OK", tone: "ok", page: "calls" },
+        : { icon: "&#128229;", title: "Fila de chamados estável", note: "Sem pendencia aberta na base atual.", label: "OK", tone: "ok", page: "calls" },
       carCount
         ? { icon: "&#128663;", title: "Carros agendados", note: `${carCount} reserva(s) de carro oficial no recorte.`, label: "Carros", tone: "info", page: "cars" }
-        : { icon: "&#128663;", title: "Agenda de carros pronta", note: "Area pronta para puxar reservas de carros oficiais.", label: "Carros", tone: "info", page: "cars" }
+        : { icon: "&#128663;", title: "Agenda de carros pronta", note: "Área pronta para puxar reservas de carros oficiais.", label: "Carros", tone: "info", page: "cars" }
     ];
 
     const profileDecision = {
@@ -727,12 +727,12 @@
     setText("#userNameLabel", display.name);
     setText("#accountNameLabel", P.firstName?.(display.shortName || display.name) || display.shortName || display.name);
     P.applyConnectionState?.();
-    setText("#userIdentitySource", display.linked ? "Usuario vinculado ao contato" : "Usuario importado da v1");
+    setText("#userIdentitySource", display.linked ? "Usuário vinculado ao contato" : "Usuário importado da v1");
     setText("#userRoleSummary", P.roleLabel?.(role) || role);
     setText("#userAccessSummary", profile?.note || "Perfil local de acesso ao painel.");
     setText("#userContactSummary", display.linked
       ? `${display.contactRole || "Contato"} | ${display.sector || "Setor"} | ${display.email || display.phone || "sem canal"}`
-      : "Sem contato vinculado. Ajuste o mapeamento em usuarios."
+      : "Sem contato vinculado. Ajuste o mapeamento em usuários."
     );
     setText("#userContactStatus", display.linked ? "Vinculado" : "Pendente");
     P.$("#userContactStatus")?.classList.toggle("warn", !display.linked);
@@ -825,13 +825,13 @@
     const supervisor = supervisorForSchool(school.name);
     const calls = (data.calls || []).filter(call => P.normalize(call.school) === P.normalize(school.name));
     const networkStatus = network ? "Mapeada" : "Pendente";
-    const profileNote = missingProfile.length ? `Pendencias: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
+    const profileNote = missingProfile.length ? `Pendências: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
     const schoolTone = totals.alertUnits || metrics.alerts ? "warn" : (!network || profilePct < 65 || calls.length ? "info" : "ok");
     const inventoryPreview = assets.slice(0, 6);
     const networkItems = [
       { title: "Rede", value: network?.network?.[0] || "Sem informação" },
       { title: "IPs", value: network?.ips?.[0] || "Sem IP cadastrado" },
-      { title: "Câmeras", value: network?.cameras?.[0] || "Sem câmera cadastrada" }
+      { title: "Câmeras", value: network?.câmeras?.[0] || "Sem câmera cadastrada" }
     ];
     const guideWidgets = [
       { key: "inventory", title: "&#128187; Inventário", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) pedem revisão` : `${totals.lines || metrics.items || 0} item(ns) sem alerta`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "Abrir", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("inventory") },
@@ -859,7 +859,7 @@
         <section class="school-profile-metrics">
           <article><span>&#128203;</span><small>Ficha</small><strong>${profilePct}%</strong><i style="--pct:${profilePct}%"></i></article>
           <article><span>&#128187;</span><small>Inventário</small><strong>${totals.lines || metrics.items || 0}</strong><i style="--pct:100%"></i></article>
-          <article><span>&#128736;&#65039;</span><small>Manutencao</small><strong>${totals.alertUnits || metrics.alerts || 0}</strong><i style="--pct:${totals.alertUnits || metrics.alerts ? 100 : 0}%"></i></article>
+          <article><span>&#128736;&#65039;</span><small>Manutenção</small><strong>${totals.alertUnits || metrics.alerts || 0}</strong><i style="--pct:${totals.alertUnits || metrics.alerts ? 100 : 0}%"></i></article>
           <article><span>&#127760;</span><small>Rede</small><strong>${networkStatus}</strong><i style="--pct:${network ? 100 : 0}%"></i></article>
           <article><span>&#128229;</span><small>Chamados</small><strong>${calls.length}</strong><i style="--pct:${calls.length ? 100 : 0}%"></i></article>
         </section>
@@ -891,13 +891,13 @@
             <div class="school-profile-stack">
               <span><small>Responsável</small><strong>${supervisor?.name || "Não vinculado"}</strong></span>
               <span><small>Semana</small><strong>${supervisor?.week || "0/3"}</strong></span>
-              <span><small>Mes</small><strong>${supervisor?.month || "0/12"}</strong></span>
+              <span><small>Mês</small><strong>${supervisor?.month || "0/12"}</strong></span>
             </div>
             <button class="ghost-btn block" type="button" data-open-supervisor="${supervisor?.name || ""}" ${supervisor ? "" : "disabled"}>Abrir supervisor</button>
           </article>
 
           <article class="box school-profile-card">
-            <div class="box-head"><div><strong>Rede e cameras</strong><small>Infraestrutura vinculada.</small></div><span class="status-pill ${network ? "info" : "warn"}">${networkStatus}</span></div>
+            <div class="box-head"><div><strong>Rede e câmeras</strong><small>Infraestrutura vinculada.</small></div><span class="status-pill ${network ? "info" : "warn"}">${networkStatus}</span></div>
             <div class="school-profile-stack">
               ${networkItems.map(item => `<span><small>${item.title}</small><strong>${item.value}</strong></span>`).join("")}
             </div>
@@ -928,14 +928,14 @@
             <form class="school-edit-form" data-school-edit-form>
               <label><span>Municipio</span><input name="city" value="${attrValue(schoolCity(school))}"></label>
               <label><span>CIE</span><input name="cie" value="${attrValue(schoolCie(school))}"></label>
-              <label><span>Direcao</span><input name="director" value="${attrValue(profile?.director)}"></label>
-              <label><span>Vice-direcao</span><input name="viceDirector" value="${attrValue(profile?.viceDirector)}"></label>
+              <label><span>Direção</span><input name="director" value="${attrValue(profile?.director)}"></label>
+              <label><span>Vice-direção</span><input name="viceDirector" value="${attrValue(profile?.viceDirector)}"></label>
               <label><span>PROATI</span><input name="proati" value="${attrValue(profile?.proati)}"></label>
               <label><span>GOE</span><input name="goe" value="${attrValue(profile?.goe)}"></label>
               <label><span>Telefone</span><input name="phone" value="${attrValue(profile?.phone)}"></label>
               <label><span>Celular</span><input name="mobile" value="${attrValue(profile?.mobile)}"></label>
               <label><span>Email</span><input name="email" value="${attrValue(profile?.email)}"></label>
-              <label class="wide"><span>Endereco</span><input name="address" value="${attrValue(profile?.address)}"></label>
+              <label class="wide"><span>Endereço</span><input name="address" value="${attrValue(profile?.address)}"></label>
               <label class="wide"><span>Observacoes</span><textarea name="notes">${attrValue(profile?.notes)}</textarea></label>
               <button class="ghost-btn" type="submit">Salvar dados</button>
             </form>
@@ -968,7 +968,7 @@
   }
 
   function followUpText(missingProfile, alertCount, network, callCount) {
-    if (alertCount) return "Conferir inventario com manutencao ou defeito.";
+    if (alertCount) return "Conferir inventário com manutenção ou defeito.";
     if (callCount) return "Chamados vinculados na escola.";
     if (missingProfile.length) return `Completar ficha: ${missingProfile.slice(0, 3).join(", ")}.`;
     if (!network) return "Mapear rede e câmeras para completar a base técnica.";
@@ -1004,7 +1004,7 @@
     const rows = [
       { icon: "RD", title: "Escolas mapeadas", note: `${names.length} escola(s) com dados de infraestrutura.`, label: `${names.length}`, tone: names.length ? "info" : "warn" },
       { icon: "IP", title: "IPs", note: `${selectedData?.ips?.length || 0} registro(s) de IP para ${selectedName || "a escola selecionada"}.`, label: selectedData?.ips?.length ? "ok" : "pendente", tone: selectedData?.ips?.length ? "ok" : "warn" },
-      { icon: "CM", title: "Câmeras", note: `${selectedData?.cameras?.length || 0} informação(ões) de câmeras disponíveis.`, label: selectedData?.cameras?.length ? "ok" : "base", tone: selectedData?.cameras?.length ? "ok" : "info" },
+      { icon: "CM", title: "Câmeras", note: `${selectedData?.câmeras?.length || 0} informação(ões) de câmeras disponíveis.`, label: selectedData?.câmeras?.length ? "ok" : "base", tone: selectedData?.câmeras?.length ? "ok" : "info" },
       { icon: "CR", title: "Credenciais", note: canViewCredentials() ? "Perfil autorizado a consultar credenciais técnicas." : "Credenciais ficam protegidas para este perfil.", label: canViewCredentials() ? "liberado" : "restrito", tone: canViewCredentials() ? "ok" : "warn" }
     ];
     renderSummaryRows("#networkSummaryRows", rows);
@@ -1028,13 +1028,13 @@
     const widgets = [
       ["Informacoes sobre redes", data.network || [], "RD", "info", "Publico CTC"],
       ["Informacoes sobre IPs", data.ips || [], "IP", "info", "Publico CTC"],
-      ["Informacoes sobre cameras", data.cameras || [], "CM", "info", "Publico CTC"],
+      ["Informacoes sobre câmeras", data.câmeras || [], "CM", "info", "Publico CTC"],
       ["Credenciais", data.credentials || [], "CR", "warn", "Restrito"]
     ].filter(([, items]) => items.length);
     if (credentialItems.length && !canViewCredentials()) {
       const credentialIndex = widgets.findIndex(([title]) => title === "Credenciais");
       if (credentialIndex >= 0) {
-        widgets[credentialIndex] = ["Credenciais protegidas", ["Disponivel apenas para Administrador, SETEC, SEINTEC e Tecnicos CTC."], "CR", "warn", "Restrito"];
+        widgets[credentialIndex] = ["Credenciais protegidas", ["Disponivel apenas para Administrador, SETEC, SEINTEC e Técnicos CTC."], "CR", "warn", "Restrito"];
       }
     }
 
@@ -1078,7 +1078,7 @@
     const categoryCount = new Set(selectedAssets.map(asset => assetCategory(asset))).size;
     const rows = [
       { icon: "&#128187;", title: "Inventário da escola", note: `${totals.lines} linha(s), ${totals.units} unidade(s) e ${categoryCount} categoria(s).`, label: `${totals.units}`, tone: "info" },
-      { icon: "&#128736;&#65039;", title: "Manutencao/defeito", note: totals.alertUnits ? `${totals.alertUnits} unidade(s) fora de OK em ${selectedSchool}.` : "Todos os itens filtrados estao OK.", label: `${totals.alertUnits}`, tone: totals.alertUnits ? "warn" : "ok" },
+      { icon: "&#128736;&#65039;", title: "Manutenção/defeito", note: totals.alertUnits ? `${totals.alertUnits} unidade(s) fora de OK em ${selectedSchool}.` : "Todos os itens filtrados estao OK.", label: `${totals.alertUnits}`, tone: totals.alertUnits ? "warn" : "ok" },
       { icon: "&#127979;", title: "Base carregada", note: `${schools} escola(s) com inventario e ${globalTotals.lines} linha(s) totais.`, label: `${schools}`, tone: "info" },
       { icon: "&#9989;", title: "Conferencia", note: `${globalTotals.alertUnits} unidade(s) fora de OK na base completa.`, label: globalTotals.alertUnits ? "acompanhar" : "ok", tone: globalTotals.alertUnits ? "warn" : "ok" }
     ];
@@ -1238,10 +1238,10 @@
     const phoneCount = visible.filter(contact => contact.phone).length;
     const photoCount = visible.filter(contact => contact.photo).length;
     const rows = [
-      { icon: "CO", title: "Contatos visiveis", note: sector === "Todos" ? `${visible.length} contato(s) em ${sectors} setor(es).` : `${visible.length} contato(s) em ${sector}.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
+      { icon: "CO", title: "Contatos visíveis", note: sector === "Todos" ? `${visible.length} contato(s) em ${sectors} setor(es).` : `${visible.length} contato(s) em ${sector}.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
       { icon: "EM", title: "E-mail", note: `${emailCount}/${visible.length || 0} contato(s) com e-mail disponível.`, label: emailCount === visible.length && visible.length ? "ok" : "base", tone: emailCount === visible.length && visible.length ? "ok" : "info" },
       { icon: "TE", title: "Telefone e ramal", note: `${phoneCount}/${visible.length || 0} contato(s) com canal telefonico.`, label: phoneCount === visible.length && visible.length ? "ok" : "revisar", tone: phoneCount === visible.length && visible.length ? "ok" : "warn" },
-      { icon: "US", title: "Perfis vinculados", note: `${photoCount} contato(s) ja usam foto enviada pelo usuario.`, label: photoCount ? "foto" : "local", tone: photoCount ? "ok" : "info" }
+      { icon: "US", title: "Perfis vinculados", note: `${photoCount} contato(s) já usam foto enviada pelo usuário.`, label: photoCount ? "foto" : "local", tone: photoCount ? "ok" : "info" }
     ];
     renderSummaryRows("#contactSummaryRows", rows);
   }
@@ -1258,7 +1258,7 @@
 
   function carStatusTone(status) {
     const key = P.normalize(status || "");
-    if (["cancelado", "cancelada", "bloqueado", "indisponivel", "recusado", "reprovado"].some(item => key.includes(item))) return "danger";
+    if (["cancelado", "cancelada", "bloqueado", "indisponível", "recusado", "reprovado"].some(item => key.includes(item))) return "danger";
     if (["pendente", "aguardando", "solicitado"].some(item => key.includes(item))) return "warn";
     if (["uso", "rota", "andamento"].some(item => key.includes(item))) return "info";
     return "ok";
@@ -1566,7 +1566,7 @@
     const visible = monthFiltered(visibleAll, item => item.date || item.value);
     renderCalendarOperationalSummary(visible, mode);
     if (!visible.length) {
-      grid.innerHTML = `<div class="empty-state">${mode === "personal" ? "Nenhum evento pessoal" : "Nenhum evento compartilhado"} em ${P.selectedMonthLabel?.() || "mes selecionado"}.</div>`;
+      grid.innerHTML = `<div class="empty-state">${mode === "personal" ? "Nenhum evento pessoal" : "Nenhum evento compartilhado"} em ${P.selectedMonthLabel?.() || "mês selecionado"}.</div>`;
       return;
     }
     grid.innerHTML = calendarBoardMarkup(visible);
@@ -1755,7 +1755,7 @@
     grid.innerHTML = items.length ? items.map(item => `
       <article class="detail-widget" data-search="${P.searchText([item.label, item.status, item.note])}">
         <div>
-          <small>${item.status === "ok" ? "concluido" : "atencao"}</small>
+          <small>${item.status === "ok" ? "concluído" : "atenção"}</small>
           <strong>${item.label}</strong>
           <p>${item.note}</p>
         </div>
@@ -1791,7 +1791,7 @@
     });
     renderCtcOperationalSummary(monthVisits, visible);
     const summary = P.$("#ctcFilterSummary");
-    if (summary) summary.textContent = `${visible.length}/${monthVisits.length} visita(s) visiveis em ${P.selectedMonthLabel?.() || "mes selecionado"}.`;
+    if (summary) summary.textContent = `${visible.length}/${monthVisits.length} visita(s) visíveis em ${P.selectedMonthLabel?.() || "mês selecionado"}.`;
 
     grid.innerHTML = visible.length ? visible.map(visit => `
       <article class="detail-widget" data-ctc-key="${P.searchText([visit.owner, visit.date, visit.time, visit.place])}" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
@@ -1804,7 +1804,7 @@
           <button class="ghost-btn" type="button" data-open-school="${visit.place}">Abrir escola</button>
         </div>
       </article>
-    `).join("") : `<div class="empty-state">${monthVisits.length ? "Nenhuma visita CTC com esses filtros." : `Nenhuma visita CTC em ${P.selectedMonthLabel?.() || "mes selecionado"}.`}</div>`;
+    `).join("") : `<div class="empty-state">${monthVisits.length ? "Nenhuma visita CTC com esses filtros." : `Nenhuma visita CTC em ${P.selectedMonthLabel?.() || "mês selecionado"}.`}</div>`;
     grid.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });
@@ -1816,7 +1816,7 @@
     const dates = new Set(visible.map(visit => visit.date).filter(Boolean)).size;
     const rows = [
       { icon: "CT", title: "Visitas técnicas", note: `${visible.length}/${visits.length} visita(s) no recorte atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
-      { icon: "US", title: "Tecnicos", note: `${owners} tecnico(s) com agenda visivel.`, label: `${owners}`, tone: owners ? "ok" : "warn" },
+      { icon: "US", title: "Técnicos", note: `${owners} técnico(s) com agenda visível.`, label: `${owners}`, tone: owners ? "ok" : "warn" },
       { icon: "ES", title: "Escolas atendidas", note: `${schools} escola(s) aparecem nas visitas filtradas.`, label: `${schools}`, tone: schools ? "info" : "warn" },
       { icon: "AG", title: "Dias de agenda", note: `${dates} dia(s) distintos no recorte.`, label: `${dates}`, tone: dates ? "info" : "warn" }
     ];
@@ -1848,7 +1848,7 @@
     });
     renderCallOperationalSummary(calls, visible);
     const summary = P.$("#callFilterSummary");
-    if (summary) summary.textContent = `${visible.length}/${calls.length} chamado(s) visiveis.`;
+    if (summary) summary.textContent = `${visible.length}/${calls.length} chamado(s) visíveis.`;
 
     grid.innerHTML = visible.length ? visible.map(call => `
       <article class="detail-widget" data-call-key="${P.searchText([call.title])}" data-search="${P.searchText([call.title, call.school, call.status, call.note])}">
@@ -1874,7 +1874,7 @@
     const resolved = visible.filter(call => call.status === "resolvido").length;
     const schools = new Set(visible.map(call => call.school).filter(Boolean)).size;
     const rows = [
-      { icon: "CH", title: "Fila visivel", note: `${visible.length}/${calls.length} chamado(s) no recorte atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "ok" },
+      { icon: "CH", title: "Fila visível", note: `${visible.length}/${calls.length} chamado(s) no recorte atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "ok" },
       { icon: "!", title: "Abertos", note: `${open} chamado(s) aguardando encaminhamento.`, label: `${open}`, tone: open ? "warn" : "ok" },
       { icon: "SV", title: "Em rota", note: `${route} chamado(s) em atendimento.`, label: `${route}`, tone: route ? "info" : "ok" },
       { icon: "ES", title: "Escolas envolvidas", note: `${schools} escola(s) com chamado no filtro. Resolvidos: ${resolved}.`, label: `${schools}`, tone: schools ? "info" : "ok" }
@@ -1901,7 +1901,7 @@
       { icon: "PS", title: "Pesquisas", note: "Campanhas cadastradas", label: String(list.length), tone: list.length ? "info" : "warn" },
       { icon: "RP", title: "Respostas", note: "Total consolidado na base", label: String(responses), tone: responses ? "ok" : "warn" },
       { icon: "AT", title: "Ativas", note: "Campanhas em acompanhamento", label: String(active), tone: active ? "info" : "ok" },
-      { icon: "LK", title: "Formularios", note: "Links oficiais disponiveis", label: String(links), tone: links ? "ok" : "warn" }
+      { icon: "LK", title: "Formularios", note: "Links oficiais disponíveis", label: String(links), tone: links ? "ok" : "warn" }
     ]);
     grid.innerHTML = list.length ? list.map(item => {
       const tone = satisfactionTone(item.status);
@@ -1910,7 +1910,7 @@
         <article class="detail-widget" data-search="${search}">
           <div>
             <small>${item.period || "Periodo a definir"}</small>
-            <strong>${item.title || "Pesquisa de satisfacao"}</strong>
+            <strong>${item.title || "Pesquisa de satisfação"}</strong>
             <p>${item.note || item.audience || "Aguardando fonte oficial da pesquisa."}</p>
             <div class="mini-metrics">
               <span><b>Publico</b>${item.audience || "Nao informado"}</span>
@@ -1920,11 +1920,11 @@
           </div>
           <div class="detail-actions">
             <span class="status-pill ${tone}">${item.status || "ativa"}</span>
-            ${item.link ? `<a class="ghost-btn" href="${item.link}" target="_blank" rel="noopener">Abrir formulario</a>` : ""}
+            ${item.link ? `<a class="ghost-btn" href="${item.link}" target="_blank" rel="noopener">Abrir formulário</a>` : ""}
           </div>
         </article>
       `;
-    }).join("") : `<div class="empty-state">Nenhuma pesquisa de satisfacao cadastrada. Cadastre a fonte oficial no Painel admin quando o formulario estiver pronto.</div>`;
+    }).join("") : `<div class="empty-state">Nenhuma pesquisa de satisfacao cadastrada. Cadastre a fonte oficial no Painel admin quando o formulário estiver pronto.</div>`;
   }
 
   function renderReports(data) {
@@ -1941,7 +1941,7 @@
       { icon: "IN", label: "Inventário", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
       { icon: "AT", label: "Alertas", value: String(alerts), note: "manutenção/defeito", tone: "glow-amber" },
       { icon: "RD", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
-      { icon: "SV", label: "Pendencias", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
+      { icon: "SV", label: "Pendências", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
       { icon: "&#128663;", label: "Carros", value: String(cars), note: "agendamentos", tone: "glow-teal" },
       { icon: "US", label: "Usuários", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
     ];
@@ -1960,7 +1960,7 @@
       ["Carros", `${cars} agendamento(s) de carro oficial no recorte atual.`, cars ? "ok" : "info"],
       ["Chamados", `${data.calls.length} chamado(s) operacionais em acompanhamento.`, data.calls.some(call => call.status !== "resolvido") ? "warn" : "ok"],
       ["Calendário", "Estrutura pronta para a agenda institucional.", "info"],
-      ["Publicacao", "2.0 publicado em repositorio proprio e GitHub Pages.", "ok"]
+      ["Publicação", "2.0 publicado em repositório proprio e GitHub Pages.", "ok"]
     ].map(([title, note, status]) => `
       <div class="data-row" data-search="${P.searchText([title, note, status])}">
         <span class="row-icon">&#128200;</span>
@@ -2028,12 +2028,12 @@
       {
         label: "Fontes oficiais",
         status: configuredSources || officialSources ? "ok" : "warn",
-        note: `${configuredSources}/${sources.length} configurada(s), ${officialSources} oficial(is), ${sensitiveSources} sensivel(is)`
+        note: `${configuredSources}/${sources.length} configurada(s), ${officialSources} oficial(is), ${sensitiveSources} sensível(is)`
       },
       {
         label: "Escopo ativo",
         status: P.canAccessData ? "ok" : "danger",
-        note: `${currentRole} com ${P.roleAccess?.(currentRole)?.length || 0} pagina(s) liberada(s). Teste automatico cobre os perfis atuais.`
+        note: `${currentRole} com ${P.roleAccess?.(currentRole)?.length || 0} página(s) liberada(s). Teste automático cobre os perfis atuais.`
       },
       {
         label: "Fichas escolares",
@@ -2062,7 +2062,7 @@
         : "Sincronize carros para ver as colunas originais.";
       carDiagnostics.innerHTML = `
         <div class="settings-row">
-          <div><strong>Fonte de carros</strong><small>${carSource.status ? `Status ${carSource.status}` : "Ainda sem sincronizacao nesta sessao."} | ${rawCarRows.length || cars.length} linha(s)</small></div>
+          <div><strong>Fonte de carros</strong><small>${carSource.status ? `Status ${carSource.status}` : "Ainda sem sincronização nesta sessao."} | ${rawCarRows.length || cars.length} linha(s)</small></div>
           <span class="status-pill ${cars.length ? "ok" : "warn"}">${cars.length ? "ok" : "revisar"}</span>
         </div>
         <div class="settings-row">
@@ -2074,7 +2074,7 @@
           <span class="status-pill info">origem</span>
         </div>
         <div class="settings-row">
-          <div><strong>Regra anti-perda</strong><small>Fonte vazia nao sobrescreve dados bons; o painel mantem o ultimo estado valido e mostra aviso.</small></div>
+          <div><strong>Regra anti-perda</strong><small>Fonte vazia não sobrescreve dados bons; o painel mantém o último estado válido e mostra aviso.</small></div>
           <span class="status-pill ok">ativo</span>
         </div>
       `;
@@ -2084,7 +2084,7 @@
     grid.innerHTML = rows.length ? rows.map(item => `
       <article class="detail-widget" data-search="${P.searchText([item.label, item.status, item.note])}">
         <div>
-          <small>${item.status === "ok" ? "estavel" : "decisao pendente"}</small>
+          <small>${item.status === "ok" ? "estável" : "decisão pendente"}</small>
           <strong>AD ${item.label}</strong>
           <p>${item.note}</p>
         </div>

@@ -345,7 +345,7 @@
 
       pushUnique(entry.network, firstValue(row, ["rede", "network", "gateway", "wifi"], ""));
       pushUnique(entry.ips, firstValue(row, ["ip", "ips", "cie", "banda"], ""));
-      pushUnique(entry.cameras, firstValue(row, ["camera", "cameras", "dvr"], ""));
+      pushUnique(entry.cameras, firstValue(row, ["camera", "cameras", "câmeras", "dvr"], ""));
       acc[school] = entry;
       return acc;
     }, {});
@@ -362,11 +362,11 @@
         tone: firstValue(row, ["status", "tone"], type || "info"),
         type,
         scope,
-        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "user"], ""),
+        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "usuário", "user"], ""),
         assignee: firstValue(row, ["atribuido", "assignee", "destinatario"], ""),
         contactId: firstValue(row, ["contact_id", "id_contato", "contato_id"], ""),
-        ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id"], ""),
-        ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email"], "")
+        ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id", "id_usuário", "usuário_id"], ""),
+        ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email_usuário", "email"], "")
       };
     });
   }
@@ -404,12 +404,12 @@
 
   function normalizeSatisfactionRows(rows) {
     return rows.map(row => ({
-      title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfacao"),
+      title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfação"),
       audience: firstValue(row, ["publico", "audiencia", "audience", "destinatario"], "Publico nao informado"),
       status: firstValue(row, ["status", "situacao", "andamento"], "ativa"),
       score: firstValue(row, ["nota", "media", "score", "avaliacao", "satisfacao"], ""),
       responses: numberFrom(row, ["respostas", "responses", "total", "quantidade"], 0),
-      link: firstValue(row, ["link", "url", "formulario", "forms"], ""),
+      link: firstValue(row, ["link", "url", "formulario", "formulário", "forms"], ""),
       period: firstValue(row, ["periodo", "prazo", "data", "competencia"], ""),
       note: firstValue(row, ["observacao", "observacoes", "descricao", "note"], "")
     }));

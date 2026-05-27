@@ -3,26 +3,26 @@
   P.seedData = P.seedData || {};
 
   P.seedData.ctcVisits = [
-    { owner: "Bruno", date: "2026-05-11", time: "09:00", place: "EE Bairro Boa Vista Intervales", objective: "Conferir rede, inventario e cameras." },
-    { owner: "Danilo", date: "2026-05-11", time: "13:30", place: "EE Bairro Ferreira dos Matos", objective: "Validar pontos de rede e equipamentos em atencao." },
-    { owner: "Bruno", date: "2026-05-12", time: "10:00", place: "PEI EE Oscar Kurtz Camargo", objective: "Revisao tecnica de cameras." }
+    { owner: "Bruno", date: "2026-05-11", time: "09:00", place: "EE Bairro Boa Vista Intervales", objective: "Conferir rede, inventario e câmeras." },
+    { owner: "Danilo", date: "2026-05-11", time: "13:30", place: "EE Bairro Ferreira dos Matos", objective: "Validar pontos de rede e equipamentos em atenção." },
+    { owner: "Bruno", date: "2026-05-12", time: "10:00", place: "PEI EE Oscar Kurtz Camargo", objective: "Revisao tecnica de câmeras." }
   ];
 
   P.seedData.cars = [
     { vehicle: "Carro oficial 1", date: "2026-05-15", time: "08:00", requester: "Gabinete", destination: "Itapeva", driver: "A definir", status: "reservado", note: "Reserva operacional para deslocamento institucional." },
     { vehicle: "Carro oficial 2", date: "2026-05-15", time: "13:30", requester: "SETEC", destination: "Ribeirao Grande", driver: "A definir", status: "pendente", note: "Aguardando confirmacao de motorista." },
-    { vehicle: "Carro oficial 1", date: "2026-05-16", time: "09:00", requester: "Supervisao", destination: "Capao Bonito", driver: "A definir", status: "reservado", note: "Agenda de visita e acompanhamento escolar." }
+    { vehicle: "Carro oficial 1", date: "2026-05-16", time: "09:00", requester: "Supervisão", destination: "Capao Bonito", driver: "A definir", status: "reservado", note: "Agenda de visita e acompanhamento escolar." }
   ];
 
   P.seedData.calls = [
-    { title: "Inventario com itens em manutencao", school: "EE Professor Gerson de Barros Margarido", status: "aberto", note: "Priorizar itens criticos antes da proxima visita." },
-    { title: "Cameras abaixo do previsto", school: "EE Bairro Turvo dos Almeidas", status: "em_rota", note: "Verificar DVR e pontos de energia." },
-    { title: "Rede mapeada para consulta", school: "PEI EE Jeminiano David Muzel", status: "resolvido", note: "Dados tecnicos disponiveis no painel." }
+    { title: "Inventário com itens em manutenção", school: "EE Professor Gerson de Barros Margarido", status: "aberto", note: "Priorizar itens críticos antes da próxima visita." },
+    { title: "Câmeras abaixo do previsto", school: "EE Bairro Turvo dos Almeidas", status: "em_rota", note: "Verificar DVR e pontos de energia." },
+    { title: "Rede mapeada para consulta", school: "PEI EE Jeminiano David Muzel", status: "resolvido", note: "Dados técnicos disponíveis no painel." }
   ];
 
   P.seedData.reports = [
     { label: "Escolas", value: "21", note: "base mestre carregada" },
-    { label: "Inventario", value: "107", note: "linhas sanitizadas por escola" },
+    { label: "Inventário", value: "107", note: "linhas sanitizadas por escola" },
     { label: "Supervisores", value: "6", note: "visitas conectadas a planilha oficial de maio" },
     { label: "Contatos", value: "46", note: "contatos categorizados" }
   ];

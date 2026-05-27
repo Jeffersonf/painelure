@@ -76,7 +76,7 @@
     const display = P.displayUser?.(user) || user || {};
     const sector = user?.sector || user?.setor || user?.category || user?.categoria || display.sector || "";
     return [
-      display.shortName || display.name || user?.name || user?.login || "Usuario",
+      display.shortName || display.name || user?.name || user?.login || "Usuário",
       sector,
       P.roleLabel?.(user?.role) || user?.role || "Consulta"
     ].filter(Boolean).join(" • ");
@@ -252,7 +252,7 @@
     localStorage.setItem(ROLE_KEY, role);
     activateLocalSession(role);
     showPinChange(false);
-    const text = reason || "Servidor indisponivel. Voce entrou no modo local e a sincronizacao pode ser feita depois.";
+    const text = reason || "Servidor indisponível. Você entrou no modo local e a sincronização pode ser feita depois.";
     P.showToast?.("Modo offline", text, "warn", { delay: 9000 });
     showLoginStatus(text);
     return user;
@@ -262,7 +262,7 @@
     const message = String(error?.message || error || "");
     if (/HTTP 401|invalido|invalid/i.test(message)) return "Nome ou PIN incorretos.";
     if (/reinicie o servidor local/i.test(message)) return "Servidor local antigo detectado. Feche o terminal antigo e rode npm start na pasta painelure2.";
-    if (/HTTP 405|method/i.test(message)) return "API nao encontrada nesta pagina. Atualize e tente novamente.";
+    if (/HTTP 405|method/i.test(message)) return "API não encontrada nesta página. Atualize e tente novamente.";
     if (/aborted|network|failed to fetch/i.test(message)) return "Nao foi possivel conectar ao servidor.";
     return message || "Nao foi possivel entrar.";
   }
@@ -297,7 +297,7 @@
     applyUserAvatar();
     P.renderApp?.();
     refreshActiveUserSelect();
-    showLoginStatus("Sessao restaurada. Sincronizando dados oficiais...");
+    showLoginStatus("Sessão restaurada. Sincronizando dados oficiais...");
   }
 
   function logoutOnline() {
@@ -315,8 +315,8 @@
     P.renderPage?.("user", { force: true });
     if (P.$("#loginForm")) P.$("#loginForm").hidden = false;
     if (P.$("#pinChangeForm")) P.$("#pinChangeForm").hidden = true;
-    showLoginStatus("Sessao encerrada.");
-    P.showToast?.("Sessao encerrada", "Voce saiu do PainelURE.", "ok", { delay: 2600 });
+    showLoginStatus("Sessão encerrada.");
+    P.showToast?.("Sessão encerrada", "Você saiu do PainelURE.", "ok", { delay: 2600 });
     const userInput = P.$("#loginUserInput");
     const pinInput = P.$("#loginPinInput");
     if (userInput) userInput.value = "";
@@ -354,7 +354,7 @@
     try {
       backendPayload = await loadScopedBackendData({ render: false });
     } catch (error) {
-      P.showToast?.("Base online indisponivel", "Entrando com dados locais; tente sincronizar novamente no painel.", "warn", { delay: 9000 });
+      P.showToast?.("Base online indisponível", "Entrando com dados locais; tente sincronizar novamente no painel.", "warn", { delay: 9000 });
     }
     if (P.loadConfiguredSources) {
       showLoginStatus("Sincronizando fontes oficiais...");
@@ -362,7 +362,7 @@
       const failed = (results || []).filter(item => item.status === "error");
       if (failed.length) {
         const labels = failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ");
-        P.showToast?.("Sincronizacao parcial", `${labels} nao respondeu agora.`, "warn", { delay: 9000 });
+        P.showToast?.("Sincronização parcial", `${labels} não respondeu agora.`, "warn", { delay: 9000 });
       }
     }
     P.saveAppData?.();
@@ -386,11 +386,11 @@
       }
       throw error;
     }
-    if (!result?.token || !result?.user) throw new Error("Login nao retornou usuario.");
+    if (!result?.token || !result?.user) throw new Error("Login nao retornou usuário.");
     activateOnlineUser(result.token, result.user, { render: false });
     const syncPayload = await syncOfficialDataBeforeOpen();
     activateOnlineUser(result.token, result.user);
-    P.showToast?.("Online", syncPayload?.data?.appData ? "Sessao conectada com dados oficiais." : "Sessao conectada; servidor sem dados novos.", "ok", { delay: 7600 });
+    P.showToast?.("Online", syncPayload?.data?.appData ? "Sessão conectada com dados oficiais." : "Sessão conectada; servidor sem dados novos.", "ok", { delay: 7600 });
     if (result.user.preferences?.forcePinChange) {
       showPinChange(true);
       showLoginStatus("Troque o PIN inicial para continuar.");
@@ -408,9 +408,9 @@
     showLoginStatus("");
     if (pin.length < 4) throw new Error("Use um PIN com pelo menos 4 digitos.");
     if (pin === "1234") throw new Error("Escolha um PIN diferente do inicial.");
-    if (pin !== confirm) throw new Error("Os PINs nao conferem.");
+    if (pin !== confirm) throw new Error("Os PINs não conferem.");
     const user = P.onlineUser?.();
-    if (!backendToken || !user) throw new Error("Sessao online nao encontrada.");
+    if (!backendToken || !user) throw new Error("Sessão online nao encontrada.");
     const preferences = {
       ...(user.preferences || {}),
       forcePinChange: false,
@@ -468,7 +468,7 @@
     }
     setAuthenticated(true);
     activateLocalSession(P.activeUser?.()?.role || localStorage.getItem(ROLE_KEY) || "Consulta");
-    showLoginStatus("Sessao salva encontrada. Validando servidor...");
+    showLoginStatus("Sessão salva encontrada. Validando servidor...");
     try {
       const payload = await P.loadBackendUser(backendToken);
       const user = payload?.user || P.onlineUser?.() || (payload?.session ? {
@@ -893,7 +893,7 @@
             setAdminMeta(`Acesso de ${user.name} removido.`);
             refreshBackendPanel();
           } catch (error) {
-            setAdminMeta(`Falha ao remover usuario: ${error.message}`);
+            setAdminMeta(`Falha ao remover usuário: ${error.message}`);
           }
           return;
         }
@@ -1219,10 +1219,10 @@
     return [
       compact ? null : (meta.domain || source.label),
       meta.owner && `resp. ${meta.owner}`,
-      meta.cadence && `cadencia ${meta.cadence}`,
-      meta.autoLoad === false && "sincronizacao manual",
-      (meta.monthKey || source.monthKey) && `mes ${P.selectedMonthLabel?.(meta.monthKey || source.monthKey) || meta.monthKey || source.monthKey}`,
-      meta.sensitive && (compact ? "dados sensiveis" : `sensivel: ${meta.sensitive}`)
+      meta.cadence && `cadência ${meta.cadence}`,
+      meta.autoLoad === false && "sincronização manual",
+      (meta.monthKey || source.monthKey) && `mês ${P.selectedMonthLabel?.(meta.monthKey || source.monthKey) || meta.monthKey || source.monthKey}`,
+      meta.sensitive && (compact ? "dados sensíveis" : `sensível: ${meta.sensitive}`)
     ].filter(Boolean).join(" | ");
   }
 
@@ -1350,7 +1350,7 @@
     const detail = loading.length
       ? loading.map(item => P.sources?.[item.key]?.label || item.key).join(", ")
       : failed.length
-        ? `${failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ")} falhou. Dados antigos seguem visiveis.`
+        ? `${failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ")} falhou. Dados antigos seguem visíveis.`
         : empty.length
           ? `${empty.map(item => P.sources?.[item.key]?.label || item.key).join(", ")} retornou vazio. Dados antigos foram mantidos.`
         : important.length
@@ -1371,7 +1371,7 @@
   }
 
   function formatDateTime(value) {
-    return value ? new Date(value).toLocaleString("pt-BR") : "data indisponivel";
+    return value ? new Date(value).toLocaleString("pt-BR") : "data indisponível";
   }
 
   function auditTitle(event) {

@@ -79,7 +79,7 @@
       const carsReady = Boolean(P.sources?.cars?.url);
       const details = [
         "Painel, carros, agenda e CTC filtram por data.",
-        supervisionMonth && supervisionMonth !== selected ? `Supervisao oficial disponivel em ${monthLabel(supervisionMonth)}.` : "Supervisao usa o mes selecionado quando houver fonte mensal.",
+        supervisionMonth && supervisionMonth !== selected ? `Supervisão oficial disponível em ${monthLabel(supervisionMonth)}.` : "Supervisão usa o mês selecionado quando houver fonte mensal.",
         !calendarReady && "Calendario oficial pendente: agenda usa fallback operacional.",
         !carsReady && "Carros usa base local ate conectar fonte oficial."
       ].filter(Boolean);

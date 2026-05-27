@@ -87,7 +87,7 @@
   }
 
   function supervisorSourceFooter() {
-    const selected = P.selectedMonthLabel?.() || "mes selecionado";
+    const selected = P.selectedMonthLabel?.() || "mês selecionado";
     const source = P.sources?.supervision?.label || "planilha oficial de supervisao";
     const updated = new Date().toLocaleString("pt-BR", {
       day: "2-digit",
@@ -97,7 +97,7 @@
     }).replace(",", "");
     return `
       <div class="supervisor-sheet-foot">
-        <span>Fonte: ${source.toLowerCase()} | Mes exibido: ${selected}</span>
+        <span>Fonte: ${source.toLowerCase()} | Mês exibido: ${selected}</span>
         <span>Atualizada em ${updated}</span>
       </div>
     `;
@@ -168,7 +168,7 @@
   function noMonthDataMarkup(stats) {
     const hasData = stats.some(item => item.visitCount > 0) || (monthSourceIsSelected() && stats.some(item => Number(item.supervisor?.monthlyVisits || 0) > 0));
     if (hasData) return "";
-    const selected = P.selectedMonthLabel?.() || "mes selecionado";
+    const selected = P.selectedMonthLabel?.() || "mês selecionado";
     const official = P.sources?.supervision?.monthKey ? P.selectedMonthLabel?.(P.sources.supervision.monthKey) : "";
     return `
       <article class="supervisor-no-data-warning" role="status">
@@ -364,11 +364,11 @@
         </div>
         <div class="setechub-two-col">
           <div class="box" id="supervisorRecordVisited">
-            <div class="box-head"><div><strong>Escolas visitadas</strong><small>Unidades vinculadas com visita no mes atual.</small></div></div>
-            <div class="stack-list">${assignedSchools.filter(school => visited.has(school)).map(school => `<button class="setechub-item setechub-clickable" type="button" data-school-jump="${school}"><strong>${school}</strong><div class="sync-meta">Visitada</div></button>`).join("") || `<div class="sync-empty">Nenhuma escola visitada no mes atual.</div>`}</div>
+            <div class="box-head"><div><strong>Escolas visitadas</strong><small>Unidades vinculadas com visita no mês atual.</small></div></div>
+            <div class="stack-list">${assignedSchools.filter(school => visited.has(school)).map(school => `<button class="setechub-item setechub-clickable" type="button" data-school-jump="${school}"><strong>${school}</strong><div class="sync-meta">Visitada</div></button>`).join("") || `<div class="sync-empty">Nenhuma escola visitada no mês atual.</div>`}</div>
           </div>
           <div class="box" id="supervisorRecordPending">
-            <div class="box-head"><div><strong>Faltam visitas</strong><small>Unidades vinculadas sem visita registrada no mes.</small></div></div>
+            <div class="box-head"><div><strong>Faltam visitas</strong><small>Unidades vinculadas sem visita registrada no mês.</small></div></div>
             <div class="stack-list">${assignedSchools.filter(school => !visited.has(school)).map(school => `<button class="setechub-item setechub-clickable" type="button" data-school-jump="${school}"><strong>${school}</strong><div class="sync-meta">Sem visita registrada</div></button>`).join("") || `<div class="sync-empty">Todas as escolas vinculadas possuem visita.</div>`}</div>
           </div>
         </div>

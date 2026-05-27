@@ -17,26 +17,26 @@
       metadata: { domain: "Escolas", cadence: "mensal", owner: "URE" }
     },
     inventory: {
-      label: "Inventario",
+      label: "Inventário",
       type: "sharepoint-list",
       url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACUz84zfYrYRIadNAPXJvISAetLbQd40ptsKrcSMFs4TNQ?e=3WOQtG",
       status: "official",
-      metadata: { domain: "Inventario", cadence: "sob demanda", owner: "SETEC/CTC", source: "Inventario", autoLoad: false }
+      metadata: { domain: "Inventário", cadence: "sob demanda", owner: "SETEC/CTC", source: "Inventário", autoLoad: false }
     },
     supervision: {
-      label: "Supervisao",
+      label: "Supervisão",
       type: "csv",
       url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSkqZydw5EWNLREBCXdG-VpqcoOfuOf-AI2gYawdaeEwDNitR2m37okLvurfscimlSQMtpbHg_H_bzz/pub?output=csv",
       status: "official",
       monthKey: "2026-05",
-      metadata: { domain: "Supervisao", monthKey: "2026-05", cadence: "mensal", owner: "Gabinete", startsAt: "2026-05", panelGid: "1507846737" }
+      metadata: { domain: "Supervisão", monthKey: "2026-05", cadence: "mensal", owner: "Gabinete", startsAt: "2026-05", panelGid: "1507846737" }
     },
     network: {
-      label: "Redes e Cameras",
+      label: "Redes e Câmeras",
       type: "csv",
       url: "",
       status: "pending",
-      metadata: { domain: "Redes e Cameras", cadence: "sob demanda", owner: "SETEC/SEINTEC/CTC", sensitive: "credentials" }
+      metadata: { domain: "Redes e Câmeras", cadence: "sob demanda", owner: "SETEC/SEINTEC/CTC", sensitive: "credentials" }
     },
     calendar: {
       label: "Calendario URE",
@@ -46,11 +46,11 @@
       metadata: { domain: "Calendario", cadence: "mensal", owner: "Gabinete" }
     },
     satisfaction: {
-      label: "Pesquisa de satisfacao",
+      label: "Pesquisa de satisfação",
       type: "csv",
       url: "",
       status: "pending",
-      metadata: { domain: "Pesquisa de satisfacao", cadence: "por campanha", owner: "Gabinete" }
+      metadata: { domain: "Pesquisa de satisfação", cadence: "por campanha", owner: "Gabinete" }
     },
     cars: {
       label: "Agendamento de carros",

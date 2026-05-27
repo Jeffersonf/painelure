@@ -232,7 +232,7 @@ async function seedLocalUsersFromFrontend() {
   const users = (seed.users || []).map(user => ({
     id: user.id || crypto.randomUUID(),
     username: String(user.username || user.login || user.name || "").trim().toLowerCase(),
-    name: String(user.name || user.username || "Usuario").trim(),
+    name: String(user.name || user.username || "Usuário").trim(),
     role: String(user.role || "Consulta").trim(),
     contact_id: String(user.contactId || user.contact_id || "").trim(),
     password_hash: hashPassword("1234"),
@@ -532,7 +532,7 @@ async function audit(req, action, entity, entityId = "", detail = "", metadata =
   const event = {
     id: crypto.randomUUID(),
     user_id: user?.id || null,
-    actor_name: user?.name || (session ? "Sessao admin" : ""),
+    actor_name: user?.name || (session ? "Sessão admin" : ""),
     actor_role: user?.role || session?.role || "",
     action,
     entity,
@@ -588,7 +588,7 @@ async function storeStatus() {
       ready: false,
       updatedAt: null,
       source: null,
-      error: dbError || "Banco ainda nao inicializado."
+      error: dbError || "Banco ainda não inicializado."
     };
   }
   const result = await pool.query("select source, updated_at from app_state where id = $1", ["main"]);
@@ -830,7 +830,7 @@ async function scopedStoreForRequest(req) {
   const store = await readStore();
   const session = currentSession(req);
   const user = await currentSessionUser(req)
-    || (session ? { role: session.role || "Consulta", name: "Sessao admin" } : null)
+    || (session ? { role: session.role || "Consulta", name: "Sessão admin" } : null)
     || (!ADMIN_KEY ? { role: "Administrador", name: "Desenvolvimento local" } : null);
   const appData = store?.appData || {};
   return {
@@ -896,7 +896,7 @@ async function createUser(input) {
   const user = {
     id: crypto.randomUUID(),
     username: String(input.username || "").trim().toLowerCase(),
-    name: String(input.name || input.username || "Usuario").trim(),
+    name: String(input.name || input.username || "Usuário").trim(),
     role: String(input.role || "Consulta").trim(),
     contact_id: String(input.contactId || input.contact_id || "").trim(),
     password_hash: hashPassword(password),
@@ -906,7 +906,7 @@ async function createUser(input) {
       pin: input.pin || password
     }
   };
-  if (!user.username) throw new Error("Usuario obrigatorio.");
+  if (!user.username) throw new Error("Usuário obrigatorio.");
   if (pool && dbReady) {
     const result = await pool.query(
       `
@@ -919,7 +919,7 @@ async function createUser(input) {
     return publicUser(result.rows[0]);
   }
   const users = currentUsers();
-  if (users.some(item => item.username === user.username)) throw new Error("Usuario ja existe.");
+  if (users.some(item => item.username === user.username)) throw new Error("Usuário ja existe.");
   users.push(user);
   await saveLocalUsers(users);
   return publicUser(user);
@@ -927,7 +927,7 @@ async function createUser(input) {
 
 async function updateUser(id, patch) {
   const current = await findUserById(id);
-  if (!current) throw new Error("Usuario nao encontrado.");
+  if (!current) throw new Error("Usuário nao encontrado.");
   const next = {
     ...current,
     name: patch.name !== undefined ? String(patch.name).trim() : current.name,
@@ -962,7 +962,7 @@ async function updateUser(id, patch) {
 
 async function deleteUser(id) {
   const current = await findUserById(id);
-  if (!current) throw new Error("Usuario nao encontrado.");
+  if (!current) throw new Error("Usuário nao encontrado.");
   for (const [token, session] of sessions.entries()) {
     if (session?.userId === id) sessions.delete(token);
   }
@@ -1206,11 +1206,11 @@ function normalizeRows(type, rows) {
         tone: firstValue(row, ["status", "tone"], eventType || "info"),
         type: eventType,
         scope,
-        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "user"], ""),
+        owner: firstValue(row, ["responsavel", "dono", "owner", "usuario", "usuário", "user"], ""),
         assignee: firstValue(row, ["atribuido", "assignee", "destinatario"], ""),
         contactId: firstValue(row, ["contact_id", "id_contato", "contato_id"], ""),
-        ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id"], ""),
-        ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email"], "")
+        ownerId: firstValue(row, ["owner_id", "user_id", "id_usuario", "usuario_id", "id_usuário", "usuário_id"], ""),
+        ownerEmail: firstValue(row, ["owner_email", "email_usuario", "email_usuário", "email"], "")
       };
     });
   }
@@ -1241,12 +1241,12 @@ function normalizeRows(type, rows) {
   }
   if (type === "satisfaction") {
     return rows.map(row => ({
-      title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfacao"),
-      audience: firstValue(row, ["publico", "audiencia", "audience", "destinatario"], "Publico nao informado"),
+      title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfação"),
+      audience: firstValue(row, ["publico", "audiencia", "audience", "destinatario"], "Público não informado"),
       status: firstValue(row, ["status", "situacao", "andamento"], "ativa"),
       score: firstValue(row, ["nota", "media", "score", "avaliacao", "satisfacao"], ""),
       responses: numberFrom(row, ["respostas", "responses", "total", "quantidade"], 0),
-      link: firstValue(row, ["link", "url", "formulario", "forms"], ""),
+      link: firstValue(row, ["link", "url", "formulario", "formulário", "forms"], ""),
       period: firstValue(row, ["periodo", "prazo", "data", "competencia"], ""),
       note: firstValue(row, ["observacao", "observacoes", "descricao", "note"], "")
     }));
@@ -1277,7 +1277,7 @@ function normalizeRows(type, rows) {
       };
       pushUnique(entry.network, firstValue(row, ["rede", "network", "gateway", "wifi"], ""));
       pushUnique(entry.ips, firstValue(row, ["ip", "ips", "cie", "banda"], ""));
-      pushUnique(entry.cameras, firstValue(row, ["camera", "cameras", "dvr"], ""));
+      pushUnique(entry.cameras, firstValue(row, ["camera", "cameras", "câmeras", "dvr"], ""));
       acc[school] = entry;
       return acc;
     }, {});
@@ -1411,7 +1411,7 @@ async function handleApi(req, res, pathname) {
         const token = createSession({ ...user, preferences });
         send(res, 200, { ok: true, token, user: updatedUser });
       } else {
-        send(res, 401, { ok: false, error: "Usuario ou senha invalidos." });
+        send(res, 401, { ok: false, error: "Usuário ou senha invalidos." });
       }
     } else if (!ADMIN_KEY || body.key === ADMIN_KEY) {
       const token = createSession({ id: null, role: "Administrador" });
@@ -1437,13 +1437,13 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "GET" && pathname === "/api/users") {
-    if (!requireAdmin(req, res, "Apenas administrador pode listar usuarios.")) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode listar usuários.")) return;
     send(res, 200, { ok: true, users: await listUsers() });
     return;
   }
 
   if (req.method === "POST" && pathname === "/api/users") {
-    if (!requireAdmin(req, res, "Apenas administrador pode criar usuarios.")) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode criar usuários.")) return;
     const body = JSON.parse(await readBody(req) || "{}");
     send(res, 201, { ok: true, user: await createUser(body) });
     return;
@@ -1453,7 +1453,7 @@ async function handleApi(req, res, pathname) {
     if (!requireAuth(req, res)) return;
     const user = await currentSessionUser(req);
     if (!user) {
-      send(res, 400, { ok: false, error: "Sessao sem usuario vinculado." });
+      send(res, 400, { ok: false, error: "Sessão sem usuário vinculado." });
       return;
     }
     const body = JSON.parse(await readBody(req) || "{}");
@@ -1462,20 +1462,20 @@ async function handleApi(req, res, pathname) {
   }
 
   if (req.method === "PUT" && pathname.startsWith("/api/users/")) {
-    if (!requireAdmin(req, res, "Apenas administrador pode editar usuarios.")) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode editar usuários.")) return;
     const id = decodeURIComponent(pathname.split("/").pop());
     const body = JSON.parse(await readBody(req) || "{}");
     const user = await updateUser(id, body);
-    await audit(req, "update", "user", id, "Usuario atualizado.", { role: user.role });
+    await audit(req, "update", "user", id, "Usuário atualizado.", { role: user.role });
     send(res, 200, { ok: true, user });
     return;
   }
 
   if (req.method === "DELETE" && pathname.startsWith("/api/users/")) {
-    if (!requireAdmin(req, res, "Apenas administrador pode remover usuarios.")) return;
+    if (!requireAdmin(req, res, "Apenas administrador pode remover usuários.")) return;
     const id = decodeURIComponent(pathname.split("/").pop());
     const user = await deleteUser(id);
-    await audit(req, "delete", "user", id, "Usuario removido.", { role: user.role });
+    await audit(req, "delete", "user", id, "Usuário removido.", { role: user.role });
     send(res, 200, { ok: true, user });
     return;
   }
@@ -1559,7 +1559,7 @@ async function handleApi(req, res, pathname) {
     return;
   }
 
-  send(res, 404, { ok: false, error: "Endpoint nao encontrado." });
+  send(res, 404, { ok: false, error: "Endpoint não encontrado." });
 }
 
 const server = http.createServer((req, res) => {
@@ -1586,7 +1586,7 @@ initDatabase()
   .catch(error => {
     dbReady = false;
     dbError = error.message;
-    console.warn(`Banco online indisponivel: ${error.message}`);
+    console.warn(`Banco online indisponível: ${error.message}`);
   })
   .then(() => ensureBootstrapUser())
   .finally(() => {
