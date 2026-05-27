@@ -57,14 +57,15 @@
     const page = id || "dashboard";
     const url = new URL(location.href);
     const base = routeBase();
+    const slug = PAGE_SLUGS[page] || page;
     url.hash = "";
-    if (base) url.pathname = `${base}/`;
+    url.searchParams.delete("tela");
+    url.searchParams.delete("categoria");
+    url.searchParams.delete("v");
     if (page === "dashboard") {
-      url.searchParams.delete("tela");
-      url.searchParams.delete("categoria");
+      url.pathname = base ? `${base}/` : "/";
     } else {
-      url.searchParams.delete("tela");
-      url.searchParams.set("categoria", PAGE_SLUGS[page] || page);
+      url.pathname = base ? `${base}/${slug}` : `/${slug}`;
     }
     return `${url.pathname}${url.search}`;
   }
