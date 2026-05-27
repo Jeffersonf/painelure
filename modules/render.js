@@ -679,7 +679,7 @@
       const focusModeAttr = focusWidget.mode ? ` data-calendar-mode-target="${focusWidget.mode}"` : "";
       command.innerHTML = `
         <article class="command-primary command-${profile.notice === "Base operacional pronta" ? "info" : "ok"}">
-          <img class="command-logo" src="./assets/ure-logo.svg" alt="Logo da URE Itapeva">
+          <img class="command-logo" src="./assets/ure-logo.png" alt="Logo da URE Itapeva">
           <div>
             <span class="eyebrow">Comando do mês</span>
             <strong>${profile.title}</strong>
@@ -1972,19 +1972,23 @@
     const list = P.$("#reportsList");
     const plan = P.$("#reportsPlanList");
     if (!grid || !list) return;
-    const alerts = Object.values(data.schoolInventoryMetrics || {}).reduce((sum, item) => sum + Number(item.alerts || 0), 0);
-    const networkCount = Object.keys(data.networkData || {}).length;
+    const ctcVisits = monthFiltered(data.ctcVisits || [], item => item.date);
+    const supervisorVisitCount = (data.supervisors || []).reduce((sum, item) => sum + (Array.isArray(item.visits) ? item.visits.length : Number(item.visits || 0)), 0);
     const pendingVisits = (data.supervisors || []).reduce((sum, item) => sum + Number(item.pending || 0), 0);
-    const linkedUsers = (data.users || []).filter(user => user.contactSync === "linked").length;
-    const cars = monthFiltered(carBookings(data), item => item.date).length;
+    const cars = monthFiltered(carBookings(data), item => item.date);
+    const openCalls = (data.calls || []).filter(call => call.status !== "resolvido").length;
+    const involvedSchools = new Set([
+      ...ctcVisits.map(item => item.place),
+      ...(data.calls || []).map(item => item.school),
+      ...(data.supervisors || []).flatMap(item => item.assignedSchools || [])
+    ].filter(Boolean).map(item => P.normalize(item)));
     const metrics = [
-      { icon: "ES", label: "Escolas", value: String(data.schools.length), note: "base regional", tone: "glow-lime" },
-      { icon: "IN", label: "Inventário", value: String(data.schoolAssets.length), note: "linhas por escola", tone: "glow-teal" },
-      { icon: "AT", label: "Alertas", value: String(alerts), note: "manutenção/defeito", tone: "glow-amber" },
-      { icon: "RD", label: "Redes", value: String(networkCount), note: "escolas mapeadas", tone: "glow-teal" },
-      { icon: "SV", label: "Pendências", value: String(pendingVisits), note: "visitas faltantes", tone: "glow-purple" },
-      { icon: "&#128663;", label: "Carros", value: String(cars), note: "agendamentos", tone: "glow-teal" },
-      { icon: "US", label: "Usuários", value: `${linkedUsers}/${data.users.length}`, note: "vinculados a contatos", tone: "glow-lime" }
+      { icon: "VT", label: "Visitas CTC", value: String(ctcVisits.length), note: "técnicas no mês", tone: "glow-teal" },
+      { icon: "SV", label: "Supervisão", value: String(supervisorVisitCount || data.supervisors.length), note: supervisorVisitCount ? "visitas registradas" : "responsáveis ativos", tone: "glow-lime" },
+      { icon: "PE", label: "Pendências", value: String(pendingVisits), note: "visitas faltantes", tone: pendingVisits ? "glow-amber" : "glow-teal" },
+      { icon: "&#128663;", label: "Deslocamentos", value: String(cars.length), note: "carros no recorte", tone: "glow-teal" },
+      { icon: "CH", label: "Chamados", value: `${openCalls}/${data.calls.length}`, note: "em acompanhamento", tone: openCalls ? "glow-amber" : "glow-lime" },
+      { icon: "ES", label: "Escolas", value: String(involvedSchools.size || data.schools.length), note: "com referência", tone: "glow-lime" }
     ];
     grid.innerHTML = metrics.map(item => `
       <article class="metric-card ${item.tone}">
@@ -1995,28 +1999,27 @@
       </article>
     `).join("");
     list.innerHTML = [
-      ["Supervisão", `${data.supervisors.length} supervisores com planilha oficial de maio conectada.`, "ok"],
-      ["Inventário", `${data.schoolAssets.length} linhas sanitizadas, sem previews brutos da base anterior.`, "ok"],
-      ["Redes e câmeras", `${networkCount}/${data.schools.length} escola(s) com infraestrutura mapeada.`, networkCount === data.schools.length ? "ok" : "warn"],
-      ["Carros", `${cars} agendamento(s) de carro oficial no recorte atual.`, cars ? "ok" : "info"],
-      ["Chamados", `${data.calls.length} chamado(s) operacionais em acompanhamento.`, data.calls.some(call => call.status !== "resolvido") ? "warn" : "ok"],
-      ["Calendário", "Estrutura pronta para a agenda institucional.", "info"],
-      ["Publicação", "2.0 publicado em repositório proprio e GitHub Pages.", "ok"]
+      ["Visitas técnicas CTC", `${ctcVisits.length} compromisso(s) técnico(s) no recorte atual.`, ctcVisits.length ? "ok" : "info"],
+      ["Visitas de supervisão", supervisorVisitCount ? `${supervisorVisitCount} visita(s) registrada(s) nas planilhas de supervisão.` : `${data.supervisors.length} responsável(is) ativo(s), aguardando detalhamento de visitas.`, supervisorVisitCount ? "ok" : "info"],
+      ["Deslocamentos oficiais", `${cars.length} reserva(s) de carro oficial vinculada(s) ao mês selecionado.`, cars.length ? "ok" : "info"],
+      ["Acompanhamentos e chamados", `${openCalls} chamado(s) aberto(s) de ${data.calls.length} ocorrência(s) cadastrada(s).`, openCalls ? "warn" : "ok"],
+      ["Escolas acompanhadas", `${involvedSchools.size || data.schools.length} escola(s) com vínculo em visitas, chamados ou supervisão.`, "ok"],
+      ["Relatórios formais", "Base preparada para registrar visitas, devolutivas, deslocamentos e acompanhamentos por setor.", "info"]
     ].map(([title, note, status]) => `
       <div class="data-row" data-search="${P.searchText([title, note, status])}">
-        <span class="row-icon">&#128200;</span>
+        <span class="row-icon">&#128203;</span>
         <span><strong>${title}</strong><small>${note}</small></span>
         <em class="status-pill ${status}">${status === "ok" ? "ok" : "revisar"}</em>
       </div>
     `).join("");
     if (plan) {
       const planned = [
-        ["Relatório por setor", "Filtros por Tecnologia, Rede Escolar, RH, Finanças e Obras."],
-        ["Exportação mensal", "Pacote PDF/Excel com indicadores e bases oficiais."],
-        ["Carros oficiais", "Reservas, condutores, setores, retirada e devolução."],
-        ["Inventário técnico", "Itens por escola, alertas e evolução de manutenção."],
-        ["Supervisão", "Indicadores semanais e mensais por supervisor."],
-        ["Pesquisa de satisfação", "Campanhas, respostas, médias e devolutivas."]
+        ["Relatório de visita técnica", "Registro de escola, técnico, objetivo, atendimento realizado e encaminhamentos."],
+        ["Relatório de visita de supervisão", "Acompanhamento por supervisor, escola, pauta, pendências e devolutiva."],
+        ["Relatório de deslocamento", "Carro, condutor, setor, destino, retirada, devolução e solicitação."],
+        ["Relatório de acompanhamento escolar", "Histórico de contatos, visitas, chamados e providências por unidade."],
+        ["Relatório de ocorrência/chamado", "Fila operacional com status, prioridade, responsável e data de conclusão."],
+        ["Relatório de satisfação", "Campanhas, respostas, média, comentários e plano de ação."]
       ];
       plan.innerHTML = planned.map(([title, note], index) => `
         <div class="data-row compact">
