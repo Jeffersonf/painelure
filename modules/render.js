@@ -440,7 +440,8 @@
       if (school) school.value = "all";
       if (status) status.value = "all";
       if (category) category.value = "all";
-      renderCtc(P.getAppData().ctcVisits);
+      const data = P.scopedData?.(P.getAppData()) || P.getAppData();
+      renderCtc(data.ctcVisits, data.calls);
       const target = P.$(`[data-call-key="${P.searchText([title])}"]`);
       if (!target) return;
       P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
@@ -478,7 +479,8 @@
       if (school) school.value = "all";
       if (status) status.value = "all";
       if (category) category.value = "all";
-      renderCtc(P.getAppData().ctcVisits);
+      const data = P.scopedData?.(P.getAppData()) || P.getAppData();
+      renderCtc(data.ctcVisits, data.calls);
       const target = P.$(`[data-ctc-key="${key}"]`) || P.$(`[data-call-key="${P.searchText([key])}"]`);
       if (!target) return;
       P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
@@ -669,7 +671,7 @@
         : { icon: "&#128736;&#65039;", title: "Agenda CTC pronta", note: "Área preparada para rotas e compromissos técnicos.", label: "CTC", tone: "info", page: "ctc" },
       openCalls
         ? { icon: "&#128229;", title: "Chamados em acompanhamento", note: `${openCalls} chamado(s) ainda não resolvido(s).`, label: "Fila", tone: "warn", page: "calls" }
-        : { icon: "&#128229;", title: "Fila de chamados estável", note: "Sem pendencia aberta na base atual.", label: "OK", tone: "ok", page: "calls" },
+        : { icon: "&#128229;", title: "Fila de chamados estável", note: "Sem pendência aberta na base atual.", label: "OK", tone: "ok", page: "calls" },
       carCount
         ? { icon: "&#128663;", title: "Carros agendados", note: `${carCount} reserva(s) de carro oficial no recorte.`, label: "Carros", tone: "info", page: "cars" }
         : { icon: "&#128663;", title: "Agenda de carros pronta", note: "Área pronta para puxar reservas de carros oficiais.", label: "Carros", tone: "info", page: "cars" }
@@ -849,7 +851,7 @@
       { key: "inventory", title: "&#128187; Inventário", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) pedem revisão` : `${totals.lines || metrics.items || 0} item(ns) sem alerta`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "Abrir", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("inventory") },
       { key: "network", title: "&#127760; Redes", note: network ? `${networkItems.filter(item => !item.value.includes("Sem")).length}/3 grupos mapeados` : "Rede e câmeras pendentes", label: network ? "Abrir" : "Pendente", tone: network ? "info" : "warn", enabled: Boolean(network) && (!P.canAccess || P.canAccess("network")) },
       { key: "supervisor", title: "&#129517; Supervisão", note: supervisor ? `${supervisor.name} | mês ${supervisor.month || "0/12"}` : "Sem supervisor vinculado", label: supervisor ? "Abrir" : "Pendente", tone: supervisor ? "info" : "warn", enabled: Boolean(supervisor) },
-      { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estavel", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("calls") }
+      { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estável", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("calls") }
     ];
     detail.innerHTML = `
       <section class="school-profile-page school-profile-${schoolTone}">
@@ -984,7 +986,7 @@
     if (callCount) return "Chamados vinculados na escola.";
     if (missingProfile.length) return `Completar ficha: ${missingProfile.slice(0, 3).join(", ")}.`;
     if (!network) return "Mapear rede e câmeras para completar a base técnica.";
-    return "Escola sem pendencia resumida no painel.";
+    return "Escola sem pendência resumida no painel.";
   }
 
   function focusInventorySchool(name) {
@@ -1877,11 +1879,12 @@
       P.saveAppData?.();
       form.reset();
       P.showToast?.("Visita CTC agendada", `${visit.owner} em ${visit.place}.`, "ok", { delay: 5000 });
-      renderCtc(P.getAppData().ctcVisits);
+      const scopedData = P.scopedData?.(P.getAppData()) || P.getAppData();
+      renderCtc(scopedData.ctcVisits, scopedData.calls);
     });
   }
 
-  function renderCtc(visits) {
+  function renderCtc(visits, callsSource) {
     const grid = P.$("#ctcGrid");
     const callsGrid = P.$("#ctcCallsGrid");
     if (!grid && !callsGrid) return;
@@ -1891,23 +1894,26 @@
     const statusFilter = P.$("#ctcStatusFilter");
     const categoryFilter = P.$("#ctcCategoryFilter");
     const monthVisits = monthFiltered(visits, visit => visit.date);
-    const allCalls = Array.isArray(P.getAppData?.().calls) ? P.getAppData().calls : [];
+    const scopedData = P.scopedData?.(P.getAppData()) || P.getAppData();
+    const allCalls = Array.isArray(callsSource)
+      ? callsSource
+      : (Array.isArray(scopedData?.calls) ? scopedData.calls : (Array.isArray(P.getAppData?.().calls) ? P.getAppData().calls : []));
     const owners = [...new Set([...monthVisits.map(visit => visit.owner), ...allCalls.map(call => call.technician)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const schools = [...new Set([...monthVisits.map(visit => visit.place), ...allCalls.map(call => call.school)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const categories = [...new Set(allCalls.map(call => call.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     setSelectOptions(ownerFilter, [{ value: "all", label: "Todos" }, ...owners.map(owner => ({ value: P.searchText([owner]), label: owner }))], ownerFilter?.value || "all");
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
     setSelectOptions(categoryFilter, [{ value: "all", label: "Todas" }, ...categories.map(category => ({ value: P.searchText([category]), label: category }))], categoryFilter?.value || "all");
-    bindSimpleSelect(ownerFilter, () => renderCtc(P.getAppData().ctcVisits));
-    bindSimpleSelect(schoolFilter, () => renderCtc(P.getAppData().ctcVisits));
-    bindSimpleSelect(statusFilter, () => renderCtc(P.getAppData().ctcVisits));
-    bindSimpleSelect(categoryFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindSimpleSelect(ownerFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
+    bindSimpleSelect(schoolFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
+    bindSimpleSelect(statusFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
+    bindSimpleSelect(categoryFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
     bindResetButton(P.$("#ctcFilterReset"), () => {
       if (ownerFilter) ownerFilter.value = "all";
       if (schoolFilter) schoolFilter.value = "all";
       if (statusFilter) statusFilter.value = "all";
       if (categoryFilter) categoryFilter.value = "all";
-      renderCtc(P.getAppData().ctcVisits);
+      renderCtc(scopedData.ctcVisits, scopedData.calls);
     });
 
     const selectedOwner = ownerFilter?.value || "all";
@@ -2403,7 +2409,7 @@
         </div>
         <span class="status-pill ${statusClass(item.status)}">${item.status}</span>
       </article>
-    `).join("") : `<div class="empty-state">Nenhum diagnostico administrativo carregado.</div>`;
+    `).join("") : `<div class="empty-state">Nenhum diagnóstico administrativo carregado.</div>`;
   }
 
   P.renderDashboard = renderDashboard;

@@ -50,7 +50,9 @@
 
   function canAccess(page, role = currentRole()) {
     if (["user", "school-detail", "supervisor-detail"].includes(page)) return true;
-    return accessForRole(role).includes(page);
+    const access = accessForRole(role);
+    if (page === "calls" || page === "ctc") return access.includes("calls") || access.includes("ctc");
+    return access.includes(page);
   }
 
   function pageLabel(page) {
@@ -104,7 +106,7 @@
       button.classList.toggle("access-disabled", denied);
       button.setAttribute("aria-disabled", denied ? "true" : "false");
       if (denied) {
-        button.title = `Acesso negado a ${pageLabel(page)}. Disponiveis: ${allowedPageLabels(role)}`;
+        button.title = `Acesso negado a ${pageLabel(page)}. Disponíveis: ${allowedPageLabels(role)}`;
       } else if (button.title?.startsWith("Acesso negado")) {
         button.removeAttribute("title");
       }

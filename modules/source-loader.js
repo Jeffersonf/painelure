@@ -1,5 +1,6 @@
 (function () {
   const P = window.PainelURE;
+  const inflightSources = new Map();
 
   async function loadSource(key) {
     const source = P.sources?.[key];
@@ -21,6 +22,13 @@
       rows,
       data: normalize(payload)
     };
+  }
+
+  async function loadSourceOnce(key) {
+    if (inflightSources.has(key)) return inflightSources.get(key);
+    const promise = loadSource(key).finally(() => inflightSources.delete(key));
+    inflightSources.set(key, promise);
+    return promise;
   }
 
   function googleSheetGidCsvUrl(url, gid) {
@@ -53,7 +61,7 @@
     const appData = { ...P.getAppData() };
     const label = P.sources?.[key]?.label || key;
     P.showToast?.("Atualizando", `${label} em sincronização.`, "info", { delay: 7600 });
-    const result = await loadSource(key);
+    const result = await loadSourceOnce(key);
     result.updatedAt = new Date().toISOString();
     if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
       applySourceData(appData, key, result.data);
@@ -141,7 +149,7 @@
           results.push({ key, status: "skipped", rows: [], data: null, reason: "manual", updatedAt: new Date().toISOString() });
           continue;
         }
-        const result = await loadSource(key);
+        const result = await loadSourceOnce(key);
         result.updatedAt = new Date().toISOString();
         results.push(result);
         if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {

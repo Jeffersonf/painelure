@@ -129,7 +129,7 @@
     if (!empty) {
       empty = document.createElement("div");
       empty.className = "empty-state search-empty";
-      empty.textContent = "Nenhum resultado encontrado nesta pagina.";
+      empty.textContent = "Nenhum resultado encontrado nesta página.";
       activePage.appendChild(empty);
     }
     return empty;

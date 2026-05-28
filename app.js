@@ -40,7 +40,7 @@
       P.renderQuality(data.quality);
     },
     ctc(data) {
-      P.renderCtc(data.ctcVisits);
+      P.renderCtc(data.ctcVisits, data.calls);
     },
     cars(data) {
       P.renderCars(data);
@@ -87,7 +87,7 @@
         })
         .catch(error => {
           console.warn("[PainelURE] Fontes oficiais carregam em segundo plano:", error);
-          P.showToast?.("Sincronizacao parcial", "Alguma fonte oficial nao respondeu agora.", "warn", { delay: 9000 });
+          P.showToast?.("Sincronização parcial", "Alguma fonte oficial não respondeu agora.", "warn", { delay: 9000 });
         });
     };
 
@@ -113,12 +113,12 @@
           if (payload?.data?.appData) {
             refreshRenderedPages();
           } else {
-            P.showToast?.("Modo local", "Servidor nao respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
+            P.showToast?.("Modo local", "Servidor não respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
           }
         })
         .catch(error => {
           console.warn("[PainelURE] Backend carregando em segundo plano:", error);
-          P.showToast?.("Modo local", "Servidor nao respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
+          P.showToast?.("Modo local", "Servidor não respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
         });
     };
 
