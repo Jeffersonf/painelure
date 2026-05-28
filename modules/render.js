@@ -2038,6 +2038,12 @@
   function renderCtcCallCards(visible, allCalls) {
     const host = P.$("#ctcCallsGrid");
     if (!host) return;
+    const technicalQueueLabel = queue => {
+      const text = String(queue || "").trim();
+      const normalized = P.normalize?.(text) || text.toLowerCase();
+      if (!text || normalized === "lote 4 - solicitacoes de ti (setec/seintec)") return "";
+      return text;
+    };
     const shown = visible.slice(0, 100);
     const active = visible.filter(call => call.status !== "resolvido").length;
     const updated = callsUpdatedUntil(allCalls);
@@ -2067,18 +2073,19 @@
               const statusTone = callStatusTone(call.status);
               const statusLabel = callStatusLabel(call.status);
               const callKey = P.searchText([call.id || call.title]);
-              const schoolName = call.school || call.schoolOriginal || "Escola não vinculada";
+              const schoolName = call.school || call.schoolOriginal || "URE Itapeva";
               const technician = call.technician || "Não atribuído";
+              const queueLabel = technicalQueueLabel(call.queue);
+              const secondaryInfo = queueLabel || call.provider || "";
               return `
                 <article class="ctc-call-row ctc-call-row-${statusTone}" role="row" data-call-key="${callKey}" data-search="${P.searchText([call.id, call.title, call.category, call.subcategory, schoolName, call.status, call.statusReason, call.serviceStatus, call.queue, call.technician, call.provider, call.note])}">
                   <div class="ctc-call-main">
                     <small>${[call.id, call.createdAtDisplay].filter(Boolean).join(" | ")}</small>
                     <strong>${call.title || [call.category, call.subcategory].filter(Boolean).join(" - ") || "Chamado de T.I."}</strong>
-                    <p>${[call.category, call.subcategory].filter(Boolean).join(" / ") || "Categoria não informada"}</p>
                   </div>
                   <div class="ctc-call-school">
                     <strong>${schoolName}</strong>
-                    <small>${call.schoolOriginal && call.schoolOriginal !== call.school ? call.schoolOriginal : "Base SETEC/SEINTEC"}</small>
+                    <small>${call.schoolOriginal && call.schoolOriginal !== call.school ? call.schoolOriginal : ""}</small>
                   </div>
                   <div class="ctc-call-status">
                     <span class="status-pill ${statusTone}">${statusLabel}</span>
@@ -2086,10 +2093,10 @@
                   </div>
                   <div class="ctc-call-tech">
                     <strong>${technician}</strong>
-                    <small>${call.queue || call.provider || "Fila não informada"}</small>
+                    <small>${secondaryInfo}</small>
                   </div>
                   <div class="ctc-call-action">
-                    ${call.school ? `<button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>` : `<span class="status-pill warn">sem escola</span>`}
+                    ${call.school ? `<button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>` : `<span class="status-pill info">URE</span>`}
                   </div>
                 </article>
               `;
