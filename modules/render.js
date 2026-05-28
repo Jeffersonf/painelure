@@ -1975,21 +1975,13 @@
     const dates = new Set(visibleVisits.map(visit => visit.date).filter(Boolean)).size;
     const activeCalls = visibleCalls.filter(call => call.status !== "resolvido").length;
     const rows = [
-      { title: "Chamados", note: `${visibleCalls.length}/${calls.length} no filtro`, label: `${visibleCalls.length}`, tone: visibleCalls.length ? "info" : "warn" },
-      { title: "Ativos", note: "pendentes ou em atendimento", label: `${activeCalls}`, tone: activeCalls ? "warn" : "ok" },
-      { title: "Técnicos", note: "com vínculo no filtro", label: `${owners}`, tone: owners ? "ok" : "warn" },
-      { title: "Escolas", note: "envolvidas", label: `${schools}`, tone: schools ? "info" : "warn" },
-      { title: "Visitas", note: `${dates} dia(s) de agenda`, label: `${visibleVisits.length}`, tone: visibleVisits.length ? "info" : "ok" }
+      { icon: "TI", title: "Chamados de T.I.", note: `${visibleCalls.length}/${calls.length} chamado(s) no relatório técnico.`, label: `${visibleCalls.length}`, tone: visibleCalls.length ? "info" : "warn" },
+      { icon: "AT", title: "Chamados ativos", note: `${activeCalls} chamado(s) pendente(s) ou em atendimento.`, label: `${activeCalls}`, tone: activeCalls ? "warn" : "ok" },
+      { icon: "US", title: "Técnicos", note: `${owners} técnico(s) vinculados ao filtro atual.`, label: `${owners}`, tone: owners ? "ok" : "warn" },
+      { icon: "AG", title: "Agenda CTC", note: `${visibleVisits.length}/${visits.length} visita(s), em ${dates} dia(s) distintos.`, label: `${visibleVisits.length}`, tone: visibleVisits.length ? "info" : "ok" },
+      { icon: "ES", title: "Escolas envolvidas", note: `${schools} escola(s) aparecem nos chamados ou visitas filtradas.`, label: `${schools}`, tone: schools ? "info" : "warn" }
     ];
-    const host = P.$("#ctcSummaryRows");
-    if (!host) return;
-    host.innerHTML = rows.map(row => `
-      <article class="ctc-kpi ctc-kpi-${row.tone}">
-        <small>${row.title}</small>
-        <strong>${row.label}</strong>
-        <span>${row.note}</span>
-      </article>
-    `).join("");
+    renderSummaryRows("#ctcSummaryRows", rows);
   }
 
   function callStatusLabel(status) {

@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "ctc-clean-20260528";
+      window.PAINELURE_BUILD = "ctc-design-20260528";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=ctc-clean-20260528">
+  <link rel="stylesheet" href="./styles.css?v=ctc-design-20260528">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -352,14 +352,6 @@
       <header class="page-header compact">
         <div><h1>CTC</h1><p>Chamados de T.I., agenda técnica e acompanhamento das escolas.</p></div>
       </header>
-      <section class="ctc-hero">
-        <div class="ctc-hero-copy">
-          <span>Operação técnica</span>
-          <strong>Chamados e visitas CTC</strong>
-          <p id="ctcFilterSummary">Chamados e visitas carregados.</p>
-        </div>
-        <div class="ctc-kpi-grid" id="ctcSummaryRows"></div>
-      </section>
       <div class="selector-panel operation-filters">
         <label>
           <span>Técnico</span>
@@ -383,19 +375,30 @@
           <select id="ctcCategoryFilter"></select>
         </label>
         <button class="ghost-btn filter-reset" type="button" id="ctcFilterReset">Limpar</button>
+        <p id="ctcFilterSummary">Chamados e visitas carregados.</p>
       </div>
+      <section class="ctc-workspace">
+        <article class="box summary-box ctc-summary-card">
+          <div class="box-head"><div><strong>Resumo técnico</strong><small>Chamados, visitas e escolas no recorte atual</small></div></div>
+          <div class="row-list compact" id="ctcSummaryRows"></div>
+        </article>
+        <article class="box summary-box ctc-call-card">
+          <div class="box-head"><div><strong>Chamados de T.I.</strong><small id="ctcCallUpdated">Relatório técnico carregado.</small></div></div>
+          <div class="row-list compact" id="ctcCallSummaryRows"></div>
+        </article>
+        <article class="box ctc-scheduler-card">
+          <div class="box-head"><div><strong>Agendar visita CTC</strong><small>Cadastre a agenda dos técnicos no painel.</small></div><span class="status-pill info">local</span></div>
+          <form class="ctc-scheduler-form" id="ctcVisitForm">
+            <label><span>Técnico</span><input id="ctcNewOwner" type="text" placeholder="Nome do técnico" required></label>
+            <label><span>Data</span><input id="ctcNewDate" type="date" required></label>
+            <label><span>Hora</span><input id="ctcNewTime" type="time" required></label>
+            <label><span>Escola</span><select id="ctcNewSchool" required></select></label>
+            <label class="wide"><span>Objetivo</span><input id="ctcNewObjective" type="text" placeholder="Rede, câmera, inventário, suporte..." required></label>
+            <button class="ghost-btn" type="submit">Adicionar visita</button>
+          </form>
+        </article>
+      </section>
       <div class="calendar-grid" id="ctcCallsGrid"></div>
-      <article class="box ctc-scheduler-card">
-        <div class="box-head"><div><strong>Agendar visita CTC</strong><small>Cadastre a agenda dos técnicos no painel.</small></div><span class="status-pill info">local</span></div>
-        <form class="ctc-scheduler-form" id="ctcVisitForm">
-          <label><span>Técnico</span><input id="ctcNewOwner" type="text" placeholder="Nome do técnico" required></label>
-          <label><span>Data</span><input id="ctcNewDate" type="date" required></label>
-          <label><span>Hora</span><input id="ctcNewTime" type="time" required></label>
-          <label><span>Escola</span><select id="ctcNewSchool" required></select></label>
-          <label class="wide"><span>Objetivo</span><input id="ctcNewObjective" type="text" placeholder="Rede, câmera, inventário, suporte..." required></label>
-          <button class="ghost-btn" type="submit">Adicionar visita</button>
-        </form>
-      </article>
       <div class="calendar-grid" id="ctcGrid"></div>
     </section>
 
@@ -775,34 +778,34 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=ctc-clean-20260528"></script>
-  <script src="./data/schools.js?v=ctc-clean-20260528"></script>
-  <script src="./data/school-profiles.js?v=ctc-clean-20260528"></script>
-  <script src="./data/school-operational.js?v=ctc-clean-20260528"></script>
-  <script src="./data/inventory.js?v=ctc-clean-20260528"></script>
-  <script src="./data/supervision.js?v=ctc-clean-20260528"></script>
-  <script src="./data/contacts.js?v=ctc-clean-20260528"></script>
-  <script src="./data/users.js?v=ctc-clean-20260528"></script>
-  <script src="./data/governance.js?v=ctc-clean-20260528"></script>
-  <script src="./data/operations.js?v=ctc-clean-20260528"></script>
-  <script src="./data/calls-report.js?v=ctc-clean-20260528"></script>
-  <script src="./data/sources.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/dom.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/ui-catalog.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/data-store.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/identity.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/access-scope.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/month-state.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/csv.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/normalizers.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/source-loader.js?v=ctc-clean-20260528"></script>
-  <script src="./config.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/backend-client.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/search.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/render.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/supervision-render.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/navigation.js?v=ctc-clean-20260528"></script>
-  <script src="./modules/admin-tools.js?v=ctc-clean-20260528"></script>
-  <script src="./app.js?v=ctc-clean-20260528"></script>
+  <script src="./data/mock.js?v=ctc-design-20260528"></script>
+  <script src="./data/schools.js?v=ctc-design-20260528"></script>
+  <script src="./data/school-profiles.js?v=ctc-design-20260528"></script>
+  <script src="./data/school-operational.js?v=ctc-design-20260528"></script>
+  <script src="./data/inventory.js?v=ctc-design-20260528"></script>
+  <script src="./data/supervision.js?v=ctc-design-20260528"></script>
+  <script src="./data/contacts.js?v=ctc-design-20260528"></script>
+  <script src="./data/users.js?v=ctc-design-20260528"></script>
+  <script src="./data/governance.js?v=ctc-design-20260528"></script>
+  <script src="./data/operations.js?v=ctc-design-20260528"></script>
+  <script src="./data/calls-report.js?v=ctc-design-20260528"></script>
+  <script src="./data/sources.js?v=ctc-design-20260528"></script>
+  <script src="./modules/dom.js?v=ctc-design-20260528"></script>
+  <script src="./modules/ui-catalog.js?v=ctc-design-20260528"></script>
+  <script src="./modules/data-store.js?v=ctc-design-20260528"></script>
+  <script src="./modules/identity.js?v=ctc-design-20260528"></script>
+  <script src="./modules/access-scope.js?v=ctc-design-20260528"></script>
+  <script src="./modules/month-state.js?v=ctc-design-20260528"></script>
+  <script src="./modules/csv.js?v=ctc-design-20260528"></script>
+  <script src="./modules/normalizers.js?v=ctc-design-20260528"></script>
+  <script src="./modules/source-loader.js?v=ctc-design-20260528"></script>
+  <script src="./config.js?v=ctc-design-20260528"></script>
+  <script src="./modules/backend-client.js?v=ctc-design-20260528"></script>
+  <script src="./modules/search.js?v=ctc-design-20260528"></script>
+  <script src="./modules/render.js?v=ctc-design-20260528"></script>
+  <script src="./modules/supervision-render.js?v=ctc-design-20260528"></script>
+  <script src="./modules/navigation.js?v=ctc-design-20260528"></script>
+  <script src="./modules/admin-tools.js?v=ctc-design-20260528"></script>
+  <script src="./app.js?v=ctc-design-20260528"></script>
 </body>
 </html>
