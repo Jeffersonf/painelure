@@ -1955,6 +1955,8 @@ html:not(.site-maintenance) .maintenance-message {
   background:
     linear-gradient(160deg, rgba(79, 240, 205, .055), transparent 45%),
     var(--sf);
+  opacity: 1;
+  filter: none;
 }
 
 .ctc-call-board-head {
@@ -2056,6 +2058,8 @@ html:not(.site-maintenance) .maintenance-message {
   min-height: 86px;
   padding: 14px 18px 14px 22px;
   border-bottom: 1px solid var(--bd);
+  color: var(--tx);
+  opacity: 1;
 }
 
 .ctc-call-row:last-child {
@@ -2117,6 +2121,18 @@ html:not(.site-maintenance) .maintenance-message {
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ctc-call-main small,
+.ctc-call-status small,
+.ctc-call-header {
+  color: color-mix(in srgb, var(--tx2) 72%, var(--mt));
+}
+
+.ctc-call-status .status-pill.warn {
+  border-color: rgba(245, 200, 90, .48);
+  background: rgba(245, 200, 90, .16);
+  color: var(--warn);
 }
 
 .ctc-call-status {

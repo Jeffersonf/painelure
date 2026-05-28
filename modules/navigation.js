@@ -47,8 +47,8 @@
     }
     const segment = path.replace(/^\/+|\/+$/g, "").split("/")[0];
     const page = segment === "acesso-admin" ? "dashboard" : (PAGE_BY_SLUG[segment] || segment);
-    if (normalizedQueryPage && P.$(`#${pageId(normalizedQueryPage)}`)) return normalizedQueryPage;
-    if (page && P.$(`#${pageId(page)}`)) return page;
+    if (normalizedQueryPage && P.$(`#${pageId(normalizedQueryPage)}`)) return normalizedQueryPage === "calls" ? "ctc" : normalizedQueryPage;
+    if (page && P.$(`#${pageId(page)}`)) return page === "calls" ? "ctc" : page;
     if (hashPage && P.$(`#${pageId(hashPage)}`)) return hashPage;
     return "";
   }
@@ -159,6 +159,7 @@
   }
 
   function setPage(id) {
+    if (id === "calls") id = "ctc";
     if (!id || !P.$(`#${pageId(id)}`)) return false;
     if (P.canAccess && !P.canAccess(id)) {
       showAccessDenied(id);

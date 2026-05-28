@@ -849,7 +849,7 @@
       { key: "inventory", title: "&#128187; Inventário", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) pedem revisão` : `${totals.lines || metrics.items || 0} item(ns) sem alerta`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "Abrir", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("inventory") },
       { key: "network", title: "&#127760; Redes", note: network ? `${networkItems.filter(item => !item.value.includes("Sem")).length}/3 grupos mapeados` : "Rede e câmeras pendentes", label: network ? "Abrir" : "Pendente", tone: network ? "info" : "warn", enabled: Boolean(network) && (!P.canAccess || P.canAccess("network")) },
       { key: "supervisor", title: "&#129517; Supervisão", note: supervisor ? `${supervisor.name} | mês ${supervisor.month || "0/12"}` : "Sem supervisor vinculado", label: supervisor ? "Abrir" : "Pendente", tone: supervisor ? "info" : "warn", enabled: Boolean(supervisor) },
-      { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estavel", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("calls") }
+      { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estavel", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("ctc") }
     ];
     detail.innerHTML = `
       <section class="school-profile-page school-profile-${schoolTone}">
@@ -970,7 +970,7 @@
         if (guide === "inventory") focusInventorySchool(school.name);
         if (guide === "network") focusNetworkSchool(school.name);
         if (guide === "supervisor") focusSupervisor(supervisor?.name);
-        if (guide === "calls") P.setPage?.("calls");
+        if (guide === "calls") P.setPage?.("ctc");
       });
     });
     detail.querySelector("[data-school-edit-form]")?.addEventListener("submit", event => {
