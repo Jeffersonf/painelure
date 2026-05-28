@@ -1936,7 +1936,16 @@
     }
 
     if (!grid) return;
-    grid.innerHTML = visibleVisits.length ? visibleVisits.map(visit => `
+    const agendaHead = `
+      <div class="ctc-section-head">
+        <div>
+          <small>Agenda técnica</small>
+          <strong>Visitas CTC</strong>
+          <p>${visibleVisits.length}/${monthVisits.length} visita(s) no mês selecionado.</p>
+        </div>
+      </div>
+    `;
+    grid.innerHTML = visibleVisits.length ? `${agendaHead}${visibleVisits.map(visit => `
       <article class="detail-widget ctc-visit-card" data-ctc-key="${P.searchText([visit.owner, visit.date, visit.time, visit.place])}" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
         <div class="ctc-date-box"><strong>${formatDate(visit.date)}</strong><small>${visit.time || "--:--"}</small></div>
         <div>
@@ -1948,7 +1957,7 @@
           <button class="ghost-btn" type="button" data-open-school="${visit.place}">Abrir escola</button>
         </div>
       </article>
-    `).join("") : `<div class="empty-state">${monthVisits.length ? "Nenhuma visita CTC com esses filtros." : `Nenhuma visita CTC em ${P.selectedMonthLabel?.() || "mês selecionado"}.`}</div>`;
+    `).join("")}` : `${agendaHead}<div class="empty-state">${monthVisits.length ? "Nenhuma visita CTC com esses filtros." : `Nenhuma visita CTC em ${P.selectedMonthLabel?.() || "mês selecionado"}.`}</div>`;
     grid.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });
@@ -2021,27 +2030,66 @@
   function renderCtcCallCards(visible, allCalls) {
     const host = P.$("#ctcCallsGrid");
     if (!host) return;
-    const shown = visible.slice(0, 80);
-    const overflow = visible.length > shown.length ? `<div class="empty-state compact">Mostrando ${shown.length} de ${visible.length} chamados. Use os filtros para refinar a fila.</div>` : "";
-    host.innerHTML = shown.length ? `${overflow}${shown.map(call => `
-      <article class="detail-widget" data-call-key="${P.searchText([call.id || call.title])}" data-search="${P.searchText([call.id, call.title, call.category, call.subcategory, call.school, call.schoolOriginal, call.status, call.statusReason, call.serviceStatus, call.queue, call.technician, call.provider, call.note])}">
-        <div>
-          <small>${[call.id, call.createdAtDisplay].filter(Boolean).join(" | ")}</small>
-          <strong>${call.title || [call.category, call.subcategory].filter(Boolean).join(" - ") || "Chamado de T.I."}</strong>
-          <p>${call.school || call.schoolOriginal || "Escola não vinculada"}${call.statusReason ? ` | ${call.statusReason}` : ""}</p>
-          <p>${[
-            call.serviceStatus && `Atendimento: ${call.serviceStatus}`,
-            call.technician ? `Técnico: ${call.technician}` : "Técnico: não atribuído",
-            call.queue && `Fila: ${call.queue}`
-          ].filter(Boolean).join(" | ")}</p>
-          ${call.provider ? `<p>Fornecedor: ${call.provider}</p>` : ""}
+    const shown = visible.slice(0, 100);
+    const active = visible.filter(call => call.status !== "resolvido").length;
+    const updated = callsUpdatedUntil(allCalls);
+    host.innerHTML = `
+      <section class="ctc-call-board">
+        <div class="ctc-call-board-head">
+          <div>
+            <small>Relatório de chamados de T.I.</small>
+            <strong>${visible.length} chamado(s) no filtro</strong>
+            <p>${active} em acompanhamento${updated ? ` | atualizado até ${updated}` : ""}</p>
+          </div>
+          <div class="ctc-call-board-actions">
+            <span class="status-pill ${active ? "warn" : "ok"}">${active ? "Acompanhar" : "Em dia"}</span>
+            ${visible.length > shown.length ? `<em>Mostrando ${shown.length} de ${visible.length}</em>` : ""}
+          </div>
         </div>
-        <div class="detail-actions">
-          <span class="status-pill ${callStatusTone(call.status)}">${callStatusLabel(call.status)}</span>
-          ${call.school ? `<button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>` : ""}
-        </div>
-      </article>
-    `).join("")}` : `<div class="empty-state">${allCalls.length ? "Nenhum chamado de T.I. com esses filtros." : "Nenhum chamado de T.I. carregado na categoria CTC."}</div>`;
+        ${shown.length ? `
+          <div class="ctc-call-table" role="table" aria-label="Chamados de T.I. da CTC">
+            <div class="ctc-call-row ctc-call-header" role="row">
+              <span>Chamado</span>
+              <span>Escola</span>
+              <span>Status</span>
+              <span>Técnico e fila</span>
+              <span>Ação</span>
+            </div>
+            ${shown.map(call => {
+              const statusTone = callStatusTone(call.status);
+              const statusLabel = callStatusLabel(call.status);
+              const callKey = P.searchText([call.id || call.title]);
+              const schoolName = call.school || call.schoolOriginal || "Escola não vinculada";
+              const technician = call.technician || "Não atribuído";
+              return `
+                <article class="ctc-call-row ctc-call-row-${statusTone}" role="row" data-call-key="${callKey}" data-search="${P.searchText([call.id, call.title, call.category, call.subcategory, schoolName, call.status, call.statusReason, call.serviceStatus, call.queue, call.technician, call.provider, call.note])}">
+                  <div class="ctc-call-main">
+                    <small>${[call.id, call.createdAtDisplay].filter(Boolean).join(" | ")}</small>
+                    <strong>${call.title || [call.category, call.subcategory].filter(Boolean).join(" - ") || "Chamado de T.I."}</strong>
+                    <p>${[call.category, call.subcategory].filter(Boolean).join(" / ") || "Categoria não informada"}</p>
+                  </div>
+                  <div class="ctc-call-school">
+                    <strong>${schoolName}</strong>
+                    <small>${call.schoolOriginal && call.schoolOriginal !== call.school ? call.schoolOriginal : "Base SETEC/SEINTEC"}</small>
+                  </div>
+                  <div class="ctc-call-status">
+                    <span class="status-pill ${statusTone}">${statusLabel}</span>
+                    <small>${call.statusReason || call.serviceStatus || "Sem observação"}</small>
+                  </div>
+                  <div class="ctc-call-tech">
+                    <strong>${technician}</strong>
+                    <small>${call.queue || call.provider || "Fila não informada"}</small>
+                  </div>
+                  <div class="ctc-call-action">
+                    ${call.school ? `<button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>` : `<span class="status-pill warn">sem escola</span>`}
+                  </div>
+                </article>
+              `;
+            }).join("")}
+          </div>
+        ` : `<div class="empty-state">${allCalls.length ? "Nenhum chamado de T.I. com esses filtros." : "Nenhum chamado de T.I. carregado na categoria CTC."}</div>`}
+      </section>
+    `;
     host.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });
