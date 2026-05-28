@@ -1895,7 +1895,7 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 #page-ctc .selector-panel.operation-filters {
-  grid-template-columns: repeat(4, minmax(150px, 1fr)) minmax(100px, 140px);
+  grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.18fr) minmax(180px, .86fr) minmax(240px, 1fr) minmax(104px, 140px);
   align-items: end;
   margin-bottom: 12px;
   padding: 12px;
@@ -1904,11 +1904,18 @@ html:not(.site-maintenance) .maintenance-message {
 
 #page-ctc .selector-panel.operation-filters label {
   gap: 6px;
+  min-width: 0;
 }
 
 #page-ctc .selector-panel.operation-filters select,
 #page-ctc .selector-panel.operation-filters .ghost-btn {
+  width: 100%;
+  box-sizing: border-box;
   min-height: 42px;
+}
+
+#page-ctc #ctcStatusFilter {
+  min-width: 0;
 }
 
 #ctcGrid {
