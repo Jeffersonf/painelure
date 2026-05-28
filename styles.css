@@ -1972,6 +1972,11 @@ html:not(.site-maintenance) .maintenance-message {
   font-weight: 850;
 }
 
+.ctc-call-school small:empty,
+.ctc-call-tech small:empty {
+  display: none;
+}
+
 .ctc-call-board-head small,
 .ctc-call-header {
   text-transform: uppercase;
