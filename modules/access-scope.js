@@ -156,10 +156,6 @@
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
-    if (page === "calls") {
-      const access = roleAccess(role);
-      return access.includes("calls") || access.includes("ctc");
-    }
     return roleAccess(role).includes(page);
   }
 
@@ -363,7 +359,7 @@
       schoolProfiles: byAccess.schools ? schoolScopedItems(data.schoolProfiles || []) : [],
       schoolAssets: byAccess.inventory ? schoolScopedItems(data.schoolAssets || []) : [],
       inventory: byAccess.inventory ? schoolScopedItems(data.inventory || []) : [],
-      calls: (byAccess.calls || byAccess.ctc) ? schoolScopedItems(data.calls || []) : [],
+      calls: byAccess.calls ? schoolScopedItems(data.calls || []) : [],
       ctcVisits: byAccess.ctc
         ? (supervisorScope ? (data.ctcVisits || []).filter(visit => allowed.has(normalized(visit.place))) : (data.ctcVisits || []))
         : [],
