@@ -2112,7 +2112,9 @@
       </section>
     `;
     host.querySelectorAll("[data-ctc-page]").forEach(button => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
         host.dataset.page = button.dataset.ctcPage || "1";
         renderCtc(P.getAppData().ctcVisits);
       });

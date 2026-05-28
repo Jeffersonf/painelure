@@ -159,6 +159,7 @@
   }
 
   function setPage(id) {
+    if (!id || !P.$(`#${pageId(id)}`)) return false;
     if (P.canAccess && !P.canAccess(id)) {
       showAccessDenied(id);
       return false;

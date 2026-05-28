@@ -6,7 +6,7 @@
     schools: { icon: "\uD83C\uDFEB", label: "Escolas", note: "Unidades e detalhes", type: "P\u00E1gina" },
     network: { icon: "\uD83C\uDF10", label: "Redes e c\u00E2meras", note: "Infraestrutura por escola", type: "P\u00E1gina" },
     inventory: { icon: "\uD83D\uDCBB", label: "Invent\u00E1rio", note: "Equipamentos e status", type: "P\u00E1gina" },
-    ctc: { icon: "\uD83D\uDEE0\uFE0F", label: "T\u00E9cnicos CTC", note: "Agenda t\u00E9cnica", type: "P\u00E1gina" },
+    ctc: { icon: "\uD83D\uDEE0\uFE0F", label: "CTC", note: "Chamados de T.I. e agenda t\u00E9cnica", type: "P\u00E1gina" },
     calls: { icon: "\uD83D\uDCE5", label: "Chamados", note: "Fila operacional", type: "P\u00E1gina" },
     cars: { icon: "\uD83D\uDE97", label: "Carros", note: "Agendamento oficial", type: "P\u00E1gina" },
     supervision: { icon: "\uD83E\uDDED", label: "Supervis\u00E3o", note: "Metas e v\u00EDnculos", type: "P\u00E1gina" },
