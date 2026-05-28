@@ -51,7 +51,7 @@
   function canAccess(page, role = currentRole()) {
     if (["user", "school-detail", "supervisor-detail"].includes(page)) return true;
     const access = accessForRole(role);
-    if (page === "calls") return access.includes("calls") || access.includes("ctc");
+    if (page === "calls" || page === "ctc") return access.includes("calls") || access.includes("ctc");
     return access.includes(page);
   }
 

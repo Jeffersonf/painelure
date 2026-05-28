@@ -156,7 +156,7 @@
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
-    if (page === "calls") {
+    if (page === "calls" || page === "ctc") {
       const access = roleAccess(role);
       return access.includes("calls") || access.includes("ctc");
     }
