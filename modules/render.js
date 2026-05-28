@@ -1881,7 +1881,7 @@
     });
   }
 
-  function renderCtc(visits) {
+  function renderCtc(visits, callsSource) {
     const grid = P.$("#ctcGrid");
     const callsGrid = P.$("#ctcCallsGrid");
     if (!grid && !callsGrid) return;
@@ -1891,7 +1891,9 @@
     const statusFilter = P.$("#ctcStatusFilter");
     const categoryFilter = P.$("#ctcCategoryFilter");
     const monthVisits = monthFiltered(visits, visit => visit.date);
-    const allCalls = Array.isArray(P.getAppData?.().calls) ? P.getAppData().calls : [];
+    const allCalls = Array.isArray(callsSource)
+      ? callsSource
+      : (Array.isArray(P.scopedData?.(P.getAppData())?.calls) ? P.scopedData(P.getAppData()).calls : (Array.isArray(P.getAppData?.().calls) ? P.getAppData().calls : []));
     const owners = [...new Set([...monthVisits.map(visit => visit.owner), ...allCalls.map(call => call.technician)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const schools = [...new Set([...monthVisits.map(visit => visit.place), ...allCalls.map(call => call.school)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const categories = [...new Set(allCalls.map(call => call.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));

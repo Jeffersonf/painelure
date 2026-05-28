@@ -683,7 +683,9 @@ function accessForRole(role, appData = {}) {
 }
 
 function canAccessData(page, user = null, appData = {}) {
-  return accessForRole(user?.role || "Consulta", appData).includes(page);
+  const access = accessForRole(user?.role || "Consulta", appData);
+  if (page === "calls") return access.includes("calls") || access.includes("ctc");
+  return access.includes(page);
 }
 
 function canViewCredentials(user = null) {
@@ -814,7 +816,7 @@ function scopeAppDataForUser(appData = {}, user = null) {
     schoolProfiles: canAccessData("schools", user, appData) ? schoolScopedItems(appData.schoolProfiles || []) : [],
     schoolAssets: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.schoolAssets || []) : [],
     inventory: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.inventory || []) : [],
-    calls: canAccessData("calls", user, appData) ? schoolScopedItems(appData.calls || []) : [],
+    calls: (canAccessData("calls", user, appData) || canAccessData("ctc", user, appData)) ? schoolScopedItems(appData.calls || []) : [],
     ctcVisits: canAccessData("ctc", user, appData)
       ? (supervisorScope ? (appData.ctcVisits || []).filter(visit => allowed.has(normalizeText(visit.place))) : (appData.ctcVisits || []))
       : [],
