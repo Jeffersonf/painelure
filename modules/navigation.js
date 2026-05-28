@@ -166,7 +166,7 @@
     const active = P.$(".page.active");
     const activeId = active?.id?.replace("page-", "");
     if (activeId && activeId !== id) previousPage = activeId;
-    P.renderPage?.(id);
+    P.renderPage?.(id, { force: true });
     P.$all(".page").forEach(page => page.classList.toggle("active", page.id === pageId(id)));
     P.$all("[data-page]").forEach(btn => btn.classList.toggle("active", btn.dataset.page === id));
     updateGlobalPageHeading(id);
