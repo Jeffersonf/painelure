@@ -1914,6 +1914,11 @@
     const selectedSchool = schoolFilter?.value || "all";
     const selectedStatus = statusFilter?.value || "all";
     const selectedCategory = categoryFilter?.value || "all";
+    const filterSignature = [selectedOwner, selectedSchool, selectedStatus, selectedCategory].join("|");
+    if (callsGrid && callsGrid.dataset.filterSignature !== filterSignature) {
+      callsGrid.dataset.filterSignature = filterSignature;
+      callsGrid.dataset.page = "1";
+    }
     const visibleVisits = monthVisits.filter(visit => {
       const ownerOk = selectedOwner === "all" || P.searchText([visit.owner]) === selectedOwner;
       const schoolOk = selectedSchool === "all" || P.searchText([visit.place]) === selectedSchool;
@@ -2001,7 +2006,7 @@
   }
 
   function callStatusTone(status) {
-    return status === "resolvido" ? "ok" : status === "em_rota" ? "info" : "warn";
+    return status === "resolvido" ? "ok" : status === "em_rota" ? "warn" : "warn";
   }
 
   function callsUpdatedUntil(calls = []) {
@@ -2038,7 +2043,11 @@
   function renderCtcCallCards(visible, allCalls) {
     const host = P.$("#ctcCallsGrid");
     if (!host) return;
-    const shown = visible.slice(0, 100);
+    const pageSize = 50;
+    const totalPages = Math.max(Math.ceil(visible.length / pageSize), 1);
+    const currentPage = Math.min(Math.max(Number(host.dataset.page || 1), 1), totalPages);
+    host.dataset.page = String(currentPage);
+    const shown = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
     const active = visible.filter(call => call.status !== "resolvido").length;
     const updated = callsUpdatedUntil(allCalls);
     host.innerHTML = `
@@ -2051,7 +2060,7 @@
           </div>
           <div class="ctc-call-board-actions">
             <span class="status-pill ${active ? "warn" : "ok"}">${active ? "Acompanhar" : "Em dia"}</span>
-            ${visible.length > shown.length ? `<em>Mostrando ${shown.length} de ${visible.length}</em>` : ""}
+            <em>Mostrando ${shown.length ? ((currentPage - 1) * pageSize) + 1 : 0}-${Math.min(currentPage * pageSize, visible.length)} de ${visible.length}</em>
           </div>
         </div>
         ${shown.length ? `
@@ -2092,9 +2101,22 @@
               `;
             }).join("")}
           </div>
+          ${visible.length > pageSize ? `
+            <div class="ctc-call-pagination">
+              <button class="ghost-btn" type="button" data-ctc-page="${currentPage - 1}" ${currentPage <= 1 ? "disabled" : ""}>Anterior</button>
+              <span>Página ${currentPage} de ${totalPages}</span>
+              <button class="ghost-btn" type="button" data-ctc-page="${currentPage + 1}" ${currentPage >= totalPages ? "disabled" : ""}>Próxima</button>
+            </div>
+          ` : ""}
         ` : `<div class="empty-state">${allCalls.length ? "Nenhum chamado de T.I. com esses filtros." : "Nenhum chamado de T.I. carregado na categoria CTC."}</div>`}
       </section>
     `;
+    host.querySelectorAll("[data-ctc-page]").forEach(button => {
+      button.addEventListener("click", () => {
+        host.dataset.page = button.dataset.ctcPage || "1";
+        renderCtc(P.getAppData().ctcVisits);
+      });
+    });
     host.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });
