@@ -684,7 +684,7 @@ function accessForRole(role, appData = {}) {
 
 function canAccessData(page, user = null, appData = {}) {
   const access = accessForRole(user?.role || "Consulta", appData);
-  if (page === "calls" || page === "ctc") return access.includes("calls") || access.includes("ctc");
+  if (page === "calls") return access.includes("calls") || access.includes("ctc");
   return access.includes(page);
 }
 

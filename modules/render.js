@@ -440,8 +440,7 @@
       if (school) school.value = "all";
       if (status) status.value = "all";
       if (category) category.value = "all";
-      const data = P.scopedData?.(P.getAppData()) || P.getAppData();
-      renderCtc(data.ctcVisits, data.calls);
+      renderCtc(P.getAppData().ctcVisits);
       const target = P.$(`[data-call-key="${P.searchText([title])}"]`);
       if (!target) return;
       P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
@@ -479,8 +478,7 @@
       if (school) school.value = "all";
       if (status) status.value = "all";
       if (category) category.value = "all";
-      const data = P.scopedData?.(P.getAppData()) || P.getAppData();
-      renderCtc(data.ctcVisits, data.calls);
+      renderCtc(P.getAppData().ctcVisits);
       const target = P.$(`[data-ctc-key="${key}"]`) || P.$(`[data-call-key="${P.searchText([key])}"]`);
       if (!target) return;
       P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
@@ -1879,8 +1877,7 @@
       P.saveAppData?.();
       form.reset();
       P.showToast?.("Visita CTC agendada", `${visit.owner} em ${visit.place}.`, "ok", { delay: 5000 });
-      const scopedData = P.scopedData?.(P.getAppData()) || P.getAppData();
-      renderCtc(scopedData.ctcVisits, scopedData.calls);
+      renderCtc(P.getAppData().ctcVisits);
     });
   }
 
@@ -1894,26 +1891,25 @@
     const statusFilter = P.$("#ctcStatusFilter");
     const categoryFilter = P.$("#ctcCategoryFilter");
     const monthVisits = monthFiltered(visits, visit => visit.date);
-    const scopedData = P.scopedData?.(P.getAppData()) || P.getAppData();
     const allCalls = Array.isArray(callsSource)
       ? callsSource
-      : (Array.isArray(scopedData?.calls) ? scopedData.calls : (Array.isArray(P.getAppData?.().calls) ? P.getAppData().calls : []));
+      : (Array.isArray(P.scopedData?.(P.getAppData())?.calls) ? P.scopedData(P.getAppData()).calls : (Array.isArray(P.getAppData?.().calls) ? P.getAppData().calls : []));
     const owners = [...new Set([...monthVisits.map(visit => visit.owner), ...allCalls.map(call => call.technician)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const schools = [...new Set([...monthVisits.map(visit => visit.place), ...allCalls.map(call => call.school)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
     const categories = [...new Set(allCalls.map(call => call.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     setSelectOptions(ownerFilter, [{ value: "all", label: "Todos" }, ...owners.map(owner => ({ value: P.searchText([owner]), label: owner }))], ownerFilter?.value || "all");
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
     setSelectOptions(categoryFilter, [{ value: "all", label: "Todas" }, ...categories.map(category => ({ value: P.searchText([category]), label: category }))], categoryFilter?.value || "all");
-    bindSimpleSelect(ownerFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
-    bindSimpleSelect(schoolFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
-    bindSimpleSelect(statusFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
-    bindSimpleSelect(categoryFilter, () => renderCtc(scopedData.ctcVisits, scopedData.calls));
+    bindSimpleSelect(ownerFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindSimpleSelect(schoolFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindSimpleSelect(statusFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindSimpleSelect(categoryFilter, () => renderCtc(P.getAppData().ctcVisits));
     bindResetButton(P.$("#ctcFilterReset"), () => {
       if (ownerFilter) ownerFilter.value = "all";
       if (schoolFilter) schoolFilter.value = "all";
       if (statusFilter) statusFilter.value = "all";
       if (categoryFilter) categoryFilter.value = "all";
-      renderCtc(scopedData.ctcVisits, scopedData.calls);
+      renderCtc(P.getAppData().ctcVisits);
     });
 
     const selectedOwner = ownerFilter?.value || "all";
@@ -2122,8 +2118,7 @@
         event.preventDefault();
         event.stopPropagation();
         host.dataset.page = button.dataset.ctcPage || "1";
-        const data = P.scopedData?.(P.getAppData()) || P.getAppData();
-        renderCtc(data.ctcVisits, data.calls);
+        renderCtc(P.getAppData().ctcVisits);
       });
     });
     host.querySelectorAll("[data-open-school]").forEach(button => {
