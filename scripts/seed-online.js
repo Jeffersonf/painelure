@@ -19,6 +19,7 @@ const DATA_FILES = [
   "users.js",
   "governance.js",
   "operations.js",
+  "calls-report.js",
   "sources.js"
 ];
 

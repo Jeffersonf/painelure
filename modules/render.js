@@ -1934,8 +1934,14 @@
     if (!grid) return;
     const statusFilter = P.$("#callStatusFilter");
     const schoolFilter = P.$("#callSchoolFilter");
+    const allCalls = Array.isArray(calls) ? calls : [];
     const tone = status => status === "resolvido" ? "ok" : status === "em_rota" ? "info" : "warn";
-    const schools = [...new Set(calls.map(call => call.school).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const statusLabel = status => ({
+      aberto: "Aberto",
+      em_rota: "Em atendimento",
+      resolvido: "Resolvido"
+    })[status] || (status || "Chamado").replace("_", " ");
+    const schools = [...new Set(allCalls.map(call => call.school).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
     bindSimpleSelect(statusFilter, () => renderCalls(P.getAppData().calls));
     bindSimpleSelect(schoolFilter, () => renderCalls(P.getAppData().calls));
@@ -1947,31 +1953,45 @@
 
     const selectedStatus = statusFilter?.value || "all";
     const selectedSchool = schoolFilter?.value || "all";
-    const visible = calls.filter(call => {
+    const visible = allCalls.filter(call => {
       const statusOk = selectedStatus === "all" || call.status === selectedStatus;
       const schoolOk = selectedSchool === "all" || P.searchText([call.school]) === selectedSchool;
       return statusOk && schoolOk;
     });
-    renderCallOperationalSummary(calls, visible);
+    renderCallOperationalSummary(allCalls, visible);
     const summary = P.$("#callFilterSummary");
-    if (summary) summary.textContent = `${visible.length}/${calls.length} chamado(s) visíveis.`;
+    if (summary) summary.textContent = callUpdatedText(allCalls, visible);
 
     grid.innerHTML = visible.length ? visible.map(call => `
-      <article class="detail-widget" data-call-key="${P.searchText([call.title])}" data-search="${P.searchText([call.title, call.school, call.status, call.note])}">
+      <article class="detail-widget" data-call-key="${P.searchText([call.id || call.title])}" data-search="${P.searchText([call.id, call.title, call.category, call.subcategory, call.school, call.status, call.statusReason, call.technician, call.provider, call.note])}">
         <div>
-          <small>${call.school}</small>
+          <small>${[call.id, call.createdAtDisplay].filter(Boolean).join(" | ")}</small>
           <strong>${call.title}</strong>
-          <p>${call.note}</p>
+          <p>${call.school || "Escola n?o informada"}${call.statusReason ? ` | ${call.statusReason}` : ""}</p>
+          <p>${[call.technician && `T?cnico: ${call.technician}`, call.provider && `Fornecedor: ${call.provider}`].filter(Boolean).join(" | ") || call.note || ""}</p>
         </div>
         <div class="detail-actions">
-          <span class="status-pill ${tone(call.status)}">${call.status.replace("_", " ")}</span>
-          <button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>
+          <span class="status-pill ${tone(call.status)}">${statusLabel(call.status)}</span>
+          ${call.school ? `<button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>` : ""}
         </div>
       </article>
-    `).join("") : `<div class="empty-state">${calls.length ? "Nenhum chamado com esses filtros." : "Nenhum chamado carregado."}</div>`;
+    `).join("") : `<div class="empty-state">${allCalls.length ? "Nenhum chamado com esses filtros." : "Nenhum chamado carregado."}</div>`;
     grid.querySelectorAll("[data-open-school]").forEach(button => {
       button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
     });
+  }
+
+  function callUpdatedText(calls = [], visible = calls) {
+    const meta = P.getAppData?.()?.callsMeta || {};
+    const updated = meta.updatedUntilDisplay || latestCallDateDisplay(calls);
+    const source = meta.source ? ` Fonte: ${meta.source}.` : "";
+    return `${visible.length}/${calls.length} chamado(s) vis?veis.${updated ? ` Atualizado at? ${updated}.` : ""}${source}`;
+  }
+
+  function latestCallDateDisplay(calls = []) {
+    return [...calls]
+      .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")))
+      .find(call => call.createdAtDisplay)?.createdAtDisplay || "";
   }
 
   function renderCallOperationalSummary(calls, visible) {
@@ -1979,10 +1999,11 @@
     const route = visible.filter(call => call.status === "em_rota").length;
     const resolved = visible.filter(call => call.status === "resolvido").length;
     const schools = new Set(visible.map(call => call.school).filter(Boolean)).size;
+    const updated = (P.getAppData?.()?.callsMeta || {}).updatedUntilDisplay || latestCallDateDisplay(calls);
     const rows = [
-      { icon: "CH", title: "Fila visível", note: `${visible.length}/${calls.length} chamado(s) no recorte atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "ok" },
+      { icon: "CH", title: "Fila vis?vel", note: `${visible.length}/${calls.length} chamado(s) no recorte atual.${updated ? ` Atualizado at? ${updated}.` : ""}`, label: `${visible.length}`, tone: visible.length ? "info" : "ok" },
       { icon: "!", title: "Abertos", note: `${open} chamado(s) aguardando encaminhamento.`, label: `${open}`, tone: open ? "warn" : "ok" },
-      { icon: "SV", title: "Em rota", note: `${route} chamado(s) em atendimento.`, label: `${route}`, tone: route ? "info" : "ok" },
+      { icon: "SV", title: "Em atendimento", note: `${route} chamado(s) em atendimento.`, label: `${route}`, tone: route ? "info" : "ok" },
       { icon: "ES", title: "Escolas envolvidas", note: `${schools} escola(s) com chamado no filtro. Resolvidos: ${resolved}.`, label: `${schools}`, tone: schools ? "info" : "ok" }
     ];
     renderSummaryRows("#callSummaryRows", rows);

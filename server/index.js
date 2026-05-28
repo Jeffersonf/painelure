@@ -146,7 +146,8 @@ function loadFrontendSeedData() {
     "data/contacts.js",
     "data/users.js",
     "data/governance.js",
-    "data/operations.js"
+    "data/operations.js",
+    "data/calls-report.js"
   ];
   const context = { window: { PainelURE: { seedData: {} } } };
   context.PainelURE = context.window.PainelURE;

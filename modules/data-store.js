@@ -17,6 +17,7 @@
     ctcVisits: [],
     cars: [],
     calls: [],
+    callsMeta: {},
     reports: [],
     users: [],
     accessRules: {},
@@ -87,7 +88,27 @@
     return [...byKey.values()];
   }
 
+  function latestTimestamp(value) {
+    const time = Date.parse(value || "");
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function freshestCalls(source = {}) {
+    const seedMeta = P.seedData?.callsMeta || {};
+    const sourceMeta = source.callsMeta || {};
+    const seedCalls = Array.isArray(P.seedData?.calls) ? P.seedData.calls : [];
+    const sourceCalls = Array.isArray(source.calls) ? source.calls : [];
+    if (seedCalls.length && latestTimestamp(seedMeta.updatedUntil) >= latestTimestamp(sourceMeta.updatedUntil)) {
+      return { calls: seedCalls, callsMeta: seedMeta };
+    }
+    return {
+      calls: sourceCalls,
+      callsMeta: sourceMeta && typeof sourceMeta === "object" ? sourceMeta : {}
+    };
+  }
+
   function normalizeAppData(source = {}) {
+    const callData = freshestCalls(source);
     return {
       schools: normalizeSchools(source),
       networkData: source.networkData && typeof source.networkData === "object" ? source.networkData : {},
@@ -106,7 +127,8 @@
       quality: Array.isArray(source.quality) ? source.quality : [],
       ctcVisits: Array.isArray(source.ctcVisits) ? source.ctcVisits : [],
       cars: Array.isArray(source.cars) ? source.cars : [],
-      calls: Array.isArray(source.calls) ? source.calls : [],
+      calls: callData.calls,
+      callsMeta: callData.callsMeta,
       reports: Array.isArray(source.reports) ? source.reports : [],
       users: mergeUsersWithSeed(source.users),
       accessRules: source.accessRules && typeof source.accessRules === "object" ? source.accessRules : {},

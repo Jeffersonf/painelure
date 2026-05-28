@@ -84,7 +84,7 @@
           focus: details ? searchText([item.vehicle, item.date, item.time, item.destination, item.requester]) : searchText([item.vehicle, item.date, item.time])
         };
       }),
-      ...(data.calls || []).map(item => ({ page: "calls", title: item.title, type: "Chamado", note: item.school || item.status, focus: item.title })),
+      ...(data.calls || []).map(item => ({ page: "calls", title: item.id ? `${item.id} - ${item.title}` : item.title, type: "Chamado", note: item.school || item.statusReason || item.status, focus: item.id || item.title })),
       ...(data.satisfaction || []).map(item => ({
         page: "satisfaction",
         title: item.title,
