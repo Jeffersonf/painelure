@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "calls-report-20260528";
+      window.PAINELURE_BUILD = "ctc-calls-report-20260528";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=calls-report-20260528">
+  <link rel="stylesheet" href="./styles.css?v=ctc-calls-report-20260528">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -149,7 +149,7 @@
         <button type="button" data-jump="network"><span>&#127760; Redes</span></button>
         <button type="button" data-jump="inventory"><span>&#128187; Inventário</span></button>
         <button type="button" data-jump="ctc"><span>&#128736;&#65039; CTC</span></button>
-        <button type="button" data-jump="calls"><span>&#128229; Chamados</span></button>
+        <button type="button" data-jump="ctc"><span>&#128229; Chamados</span></button>
         <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
         <button type="button" data-jump="reports"><span>&#128200; Relatórios</span></button>
       </div>
@@ -350,24 +350,41 @@
 
     <section class="page" id="page-ctc">
       <header class="page-header compact">
-        <div><h1>Técnicos CTC</h1><p>Agenda técnica, visitas e demandas.</p></div>
+        <div><h1>CTC</h1><p>Chamados de T.I., agenda técnica e acompanhamento das escolas.</p></div>
       </header>
       <div class="selector-panel operation-filters">
         <label>
-          <span>Tecnico</span>
+          <span>Técnico</span>
           <select id="ctcOwnerFilter"></select>
         </label>
         <label>
           <span>Escola</span>
           <select id="ctcSchoolFilter"></select>
         </label>
+        <label>
+          <span>Status</span>
+          <select id="ctcStatusFilter">
+            <option value="all">Todos</option>
+            <option value="aberto">Aberto</option>
+            <option value="em_rota">Em atendimento</option>
+            <option value="resolvido">Resolvido</option>
+          </select>
+        </label>
+        <label>
+          <span>Categoria</span>
+          <select id="ctcCategoryFilter"></select>
+        </label>
         <button class="ghost-btn filter-reset" type="button" id="ctcFilterReset">Limpar</button>
-        <p id="ctcFilterSummary">Visitas técnicas carregadas.</p>
+        <p id="ctcFilterSummary">Chamados e visitas carregados.</p>
       </div>
       <section class="ctc-workspace">
         <article class="box summary-box ctc-summary-card">
-          <div class="box-head"><div><strong>Resumo técnico</strong><small>Visitas e escolas no recorte atual</small></div></div>
+          <div class="box-head"><div><strong>Resumo técnico</strong><small>Chamados, visitas e escolas no recorte atual</small></div></div>
           <div class="row-list compact" id="ctcSummaryRows"></div>
+        </article>
+        <article class="box summary-box ctc-call-card">
+          <div class="box-head"><div><strong>Chamados de T.I.</strong><small id="ctcCallUpdated">Relatório técnico carregado.</small></div></div>
+          <div class="row-list compact" id="ctcCallSummaryRows"></div>
         </article>
         <article class="box ctc-scheduler-card">
           <div class="box-head"><div><strong>Agendar visita CTC</strong><small>Cadastre a agenda dos técnicos no painel.</small></div><span class="status-pill info">local</span></div>
@@ -381,6 +398,7 @@
           </form>
         </article>
       </section>
+      <div class="calendar-grid" id="ctcCallsGrid"></div>
       <div class="calendar-grid" id="ctcGrid"></div>
     </section>
 
@@ -760,34 +778,34 @@
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
-  <script src="./data/mock.js?v=calls-report-20260528"></script>
-  <script src="./data/schools.js?v=calls-report-20260528"></script>
-  <script src="./data/school-profiles.js?v=calls-report-20260528"></script>
-  <script src="./data/school-operational.js?v=calls-report-20260528"></script>
-  <script src="./data/inventory.js?v=calls-report-20260528"></script>
-  <script src="./data/supervision.js?v=calls-report-20260528"></script>
-  <script src="./data/contacts.js?v=calls-report-20260528"></script>
-  <script src="./data/users.js?v=calls-report-20260528"></script>
-  <script src="./data/governance.js?v=calls-report-20260528"></script>
-  <script src="./data/operations.js?v=calls-report-20260528"></script>
-  <script src="./data/calls-report.js?v=calls-report-20260528"></script>
-  <script src="./data/sources.js?v=calls-report-20260528"></script>
-  <script src="./modules/dom.js?v=calls-report-20260528"></script>
-  <script src="./modules/ui-catalog.js?v=calls-report-20260528"></script>
-  <script src="./modules/data-store.js?v=calls-report-20260528"></script>
-  <script src="./modules/identity.js?v=calls-report-20260528"></script>
-  <script src="./modules/access-scope.js?v=calls-report-20260528"></script>
-  <script src="./modules/month-state.js?v=calls-report-20260528"></script>
-  <script src="./modules/csv.js?v=calls-report-20260528"></script>
-  <script src="./modules/normalizers.js?v=calls-report-20260528"></script>
-  <script src="./modules/source-loader.js?v=calls-report-20260528"></script>
-  <script src="./config.js?v=calls-report-20260528"></script>
-  <script src="./modules/backend-client.js?v=calls-report-20260528"></script>
-  <script src="./modules/search.js?v=calls-report-20260528"></script>
-  <script src="./modules/render.js?v=calls-report-20260528"></script>
-  <script src="./modules/supervision-render.js?v=calls-report-20260528"></script>
-  <script src="./modules/navigation.js?v=calls-report-20260528"></script>
-  <script src="./modules/admin-tools.js?v=calls-report-20260528"></script>
-  <script src="./app.js?v=calls-report-20260528"></script>
+  <script src="./data/mock.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/schools.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/school-profiles.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/school-operational.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/inventory.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/supervision.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/contacts.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/users.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/governance.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/operations.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/calls-report.js?v=ctc-calls-report-20260528"></script>
+  <script src="./data/sources.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/dom.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/ui-catalog.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/data-store.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/identity.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/access-scope.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/month-state.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/csv.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/normalizers.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/source-loader.js?v=ctc-calls-report-20260528"></script>
+  <script src="./config.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/backend-client.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/search.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/render.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/supervision-render.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/navigation.js?v=ctc-calls-report-20260528"></script>
+  <script src="./modules/admin-tools.js?v=ctc-calls-report-20260528"></script>
+  <script src="./app.js?v=ctc-calls-report-20260528"></script>
 </body>
 </html>

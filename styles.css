@@ -1784,6 +1784,15 @@ html:not(.site-maintenance) .maintenance-message {
   margin-bottom: 14px;
 }
 
+.ctc-scheduler-card {
+  grid-column: 1 / -1;
+}
+
+.ctc-call-card .row-list,
+.ctc-summary-card .row-list {
+  min-height: 100%;
+}
+
 .ctc-scheduler-form {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

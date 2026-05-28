@@ -430,8 +430,17 @@
   }
 
   function focusCall(title) {
-    P.setPage?.("calls");
+    P.setPage?.("ctc");
     requestAnimationFrame(() => {
+      const owner = P.$("#ctcOwnerFilter");
+      const school = P.$("#ctcSchoolFilter");
+      const status = P.$("#ctcStatusFilter");
+      const category = P.$("#ctcCategoryFilter");
+      if (owner) owner.value = "all";
+      if (school) school.value = "all";
+      if (status) status.value = "all";
+      if (category) category.value = "all";
+      renderCtc(P.getAppData().ctcVisits);
       const target = P.$(`[data-call-key="${P.searchText([title])}"]`);
       if (!target) return;
       P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
@@ -463,10 +472,14 @@
     requestAnimationFrame(() => {
       const owner = P.$("#ctcOwnerFilter");
       const school = P.$("#ctcSchoolFilter");
+      const status = P.$("#ctcStatusFilter");
+      const category = P.$("#ctcCategoryFilter");
       if (owner) owner.value = "all";
       if (school) school.value = "all";
+      if (status) status.value = "all";
+      if (category) category.value = "all";
       renderCtc(P.getAppData().ctcVisits);
-      const target = P.$(`[data-ctc-key="${key}"]`);
+      const target = P.$(`[data-ctc-key="${key}"]`) || P.$(`[data-call-key="${P.searchText([key])}"]`);
       if (!target) return;
       P.$all(".detail-widget.focused").forEach(card => card.classList.remove("focused"));
       target.classList.add("focused");
@@ -560,8 +573,8 @@
       { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
       { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventário", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
-      { id: "ctc", roles: ["administrador", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128736;&#65039;", label: "CTC", value: context.ctcVisits, note: context.ctcVisits ? "Visitas técnicas no mês" : "Sem visitas no recorte", tone: context.ctcVisits ? "info" : "ok" },
-      { id: "calls", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "calls", icon: "&#128229;", label: "Chamados", value: context.openCalls, note: context.openCalls ? "Chamados em acompanhamento" : "Fila sem pendências", tone: context.openCalls ? "warn" : "ok" },
+      { id: "ctc", roles: ["administrador", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128736;&#65039;", label: "CTC", value: context.openCalls, note: context.openCalls ? "Chamados de T.I. em acompanhamento" : "Chamados de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
+      { id: "calls", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados", value: context.openCalls, note: context.openCalls ? "Abrir fila na CTC" : "Fila sem pendências", tone: context.openCalls ? "warn" : "ok" },
       { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
       { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mês" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
@@ -1870,35 +1883,60 @@
 
   function renderCtc(visits) {
     const grid = P.$("#ctcGrid");
-    if (!grid) return;
+    const callsGrid = P.$("#ctcCallsGrid");
+    if (!grid && !callsGrid) return;
     bindCtcVisitForm();
     const ownerFilter = P.$("#ctcOwnerFilter");
     const schoolFilter = P.$("#ctcSchoolFilter");
+    const statusFilter = P.$("#ctcStatusFilter");
+    const categoryFilter = P.$("#ctcCategoryFilter");
     const monthVisits = monthFiltered(visits, visit => visit.date);
-    const owners = [...new Set(monthVisits.map(visit => visit.owner).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    const schools = [...new Set(monthVisits.map(visit => visit.place).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const allCalls = Array.isArray(P.getAppData?.().calls) ? P.getAppData().calls : [];
+    const owners = [...new Set([...monthVisits.map(visit => visit.owner), ...allCalls.map(call => call.technician)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const schools = [...new Set([...monthVisits.map(visit => visit.place), ...allCalls.map(call => call.school)].filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    const categories = [...new Set(allCalls.map(call => call.category).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     setSelectOptions(ownerFilter, [{ value: "all", label: "Todos" }, ...owners.map(owner => ({ value: P.searchText([owner]), label: owner }))], ownerFilter?.value || "all");
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
+    setSelectOptions(categoryFilter, [{ value: "all", label: "Todas" }, ...categories.map(category => ({ value: P.searchText([category]), label: category }))], categoryFilter?.value || "all");
     bindSimpleSelect(ownerFilter, () => renderCtc(P.getAppData().ctcVisits));
     bindSimpleSelect(schoolFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindSimpleSelect(statusFilter, () => renderCtc(P.getAppData().ctcVisits));
+    bindSimpleSelect(categoryFilter, () => renderCtc(P.getAppData().ctcVisits));
     bindResetButton(P.$("#ctcFilterReset"), () => {
       if (ownerFilter) ownerFilter.value = "all";
       if (schoolFilter) schoolFilter.value = "all";
+      if (statusFilter) statusFilter.value = "all";
+      if (categoryFilter) categoryFilter.value = "all";
       renderCtc(P.getAppData().ctcVisits);
     });
 
     const selectedOwner = ownerFilter?.value || "all";
     const selectedSchool = schoolFilter?.value || "all";
-    const visible = monthVisits.filter(visit => {
+    const selectedStatus = statusFilter?.value || "all";
+    const selectedCategory = categoryFilter?.value || "all";
+    const visibleVisits = monthVisits.filter(visit => {
       const ownerOk = selectedOwner === "all" || P.searchText([visit.owner]) === selectedOwner;
       const schoolOk = selectedSchool === "all" || P.searchText([visit.place]) === selectedSchool;
       return ownerOk && schoolOk;
     });
-    renderCtcOperationalSummary(monthVisits, visible);
+    const visibleCalls = allCalls.filter(call => {
+      const ownerOk = selectedOwner === "all" || P.searchText([call.technician]) === selectedOwner;
+      const schoolOk = selectedSchool === "all" || P.searchText([call.school]) === selectedSchool;
+      const statusOk = selectedStatus === "all" || call.status === selectedStatus;
+      const categoryOk = selectedCategory === "all" || P.searchText([call.category]) === selectedCategory;
+      return ownerOk && schoolOk && statusOk && categoryOk;
+    });
+    renderCtcOperationalSummary(monthVisits, visibleVisits, allCalls, visibleCalls);
+    renderCtcCallSummary(allCalls, visibleCalls);
+    renderCtcCallCards(visibleCalls, allCalls);
     const summary = P.$("#ctcFilterSummary");
-    if (summary) summary.textContent = `${visible.length}/${monthVisits.length} visita(s) visíveis em ${P.selectedMonthLabel?.() || "mês selecionado"}.`;
+    if (summary) {
+      const updated = callsUpdatedUntil(allCalls);
+      summary.textContent = `${visibleCalls.length}/${allCalls.length} chamado(s) de T.I. | ${visibleVisits.length}/${monthVisits.length} visita(s) CTC.${updated ? ` Atualizado até ${updated}.` : ""}`;
+    }
 
-    grid.innerHTML = visible.length ? visible.map(visit => `
+    if (!grid) return;
+    grid.innerHTML = visibleVisits.length ? visibleVisits.map(visit => `
       <article class="detail-widget ctc-visit-card" data-ctc-key="${P.searchText([visit.owner, visit.date, visit.time, visit.place])}" data-search="${P.searchText([visit.owner, visit.date, visit.time, visit.place, visit.objective])}">
         <div class="ctc-date-box"><strong>${formatDate(visit.date)}</strong><small>${visit.time || "--:--"}</small></div>
         <div>
@@ -1916,17 +1954,97 @@
     });
   }
 
-  function renderCtcOperationalSummary(visits, visible) {
-    const owners = new Set(visible.map(visit => visit.owner).filter(Boolean)).size;
-    const schools = new Set(visible.map(visit => visit.place).filter(Boolean)).size;
-    const dates = new Set(visible.map(visit => visit.date).filter(Boolean)).size;
+  function renderCtcOperationalSummary(visits, visibleVisits, calls = [], visibleCalls = []) {
+    const owners = new Set([
+      ...visibleVisits.map(visit => visit.owner),
+      ...visibleCalls.map(call => call.technician)
+    ].filter(Boolean)).size;
+    const schools = new Set([
+      ...visibleVisits.map(visit => visit.place),
+      ...visibleCalls.map(call => call.school)
+    ].filter(Boolean)).size;
+    const dates = new Set(visibleVisits.map(visit => visit.date).filter(Boolean)).size;
+    const activeCalls = visibleCalls.filter(call => call.status !== "resolvido").length;
     const rows = [
-      { icon: "CT", title: "Visitas técnicas", note: `${visible.length}/${visits.length} visita(s) no recorte atual.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
-      { icon: "US", title: "Técnicos", note: `${owners} técnico(s) com agenda visível.`, label: `${owners}`, tone: owners ? "ok" : "warn" },
-      { icon: "ES", title: "Escolas atendidas", note: `${schools} escola(s) aparecem nas visitas filtradas.`, label: `${schools}`, tone: schools ? "info" : "warn" },
-      { icon: "AG", title: "Dias de agenda", note: `${dates} dia(s) distintos no recorte.`, label: `${dates}`, tone: dates ? "info" : "warn" }
+      { icon: "TI", title: "Chamados de T.I.", note: `${visibleCalls.length}/${calls.length} chamado(s) no relatório técnico.`, label: `${visibleCalls.length}`, tone: visibleCalls.length ? "info" : "warn" },
+      { icon: "AT", title: "Chamados ativos", note: `${activeCalls} chamado(s) pendente(s) ou em atendimento.`, label: `${activeCalls}`, tone: activeCalls ? "warn" : "ok" },
+      { icon: "US", title: "Técnicos", note: `${owners} técnico(s) vinculados ao filtro atual.`, label: `${owners}`, tone: owners ? "ok" : "warn" },
+      { icon: "AG", title: "Agenda CTC", note: `${visibleVisits.length}/${visits.length} visita(s), em ${dates} dia(s) distintos.`, label: `${visibleVisits.length}`, tone: visibleVisits.length ? "info" : "ok" },
+      { icon: "ES", title: "Escolas envolvidas", note: `${schools} escola(s) aparecem nos chamados ou visitas filtradas.`, label: `${schools}`, tone: schools ? "info" : "warn" }
     ];
     renderSummaryRows("#ctcSummaryRows", rows);
+  }
+
+  function callStatusLabel(status) {
+    return ({
+      aberto: "Aberto",
+      em_rota: "Em atendimento",
+      resolvido: "Resolvido"
+    })[status] || (status || "Chamado").replace("_", " ");
+  }
+
+  function callStatusTone(status) {
+    return status === "resolvido" ? "ok" : status === "em_rota" ? "info" : "warn";
+  }
+
+  function callsUpdatedUntil(calls = []) {
+    const meta = P.getAppData?.()?.callsMeta || {};
+    return meta.updatedUntilDisplay || latestCallDateDisplay(calls);
+  }
+
+  function renderCtcCallSummary(calls, visible) {
+    const host = P.$("#ctcCallUpdated");
+    const meta = P.getAppData?.()?.callsMeta || {};
+    const updated = callsUpdatedUntil(calls);
+    if (host) {
+      host.textContent = `${updated ? `Atualizado até ${updated}` : "Atualização não informada"}${meta.latestCallId ? ` | Último chamado ${meta.latestCallId}` : ""}.`;
+    }
+    const active = visible.filter(call => call.status !== "resolvido").length;
+    const resolved = visible.filter(call => call.status === "resolvido").length;
+    const noSchool = visible.filter(call => !call.school).length;
+    const technicians = new Set(visible.map(call => call.technician).filter(Boolean)).size;
+    const schools = new Set(visible.map(call => call.school).filter(Boolean)).size;
+    const topCategories = Object.entries(visible.reduce((acc, call) => {
+      const category = call.category || "Sem categoria";
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {})).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([category, count]) => `${category}: ${count}`).join(" | ");
+    const rows = [
+      { icon: "CH", title: "Chamados filtrados", note: `${visible.length}/${calls.length} chamado(s) do relatório de T.I.`, label: `${visible.length}`, tone: visible.length ? "info" : "warn" },
+      { icon: "AT", title: "Ativos", note: `${active} pendente(s)/em atendimento. Concluídos: ${resolved}.`, label: `${active}`, tone: active ? "warn" : "ok" },
+      { icon: "TC", title: "Técnicos atribuídos", note: `${technicians} técnico(s) com chamado vinculado.`, label: `${technicians}`, tone: technicians ? "info" : "warn" },
+      { icon: "ES", title: "Escolas", note: `${schools} escola(s). Sem escola vinculada: ${noSchool}.${topCategories ? ` ${topCategories}.` : ""}`, label: `${schools}`, tone: schools ? "info" : "warn" }
+    ];
+    renderSummaryRows("#ctcCallSummaryRows", rows);
+  }
+
+  function renderCtcCallCards(visible, allCalls) {
+    const host = P.$("#ctcCallsGrid");
+    if (!host) return;
+    const shown = visible.slice(0, 80);
+    const overflow = visible.length > shown.length ? `<div class="empty-state compact">Mostrando ${shown.length} de ${visible.length} chamados. Use os filtros para refinar a fila.</div>` : "";
+    host.innerHTML = shown.length ? `${overflow}${shown.map(call => `
+      <article class="detail-widget" data-call-key="${P.searchText([call.id || call.title])}" data-search="${P.searchText([call.id, call.title, call.category, call.subcategory, call.school, call.schoolOriginal, call.status, call.statusReason, call.serviceStatus, call.queue, call.technician, call.provider, call.note])}">
+        <div>
+          <small>${[call.id, call.createdAtDisplay].filter(Boolean).join(" | ")}</small>
+          <strong>${call.title || [call.category, call.subcategory].filter(Boolean).join(" - ") || "Chamado de T.I."}</strong>
+          <p>${call.school || call.schoolOriginal || "Escola não vinculada"}${call.statusReason ? ` | ${call.statusReason}` : ""}</p>
+          <p>${[
+            call.serviceStatus && `Atendimento: ${call.serviceStatus}`,
+            call.technician ? `Técnico: ${call.technician}` : "Técnico: não atribuído",
+            call.queue && `Fila: ${call.queue}`
+          ].filter(Boolean).join(" | ")}</p>
+          ${call.provider ? `<p>Fornecedor: ${call.provider}</p>` : ""}
+        </div>
+        <div class="detail-actions">
+          <span class="status-pill ${callStatusTone(call.status)}">${callStatusLabel(call.status)}</span>
+          ${call.school ? `<button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>` : ""}
+        </div>
+      </article>
+    `).join("")}` : `<div class="empty-state">${allCalls.length ? "Nenhum chamado de T.I. com esses filtros." : "Nenhum chamado de T.I. carregado na categoria CTC."}</div>`;
+    host.querySelectorAll("[data-open-school]").forEach(button => {
+      button.addEventListener("click", () => focusSchool(button.dataset.openSchool));
+    });
   }
 
   function renderCalls(calls) {
@@ -1935,12 +2053,6 @@
     const statusFilter = P.$("#callStatusFilter");
     const schoolFilter = P.$("#callSchoolFilter");
     const allCalls = Array.isArray(calls) ? calls : [];
-    const tone = status => status === "resolvido" ? "ok" : status === "em_rota" ? "info" : "warn";
-    const statusLabel = status => ({
-      aberto: "Aberto",
-      em_rota: "Em atendimento",
-      resolvido: "Resolvido"
-    })[status] || (status || "Chamado").replace("_", " ");
     const schools = [...new Set(allCalls.map(call => call.school).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     setSelectOptions(schoolFilter, [{ value: "all", label: "Todas" }, ...schools.map(school => ({ value: P.searchText([school]), label: school }))], schoolFilter?.value || "all");
     bindSimpleSelect(statusFilter, () => renderCalls(P.getAppData().calls));
@@ -1967,11 +2079,11 @@
         <div>
           <small>${[call.id, call.createdAtDisplay].filter(Boolean).join(" | ")}</small>
           <strong>${call.title}</strong>
-          <p>${call.school || "Escola n?o informada"}${call.statusReason ? ` | ${call.statusReason}` : ""}</p>
-          <p>${[call.technician && `T?cnico: ${call.technician}`, call.provider && `Fornecedor: ${call.provider}`].filter(Boolean).join(" | ") || call.note || ""}</p>
+          <p>${call.school || "Escola não informada"}${call.statusReason ? ` | ${call.statusReason}` : ""}</p>
+          <p>${[call.technician && `Técnico: ${call.technician}`, call.provider && `Fornecedor: ${call.provider}`].filter(Boolean).join(" | ") || call.note || ""}</p>
         </div>
         <div class="detail-actions">
-          <span class="status-pill ${tone(call.status)}">${statusLabel(call.status)}</span>
+          <span class="status-pill ${callStatusTone(call.status)}">${callStatusLabel(call.status)}</span>
           ${call.school ? `<button class="ghost-btn" type="button" data-open-school="${call.school}">Abrir escola</button>` : ""}
         </div>
       </article>
@@ -1985,7 +2097,7 @@
     const meta = P.getAppData?.()?.callsMeta || {};
     const updated = meta.updatedUntilDisplay || latestCallDateDisplay(calls);
     const source = meta.source ? ` Fonte: ${meta.source}.` : "";
-    return `${visible.length}/${calls.length} chamado(s) vis?veis.${updated ? ` Atualizado at? ${updated}.` : ""}${source}`;
+    return `${visible.length}/${calls.length} chamado(s) visíveis.${updated ? ` Atualizado até ${updated}.` : ""}${source}`;
   }
 
   function latestCallDateDisplay(calls = []) {
@@ -2001,7 +2113,7 @@
     const schools = new Set(visible.map(call => call.school).filter(Boolean)).size;
     const updated = (P.getAppData?.()?.callsMeta || {}).updatedUntilDisplay || latestCallDateDisplay(calls);
     const rows = [
-      { icon: "CH", title: "Fila vis?vel", note: `${visible.length}/${calls.length} chamado(s) no recorte atual.${updated ? ` Atualizado at? ${updated}.` : ""}`, label: `${visible.length}`, tone: visible.length ? "info" : "ok" },
+      { icon: "CH", title: "Fila visível", note: `${visible.length}/${calls.length} chamado(s) no recorte atual.${updated ? ` Atualizado até ${updated}.` : ""}`, label: `${visible.length}`, tone: visible.length ? "info" : "ok" },
       { icon: "!", title: "Abertos", note: `${open} chamado(s) aguardando encaminhamento.`, label: `${open}`, tone: open ? "warn" : "ok" },
       { icon: "SV", title: "Em atendimento", note: `${route} chamado(s) em atendimento.`, label: `${route}`, tone: route ? "info" : "ok" },
       { icon: "ES", title: "Escolas envolvidas", note: `${schools} escola(s) com chamado no filtro. Resolvidos: ${resolved}.`, label: `${schools}`, tone: schools ? "info" : "ok" }
