@@ -1786,6 +1786,7 @@ html:not(.site-maintenance) .maintenance-message {
 
 .ctc-scheduler-card {
   grid-column: 1 / -1;
+  margin-bottom: 16px;
 }
 
 .ctc-call-card .row-list,
@@ -1796,6 +1797,118 @@ html:not(.site-maintenance) .maintenance-message {
 #ctcCallsGrid {
   display: block;
   margin-bottom: 16px;
+}
+
+.ctc-hero {
+  display: grid;
+  grid-template-columns: minmax(260px, .8fr) minmax(0, 1.2fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 12px;
+  padding: 16px;
+  border: 1px solid rgba(79, 240, 205, .2);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(79, 240, 205, .08), rgba(200, 245, 90, .035)),
+    var(--sf);
+}
+
+.ctc-hero-copy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.ctc-hero-copy span,
+.ctc-hero-copy p {
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.ctc-hero-copy span {
+  text-transform: uppercase;
+}
+
+.ctc-hero-copy strong {
+  color: var(--tx);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.ctc-hero-copy p {
+  max-width: 56ch;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.ctc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.ctc-kpi {
+  min-width: 0;
+  min-height: 94px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 13px 14px;
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, .035), transparent 62%),
+    rgba(255, 255, 255, .025);
+}
+
+.ctc-kpi small,
+.ctc-kpi span {
+  overflow: hidden;
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.ctc-kpi strong {
+  color: var(--tx);
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.ctc-kpi-ok {
+  border-color: rgba(74, 222, 128, .22);
+}
+
+.ctc-kpi-info {
+  border-color: rgba(79, 240, 205, .24);
+}
+
+.ctc-kpi-warn {
+  border-color: rgba(245, 200, 90, .26);
+}
+
+#page-ctc .selector-panel.operation-filters {
+  grid-template-columns: repeat(4, minmax(150px, 1fr)) minmax(100px, 140px);
+  align-items: end;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 18px;
+}
+
+#page-ctc .selector-panel.operation-filters label {
+  gap: 6px;
+}
+
+#page-ctc .selector-panel.operation-filters select,
+#page-ctc .selector-panel.operation-filters .ghost-btn {
+  min-height: 42px;
 }
 
 #ctcGrid {
@@ -2097,6 +2210,18 @@ html:not(.site-maintenance) .maintenance-message {
     grid-template-columns: minmax(220px, 1.2fr) minmax(180px, 1fr) minmax(150px, .8fr);
   }
 
+  .ctc-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .ctc-kpi-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  #page-ctc .selector-panel.operation-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  }
+
   .ctc-call-header span:nth-child(4),
   .ctc-call-header span:nth-child(5),
   .ctc-call-tech,
@@ -2131,6 +2256,16 @@ html:not(.site-maintenance) .maintenance-message {
 
   .ctc-call-board-head,
   .ctc-call-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ctc-hero {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .ctc-kpi-grid,
+  #page-ctc .selector-panel.operation-filters {
     grid-template-columns: 1fr;
   }
 
