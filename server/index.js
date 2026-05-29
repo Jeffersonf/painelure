@@ -650,6 +650,24 @@ function isSupervisorRole(role) {
   return normalizeText(role).includes("supervis");
 }
 
+function identityTokens(value) {
+  return normalizeText(value).split(/\s+/).filter(Boolean);
+}
+
+function identityMatches(userValue, supervisorValue) {
+  const userKey = normalizeText(userValue);
+  const supervisorKey = normalizeText(supervisorValue);
+  if (!userKey || !supervisorKey) return false;
+  const cleanUserKey = userKey.includes("@") ? userKey.split("@")[0].replace(/[._-]+/g, " ") : userKey;
+  const cleanSupervisorKey = supervisorKey.includes("@") ? supervisorKey.split("@")[0].replace(/[._-]+/g, " ") : supervisorKey;
+  if (cleanUserKey === cleanSupervisorKey) return true;
+  const userTokens = identityTokens(cleanUserKey);
+  const supervisorTokens = identityTokens(cleanSupervisorKey);
+  if (userTokens.length >= 2 && userTokens.every(token => supervisorTokens.includes(token))) return true;
+  if (supervisorTokens.length >= 2 && supervisorTokens.every(token => userTokens.includes(token))) return true;
+  return false;
+}
+
 function accessForRole(role, appData = {}) {
   const target = normalizeText(role);
   const key = Object.keys(DATA_ACCESS).find(item => normalizeText(item) === target);
@@ -768,17 +786,24 @@ function publicCarBooking(item = {}) {
 
 function supervisorForUser(appData = {}, user = null) {
   if (!user || !isSupervisorRole(user.role)) return null;
-  const userKeys = [user.name, user.username, user.contactName, user.supervisorName]
-    .map(normalizeText)
-    .filter(Boolean);
+  const userValues = [
+    user.name,
+    user.username,
+    user.login,
+    user.email,
+    user.contactName,
+    user.supervisorName,
+    user.preferences?.supervisorName
+  ].filter(Boolean);
   return (appData.supervisors || []).find(supervisor => {
-    const supervisorKeys = [supervisor.name, supervisor.email, supervisor.login, supervisor.username]
-      .map(value => {
-        const normalized = normalizeText(value);
-        return normalized.includes("@") ? normalized.split("@")[0] : normalized;
-      })
-      .filter(Boolean);
-    return supervisorKeys.some(key => userKeys.includes(key));
+    const supervisorValues = [
+      supervisor.name,
+      supervisor.email,
+      supervisor.login,
+      supervisor.username,
+      ...(supervisor.aliases || [])
+    ].filter(Boolean);
+    return userValues.some(userValue => supervisorValues.some(value => identityMatches(userValue, value)));
   }) || null;
 }
 

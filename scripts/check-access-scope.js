@@ -88,6 +88,13 @@ function run() {
     assert(!P.canViewSchool("EE Bairro Boa Vista Intervales"), "Supervisor nao deve abrir escola fora da carteira.");
   });
 
+  const adilson = data.supervisors.find(item => P.normalize(item.name).includes("adilson"));
+  assert(adilson, "Supervisor Adilson precisa existir na base seed.");
+  withUser(P, { name: "Adilson Fogaca", username: "adilson fogaca", role: "Supervisao", preferences: { supervisorName: "Adilson Fogaca" } }, scoped => {
+    assert(scoped.schools.length === adilson.assignedSchools.length, "Adilson deve ver as escolas vinculadas mesmo com nome abreviado.");
+    assert(scoped.supervisors.length === 1 && scoped.supervisors[0].name === adilson.name, "Adilson deve ver o proprio painel de supervisao.");
+  });
+
   withUser(P, { name: "Consulta", role: "Consulta" }, scoped => {
     assert(scoped.schools.length === data.schools.length, "Consulta deve receber escolas.");
     assert(scoped.contacts.length === data.contacts.length, "Consulta deve receber contatos.");

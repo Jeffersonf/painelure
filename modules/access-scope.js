@@ -256,20 +256,43 @@
   }
 
   function supervisorIdentityKey(user = activeIdentity()) {
-    return normalized(user?.supervisorName || user?.contactName || user?.name || user?.login || user?.username);
+    return normalized(user?.supervisorName || user?.preferences?.supervisorName || user?.contactName || user?.name || user?.login || user?.username);
+  }
+
+  function identityTokens(value) {
+    return normalized(value).split(/\s+/).filter(Boolean);
+  }
+
+  function identityMatches(userValue, supervisorValue) {
+    const userKey = normalized(userValue);
+    const supervisorKey = normalized(supervisorValue);
+    if (!userKey || !supervisorKey) return false;
+    const cleanSupervisorKey = supervisorKey.includes("@") ? supervisorKey.split("@")[0].replace(/[._-]+/g, " ") : supervisorKey;
+    const cleanUserKey = userKey.includes("@") ? userKey.split("@")[0].replace(/[._-]+/g, " ") : userKey;
+    if (cleanSupervisorKey === cleanUserKey) return true;
+    const userTokens = identityTokens(cleanUserKey);
+    const supervisorTokens = identityTokens(cleanSupervisorKey);
+    if (userTokens.length >= 2 && userTokens.every(token => supervisorTokens.includes(token))) return true;
+    if (supervisorTokens.length >= 2 && supervisorTokens.every(token => userTokens.includes(token))) return true;
+    return false;
   }
 
   function supervisorForCurrentUser(data = P.getAppData?.()) {
     const user = activeIdentity();
     if (!user || !isSupervisorUser(user)) return null;
-    const userKey = supervisorIdentityKey(user);
-    if (!userKey) return null;
+    const userValues = [
+      user?.supervisorName,
+      user?.preferences?.supervisorName,
+      user?.contactName,
+      user?.name,
+      user?.login,
+      user?.username,
+      user?.email
+    ].filter(Boolean);
+    if (!userValues.length && !supervisorIdentityKey(user)) return null;
     return (data?.supervisors || []).find(supervisor => {
-      const values = [supervisor.name, supervisor.email, supervisor.login, supervisor.username];
-      return values.some(value => {
-        const key = normalized(value);
-        return key === userKey || (key && userKey && key.split("@")[0] === userKey);
-      });
+      const values = [supervisor.name, supervisor.email, supervisor.login, supervisor.username, ...(supervisor.aliases || [])];
+      return userValues.some(userValue => values.some(value => identityMatches(userValue, value)));
     }) || null;
   }
 
