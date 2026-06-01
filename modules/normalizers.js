@@ -138,11 +138,20 @@
     });
   }
 
-  function normalizeInventoryRows(rows) {
-    function lookupLabel(value, label) {
+  function normalizeInventoryRows(payload) {
+    const rows = Array.isArray(payload) ? payload : (payload?.rows || []);
+    const schoolRows = Array.isArray(payload?.schoolRows) ? payload.schoolRows : [];
+    const schoolLookup = schoolRows.reduce((acc, row) => {
+      const id = firstValue(row, ["id"], "");
+      const name = firstValue(row, ["escolas", "escola", "nome", "title"], "");
+      if (id && name) acc[id] = name.trim();
+      return acc;
+    }, {});
+
+    function lookupLabel(value, label, map = {}) {
       const text = valueToText(value);
       if (!text) return "";
-      return /^\d+$/.test(text) ? `${label} #${text}` : text;
+      return /^\d+$/.test(text) ? (map[text] || `${label} #${text}`) : text;
     }
 
     function inventoryStatus(row) {
@@ -171,7 +180,7 @@
 
     if (rows.some(row => firstValue(row, ["escola", "school", "unidade"], ""))) {
       return rows.map(row => {
-        const school = lookupLabel(firstValue(row, ["escola", "school", "unidade"], ""), "Escola") || "Escola sem nome";
+        const school = lookupLabel(firstValue(row, ["escola", "school", "unidade"], ""), "Escola", schoolLookup) || "Escola sem nome";
         const equipment = lookupLabel(firstValue(row, ["tipo", "equipamento", "item", "nome"], ""), "Equipamento") || "Item";
         return {
           id: firstValue(row, ["id"], "") ? `sharepoint-inventory-${firstValue(row, ["id"], "")}` : undefined,

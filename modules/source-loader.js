@@ -15,7 +15,9 @@
       : await P.fetchCsv(source.url);
     const payload = key === "supervision"
       ? await supervisionPayload(source, rows)
-      : rows;
+      : key === "inventory"
+        ? await inventoryPayload(source, rows)
+        : rows;
     return {
       key,
       status: "loaded",
@@ -78,6 +80,18 @@
     if (result.status === "loaded") P.showToast?.("Atualizado", `${label}: ${result.rows?.length || 0} linha(s) carregada(s).`, "ok", { delay: 7600 });
     if (result.status === "empty") P.showToast?.("Fonte vazia", `${label} não substituiu os dados atuais.`, "warn", { delay: 9000 });
     return result;
+  }
+
+  async function inventoryPayload(source, rows) {
+    const schoolLookupUrl = source?.metadata?.schoolLookupUrl;
+    if (!schoolLookupUrl) return rows;
+    try {
+      const schoolRows = await P.fetchSharePointList(schoolLookupUrl);
+      return { rows, schoolRows };
+    } catch (error) {
+      console.warn("[PainelURE] Mapa de escolas do inventário não carregado:", error);
+      return { rows, schoolRows: [] };
+    }
   }
 
   function hasMeaningfulSourceData(data) {

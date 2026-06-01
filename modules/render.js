@@ -626,7 +626,7 @@
   function adminDashboardTasks(data, context) {
     const assets = data.schoolAssets || [];
     const supervisors = data.supervisors || [];
-    const lookupIds = assets.filter(item => /^(Escola|Equipamento) #\d+/i.test(`${item.school || ""} ${item.name || ""}`)).length;
+    const lookupIds = assets.filter(item => /^(Escola|Equipamento) #\d+/i.test(item.school || "") || /^(Escola|Equipamento) #\d+/i.test(item.name || "")).length;
     const sourceInventory = P.sourceResult?.("inventory");
     const sourceSupervision = P.sourceResult?.("supervision");
     const sourceCars = P.sourceResult?.("cars");

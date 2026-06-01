@@ -21,7 +21,14 @@
       type: "sharepoint-list",
       url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACUz84zfYrYRIadNAPXJvISAetLbQd40ptsKrcSMFs4TNQ?e=Ae9Qvg",
       status: "official",
-      metadata: { domain: "Inventário", cadence: "sob demanda", owner: "SETEC/CTC", source: "InventarioEquipamentosEscolas", autoLoad: false }
+      metadata: {
+        domain: "Inventário",
+        cadence: "sob demanda",
+        owner: "SETEC/CTC",
+        source: "InventarioEquipamentosEscolas",
+        autoLoad: false,
+        schoolLookupUrl: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACZ5y0MlGBTQI4wlCbHtIPeASsrN5V7U1knW4j85cHF7tk?e=v1BVFU"
+      }
     },
     supervision: {
       label: "Supervisão",
