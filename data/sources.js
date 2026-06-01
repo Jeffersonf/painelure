@@ -19,9 +19,9 @@
     inventory: {
       label: "Inventário",
       type: "sharepoint-list",
-      url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACUz84zfYrYRIadNAPXJvISAetLbQd40ptsKrcSMFs4TNQ?e=3WOQtG",
+      url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACUz84zfYrYRIadNAPXJvISAetLbQd40ptsKrcSMFs4TNQ?e=Ae9Qvg",
       status: "official",
-      metadata: { domain: "Inventário", cadence: "sob demanda", owner: "SETEC/CTC", source: "Inventário", autoLoad: false }
+      metadata: { domain: "Inventário", cadence: "sob demanda", owner: "SETEC/CTC", source: "InventarioEquipamentosEscolas", autoLoad: false }
     },
     supervision: {
       label: "Supervisão",

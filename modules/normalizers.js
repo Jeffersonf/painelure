@@ -139,22 +139,54 @@
   }
 
   function normalizeInventoryRows(rows) {
+    function lookupLabel(value, label) {
+      const text = valueToText(value);
+      if (!text) return "";
+      return /^\d+$/.test(text) ? `${label} #${text}` : text;
+    }
+
+    function inventoryStatus(row) {
+      const text = firstValue(row, ["status", "situacao", "estado", "statusdoequipamento", "status_do_equipamento"], "ok");
+      const key = P.normalize(text);
+      if (key === "1" || key.includes("ok") || key.includes("sim") || key.includes("funcionando")) return "ok";
+      if (key.includes("defeito") || key.includes("quebrado") || key.includes("nao")) return "defeito";
+      return "manutencao";
+    }
+
+    function inventoryNotes(row) {
+      const serial = firstValue(row, ["n_mero_de_s_rie", "numero_de_serie", "n_x00fa_merodes_x00e9_rie", "serial"], "");
+      const patrimony = firstValue(row, ["patrimonio", "patrim_x00f4_nio"], "");
+      const imei = firstValue(row, ["imei"], "");
+      const blueMonitor = firstValue(row, ["bluemonitor", "blue_monitor"], "");
+      const collectedAt = firstValue(row, ["datadacoleta", "data_da_coleta"], "");
+      return [
+        serial && `Serie: ${serial}`,
+        patrimony && `Patrimonio: ${patrimony}`,
+        imei && `IMEI: ${imei}`,
+        blueMonitor && `BlueMonitor: ${blueMonitor}`,
+        collectedAt && `Coleta: ${formatDateValue(collectedAt)}`,
+        firstValue(row, ["observacao", "observacoes", "observa_x00e7__x00e3_o"], "")
+      ].filter(Boolean).join(" | ");
+    }
+
     if (rows.some(row => firstValue(row, ["escola", "school", "unidade"], ""))) {
       return rows.map(row => {
-        const statusText = firstValue(row, ["status", "situacao", "estado"], "ok").toLowerCase();
+        const school = lookupLabel(firstValue(row, ["escola", "school", "unidade"], ""), "Escola") || "Escola sem nome";
+        const equipment = lookupLabel(firstValue(row, ["tipo", "equipamento", "item", "nome"], ""), "Equipamento") || "Item";
         return {
-          school: firstValue(row, ["escola", "school", "unidade"], "Escola sem nome"),
-          name: firstValue(row, ["tipo", "equipamento", "item", "nome"], "Item"),
-          sourceName: firstValue(row, ["nome_original", "descricao", "patrimonio", "modelo"], ""),
-          notes: firstValue(row, ["observação", "observacoes", "nota", "quantidade", "qtd"], ""),
-          status: statusText.includes("defeito") ? "defeito" : statusText.includes("manut") ? "manutencao" : "ok"
+          id: firstValue(row, ["id"], "") ? `sharepoint-inventory-${firstValue(row, ["id"], "")}` : undefined,
+          school,
+          name: equipment,
+          sourceName: equipment,
+          notes: inventoryNotes(row),
+          status: inventoryStatus(row)
         };
       });
     }
     return rows.map(row => ({
       label: firstValue(row, ["tipo", "equipamento", "item", "nome"], "Item"),
       value: firstValue(row, ["quantidade", "qtd", "total"], "0"),
-      note: firstValue(row, ["observação", "observacoes", "status", "nota"], ""),
+      note: firstValue(row, ["observacao", "observacoes", "status", "nota"], ""),
       tone: firstValue(row, ["status"], "").toLowerCase().includes("manut") ? "warn" : "ok"
     }));
   }
