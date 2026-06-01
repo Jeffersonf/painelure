@@ -326,6 +326,17 @@
             <option value="defeito">Defeito</option>
           </select>
         </label>
+        <label>
+          <span>Identificação</span>
+          <select id="inventoryIssueSelect">
+            <option value="">Todos</option>
+            <option value="missing-serial">Sem série</option>
+            <option value="missing-patrimony">Sem patrimônio</option>
+            <option value="missing-type">Sem tipo</option>
+            <option value="school-id">Escola por ID</option>
+            <option value="equipment-id">Equipamento por ID</option>
+          </select>
+        </label>
         <button class="ghost-btn filter-reset" type="button" id="inventoryFilterReset">Limpar</button>
       </div>
       <div class="inventory-school-grid" id="inventorySchoolGrid"></div>
@@ -801,7 +812,7 @@
   <script src="./config.js?v=stability-polish-20260528"></script>
   <script src="./modules/backend-client.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/search.js?v=stability-polish-20260528"></script>
-  <script src="./modules/render.js?v=quality-diagnostics-20260601"></script>
+  <script src="./modules/render.js?v=inventory-triage-20260601"></script>
   <script src="./modules/supervision-render.js?v=supervision-month-group-fix-20260601"></script>
   <script src="./modules/navigation.js?v=stability-polish-20260528"></script>
   <script src="./modules/admin-tools.js?v=supervision-monthkey-fix-20260601"></script>

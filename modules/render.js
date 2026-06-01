@@ -1369,6 +1369,7 @@
     }
     const filterInput = P.$("#inventoryFilterInput");
     const statusSelect = P.$("#inventoryStatusSelect");
+    const issueSelect = P.$("#inventoryIssueSelect");
     if (filterInput && !filterInput.dataset.bound) {
       filterInput.dataset.bound = "true";
       filterInput.addEventListener("input", () => renderInventory(P.getAppData()));
@@ -1377,9 +1378,14 @@
       statusSelect.dataset.bound = "true";
       statusSelect.addEventListener("change", () => renderInventory(P.getAppData()));
     }
+    if (issueSelect && !issueSelect.dataset.bound) {
+      issueSelect.dataset.bound = "true";
+      issueSelect.addEventListener("change", () => renderInventory(P.getAppData()));
+    }
     bindResetButton(P.$("#inventoryFilterReset"), () => {
       if (filterInput) filterInput.value = "";
       if (statusSelect) statusSelect.value = "";
+      if (issueSelect) issueSelect.value = "";
       renderInventory(P.getAppData());
     });
     const schoolNames = [...new Set(assets.map(asset => asset.school).filter(Boolean))].sort((a, b) => {
@@ -1420,9 +1426,20 @@
     }
     const query = P.normalize(filterInput?.value || "");
     const statusFilter = statusSelect?.value || "";
+    const issueFilter = issueSelect?.value || "";
+    const matchesIssue = asset => {
+      if (!issueFilter) return true;
+      if (issueFilter === "missing-serial") return !assetHasNoteValue(asset, "Serie");
+      if (issueFilter === "missing-patrimony") return !assetHasNoteValue(asset, "Patrimonio");
+      if (issueFilter === "missing-type") return !asset.name || asset.name === "Item";
+      if (issueFilter === "school-id") return /^Escola #\d+$/i.test(asset.school || "");
+      if (issueFilter === "equipment-id") return /^Equipamento #\d+$/i.test(asset.name || "");
+      return true;
+    };
     const selectedAssets = assets.filter(asset => {
       if (asset.school !== selectedSchool) return false;
       if (statusFilter && asset.status !== statusFilter) return false;
+      if (!matchesIssue(asset)) return false;
       if (!query) return true;
       return P.searchText([asset.name, asset.sourceName, asset.notes, asset.status]).includes(query);
     });
