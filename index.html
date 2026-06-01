@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "dashboard-logo-center-20260601";
+      window.PAINELURE_BUILD = "sidebar-logo-test-20260601";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=dashboard-logo-center-20260601">
+  <link rel="stylesheet" href="./styles.css?v=sidebar-logo-test-20260601">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -119,7 +119,10 @@
 
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-word"><span>Painel</span><strong>URE</strong></span>
+      <span class="brand-lockup">
+        <img class="brand-logo" src="./assets/ure-logo-transparent.png" alt="">
+        <span class="brand-word"><span>Painel</span><strong>URE</strong></span>
+      </span>
       <div class="brand-actions">
         <button class="icon-btn" id="themeBtn" type="button" aria-label="Usar tema claro" aria-pressed="false">&#9728;&#65039;</button>
       </div>
@@ -799,7 +802,7 @@
   <script src="./config.js?v=stability-polish-20260528"></script>
   <script src="./modules/backend-client.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/search.js?v=stability-polish-20260528"></script>
-  <script src="./modules/render.js?v=dashboard-logo-center-20260601"></script>
+  <script src="./modules/render.js?v=sidebar-logo-test-20260601"></script>
   <script src="./modules/supervision-render.js?v=supervision-month-group-fix-20260601"></script>
   <script src="./modules/navigation.js?v=stability-polish-20260528"></script>
   <script src="./modules/admin-tools.js?v=supervision-monthkey-fix-20260601"></script>

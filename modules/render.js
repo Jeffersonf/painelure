@@ -697,9 +697,6 @@
             <strong>${profile.title}</strong>
             <p>${profile.note}</p>
           </div>
-          <div class="command-logo-panel" aria-label="Logo da URE Itapeva">
-            <img class="command-logo" src="./assets/ure-logo-transparent.png" alt="Logo da URE Itapeva">
-          </div>
           <button class="ghost-btn" type="button" data-jump="${focusWidget.page}"${focusModeAttr}>Abrir foco</button>
         </article>
         <div class="dashboard-widget-grid">
