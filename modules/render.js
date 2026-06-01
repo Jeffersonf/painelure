@@ -613,6 +613,112 @@
     `;
   }
 
+  const ADMIN_CHECKPOINT_KEY = "painelure_admin_dashboard_checkpoints";
+
+  function savedAdminCheckpoints() {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_CHECKPOINT_KEY) || "{}") || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function adminDashboardTasks(data, context) {
+    const assets = data.schoolAssets || [];
+    const supervisors = data.supervisors || [];
+    const lookupIds = assets.filter(item => /^(Escola|Equipamento) #\d+/i.test(`${item.school || ""} ${item.name || ""}`)).length;
+    const sourceInventory = P.sourceResult?.("inventory");
+    const sourceSupervision = P.sourceResult?.("supervision");
+    const sourceCars = P.sourceResult?.("cars");
+    return [
+      {
+        id: "inventory-lookups",
+        title: "Resolver nomes do inventário",
+        note: lookupIds
+          ? `${lookupIds} item(ns) ainda aparecem com ID do SharePoint. Precisa liberar as listas lookup ou cadastrar o mapa ID -> nome.`
+          : "Inventário sem IDs aparentes de escola/equipamento.",
+        tone: lookupIds ? "warn" : "ok"
+      },
+      {
+        id: "brand-logo",
+        title: "Refazer logo da barra lateral",
+        note: "Logo removido da sidebar. Manter PainelURE limpo até termos uma versão que funcione em tamanho pequeno.",
+        tone: "warn"
+      },
+      {
+        id: "inventory-source",
+        title: "Validar planilha de equipamentos",
+        note: `${assets.length} linha(s) carregada(s). Status da fonte: ${sourceInventory?.status || "sem sincronização nesta sessão"}.`,
+        tone: assets.length ? "info" : "warn"
+      },
+      {
+        id: "supervision-month",
+        title: "Conferir supervisão por mês",
+        note: `${supervisors.length} supervisor(es). O agrupamento usa registros datados para não zerar na virada do mês.`,
+        tone: supervisors.length && !context.pendingVisits ? "ok" : "warn"
+      },
+      {
+        id: "cars-source",
+        title: "Conferir agenda de carros",
+        note: `${context.carCount} reserva(s) no mês. Status da fonte: ${sourceCars?.status || "sem sincronização nesta sessão"}.`,
+        tone: sourceCars?.status === "loaded" || context.carCount ? "info" : "warn"
+      },
+      {
+        id: "home-review",
+        title: "Revisar utilidade da inicial",
+        note: "Checar se os widgets e atalhos ajudam na rotina. Remover o que não tiver ação clara.",
+        tone: "warn"
+      },
+      {
+        id: "official-sources",
+        title: "Rodar atualização geral",
+        note: `Supervisão: ${sourceSupervision?.status || "sem sessão"} | Inventário: ${sourceInventory?.status || "sem sessão"} | Carros: ${sourceCars?.status || "sem sessão"}.`,
+        tone: sourceInventory?.status === "loaded" && sourceSupervision?.status === "loaded" ? "ok" : "warn"
+      }
+    ];
+  }
+
+  function adminDashboardChecklistMarkup(data, context) {
+    if (!currentRoleKey().includes("administrador")) return "";
+    const saved = savedAdminCheckpoints();
+    const tasks = adminDashboardTasks(data, context);
+    const pending = tasks.filter(item => !saved[item.id]).length;
+    return `
+      <section class="admin-dashboard-panel" aria-label="Checkpoints administrativos">
+        <div class="admin-dashboard-head">
+          <div>
+            <strong>Checkpoints do Jefferson</strong>
+            <small>Avisos das partes que ainda precisam de decisão ou validação.</small>
+          </div>
+          <span class="status-pill ${pending ? "warn" : "ok"}">${pending ? `${pending} pendente(s)` : "ok"}</span>
+        </div>
+        <div class="admin-checkpoint-list">
+          ${tasks.map(item => `
+            <label class="admin-checkpoint" data-search="${P.searchText([item.title, item.note, item.tone])}">
+              <input type="checkbox" data-admin-checkpoint="${item.id}"${saved[item.id] ? " checked" : ""}>
+              <span>
+                <strong>${item.title}</strong>
+                <small>${item.note}</small>
+              </span>
+              <em class="status-pill ${saved[item.id] ? "ok" : item.tone}">${saved[item.id] ? "feito" : item.tone === "warn" ? "revisar" : item.tone}</em>
+            </label>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function bindAdminDashboardChecklist(command) {
+    command.querySelectorAll("[data-admin-checkpoint]").forEach(input => {
+      input.addEventListener("change", () => {
+        const saved = savedAdminCheckpoints();
+        saved[input.dataset.adminCheckpoint] = input.checked;
+        localStorage.setItem(ADMIN_CHECKPOINT_KEY, JSON.stringify(saved));
+        renderDashboard(P.getAppData());
+      });
+    });
+  }
+
   function renderDashboard(data) {
     P.bindMonthControls?.();
     const monthLabel = P.selectedMonthLabel?.() || "Maio 2026";
@@ -708,7 +814,9 @@
         <div class="dashboard-widget-grid" aria-label="Indicadores do painel">
           ${dashboardWidgets.map(dashboardWidgetMarkup).join("")}
         </div>
+        ${adminDashboardChecklistMarkup(data, context)}
       `;
+      bindAdminDashboardChecklist(command);
     }
 
     const decisionRows = P.$("#decisionRows");
