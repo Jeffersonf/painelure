@@ -692,11 +692,14 @@
       const focusModeAttr = focusWidget.mode ? ` data-calendar-mode-target="${focusWidget.mode}"` : "";
       command.innerHTML = `
         <article class="command-primary command-${profile.notice === "Base operacional pronta" ? "info" : "ok"}">
-          <img class="command-logo" src="./assets/ure-logo-transparent.png" alt="Logo da URE Itapeva">
-          <div>
+          <div class="command-copy">
             <span class="eyebrow">Comando do mês</span>
             <strong>${profile.title}</strong>
             <p>${profile.note}</p>
+          </div>
+          <div class="command-brand-mark" aria-label="URE Itapeva">
+            <span>URE</span>
+            <strong>Itapeva</strong>
           </div>
           <button class="ghost-btn" type="button" data-jump="${focusWidget.page}"${focusModeAttr}>Abrir foco</button>
         </article>
