@@ -597,13 +597,17 @@
 
   function dashboardWidgetMarkup(widget) {
     const modeAttr = widget.mode ? ` data-calendar-mode-target="${widget.mode}"` : "";
+    const statusLabel = widget.tone === "warn" ? "atenção" : widget.tone === "danger" ? "crítico" : widget.tone === "ok" ? "ok" : "ativo";
     return `
       <button class="dashboard-widget-card dashboard-widget-${widget.tone}" type="button" data-jump="${widget.page}"${modeAttr} data-search="${P.searchText([widget.label, widget.note, widget.value])}">
-        <span class="dashboard-widget-icon">${widget.icon}</span>
-        <span class="dashboard-widget-copy">
+        <span class="dashboard-widget-head">
+          <span class="dashboard-widget-icon">${widget.icon}</span>
           <small>${widget.label}</small>
+          <em class="status-pill ${widget.tone}">${statusLabel}</em>
+        </span>
+        <span class="dashboard-widget-copy">
           <strong>${widget.value}</strong>
-          <em>${widget.note}</em>
+          <span>${widget.note}</span>
         </span>
       </button>
     `;
@@ -616,7 +620,9 @@
     const calendarCount = monthFiltered(data.calendar || [], item => item.date || item.value).length;
     const carCount = monthFiltered(carBookings(data), item => item.date).length;
     const missingNetwork = Math.max((data.schools?.length || 0) - networkCount, 0);
-    const inventoryAlerts = Object.values(data.schoolInventoryMetrics || {}).reduce((sum, item) => sum + Number(item.alerts || 0), 0);
+    const assetAlerts = (data.schoolAssets || []).filter(item => item.status && item.status !== "ok").length;
+    const metricAlerts = Object.values(data.schoolInventoryMetrics || {}).reduce((sum, item) => sum + Number(item.alerts || 0), 0);
+    const inventoryAlerts = Math.max(assetAlerts, metricAlerts);
     const pendingVisits = (data.supervisors || []).reduce((sum, item) => sum + Number(item.pending || 0), 0);
     const openCalls = (data.calls || []).filter(item => item.status !== "resolvido").length;
     const ctcVisits = monthFiltered(data.ctcVisits || [], item => item.date).length;
@@ -699,7 +705,7 @@
           </div>
           <button class="ghost-btn" type="button" data-jump="${focusWidget.page}"${focusModeAttr}>Abrir foco</button>
         </article>
-        <div class="dashboard-widget-grid">
+        <div class="dashboard-widget-grid" aria-label="Indicadores do painel">
           ${dashboardWidgets.map(dashboardWidgetMarkup).join("")}
         </div>
       `;
