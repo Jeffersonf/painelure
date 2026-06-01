@@ -75,14 +75,14 @@
   }
 
   function currentWeekNumber(stats) {
-    const officialWeek = monthSourceIsSelected() && stats.map(item => Number(item.supervisor?.currentWeek || 0)).find(Boolean);
-    if (officialWeek) return officialWeek;
     const visits = stats.flatMap(item => item.visits || []);
     const dates = visits.map(visit => supervisorVisitDate(visit.date)).filter(Boolean);
     if (dates.length) {
       const latest = new Date(Math.max(...dates.map(date => date.getTime())));
       return Math.max(1, selectedDateWeek(latest));
     }
+    const officialWeek = monthSourceIsSelected() && stats.map(item => Number(item.supervisor?.currentWeek || 0)).find(Boolean);
+    if (officialWeek) return officialWeek;
     return Math.max(1, lastWeekOfSelectedMonth());
   }
 
@@ -149,10 +149,11 @@
     const officialMonth = monthSourceIsSelected();
     const weeklyGoal = Number(supervisor.weeklyGoal || 0);
     const monthlyGoal = Number(supervisor.monthlyGoal || 0);
-    const selectedWeek = officialMonth ? Number(supervisor.currentWeek || currentWeek || 0) : currentWeek;
+    const hasDatedVisits = (item.visits || []).some(visit => supervisorVisitDate(visit.date));
+    const selectedWeek = hasDatedVisits ? currentWeek : officialMonth ? Number(supervisor.currentWeek || currentWeek || 0) : currentWeek;
     const localWeekVisits = (item.visits || []).filter(visit => selectedDateWeek(supervisorVisitDate(visit.date)) === selectedWeek).length;
-    const weeklyVisits = officialMonth && Number.isFinite(Number(supervisor.weeklyVisits)) ? Number(supervisor.weeklyVisits) : localWeekVisits;
-    const monthlyVisits = officialMonth && Number.isFinite(Number(supervisor.monthlyVisits)) ? Number(supervisor.monthlyVisits) : item.visitCount;
+    const weeklyVisits = hasDatedVisits ? localWeekVisits : officialMonth && Number.isFinite(Number(supervisor.weeklyVisits)) ? Number(supervisor.weeklyVisits) : localWeekVisits;
+    const monthlyVisits = hasDatedVisits ? item.visitCount : officialMonth && Number.isFinite(Number(supervisor.monthlyVisits)) ? Number(supervisor.monthlyVisits) : item.visitCount;
     const weeklyIndicator = supervisorIndicatorFromGoal(weeklyVisits, weeklyGoal);
     const monthlyIndicator = supervisorIndicatorFromGoal(monthlyVisits, monthlyGoal);
     return {

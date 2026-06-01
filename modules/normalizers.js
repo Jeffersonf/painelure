@@ -231,9 +231,12 @@
     }
 
     function visitDate(value) {
-      const match = String(value || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-      if (!match) return null;
-      return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+      const text = formatDateValue(value);
+      const iso = String(text || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+      const pt = String(text || "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (pt) return new Date(Number(pt[3]), Number(pt[2]) - 1, Number(pt[1]));
+      return null;
     }
 
     function weekOfMonth(date) {
@@ -263,10 +266,14 @@
 
     rows.forEach(row => {
       const supervisorName = officialSupervisorName(firstValue(row, ["nome_do_supervisor", "supervisor", "nome"], ""));
-      const date = visitDate(firstValue(row, ["data_da_visita", "data", "date"], ""));
+      const dateValue = firstMatchingValue(row, ["data_da_visita", "data", "date"], ["data", "date"], "");
+      const date = visitDate(dateValue);
       const schools = Object.entries(row)
-        .filter(([key]) => key.startsWith("escola_visitada") || key.startsWith("escolas_visitadas"))
-        .map(([, value]) => String(value || "").trim())
+        .filter(([key]) => {
+          const normalizedKey = P.normalize(key);
+          return normalizedKey.startsWith("escola_visitada") || normalizedKey.startsWith("escolas_visitadas");
+        })
+        .map(([, value]) => valueToText(value).trim())
         .filter(Boolean);
 
       if (!stats.has(supervisorName)) {
@@ -282,7 +289,7 @@
         item.weekVisits.set(week, (item.weekVisits.get(week) || 0) + (canonicalSchools.length || 1));
         (canonicalSchools.length ? canonicalSchools : ["Escola não informada"]).forEach(school => {
           item.records.push({
-            date: formatDateValue(firstValue(row, ["data_da_visita", "data", "date"], "")),
+            date: formatDateValue(dateValue),
             school,
             type: firstValue(row, ["confirmacao_de_visita", "tipo", "type"], "Visita")
           });
