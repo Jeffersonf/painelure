@@ -1427,6 +1427,7 @@
             type: item.type || P.sources[item.key].type,
             url: item.url || P.sources[item.key].url,
             status: item.status || P.sources[item.key].status,
+            monthKey: item.monthKey || item.metadata?.monthKey || P.sources[item.key].monthKey,
             metadata: item.metadata || P.sources[item.key].metadata
           };
         });

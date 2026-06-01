@@ -36,6 +36,32 @@
     return /aborted|network|failed to fetch|HTTP 502|HTTP 503|HTTP 504/i.test(String(error?.message || error || ""));
   }
 
+  function progressDone(text) {
+    const [done] = String(text || "0/0").split("/").map(value => Number(value) || 0);
+    return done || 0;
+  }
+
+  function supervisionDataScore(supervisors = []) {
+    if (!Array.isArray(supervisors) || !supervisors.length) return 0;
+    return supervisors.reduce((score, supervisor) => {
+      const monthlyVisits = Number(supervisor?.monthlyVisits || 0);
+      const records = Array.isArray(supervisor?.visitRecords) ? supervisor.visitRecords.length : 0;
+      const monthDone = progressDone(supervisor?.month);
+      const weekDone = progressDone(supervisor?.week);
+      return score + monthlyVisits + records + monthDone + weekDone;
+    }, 0);
+  }
+
+  function mergeBackendAppData(currentData = {}, backendData = {}) {
+    const merged = { ...(currentData || {}), ...(backendData || {}) };
+    const currentSupervisionScore = supervisionDataScore(currentData?.supervisors);
+    const backendSupervisionScore = supervisionDataScore(backendData?.supervisors);
+    if (currentSupervisionScore > backendSupervisionScore) {
+      merged.supervisors = currentData.supervisors;
+    }
+    return merged;
+  }
+
   async function fetchJson(url, options = {}) {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs || API_TIMEOUT);
@@ -83,7 +109,7 @@
       const payload = await fetchApi("/api/data", { headers, timeoutMs: 12000 });
       const appData = payload?.data?.appData;
       if (appData) {
-        P.setAppData({ ...(P.getAppData() || {}), ...appData });
+        P.setAppData(mergeBackendAppData(P.getAppData() || {}, appData));
         P.applyLoadedSourceData?.();
         P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt || "" };
         P.saveAppData?.();

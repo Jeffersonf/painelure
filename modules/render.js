@@ -84,7 +84,7 @@
 
   function supervisionMonthNote() {
     const selected = P.selectedMonthKey?.() || "";
-    const official = P.sources?.supervision?.monthKey || "";
+    const official = P.supervisionMonthKey?.() || P.sources?.supervision?.monthKey || P.sources?.supervision?.metadata?.monthKey || "";
     if (!official || selected === official) return "";
     return `Fonte oficial carregada para ${P.selectedMonthLabel?.(official) || official}.`;
   }

@@ -449,6 +449,7 @@ async function listOfficialSources() {
       type: row.type,
       url: row.url,
       status: row.status,
+      monthKey: row.metadata?.monthKey || "",
       metadata: row.metadata || {},
       updatedAt: row.updated_at.toISOString()
     }));
@@ -463,7 +464,10 @@ async function saveOfficialSources(sources) {
     type: String(source.type || "csv"),
     url: String(source.url || ""),
     status: String(source.status || (source.url ? "configured" : "pending")),
-    metadata: source.metadata || {}
+    metadata: {
+      ...(source.metadata || {}),
+      ...(source.monthKey || source.metadata?.monthKey ? { monthKey: source.monthKey || source.metadata?.monthKey } : {})
+    }
   }));
   if (pool && dbReady) {
     const client = await pool.connect();

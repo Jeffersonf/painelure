@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "supervisor-alias-fix-20260529";
+      window.PAINELURE_BUILD = "supervision-sidebar-fix-20260601";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -73,7 +73,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=stability-polish-20260528">
+  <link rel="stylesheet" href="./styles.css?v=supervision-sidebar-fix-20260601">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -792,17 +792,17 @@
   <script src="./modules/data-store.js?v=stability-polish-20260528"></script>
   <script src="./modules/identity.js?v=stability-polish-20260528"></script>
   <script src="./modules/access-scope.js?v=stability-polish-20260528"></script>
-  <script src="./modules/month-state.js?v=stability-polish-20260528"></script>
+  <script src="./modules/month-state.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/csv.js?v=stability-polish-20260528"></script>
   <script src="./modules/normalizers.js?v=stability-polish-20260528"></script>
   <script src="./modules/source-loader.js?v=stability-polish-20260528"></script>
   <script src="./config.js?v=stability-polish-20260528"></script>
-  <script src="./modules/backend-client.js?v=stability-polish-20260528"></script>
+  <script src="./modules/backend-client.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/search.js?v=stability-polish-20260528"></script>
-  <script src="./modules/render.js?v=stability-polish-20260528"></script>
-  <script src="./modules/supervision-render.js?v=stability-polish-20260528"></script>
+  <script src="./modules/render.js?v=supervision-monthkey-fix-20260601"></script>
+  <script src="./modules/supervision-render.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/navigation.js?v=stability-polish-20260528"></script>
-  <script src="./modules/admin-tools.js?v=stability-polish-20260528"></script>
+  <script src="./modules/admin-tools.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./app.js?v=stability-polish-20260528"></script>
 </body>
 </html>

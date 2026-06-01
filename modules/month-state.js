@@ -28,12 +28,17 @@
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
   }
 
+  function supervisionMonthKey() {
+    return P.sources?.supervision?.monthKey || P.sources?.supervision?.metadata?.monthKey || "";
+  }
+
   function selectedMonthKey() {
     try {
       const saved = localStorage.getItem(MONTH_KEY);
       if (parseMonthKey(saved)) return saved;
     } catch (error) {}
-    return parseMonthKey(P.sources?.supervision?.monthKey) ? P.sources.supervision.monthKey : "2026-05";
+    const officialMonth = supervisionMonthKey();
+    return parseMonthKey(officialMonth) ? officialMonth : "2026-05";
   }
 
   function selectedMonth() {
@@ -74,7 +79,7 @@
     const note = P.$?.("#monthScopeNote");
     if (note) {
       const selected = selectedMonthKey();
-      const supervisionMonth = P.sources?.supervision?.monthKey || "";
+      const supervisionMonth = supervisionMonthKey();
       const calendarReady = Boolean(P.sources?.calendar?.url);
       const carsReady = Boolean(P.sources?.cars?.url);
       const details = [
@@ -121,6 +126,7 @@
   P.selectedMonthKey = selectedMonthKey;
   P.selectedMonth = selectedMonth;
   P.selectedMonthLabel = monthLabel;
+  P.supervisionMonthKey = supervisionMonthKey;
   P.setSelectedMonth = setSelectedMonth;
   P.shiftSelectedMonth = shiftMonth;
   P.bindMonthControls = bindMonthControls;

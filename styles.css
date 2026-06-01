@@ -466,14 +466,33 @@ html:not(.site-maintenance) .maintenance-message {
   z-index: 100;
   width: 236px;
   height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: calc(28px + env(safe-area-inset-top)) 16px 28px;
+  padding: calc(28px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   background: var(--sf);
   backdrop-filter: blur(20px) saturate(170%);
   -webkit-backdrop-filter: blur(20px) saturate(170%);
   border-right: 1px solid var(--bd);
   box-shadow: 12px 0 34px rgba(0, 0, 0, .18);
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--bd) 72%, transparent);
+  border-radius: 999px;
 }
 
 .brand {
@@ -1031,6 +1050,7 @@ html:not(.site-maintenance) .maintenance-message {
 .account {
   margin-top: auto;
   padding-top: 14px;
+  padding-bottom: 2px;
   position: relative;
 }
 
@@ -6676,6 +6696,48 @@ html:not(.site-maintenance) .maintenance-message {
   .page-header {
     flex-direction: column;
     gap: 14px;
+  }
+}
+
+@media (min-width: 961px) and (max-height: 760px) {
+  .sidebar {
+    padding-top: calc(18px + env(safe-area-inset-top));
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+
+  .brand {
+    margin-bottom: 12px;
+  }
+
+  .sidebar-search {
+    margin-bottom: 10px;
+  }
+
+  .nav-item {
+    min-height: 35px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+
+  .sidebar-card {
+    margin-top: 10px;
+    padding: 11px;
+  }
+
+  .sidebar-shortcuts {
+    margin-top: 9px;
+  }
+
+  .sidebar-shortcuts.labeled button {
+    min-height: 32px;
+  }
+
+  .account {
+    padding-top: 10px;
+  }
+
+  .account-row {
+    min-height: 58px;
   }
 }
 

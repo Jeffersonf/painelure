@@ -31,7 +31,7 @@
   }
 
   function monthSourceIsSelected() {
-    return (P.selectedMonthKey?.() || "") === (P.sources?.supervision?.monthKey || "");
+    return (P.selectedMonthKey?.() || "") === (P.supervisionMonthKey?.() || P.sources?.supervision?.monthKey || P.sources?.supervision?.metadata?.monthKey || "");
   }
 
   function selectedWeekOneStart() {
@@ -169,7 +169,8 @@
     const hasData = stats.some(item => item.visitCount > 0) || (monthSourceIsSelected() && stats.some(item => Number(item.supervisor?.monthlyVisits || 0) > 0));
     if (hasData) return "";
     const selected = P.selectedMonthLabel?.() || "mês selecionado";
-    const official = P.sources?.supervision?.monthKey ? P.selectedMonthLabel?.(P.sources.supervision.monthKey) : "";
+    const officialMonth = P.supervisionMonthKey?.() || P.sources?.supervision?.monthKey || P.sources?.supervision?.metadata?.monthKey || "";
+    const official = officialMonth ? P.selectedMonthLabel?.(officialMonth) : "";
     return `
       <article class="supervisor-no-data-warning" role="status">
         <strong>Não há dados de supervisão para ${selected}</strong>
