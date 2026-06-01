@@ -1,5 +1,50 @@
 # PainelURE 2.0
 
+## Plano Ativo - Execucao Completa
+
+Status: ativo desde 2026-06-01.
+
+Regra de execucao: implementar primeiro tudo que depende apenas do codigo e dos dados ja acessiveis. Itens que dependem de novo link, permissao do SharePoint, decisao visual ou conferencia manual ficam no fim da fila, sem bloquear o restante.
+
+### Agora
+
+1. Inventario
+   - Usar o mapa de escolas do SharePoint para trocar `Escola #ID` por nome real.
+   - Criar diagnostico para `Equipamento #ID` e status por ID enquanto faltam os mapas.
+   - Marcar ativos sem patrimonio, sem serie, sem equipamento e sem escola.
+   - Mostrar escolas sem inventario e fontes com falha.
+
+2. Tela inicial
+   - Manter `painelure` em minusculo.
+   - Manter checkpoints do administrador na pagina inicial.
+   - Remover widgets sem acao clara conforme forem identificados.
+   - Priorizar proximas acoes e pendencias reais.
+
+3. Qualidade dos dados
+   - Transformar a pagina Qualidade em painel vivo de diagnostico.
+   - Separar problemas por area: Inventario, Escolas, Fontes, Supervisao, UI.
+   - Usar estados `ok`, `warn`, `danger` e `info`.
+
+4. Admin
+   - Consolidar fontes, status, backups e pendencias numa central unica.
+   - Exibir problemas conhecidos que ainda precisam de decisao.
+
+5. Supervisao
+   - Manter agrupamento por mes usando datas reais.
+   - Destacar reset de fonte mensal e diferenciar dado historico de dado atual.
+
+6. Escolas
+   - Integrar inventario, rede, supervisao, chamados e contatos no detalhe.
+   - Sinalizar divergencias entre fontes.
+
+### Final Da Fila - Depende De Insumo Externo
+
+1. Link/lista de `Equipamento` para resolver `Equipamento #ID`.
+2. Link/lista de `Status do Equipamento` para resolver status por ID.
+3. Permissao SharePoint para expandir lookups diretamente, se quiser evitar mapas separados.
+4. Decisao visual final para marca/logo alem do texto `painelure`.
+5. Revisao manual da tela inicial depois que os diagnosticos estiverem funcionando.
+
 Roadmap, diretrizes e changelog da nova versão do PainelURE.
 
 Esta versão nasce separada do PainelURE 1.0. A versão 1.0 continua como publicação oficial atual; o PainelURE 2.0 é uma reconstrução limpa, com foco em usabilidade, performance e consistência visual inspirada no Finanza.

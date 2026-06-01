@@ -334,6 +334,101 @@
     }, { lines: 0, units: 0, alertUnits: 0, defectUnits: 0, categories: new Set() });
   }
 
+  function assetHasNoteValue(asset, label) {
+    const match = String(asset?.notes || "").match(new RegExp(`${label}:\\s*([^|]+)`, "i"));
+    return Boolean(match && match[1]?.trim());
+  }
+
+  function sourceRuntimeStatus(key) {
+    return P.sourceResult?.(key)?.status || (P.sources?.[key]?.url ? "configurada" : "sem fonte");
+  }
+
+  function qualityDiagnostics(data) {
+    const schools = data.schools || [];
+    const assets = data.schoolAssets || [];
+    const supervisors = data.supervisors || [];
+    const sources = Object.entries(P.sources || {});
+    const normalizedAssetSchools = new Set(assets.map(asset => P.normalize(asset.school)).filter(Boolean));
+    const schoolsWithoutInventory = schools.filter(school => !normalizedAssetSchools.has(P.normalize(school.name)));
+    const unresolvedSchoolIds = assets.filter(asset => /^Escola #\d+$/i.test(asset.school || "")).length;
+    const unresolvedEquipmentIds = assets.filter(asset => /^Equipamento #\d+$/i.test(asset.name || "")).length;
+    const missingSchool = assets.filter(asset => !asset.school || asset.school === "Escola sem nome").length;
+    const missingEquipment = assets.filter(asset => !asset.name || asset.name === "Item").length;
+    const missingSerial = assets.filter(asset => !assetHasNoteValue(asset, "Serie")).length;
+    const missingPatrimony = assets.filter(asset => !assetHasNoteValue(asset, "Patrimonio")).length;
+    const alertAssets = assets.filter(asset => asset.status && asset.status !== "ok").length;
+    const sourceErrors = (P.sourceStatus || []).filter(item => item.status === "error").length;
+    const configuredSources = sources.filter(([, source]) => source.url).length;
+    const sourceLoaded = (P.sourceStatus || []).filter(item => item.status === "loaded").length;
+    const supervisionTotals = supervisors.reduce((acc, item) => {
+      const month = progressParts(item.month);
+      acc.done += month.done;
+      acc.total += month.total;
+      acc.pending += Number(item.pending || month.missing || 0);
+      return acc;
+    }, { done: 0, total: 0, pending: 0 });
+    return [
+      {
+        label: "Inventário: escolas mapeadas",
+        status: unresolvedSchoolIds || missingSchool ? "warn" : "ok",
+        note: unresolvedSchoolIds
+          ? `${unresolvedSchoolIds} item(ns) ainda usam Escola #ID. Verifique o mapa de escolas.`
+          : `${assets.length} item(ns) com escola resolvida; ${missingSchool} sem escola.`
+      },
+      {
+        label: "Inventário: equipamentos mapeados",
+        status: unresolvedEquipmentIds ? "warn" : "ok",
+        note: unresolvedEquipmentIds
+          ? `${unresolvedEquipmentIds} item(ns) ainda usam Equipamento #ID. Falta o link/lista de Equipamento.`
+          : "Tipos de equipamento resolvidos."
+      },
+      {
+        label: "Inventário: identificação dos ativos",
+        status: missingSerial || missingPatrimony || missingEquipment ? "warn" : "ok",
+        note: `Sem série: ${missingSerial}. Sem patrimônio: ${missingPatrimony}. Sem tipo: ${missingEquipment}.`
+      },
+      {
+        label: "Inventário: manutenção/defeito",
+        status: alertAssets ? "warn" : "ok",
+        note: alertAssets ? `${alertAssets} ativo(s) fora de OK.` : "Nenhum ativo fora de OK na base atual."
+      },
+      {
+        label: "Escolas sem inventário",
+        status: schoolsWithoutInventory.length ? "warn" : "ok",
+        note: schoolsWithoutInventory.length
+          ? `${schoolsWithoutInventory.length} escola(s) sem itens vinculados: ${schoolsWithoutInventory.slice(0, 4).map(item => item.name).join(", ")}${schoolsWithoutInventory.length > 4 ? "..." : ""}`
+          : "Todas as escolas carregadas têm algum item de inventário."
+      },
+      {
+        label: "Fontes oficiais",
+        status: sourceErrors ? "danger" : (configuredSources ? "info" : "warn"),
+        note: `${configuredSources}/${sources.length} fonte(s) configurada(s), ${sourceLoaded} carregada(s) nesta sessão, ${sourceErrors} erro(s).`
+      },
+      {
+        label: "Fonte do inventário",
+        status: sourceRuntimeStatus("inventory") === "error" ? "danger" : "info",
+        note: `Inventário: ${sourceRuntimeStatus("inventory")}. Mapa de escolas: ${P.sources?.inventory?.metadata?.schoolLookupUrl ? "configurado" : "pendente"}.`
+      },
+      {
+        label: "Supervisão mensal",
+        status: supervisionTotals.pending ? "warn" : "ok",
+        note: supervisionTotals.total
+          ? `${supervisionTotals.done}/${supervisionTotals.total} visita(s) do mês; ${supervisionTotals.pending} pendente(s).`
+          : "Sem meta mensal calculada para a supervisão."
+      },
+      {
+        label: "Marca e tela inicial",
+        status: "info",
+        note: "Marca visual mantida como painelure em minúsculo; checkpoints do administrador seguem na inicial."
+      },
+      {
+        label: "Bloqueios finais",
+        status: unresolvedEquipmentIds ? "warn" : "info",
+        note: "Final da fila: links de Equipamento e Status do Equipamento para remover os IDs restantes."
+      }
+    ];
+  }
+
   function focusSchool(name) {
     openSchoolPage(name);
   }
@@ -1953,9 +2048,12 @@
     `).join("") : `<div class="empty-state">Nenhum perfil definido ainda.</div>`;
   }
 
-  function renderQuality(items) {
+  function renderQuality(input) {
     const grid = P.$("#qualityGrid");
     if (!grid) return;
+    const data = Array.isArray(input) ? P.getAppData() : (input || P.getAppData());
+    const baseItems = Array.isArray(input) ? input : (Array.isArray(data.quality) ? data.quality : []);
+    const items = [...qualityDiagnostics(data), ...baseItems];
     grid.innerHTML = items.length ? items.map(item => `
       <article class="detail-widget" data-search="${P.searchText([item.label, item.status, item.note])}">
         <div>
@@ -1963,7 +2061,7 @@
           <strong>${item.label}</strong>
           <p>${item.note}</p>
         </div>
-        <span class="status-pill ${statusClass(item.status)}">${item.status === "ok" ? "ok" : "revisar"}</span>
+        <span class="status-pill ${statusClass(item.status)}">${item.status === "ok" ? "ok" : item.status === "info" ? "info" : "revisar"}</span>
       </article>
     `).join("") : `<div class="empty-state">Checklist de qualidade não carregado.</div>`;
   }

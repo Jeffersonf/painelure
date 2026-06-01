@@ -37,7 +37,7 @@
       P.renderProfiles(data.profiles);
     },
     quality(data) {
-      P.renderQuality(data.quality);
+      P.renderQuality(data);
     },
     ctc(data) {
       P.renderCtc(data.ctcVisits, data.calls);
