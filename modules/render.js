@@ -1063,6 +1063,20 @@
       { key: "supervisor", title: "&#129517; Supervisão", note: supervisor ? `${supervisor.name} | mês ${supervisor.month || "0/12"}` : "Sem supervisor vinculado", label: supervisor ? "Abrir" : "Pendente", tone: supervisor ? "info" : "warn", enabled: Boolean(supervisor) },
       { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estável", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("calls") }
     ];
+    const schoolAssetIds = assets.filter(asset => /^Escola #\d+$/i.test(asset.school || "")).length;
+    const equipmentIds = assets.filter(asset => /^Equipamento #\d+$/i.test(asset.name || "")).length;
+    const missingSerial = assets.filter(asset => !assetHasNoteValue(asset, "Serie")).length;
+    const missingPatrimony = assets.filter(asset => !assetHasNoteValue(asset, "Patrimonio")).length;
+    const openCalls = calls.filter(call => call.status !== "resolvido").length;
+    const sourceChecks = [
+      { title: "Inventário", note: assets.length ? `${assets.length} linha(s) vinculada(s) a esta escola.` : "Nenhum item vinculado no inventário.", status: assets.length ? "ok" : "warn" },
+      { title: "Equipamentos por ID", note: equipmentIds ? `${equipmentIds} item(ns) ainda usam Equipamento #ID.` : "Tipos de equipamento sem ID aparente.", status: equipmentIds ? "warn" : "ok" },
+      { title: "Identificação dos ativos", note: `Sem série: ${missingSerial}. Sem patrimônio: ${missingPatrimony}.`, status: missingSerial || missingPatrimony ? "warn" : "ok" },
+      { title: "Rede e câmeras", note: network ? "Infraestrutura vinculada na fonte de redes." : "Sem rede vinculada para esta escola.", status: network ? "ok" : "warn" },
+      { title: "Supervisão", note: supervisor ? `${supervisor.name} vinculado(a).` : "Sem supervisor vinculado na base atual.", status: supervisor ? "ok" : "warn" },
+      { title: "Chamados", note: openCalls ? `${openCalls} chamado(s) ainda não resolvido(s).` : "Sem chamado aberto vinculado.", status: openCalls ? "warn" : "ok" },
+      { title: "Mapa de escola", note: schoolAssetIds ? `${schoolAssetIds} item(ns) ainda usam Escola #ID.` : "Nome da escola resolvido no inventário.", status: schoolAssetIds ? "warn" : "ok" }
+    ];
     detail.innerHTML = `
       <section class="school-profile-page school-profile-${schoolTone}">
         <article class="school-profile-hero compact">
@@ -1097,6 +1111,19 @@
         </section>
 
         <section class="school-profile-grid">
+          <article class="box school-profile-card wide">
+            <div class="box-head"><div><strong>Divergências entre fontes</strong><small>Conferência cruzada de inventário, rede, supervisão e chamados.</small></div><span class="status-pill ${sourceChecks.some(item => item.status !== "ok") ? "warn" : "ok"}">${sourceChecks.filter(item => item.status !== "ok").length || "ok"}</span></div>
+            <div class="row-list compact">
+              ${sourceChecks.map(item => `
+                <div class="data-row compact" data-search="${P.searchText([school.name, item.title, item.note, item.status])}">
+                  <span class="row-icon">${item.status === "ok" ? "OK" : "!"}</span>
+                  <span><strong>${item.title}</strong><small>${item.note}</small></span>
+                  <em class="status-pill ${statusClass(item.status)}">${item.status === "ok" ? "ok" : "revisar"}</em>
+                </div>
+              `).join("")}
+            </div>
+          </article>
+
           <article class="box school-profile-card wide">
             <div class="box-head"><div><strong>Ficha escolar</strong><small>Dados principais da unidade.</small></div><span class="status-pill ${profileStatusFromPct(profilePct)}">${profilePct}%</span></div>
             <div class="school-profile-fields">
