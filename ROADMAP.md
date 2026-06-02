@@ -6,6 +6,13 @@ Status: ativo desde 2026-06-01.
 
 Regra de execucao: implementar primeiro tudo que depende apenas do codigo e dos dados ja acessiveis. Itens que dependem de novo link, permissao do SharePoint, decisao visual ou conferencia manual ficam no fim da fila, sem bloquear o restante.
 
+Progresso registrado:
+
+- Roadmap ativo salvo no repositorio.
+- Pagina Qualidade transformada em diagnostico vivo de dados.
+- Inventario ganhou filtros de triagem por identificacao.
+- Admin passou a mostrar a contagem e as linhas de pendencias conhecidas do roadmap no diagnostico automatico.
+
 ### Agora
 
 1. Inventario

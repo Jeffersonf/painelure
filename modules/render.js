@@ -818,6 +818,8 @@
     P.bindMonthControls?.();
     const monthLabel = P.selectedMonthLabel?.() || "Maio 2026";
     const networkCount = Object.keys(data.networkData || {}).length;
+    const roadmapDiagnostics = qualityDiagnostics(data);
+    const knownProblems = roadmapDiagnostics.filter(item => item.status !== "ok");
     const calendarCount = monthFiltered(data.calendar || [], item => item.date || item.value).length;
     const carCount = monthFiltered(carBookings(data), item => item.date).length;
     const missingNetwork = Math.max((data.schools?.length || 0) - networkCount, 0);
@@ -2548,6 +2550,7 @@
       { icon: "US", label: "Usuários", value: String(data.users.length), note: `${linkedUsers} vinculado(s) a contatos`, tone: data.users.length ? "ok" : "warn" },
       { icon: "ES", label: "Escolas", value: String(data.schools.length), note: "unidades na base atual", tone: data.schools.length ? "ok" : "warn" },
       { icon: "FT", label: "Fontes", value: `${configuredSources}/${sources.length}`, note: `${officialSources} oficial(is)`, tone: configuredSources ? "ok" : "warn" },
+      { icon: "RM", label: "Roadmap", value: String(knownProblems.length), note: "pendência(s) conhecida(s)", tone: knownProblems.length ? "warn" : "ok" },
       { icon: "CR", label: "Carros", value: String(cars.length), note: `${rawCarRows.length || cars.length} linha(s) de origem`, tone: cars.length ? "ok" : "warn" },
       { icon: "RD", label: "Redes", value: String(networkCount), note: "escolas com infraestrutura", tone: networkCount ? "info" : "warn" },
       { icon: "BK", label: "Backups", value: "auto", note: "snapshots antes de gravações", tone: "info" }
@@ -2626,7 +2629,12 @@
         </div>
       `;
     }
-    const rows = [...systemChecks, ...items];
+    const roadmapRows = knownProblems.map(item => ({
+      label: `Roadmap - ${item.label}`,
+      status: item.status,
+      note: item.note
+    }));
+    const rows = [...roadmapRows, ...systemChecks, ...items];
     if (!grid) return;
     grid.innerHTML = rows.length ? rows.map(item => `
       <article class="detail-widget" data-search="${P.searchText([item.label, item.status, item.note])}">
