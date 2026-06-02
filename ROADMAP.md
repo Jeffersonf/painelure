@@ -14,6 +14,7 @@ Progresso registrado:
 - Admin passou a mostrar a contagem e as linhas de pendencias conhecidas do roadmap no diagnostico automatico.
 - Ficha da escola passou a exibir divergencias entre fontes: inventario, equipamentos por ID, identificacao dos ativos, rede, supervisao e chamados.
 - Tela inicial do admin ganhou bloco de acoes reais e a grade principal foi reduzida a widgets operacionais.
+- Supervisao ganhou resumo mensal operacional com fonte usada, meta mensal, semana, pendencias e chamados nas escolas vinculadas.
 
 ### Agora
 

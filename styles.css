@@ -4935,6 +4935,56 @@ html:not(.site-maintenance) .maintenance-message {
   gap: 14px;
 }
 
+.supervision-month-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, .95fr);
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(90, 245, 200, .2);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(90, 245, 200, .08), transparent 46%),
+    var(--sf);
+}
+
+.supervision-month-command > div:first-child {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+}
+
+.supervision-month-command small,
+.supervision-month-command strong,
+.supervision-month-command p {
+  display: block;
+}
+
+.supervision-month-command small {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.supervision-month-command strong {
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.supervision-month-command p {
+  margin: 0;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.supervision-month-warn {
+  border-color: rgba(245, 200, 90, .28);
+  background:
+    linear-gradient(135deg, rgba(245, 200, 90, .09), transparent 46%),
+    var(--sf);
+}
+
 .supervision-v1-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

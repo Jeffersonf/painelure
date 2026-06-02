@@ -208,6 +208,45 @@
     }).join("");
   }
 
+  function supervisionMonthSummaryMarkup(stats, currentWeek) {
+    const totals = stats.reduce((acc, item) => {
+      const metrics = supervisorSheetMetrics(item, currentWeek);
+      acc.assigned += Number(metrics.assigned || item.assignedSchools.length || 0);
+      acc.weekDone += Number(metrics.week.done || 0);
+      acc.weekGoal += Number(metrics.week.total || 0);
+      acc.monthDone += Number(metrics.month.done || 0);
+      acc.monthGoal += Number(metrics.month.total || 0);
+      acc.visitedSchools += Number(item.visitedSchools || 0);
+      acc.openCalls += Number(item.openCalls || 0);
+      acc.red += metrics.monthlyIndicator.tone === "danger" ? 1 : 0;
+      acc.warn += metrics.monthlyIndicator.tone === "warn" ? 1 : 0;
+      acc.ok += metrics.monthlyIndicator.tone === "ok" ? 1 : 0;
+      return acc;
+    }, { assigned: 0, weekDone: 0, weekGoal: 0, monthDone: 0, monthGoal: 0, visitedSchools: 0, openCalls: 0, red: 0, warn: 0, ok: 0 });
+    const selected = P.selectedMonthLabel?.() || "mês selecionado";
+    const officialMonth = P.supervisionMonthKey?.() || P.sources?.supervision?.monthKey || P.sources?.supervision?.metadata?.monthKey || "";
+    const officialSelected = monthSourceIsSelected();
+    const sourceLabel = officialSelected ? "fonte oficial do mês" : (officialMonth ? `histórico/local; oficial atual: ${P.selectedMonthLabel?.(officialMonth) || officialMonth}` : "histórico/local");
+    const pendingMonth = Math.max(totals.monthGoal - totals.monthDone, 0);
+    const pendingSchools = Math.max(totals.assigned - totals.visitedSchools, 0);
+    const tone = pendingMonth || totals.red ? "warn" : "ok";
+    return `
+      <article class="supervision-month-command supervision-month-${tone}">
+        <div>
+          <small>${selected} | ${sourceLabel}</small>
+          <strong>${pendingMonth ? `${pendingMonth} visita(s) para cumprir a meta mensal` : "Meta mensal sem pendência no resumo"}</strong>
+          <p>${stats.length} supervisor(es), ${totals.assigned} escola(s), ${pendingSchools} escola(s) sem visita registrada no mês.</p>
+        </div>
+        <div class="supervision-v1-metrics">
+          <article><span>Mês</span><strong>${totals.monthDone}/${totals.monthGoal || "--"}</strong><small>visitas</small></article>
+          <article><span>Semana ${currentWeek}</span><strong>${totals.weekDone}/${totals.weekGoal || "--"}</strong><small>visitas</small></article>
+          <article><span>Indicador</span><strong>${totals.red}/${totals.warn}/${totals.ok}</strong><small>vermelho/amarelo/verde</small></article>
+          <article><span>Chamados</span><strong>${totals.openCalls}</strong><small>abertos nas escolas</small></article>
+        </div>
+      </article>
+    `;
+  }
+
   function renderSupervisors(supervisors) {
     const host = P.$("#supervisorRows");
     if (!host) return;
@@ -221,6 +260,7 @@
     host.innerHTML = `
       <section class="supervision-original-shell">
         ${supervisionAprilWarningMarkup()}
+        ${supervisionMonthSummaryMarkup(stats, currentWeek)}
         <article class="box" id="painelSupervisor">
           <div class="box-head supervisor-original-box-head">
             <div><strong>🧭 Painel de supervisores</strong><small>Resumo mensal das visitas, metas e indicadores da planilha oficial.</small></div>
