@@ -451,16 +451,32 @@
   }
 
   function normalizeSatisfactionRows(rows) {
-    return rows.map(row => ({
-      title: firstValue(row, ["titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfação"),
-      audience: firstValue(row, ["público", "audiência", "audience", "destinatário"], "Público não informado"),
-      status: firstValue(row, ["status", "situacao", "andamento"], "ativa"),
-      score: firstValue(row, ["nota", "média", "score", "avaliacao", "satisfacao"], ""),
-      responses: numberFrom(row, ["respostas", "responses", "total", "quantidade"], 0),
-      link: firstValue(row, ["link", "url", "formulario", "formulário", "forms"], ""),
-      period: firstValue(row, ["período", "prazo", "data", "competencia"], ""),
-      note: firstValue(row, ["observação", "observacoes", "descricao", "note"], "")
-    }));
+    return rows.map(row => {
+      const title = firstValue(row, ["descrevaresumidamenteomotivodoat", "motivo", "descricao", "titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfação");
+      const rating = firstValue(row, ["comovoc_x00ea_avaliaoatendimento", "avaliacao_atendimento", "avaliacao", "nota", "média", "score", "satisfacao"], "");
+      const attended = firstValue(row, ["suasolicita_x00e7__x00e3_ofoiate", "solicitacao_atendida", "solicitacao_foi_atendida", "status", "situacao", "andamento"], "");
+      const wait = firstValue(row, ["comovoc_x00ea_avaliaotempodeespe", "tempo_de_espera", "espera"], "");
+      const cordial = firstValue(row, ["oservidorfoiclaroecordialdurante", "servidor_claro_cordial", "cordial"], "");
+      const extra = firstValue(row, ["h_x00e1_algumaoutrainforma_x00e7", "outra_informacao", "observação", "observacoes", "note"], "");
+      const action = firstValue(row, ["informeamedidatomada", "medida_tomada"], "");
+      const requestId = firstValue(row, ["id"], "");
+      return {
+        title,
+        audience: requestId ? `Atendimento #${requestId}` : "Atendimento URE",
+        status: attended ? `Atendida: ${attended}` : "respondida",
+        score: rating,
+        responses: 1,
+        link: firstValue(row, ["link", "url", "formulario", "formulário", "forms"], ""),
+        period: formatDateValue(firstValue(row, ["datadoatendimento", "data_atendimento", "data", "periodo", "competencia"], "")),
+        note: [
+          rating && `Avaliação: ${rating}`,
+          wait && `Espera: ${wait}`,
+          cordial && `Clareza/cordialidade: ${cordial}`,
+          extra && `Comentário: ${extra}`,
+          action && `Medida: ${action}`
+        ].filter(Boolean).join(" | ")
+      };
+    });
   }
 
   P.normalizers = {
