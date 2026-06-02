@@ -814,6 +814,51 @@
     });
   }
 
+  function adminDashboardActionsMarkup(knownProblems, data, context) {
+    if (!currentRoleKey().includes("administrador")) return "";
+    const problems = knownProblems.slice(0, 4).map(item => ({
+      icon: item.status === "danger" ? "!" : "AD",
+      title: item.label,
+      note: item.note,
+      label: item.status === "info" ? "monitorar" : "revisar",
+      tone: item.status === "danger" ? "danger" : item.status === "info" ? "info" : "warn",
+      page: item.label.includes("Inventário") ? "inventory" : item.label.includes("Supervisão") ? "supervision" : item.label.includes("Fonte") ? "admin" : "quality"
+    }));
+    const actions = [
+      context.inventoryAlerts
+        ? { icon: "IN", title: "Triar inventário", note: `${context.inventoryAlerts} ativo(s) fora de OK ou com identificação pendente.`, label: "abrir", tone: "warn", page: "inventory" }
+        : { icon: "IN", title: "Inventário estável", note: `${data.schoolAssets.length} linha(s) consolidadas para consulta.`, label: "ok", tone: "ok", page: "inventory" },
+      context.missingNetwork
+        ? { icon: "RD", title: "Completar redes", note: `${context.missingNetwork} escola(s) sem infraestrutura mapeada.`, label: "rede", tone: "warn", page: "network" }
+        : { icon: "RD", title: "Redes mapeadas", note: `${context.networkCount} escola(s) com dados técnicos.`, label: "ok", tone: "ok", page: "network" },
+      context.pendingVisits
+        ? { icon: "SV", title: "Acompanhar supervisão", note: `${context.pendingVisits} visita(s) pendente(s) no recorte.`, label: "meta", tone: "warn", page: "supervision" }
+        : { icon: "SV", title: "Supervisão sem alerta", note: "Metas sem pendência no resumo atual.", label: "ok", tone: "ok", page: "supervision" }
+    ];
+    const rows = problems.length ? problems : actions;
+    return `
+      <section class="admin-dashboard-panel dashboard-action-panel" aria-label="Ações administrativas atuais">
+        <div class="admin-dashboard-head">
+          <div>
+            <strong>Ações de agora</strong>
+            <small>Pendências e atalhos com efeito direto no painel.</small>
+          </div>
+          <button class="ghost-btn" type="button" data-jump="quality">Abrir qualidade</button>
+        </div>
+        <div class="row-list compact">
+          ${rows.map(item => dashboardRow(item, true)).join("")}
+        </div>
+        <div class="dashboard-action-strip">
+          ${actions.map(item => `
+            <button class="ghost-btn" type="button" data-jump="${item.page}">
+              <span>${item.icon}</span>${item.title}
+            </button>
+          `).join("")}
+        </div>
+      </section>
+    `;
+  }
+
   function renderDashboard(data) {
     P.bindMonthControls?.();
     const monthLabel = P.selectedMonthLabel?.() || "Maio 2026";
@@ -833,6 +878,10 @@
     const context = { networkCount, calendarCount, carCount, missingNetwork, inventoryAlerts, pendingVisits, openCalls, ctcVisits };
     const profile = dashboardProfile(data, context);
     const dashboardWidgets = dashboardWidgetsForRole(data, context);
+    const dashboardCoreIds = new Set(["schools", "supervision", "network", "inventory", "ctc", "calls", "cars"]);
+    const visibleDashboardWidgets = currentRoleKey().includes("administrador")
+      ? dashboardWidgets.filter(widget => dashboardCoreIds.has(widget.id)).slice(0, 7)
+      : dashboardWidgets;
     const sourceNote = officialSources
       ? `${officialSources} fonte(s) atualizada(s)`
       : "base local pronta para consulta";
@@ -908,8 +957,9 @@
           </div>
           <button class="ghost-btn" type="button" data-jump="${focusWidget.page}"${focusModeAttr}>Abrir foco</button>
         </article>
+        ${adminDashboardActionsMarkup(knownProblems, data, context)}
         <div class="dashboard-widget-grid" aria-label="Indicadores do painel">
-          ${dashboardWidgets.map(dashboardWidgetMarkup).join("")}
+          ${visibleDashboardWidgets.map(dashboardWidgetMarkup).join("")}
         </div>
         ${adminDashboardChecklistMarkup(data, context)}
       `;

@@ -13,6 +13,7 @@ Progresso registrado:
 - Inventario ganhou filtros de triagem por identificacao.
 - Admin passou a mostrar a contagem e as linhas de pendencias conhecidas do roadmap no diagnostico automatico.
 - Ficha da escola passou a exibir divergencias entre fontes: inventario, equipamentos por ID, identificacao dos ativos, rede, supervisao e chamados.
+- Tela inicial do admin ganhou bloco de acoes reais e a grade principal foi reduzida a widgets operacionais.
 
 ### Agora
 

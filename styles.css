@@ -2810,6 +2810,27 @@ html:not(.site-maintenance) .maintenance-message {
   line-height: 1.35;
 }
 
+.dashboard-action-panel .row-list {
+  gap: 8px;
+}
+
+.dashboard-action-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dashboard-action-strip .ghost-btn {
+  min-height: 34px;
+}
+
+.dashboard-action-strip span {
+  margin-right: 6px;
+  color: var(--ac2);
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .widget,
 .box,
 .table-card,
