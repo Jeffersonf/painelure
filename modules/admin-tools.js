@@ -33,7 +33,7 @@
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
-  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"];
+  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"];
 
   function currentRole() {
     return P.onlineUser?.()?.role || localStorage.getItem(ROLE_KEY) || P.displayUser?.().role || "Administrador";
@@ -60,9 +60,9 @@
   }
 
   function allowedPageLabels(role = currentRole()) {
-    return accessForRole(role)
+    return [...new Set(accessForRole(role)
       .map(page => pageLabel(page))
-      .filter(Boolean)
+      .filter(Boolean))]
       .join(", ");
   }
 
@@ -1134,7 +1134,7 @@
   function defaultPrefs() {
     return {
       widgets: { shortcuts: true, metrics: true, operations: true },
-      shortcuts: { network: true, inventory: true, ctc: true, calls: true, cars: true, calendar: true, satisfaction: true, reports: true }
+      shortcuts: { network: true, inventory: true, ctc: true, cars: true, calendar: true, satisfaction: true, reports: true }
     };
   }
 

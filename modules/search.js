@@ -45,7 +45,6 @@
       "calendar",
       "ctc",
       "cars",
-      "calls",
       "satisfaction",
       "reports"
     ].map(page => {

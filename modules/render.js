@@ -670,8 +670,7 @@
       { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
       { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventário", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
-      { id: "ctc", roles: ["administrador", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128736;&#65039;", label: "CTC", value: context.openCalls, note: context.openCalls ? "Chamados de T.I. em acompanhamento" : "Chamados de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
-      { id: "calls", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados", value: context.openCalls, note: context.openCalls ? "Abrir fila na CTC" : "Fila sem pendências", tone: context.openCalls ? "warn" : "ok" },
+      { id: "ctc", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados CTC", value: context.openCalls, note: context.openCalls ? "Fila de T.I. em acompanhamento" : "Fila de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
       { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
       { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mês" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
@@ -725,6 +724,7 @@
     const sourceInventory = P.sourceResult?.("inventory");
     const sourceSupervision = P.sourceResult?.("supervision");
     const sourceCars = P.sourceResult?.("cars");
+    const sourceSatisfaction = P.sourceResult?.("satisfaction");
     return [
       {
         id: "inventory-lookups",
@@ -757,6 +757,12 @@
         title: "Conferir agenda de carros",
         note: `${context.carCount} reserva(s) no mês. Status da fonte: ${sourceCars?.status || "sem sincronização nesta sessão"}.`,
         tone: sourceCars?.status === "loaded" || context.carCount ? "info" : "warn"
+      },
+      {
+        id: "satisfaction-source",
+        title: "Definir pesquisa de satisfação",
+        note: `${(data.satisfaction || []).length} resposta(s) carregada(s). A fonte oficial ainda está ${sourceSatisfaction?.status || "sem URL"} no cadastro de fontes.`,
+        tone: (data.satisfaction || []).length ? "info" : "warn"
       },
       {
         id: "home-review",
@@ -878,7 +884,7 @@
     const context = { networkCount, calendarCount, carCount, missingNetwork, inventoryAlerts, pendingVisits, openCalls, ctcVisits };
     const profile = dashboardProfile(data, context);
     const dashboardWidgets = dashboardWidgetsForRole(data, context);
-    const dashboardCoreIds = new Set(["schools", "supervision", "network", "inventory", "ctc", "calls", "cars"]);
+    const dashboardCoreIds = new Set(["schools", "supervision", "network", "inventory", "ctc", "cars"]);
     const visibleDashboardWidgets = currentRoleKey().includes("administrador")
       ? dashboardWidgets.filter(widget => dashboardCoreIds.has(widget.id)).slice(0, 7)
       : dashboardWidgets;
@@ -928,8 +934,8 @@
         ? { icon: "&#128736;&#65039;", title: "Visitas técnicas previstas", note: `${ctcVisits} compromisso(s) técnico(s) na base atual.`, label: "CTC", tone: "info", page: "ctc" }
         : { icon: "&#128736;&#65039;", title: "Agenda CTC pronta", note: "Área preparada para rotas e compromissos técnicos.", label: "CTC", tone: "info", page: "ctc" },
       openCalls
-        ? { icon: "&#128229;", title: "Chamados em acompanhamento", note: `${openCalls} chamado(s) ainda não resolvido(s).`, label: "Fila", tone: "warn", page: "calls" }
-        : { icon: "&#128229;", title: "Fila de chamados estável", note: "Sem pendência aberta na base atual.", label: "OK", tone: "ok", page: "calls" },
+        ? { icon: "&#128229;", title: "Chamados CTC em acompanhamento", note: `${openCalls} chamado(s) ainda não resolvido(s).`, label: "Fila", tone: "warn", page: "ctc" }
+        : { icon: "&#128229;", title: "Chamados CTC estáveis", note: "Sem pendência aberta na base atual.", label: "OK", tone: "ok", page: "ctc" },
       carCount
         ? { icon: "&#128663;", title: "Carros agendados", note: `${carCount} reserva(s) de carro oficial no recorte.`, label: "Carros", tone: "info", page: "cars" }
         : { icon: "&#128663;", title: "Agenda de carros pronta", note: "Área pronta para puxar reservas de carros oficiais.", label: "Carros", tone: "info", page: "cars" }

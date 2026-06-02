@@ -27,6 +27,10 @@
 
   let previousPage = "dashboard";
 
+  function canonicalPage(id) {
+    return id === "calls" ? "ctc" : id;
+  }
+
   function routeBase() {
     const path = location.pathname.replace(/\/+$/, "");
     const marker = "/painelure";
@@ -36,17 +40,17 @@
   }
 
   function routePage() {
-    const hashPage = location.hash.replace("#", "");
+    const hashPage = canonicalPage(location.hash.replace("#", ""));
     const params = new URLSearchParams(location.search);
     const queryPage = params.get("categoria") || params.get("tela") || "";
-    const normalizedQueryPage = PAGE_BY_SLUG[queryPage] || queryPage;
+    const normalizedQueryPage = canonicalPage(PAGE_BY_SLUG[queryPage] || queryPage);
     const base = routeBase();
     let path = location.pathname;
     if (base && path.toLowerCase().startsWith(base.toLowerCase())) {
       path = path.slice(base.length);
     }
     const segment = path.replace(/^\/+|\/+$/g, "").split("/")[0];
-    const page = segment === "acesso-admin" ? "dashboard" : (PAGE_BY_SLUG[segment] || segment);
+    const page = canonicalPage(segment === "acesso-admin" ? "dashboard" : (PAGE_BY_SLUG[segment] || segment));
     if (normalizedQueryPage && P.$(`#${pageId(normalizedQueryPage)}`)) return normalizedQueryPage;
     if (page && P.$(`#${pageId(page)}`)) return page;
     if (hashPage && P.$(`#${pageId(hashPage)}`)) return hashPage;
@@ -54,7 +58,7 @@
   }
 
   function pageRoute(id) {
-    const page = id || "dashboard";
+    const page = canonicalPage(id || "dashboard");
     const url = new URL(location.href);
     const base = routeBase();
     const slug = PAGE_SLUGS[page] || page;
@@ -159,20 +163,21 @@
   }
 
   function setPage(id) {
-    if (P.canAccess && !P.canAccess(id)) {
-      showAccessDenied(id);
+    const target = canonicalPage(id || "dashboard");
+    if (P.canAccess && !P.canAccess(target)) {
+      showAccessDenied(target);
       return false;
     }
     const active = P.$(".page.active");
     const activeId = active?.id?.replace("page-", "");
-    if (activeId && activeId !== id) previousPage = activeId;
-    P.renderPage?.(id, { force: true });
-    P.$all(".page").forEach(page => page.classList.toggle("active", page.id === pageId(id)));
-    P.$all("[data-page]").forEach(btn => btn.classList.toggle("active", btn.dataset.page === id));
-    updateGlobalPageHeading(id);
-    updatePageMaintenanceNotice(id);
+    if (activeId && activeId !== target) previousPage = activeId;
+    P.renderPage?.(target, { force: true });
+    P.$all(".page").forEach(page => page.classList.toggle("active", page.id === pageId(target)));
+    P.$all("[data-page]").forEach(btn => btn.classList.toggle("active", canonicalPage(btn.dataset.page) === target));
+    updateGlobalPageHeading(target);
+    updatePageMaintenanceNotice(target);
     P.applyAccessState?.();
-    history.replaceState(null, "", pageRoute(id));
+    history.replaceState(null, "", pageRoute(target));
     P.clearSearch();
     window.scrollTo(0, 0);
     return true;

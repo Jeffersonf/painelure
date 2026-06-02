@@ -15,6 +15,8 @@ Progresso registrado:
 - Ficha da escola passou a exibir divergencias entre fontes: inventario, equipamentos por ID, identificacao dos ativos, rede, supervisao e chamados.
 - Tela inicial do admin ganhou bloco de acoes reais e a grade principal foi reduzida a widgets operacionais.
 - Supervisao ganhou resumo mensal operacional com fonte usada, meta mensal, semana, pendencias e chamados nas escolas vinculadas.
+- CTC e Chamados foram consolidados em uma unica categoria visivel: Chamados CTC. Links antigos de Chamados continuam redirecionando para a tela consolidada.
+- Pesquisa de satisfacao esta pronta como pagina/fonte, mas segue pendente de URL oficial ou formulario com respostas reais.
 
 ### Agora
 
@@ -29,6 +31,7 @@ Progresso registrado:
    - Manter checkpoints do administrador na pagina inicial.
    - Remover widgets sem acao clara conforme forem identificados.
    - Priorizar proximas acoes e pendencias reais.
+   - Manter apenas um atalho para chamados: `Chamados CTC`.
 
 3. Qualidade dos dados
    - Transformar a pagina Qualidade em painel vivo de diagnostico.
