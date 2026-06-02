@@ -52,12 +52,19 @@
     }, 0);
   }
 
+  function sourceDataCount(items = []) {
+    return Array.isArray(items) ? items.length : 0;
+  }
+
   function mergeBackendAppData(currentData = {}, backendData = {}) {
     const merged = { ...(currentData || {}), ...(backendData || {}) };
     const currentSupervisionScore = supervisionDataScore(currentData?.supervisors);
     const backendSupervisionScore = supervisionDataScore(backendData?.supervisors);
     if (currentSupervisionScore > backendSupervisionScore) {
       merged.supervisors = currentData.supervisors;
+    }
+    if (sourceDataCount(currentData?.satisfaction) > sourceDataCount(backendData?.satisfaction)) {
+      merged.satisfaction = currentData.satisfaction;
     }
     return merged;
   }

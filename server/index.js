@@ -67,6 +67,21 @@ const DATA_ACCESS = {
   Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
 };
 const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => page !== "admin");
+const OFFICIAL_SOURCE_FIXES = {
+  satisfaction: {
+    label: "Pesquisa de satisfação",
+    type: "sharepoint-list",
+    url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JADpBjs_DuTvSZyxa7kBWSezAaggBDoxC1kO4aT04Yv8SoA?e=iNCKJF",
+    status: "official",
+    metadata: {
+      domain: "Pesquisa de satisfação",
+      cadence: "por campanha",
+      owner: "Gabinete",
+      source: "PesquisaSatisfacao",
+      locked: true
+    }
+  }
+};
 const pool = DATABASE_URL
   ? new Pool({
       connectionString: DATABASE_URL,
@@ -441,9 +456,26 @@ async function listSnapshots(limit = 20) {
 }
 
 async function listOfficialSources() {
+  function applySourceFixes(sources) {
+    const byKey = new Map((sources || []).map(source => [source.key, source]));
+    Object.entries(OFFICIAL_SOURCE_FIXES).forEach(([key, fix]) => {
+      const current = byKey.get(key) || { key };
+      byKey.set(key, {
+        ...current,
+        ...fix,
+        key,
+        metadata: {
+          ...(current.metadata || {}),
+          ...(fix.metadata || {})
+        },
+        updatedAt: current.updatedAt || new Date().toISOString()
+      });
+    });
+    return [...byKey.values()].sort((a, b) => String(a.key).localeCompare(String(b.key)));
+  }
   if (pool && dbReady) {
     const result = await pool.query("select key, label, type, url, status, metadata, updated_at from official_sources order by key");
-    return result.rows.map(row => ({
+    return applySourceFixes(result.rows.map(row => ({
       key: row.key,
       label: row.label,
       type: row.type,
@@ -452,9 +484,9 @@ async function listOfficialSources() {
       monthKey: row.metadata?.monthKey || "",
       metadata: row.metadata || {},
       updatedAt: row.updated_at.toISOString()
-    }));
+    })));
   }
-  return Object.entries(currentSources()).map(([key, source]) => ({ key, ...source }));
+  return applySourceFixes(Object.entries(currentSources()).map(([key, source]) => ({ key, ...source })));
 }
 
 async function saveOfficialSources(sources) {

@@ -57,7 +57,7 @@
       type: "sharepoint-list",
       url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JADpBjs_DuTvSZyxa7kBWSezAaggBDoxC1kO4aT04Yv8SoA?e=iNCKJF",
       status: "official",
-      metadata: { domain: "Pesquisa de satisfação", cadence: "por campanha", owner: "Gabinete", source: "PesquisaSatisfacao" }
+      metadata: { domain: "Pesquisa de satisfação", cadence: "por campanha", owner: "Gabinete", source: "PesquisaSatisfacao", locked: true }
     },
     cars: {
       label: "Agendamento de carros",
