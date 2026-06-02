@@ -194,6 +194,11 @@
 
       const accountButton = event.target.closest("#accountBtn");
       if (accountButton) {
+        if (event.target.closest(".avatar") && (!P.canAccess || P.canAccess("admin"))) {
+          setPage("admin");
+          P.closeAccountMenu?.();
+          return;
+        }
         P.toggleAccountMenu?.();
         return;
       }
