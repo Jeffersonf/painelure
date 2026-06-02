@@ -2505,6 +2505,20 @@
     const grid = P.$("#satisfactionGrid");
     if (!grid) return;
     const list = Array.isArray(items) ? items : [];
+    const source = P.sources?.satisfaction || {};
+    const sourceState = P.sourceResult?.("satisfaction");
+    if (source.url && sourceState?.status !== "loaded" && !P.satisfactionAutoRefreshStarted) {
+      P.satisfactionAutoRefreshStarted = true;
+      P.ensureSource?.("satisfaction")
+        .then(() => {
+          P.renderPage?.("dashboard", { force: true });
+          P.renderPage?.("satisfaction", { force: true });
+          P.renderSourceStatus?.();
+        })
+        .catch(error => {
+          console.warn("[PainelURE] Pesquisa de satisfação não carregada:", error);
+        });
+    }
     const active = list.filter(item => !["encerrada", "finalizada", "cancelada"].some(term => (P.normalize?.(item.status) || "").includes(term))).length;
     const responses = list.reduce((sum, item) => sum + Number(item.responses || 0), 0);
     const links = list.filter(item => item.link).length;

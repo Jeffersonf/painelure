@@ -81,7 +81,8 @@ function run() {
   withUser(P, { name: magda.name, supervisorName: magda.name, role: "Supervisao" }, scoped => {
     assert(scoped.schools.length === magda.assignedSchools.length, "Supervisor deve ver apenas escolas vinculadas.");
     assert(scoped.supervisors.length === 1 && scoped.supervisors[0].name === magda.name, "Supervisor deve ver apenas o proprio registro.");
-    assert(Object.keys(scoped.networkData).length === 0, "Supervisor nao deve receber redes/cameras.");
+    assert(Object.keys(scoped.networkData).length === magda.assignedSchools.length, "Supervisor deve receber redes/cameras das escolas vinculadas.");
+    assert(!hasCredentials(scoped.networkData), "Supervisor nao deve receber credenciais de rede.");
     assert(scoped.schoolAssets.length === 0, "Supervisor nao deve receber inventario tecnico.");
     assert(scoped.cars.length === 0, "Supervisor nao deve receber agendamentos de carro.");
     assert(P.canViewSchool(magda.assignedSchools[0]), "Supervisor deve abrir escola propria.");
@@ -98,7 +99,8 @@ function run() {
   withUser(P, { name: "Consulta", role: "Consulta" }, scoped => {
     assert(scoped.schools.length === data.schools.length, "Consulta deve receber escolas.");
     assert(scoped.contacts.length === data.contacts.length, "Consulta deve receber contatos.");
-    assert(Object.keys(scoped.networkData).length === 0, "Consulta nao deve receber redes/cameras.");
+    assert(Object.keys(scoped.networkData).length > 0, "Consulta deve receber redes/cameras sem credenciais.");
+    assert(!hasCredentials(scoped.networkData), "Consulta nao deve receber credenciais de rede.");
     assert(scoped.users.length === 0, "Consulta nao deve receber usuarios.");
   });
 
@@ -132,7 +134,8 @@ function run() {
     assert(scoped.calls.length === data.calls.length, "Gabinete deve receber chamados.");
     assert(scoped.cars.length === data.cars.length, "Gabinete deve receber agendamentos de carro.");
     assert(P.canViewAllCarBookings(), "Gabinete deve ver detalhes completos de carros.");
-    assert(Object.keys(scoped.networkData).length === 0, "Gabinete nao deve receber redes/cameras.");
+    assert(Object.keys(scoped.networkData).length > 0, "Gabinete deve receber redes/cameras sem credenciais.");
+    assert(!hasCredentials(scoped.networkData), "Gabinete nao deve receber credenciais de rede.");
     assert(scoped.schoolAssets.length === 0, "Gabinete nao deve receber inventario tecnico.");
   });
 
@@ -191,7 +194,8 @@ function run() {
     assert(scoped.schools.length === data.schools.length, "Pedagogico deve receber escolas.");
     assert(scoped.supervisors.length === data.supervisors.length, "Pedagogico deve receber supervisao.");
     assert(scoped.cars.length === 0, "Pedagogico/PEC nao deve receber agendamentos de carro.");
-    assert(Object.keys(scoped.networkData).length === 0, "Pedagogico nao deve receber redes/cameras.");
+    assert(Object.keys(scoped.networkData).length > 0, "Pedagogico deve receber redes/cameras sem credenciais.");
+    assert(!hasCredentials(scoped.networkData), "Pedagogico nao deve receber credenciais de rede.");
     assert(scoped.schoolAssets.length === 0, "Pedagogico nao deve receber inventario tecnico.");
   });
 
@@ -223,14 +227,14 @@ function run() {
   });
 
   assertAccess(P, "Administrador", ["admin", "network", "inventory", "profiles"], []);
-  assertAccess(P, "Supervisao", ["dashboard", "schools", "supervision", "satisfaction"], ["network", "inventory", "cars", "reports", "admin"]);
+  assertAccess(P, "Supervisao", ["dashboard", "schools", "network", "supervision", "satisfaction"], ["inventory", "cars", "reports", "admin"]);
   assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars", "satisfaction"], ["reports", "admin", "profiles"]);
   assertAccess(P, "SETEC", ["network", "inventory", "calendar", "satisfaction"], ["reports", "admin"]);
   assertAccess(P, "SEINTEC", ["network", "inventory", "ctc", "calls", "cars", "supervision", "calendar", "satisfaction", "reports", "profiles", "quality"], ["admin"]);
-  assertAccess(P, "Gabinete", ["calls", "calendar", "cars", "satisfaction"], ["reports", "network", "inventory", "admin"]);
-  assertAccess(P, "Pedagogico", ["schools", "supervision", "calendar", "satisfaction"], ["reports", "network", "inventory", "cars", "admin"]);
-  assertAccess(P, "Consulta", ["schools", "contacts", "calendar", "satisfaction"], ["reports", "network", "inventory", "admin"]);
-  assertAccess(P, "Carros", ["dashboard", "cars", "calendar"], ["schools", "contacts", "network", "inventory", "admin"]);
+  assertAccess(P, "Gabinete", ["network", "calls", "calendar", "cars", "satisfaction"], ["reports", "inventory", "admin"]);
+  assertAccess(P, "Pedagogico", ["schools", "network", "supervision", "calendar", "satisfaction"], ["reports", "inventory", "cars", "admin"]);
+  assertAccess(P, "Consulta", ["schools", "network", "contacts", "calendar", "satisfaction"], ["reports", "inventory", "admin"]);
+  assertAccess(P, "Carros", ["dashboard", "network", "cars", "calendar"], ["schools", "contacts", "inventory", "admin"]);
   assertAccess(P, "SEGRE", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
   assertAccess(P, "SEPES", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
   assertAccess(P, "SEFIN", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);

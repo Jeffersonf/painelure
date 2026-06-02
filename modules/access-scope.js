@@ -156,6 +156,7 @@
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
+    if (page === "network") return true;
     if (page === "calls" || page === "ctc") {
       const access = roleAccess(role);
       return access.includes("calls") || access.includes("ctc");
