@@ -66,6 +66,12 @@
     if (sourceDataCount(currentData?.satisfaction) > sourceDataCount(backendData?.satisfaction)) {
       merged.satisfaction = currentData.satisfaction;
     }
+    if (sourceDataCount(currentData?.schoolAssets) > sourceDataCount(backendData?.schoolAssets)) {
+      merged.schoolAssets = currentData.schoolAssets;
+      merged.schoolInventoryMetrics = currentData.schoolInventoryMetrics;
+      merged.inventory = currentData.inventory;
+      merged.inventoryImportMeta = currentData.inventoryImportMeta;
+    }
     return merged;
   }
 

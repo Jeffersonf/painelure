@@ -4,7 +4,10 @@
 
   const report = {
     title: "Painel de Inventario - URE Itapeva",
-    sourceFile: "bi_inventario.pbix",
+    sourceFile: "InventarioEquipamentosEscolas (2).csv",
+    sourceType: "csv",
+    sourceRows: 3255,
+    skippedRows: 2,
     createdFrom: "Cloud",
     powerBiRelease: "2026.05",
     datasetId: "5c8b7bdf-134a-42c6-b729-972f71c0c9ce",
@@ -23,10 +26,22 @@
     ],
     fields: [
       "ID",
-      "Escola.lookupValue",
-      "Equipamento.lookupValue",
-      "Status do Equipamento.lookupValue"
-    ]
+      "Escola",
+      "Data da Coleta",
+      "Equipamento",
+      "Numero de Serie",
+      "BlueMonitor",
+      "Responsavel",
+      "Status do Equipamento",
+      "Patrimonio",
+      "Observacao",
+      "IMEI"
+    ],
+    statusMap: {
+      ok: ["Funcionando"],
+      manutencao: ["Manutencao", "Garantia", "Sem status"],
+      defeito: ["Baixa"]
+    }
   };
   P.biEquipmentReport = report;
   P.seedData = P.seedData || {};

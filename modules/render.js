@@ -1712,18 +1712,18 @@
         </article>
 
         <article class="settings-section span-2">
-          <div class="box-head"><div><strong>Fonte Power BI</strong><small>Metadados extraidos do arquivo bi_inventario.pbix.</small></div></div>
+          <div class="box-head"><div><strong>Fonte do BI Equipamentos</strong><small>Base operacional importada do CSV de inventario.</small></div></div>
           <div class="source-list">
             <div class="source-card">
-              <div><strong>${report.title || "BI Equipamentos"}</strong><small>${report.page || "Painel URE ITAPEVA"} | ${report.table || "InventarioEquipamentosEscolas"}</small></div>
+              <div><strong>${report.title || "BI Equipamentos"}</strong><small>${report.sourceFile || "InventarioEquipamentosEscolas.csv"} | ${report.table || "InventarioEquipamentosEscolas"}</small></div>
               <span class="status-pill info">admin</span>
             </div>
             <div class="source-card">
-              <div><strong>Dataset</strong><small>${report.datasetId || "nao identificado"}</small></div>
-              <span class="status-pill info">Power BI</span>
+              <div><strong>Linhas importadas</strong><small>${report.sourceRows || assets.length} registro(s), ${report.skippedRows || 0} ignorado(s)</small></div>
+              <span class="status-pill info">CSV</span>
             </div>
             <div class="source-card">
-              <div><strong>Relatorio</strong><small>${report.reportId || "nao identificado"}</small></div>
+              <div><strong>Referencia Power BI</strong><small>${report.reportId || "nao identificado"}</small></div>
               <span class="status-pill ok">${report.createdFrom || "PBIX"}</span>
             </div>
           </div>

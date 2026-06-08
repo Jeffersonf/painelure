@@ -1341,6 +1341,24 @@ function normalizeRows(type, rows) {
     });
   }
   if (type === "inventory") {
+    const schoolAliases = {
+      [normalizeText("EE IDALICIO MENDES LIMA")]: "PEI EE Idalicio Mendes Lima",
+      [normalizeText("EE ANTONIO DEFFUNE")]: "EE Doutor Antonio Deffune",
+      [normalizeText("EE CELIA VASQUES FERRAI DUCH")]: "PEI EE Professora Celia Vasques Ferrari Duch",
+      [normalizeText("EE CINIRA DANIEL DA SILVA")]: "PEI EE Professora Cinira Daniel da Silva",
+      [normalizeText("EE FRANCELINA FRANCO")]: "PEI EE Professora Francelina Franco",
+      [normalizeText("EE GERSON DE BARROS")]: "EE Professor Gerson de Barros Margarido",
+      [normalizeText("EE JOAO BATISTA DO AMARAL VASCONCELOS")]: "PEI EE Professor Joao Baptista do Amaral Vasconcellos",
+      [normalizeText("EE OSCAR KURTZ CAMARGO")]: "PEI EE Oscar Kurtz Camargo",
+      [normalizeText("EE OTAVIO FERRARI")]: "PEI EE Otavio Ferrari",
+      [normalizeText("EE PADRE ARLINDO VIEIRA")]: "PEI EE Padre Arlindo Vieira",
+      [normalizeText("EE RICARDO CAMPOLIM DE ALMEIDA NETO")]: "PEI EE Ricardo Campolim de Almeida Neto",
+      [normalizeText("EE SILVERIO MONTERIO")]: "EE Professor Silverio Monteiro",
+      [normalizeText("EE SILVERIO MONTEIRO")]: "EE Professor Silverio Monteiro",
+      [normalizeText("EE SIMPLICIANO CAMPOLIM DE ALMEIDA")]: "PEI EE Simpliciano Campolim de Almeida",
+      [normalizeText("EE DR. RAUL VENTURELLI")]: "EE Doutor Raul Venturelli",
+      [normalizeText("DIRETORIA ITAPEVA")]: "Diretoria Itapeva"
+    };
     function lookupLabelValue(value, label) {
       const text = valueToText(value);
       if (!text) return "";
@@ -1350,7 +1368,7 @@ function normalizeRows(type, rows) {
       const text = firstValue(row, ["status", "situacao", "estado", "statusdoequipamento", "status_do_equipamento"], "ok");
       const key = normalizeText(text);
       if (key === "1" || key.includes("ok") || key.includes("sim") || key.includes("funcionando")) return "ok";
-      if (key.includes("defeito") || key.includes("quebrado") || key.includes("nao")) return "defeito";
+      if (key.includes("baixa") || key.includes("defeito") || key.includes("quebrado") || key.includes("nao")) return "defeito";
       return "manutencao";
     }
     function inventoryNotes(row) {
@@ -1359,17 +1377,26 @@ function normalizeRows(type, rows) {
       const imei = firstValue(row, ["imei"], "");
       const blueMonitor = firstValue(row, ["bluemonitor", "blue_monitor"], "");
       const collectedAt = firstValue(row, ["datadacoleta", "data_da_coleta"], "");
+      const status = firstValue(row, ["status", "situacao", "estado", "statusdoequipamento", "status_do_equipamento"], "");
+      const responsible = firstValue(row, ["responsavel", "responsavel_pelo_equipamento"], "");
+      const info = firstValue(row, ["informacao_do_equipamento", "informa_x00e7__x00e3_o_do_equipamento", "descricao"], "");
       return [
+        "1 unidade",
+        status && `Status original: ${status}`,
+        firstValue(row, ["id"], "") && `ID: ${firstValue(row, ["id"], "")}`,
+        info && `Info: ${info}`,
         serial && `Serie: ${serial}`,
         patrimony && `Patrimonio: ${patrimony}`,
         imei && `IMEI: ${imei}`,
         blueMonitor && `BlueMonitor: ${blueMonitor}`,
+        responsible && `Responsavel: ${responsible}`,
         collectedAt && `Coleta: ${collectedAt}`,
         firstValue(row, ["observacao", "observacoes", "observa_x00e7__x00e3_o"], "")
       ].filter(Boolean).join(" | ");
     }
     return rows.map(row => {
-      const school = lookupLabelValue(firstValue(row, ["escola", "school", "unidade"], ""), "Escola") || "Escola sem nome";
+      const rawSchool = lookupLabelValue(firstValue(row, ["escola", "school", "unidade"], ""), "Escola");
+      const school = schoolAliases[normalizeText(rawSchool)] || rawSchool || "Escola sem nome";
       const equipment = lookupLabelValue(firstValue(row, ["tipo", "equipamento", "item", "nome"], ""), "Equipamento") || "Item";
       return {
         id: firstValue(row, ["id"], "") ? `sharepoint-inventory-${firstValue(row, ["id"], "")}` : undefined,
