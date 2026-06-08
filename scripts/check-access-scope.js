@@ -226,15 +226,15 @@ function run() {
     assert(!sharedTitles.includes("Pessoal Ana"), "Agenda compartilhada nao deve mostrar evento pessoal do usuario.");
   });
 
-  assertAccess(P, "Administrador", ["admin", "network", "inventory", "profiles"], []);
-  assertAccess(P, "Supervisao", ["dashboard", "schools", "network", "supervision", "satisfaction"], ["inventory", "cars", "reports", "admin"]);
-  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars", "satisfaction"], ["reports", "admin", "profiles"]);
-  assertAccess(P, "SETEC", ["network", "inventory", "calendar", "satisfaction"], ["reports", "admin"]);
-  assertAccess(P, "SEINTEC", ["network", "inventory", "ctc", "calls", "cars", "supervision", "calendar", "satisfaction", "reports", "profiles", "quality"], ["admin"]);
-  assertAccess(P, "Gabinete", ["network", "calls", "calendar", "cars", "satisfaction"], ["reports", "inventory", "admin"]);
-  assertAccess(P, "Pedagogico", ["schools", "network", "supervision", "calendar", "satisfaction"], ["reports", "inventory", "cars", "admin"]);
-  assertAccess(P, "Consulta", ["schools", "network", "contacts", "calendar", "satisfaction"], ["reports", "inventory", "admin"]);
-  assertAccess(P, "Carros", ["dashboard", "network", "cars", "calendar"], ["schools", "contacts", "inventory", "admin"]);
+  assertAccess(P, "Administrador", ["admin", "network", "inventory", "bi-equipment", "profiles"], []);
+  assertAccess(P, "Supervisao", ["dashboard", "schools", "network", "supervision", "satisfaction"], ["inventory", "bi-equipment", "cars", "reports", "admin"]);
+  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars", "satisfaction"], ["bi-equipment", "reports", "admin", "profiles"]);
+  assertAccess(P, "SETEC", ["network", "inventory", "calendar", "satisfaction"], ["bi-equipment", "reports", "admin"]);
+  assertAccess(P, "SEINTEC", ["network", "inventory", "ctc", "calls", "cars", "supervision", "calendar", "satisfaction", "reports", "profiles", "quality"], ["bi-equipment", "admin"]);
+  assertAccess(P, "Gabinete", ["network", "calls", "calendar", "cars", "satisfaction"], ["reports", "inventory", "bi-equipment", "admin"]);
+  assertAccess(P, "Pedagogico", ["schools", "network", "supervision", "calendar", "satisfaction"], ["reports", "inventory", "bi-equipment", "cars", "admin"]);
+  assertAccess(P, "Consulta", ["schools", "network", "contacts", "calendar", "satisfaction"], ["reports", "inventory", "bi-equipment", "admin"]);
+  assertAccess(P, "Carros", ["dashboard", "network", "cars", "calendar"], ["schools", "contacts", "inventory", "bi-equipment", "admin"]);
   assertAccess(P, "SEGRE", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
   assertAccess(P, "SEPES", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);
   assertAccess(P, "SEFIN", ["dashboard", "cars", "calendar"], ["schools", "contacts", "supervision", "admin"]);

@@ -21,6 +21,7 @@
         schools: "escolas",
         network: "redes",
         inventory: "inventario",
+        "bi-equipment": "bi-equipamentos",
         supervision: "supervisao",
         contacts: "contatos",
         calendar: "calendario",
@@ -150,6 +151,7 @@
       <div class="sidebar-shortcuts labeled">
         <button type="button" data-jump="network"><span>&#127760; Redes</span></button>
         <button type="button" data-jump="inventory"><span>&#128187; Inventário</span></button>
+        <button type="button" data-jump="bi-equipment"><span>BI Equipamentos</span></button>
         <button type="button" data-jump="ctc"><span>&#128229; Chamados CTC</span></button>
         <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
         <button type="button" data-jump="reports"><span>&#128200; Relatórios</span></button>
@@ -343,6 +345,13 @@
         <div class="box-head"><div><strong>Equipamentos em acompanhamento</strong><small>Status resumido para triagem</small></div></div>
         <div class="inventory-grid" id="inventoryGrid"></div>
       </div>
+    </section>
+
+    <section class="page" id="page-bi-equipment">
+      <header class="page-header compact">
+        <div><h1>BI Equipamentos</h1><p>Indicadores administrativos do Power BI de inventário.</p></div>
+      </header>
+      <div id="biEquipmentDashboard"></div>
     </section>
 
     <section class="page supervision-original-page" id="page-supervision">
@@ -792,6 +801,7 @@
   <script src="./data/school-profiles.js?v=stability-polish-20260528"></script>
   <script src="./data/school-operational.js?v=stability-polish-20260528"></script>
   <script src="./data/inventory.js?v=stability-polish-20260528"></script>
+  <script src="./data/bi-equipments.js?v=bi-equipamentos-20260608"></script>
   <script src="./data/supervision.js?v=stability-polish-20260528"></script>
   <script src="./data/contacts.js?v=stability-polish-20260528"></script>
   <script src="./data/users.js?v=stability-polish-20260528"></script>
@@ -800,10 +810,10 @@
   <script src="./data/calls-report.js?v=stability-polish-20260528"></script>
   <script src="./data/sources.js?v=satisfaction-sharepoint-20260602"></script>
   <script src="./modules/dom.js?v=stability-polish-20260528"></script>
-  <script src="./modules/ui-catalog.js?v=chamados-ctc-20260602"></script>
+  <script src="./modules/ui-catalog.js?v=bi-equipamentos-20260608"></script>
   <script src="./modules/data-store.js?v=stability-polish-20260528"></script>
   <script src="./modules/identity.js?v=stability-polish-20260528"></script>
-  <script src="./modules/access-scope.js?v=network-satisfaction-fix-20260602"></script>
+  <script src="./modules/access-scope.js?v=bi-equipamentos-20260608"></script>
   <script src="./modules/month-state.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/csv.js?v=stability-polish-20260528"></script>
   <script src="./modules/normalizers.js?v=satisfaction-sharepoint-20260602"></script>
@@ -811,10 +821,10 @@
   <script src="./config.js?v=stability-polish-20260528"></script>
   <script src="./modules/backend-client.js?v=satisfaction-sharepoint-20260602"></script>
   <script src="./modules/search.js?v=chamados-ctc-20260602"></script>
-  <script src="./modules/render.js?v=network-satisfaction-fix-20260602"></script>
+  <script src="./modules/render.js?v=bi-equipamentos-20260608"></script>
   <script src="./modules/supervision-render.js?v=supervision-month-summary-20260602"></script>
-  <script src="./modules/navigation.js?v=avatar-admin-20260602"></script>
-  <script src="./modules/admin-tools.js?v=network-satisfaction-fix-20260602"></script>
-  <script src="./app.js?v=quality-diagnostics-20260601"></script>
+  <script src="./modules/navigation.js?v=bi-equipamentos-20260608"></script>
+  <script src="./modules/admin-tools.js?v=bi-equipamentos-20260608"></script>
+  <script src="./app.js?v=bi-equipamentos-20260608"></script>
 </body>
 </html>

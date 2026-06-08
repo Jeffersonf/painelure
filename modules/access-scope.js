@@ -1,7 +1,7 @@
 (function () {
   const P = window.PainelURE;
   const DEFAULT_ACCESS = {
-    Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+    Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -25,7 +25,7 @@
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
   const ACCESS = DEFAULT_ACCESS;
-  const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => page !== "admin");
+  const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => !["admin", "bi-equipment"].includes(page));
   const ROLE_EMOJI = {
     Administrador: "🛡️",
     Supervisao: "🧭",
@@ -156,6 +156,7 @@
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
+    if (page === "bi-equipment") return roleKey(role) === "Administrador";
     if (page === "network") return true;
     if (page === "calls" || page === "ctc") {
       const access = roleAccess(role);
@@ -356,6 +357,7 @@
       schools: canAccessData("schools", role),
       network: canAccessData("network", role),
       inventory: canAccessData("inventory", role),
+      biEquipment: canAccessData("bi-equipment", role),
       supervision: canAccessData("supervision", role),
       contacts: canAccessData("contacts", role),
       calendar: canAccessData("calendar", role),
@@ -387,6 +389,7 @@
       schoolProfiles: byAccess.schools ? schoolScopedItems(data.schoolProfiles || []) : [],
       schoolAssets: byAccess.inventory ? schoolScopedItems(data.schoolAssets || []) : [],
       inventory: byAccess.inventory ? schoolScopedItems(data.inventory || []) : [],
+      biEquipmentReport: byAccess.biEquipment ? (P.biEquipmentReport || data.biEquipmentReport || null) : null,
       calls: (byAccess.calls || byAccess.ctc) ? schoolScopedItems(data.calls || []) : [],
       ctcVisits: byAccess.ctc
         ? (supervisorScope ? (data.ctcVisits || []).filter(visit => allowed.has(normalized(visit.place))) : (data.ctcVisits || []))

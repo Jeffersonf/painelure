@@ -10,6 +10,7 @@
     schools: "escolas",
     network: "redes",
     inventory: "inventario",
+    "bi-equipment": "bi-equipamentos",
     supervision: "supervisao",
     contacts: "contatos",
     calendar: "calendario",

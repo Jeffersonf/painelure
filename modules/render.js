@@ -670,6 +670,7 @@
       { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
       { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventário", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
+      { id: "biEquipment", roles: ["administrador"], page: "bi-equipment", icon: "BI", label: "BI Equipamentos", value: data.schoolAssets?.length || 0, note: "Power BI do inventario", tone: "info" },
       { id: "ctc", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados CTC", value: context.openCalls, note: context.openCalls ? "Fila de T.I. em acompanhamento" : "Fila de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
       { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
@@ -1615,6 +1616,123 @@
     });
     grid.querySelector("[data-open-supervisor]")?.addEventListener("click", event => {
       focusSupervisor(event.currentTarget.dataset.openSupervisor);
+    });
+  }
+
+  function biEquipmentGroup(assets, getter) {
+    return Object.entries((assets || []).reduce((acc, asset) => {
+      const key = getter(asset) || "Nao informado";
+      acc[key] = (acc[key] || 0) + assetUnits(asset);
+      return acc;
+    }, {})).sort((a, b) => b[1] - a[1]);
+  }
+
+  function biEquipmentStatusTone(status) {
+    const text = P.normalize(status);
+    if (text.includes("defeito") || text.includes("baixa")) return "danger";
+    if (text.includes("manutenc")) return "warn";
+    return "ok";
+  }
+
+  function renderBiEquipment(data) {
+    const host = P.$("#biEquipmentDashboard");
+    if (!host) return;
+    const report = P.biEquipmentReport || data.biEquipmentReport || {};
+    const assets = data.schoolAssets || [];
+    const totals = inventoryTotals(assets);
+    const schoolsWithAssets = new Set(assets.map(asset => asset.school).filter(Boolean));
+    const functioning = Math.max(totals.units - totals.alertUnits, 0);
+    const maintenance = assets
+      .filter(asset => asset.status === "manutencao")
+      .reduce((sum, asset) => sum + assetUnits(asset), 0);
+    const low = assets
+      .filter(asset => asset.status === "defeito")
+      .reduce((sum, asset) => sum + assetUnits(asset), 0);
+    const bySchool = biEquipmentGroup(assets, asset => asset.school).slice(0, 10);
+    const byStatus = biEquipmentGroup(assets, asset => assetStatusLabel(asset.status));
+    const byType = biEquipmentGroup(assets, asset => assetCategory(asset)).slice(0, 8);
+    const maxSchool = Math.max(...bySchool.map(([, count]) => count), 1);
+    const maxType = Math.max(...byType.map(([, count]) => count), 1);
+    const cards = [
+      { label: "Total equipamentos", value: totals.units, note: `${totals.lines} linha(s) consolidadas`, tone: "info" },
+      { label: "Escolas inventariadas", value: schoolsWithAssets.size, note: "com item vinculado", tone: schoolsWithAssets.size ? "ok" : "warn" },
+      { label: "Funcionando", value: functioning, note: "status OK", tone: "ok" },
+      { label: "Em manutencao", value: maintenance, note: "pedem acompanhamento", tone: maintenance ? "warn" : "ok" },
+      { label: "Baixa", value: low, note: "defeito/baixa", tone: low ? "danger" : "ok" }
+    ];
+
+    host.innerHTML = `
+      <section class="dashboard-grid">
+        ${cards.map(card => `
+          <article class="dashboard-widget-card dashboard-widget-${card.tone}" data-search="${P.searchText([card.label, card.value, card.note])}">
+            <span>BI</span>
+            <strong>${card.value}</strong>
+            <small>${card.label}</small>
+            <p>${card.note}</p>
+          </article>
+        `).join("")}
+      </section>
+
+      <section class="settings-shell admin-layout">
+        <article class="settings-section span-2">
+          <div class="box-head"><div><strong>Equipamentos por escola</strong><small>Mesmo eixo principal do PBIX.</small></div></div>
+          <div class="row-list compact">
+            ${bySchool.length ? bySchool.map(([school, count]) => `
+              <button class="data-row compact" type="button" data-open-inventory="${attrValue(school)}" data-search="${P.searchText([school, count])}">
+                <span><strong>${school}</strong><small>${count} equipamento(s)</small></span>
+                <i style="--pct:${Math.round((count / maxSchool) * 100)}%"></i>
+              </button>
+            `).join("") : `<div class="empty-state">Nenhum equipamento consolidado para montar o BI.</div>`}
+          </div>
+        </article>
+
+        <article class="settings-section">
+          <div class="box-head"><div><strong>Status do equipamento</strong><small>Funcionando, manutencao e baixa.</small></div></div>
+          <div class="calendar-grid">
+            ${byStatus.map(([status, count]) => `
+              <article class="detail-widget" data-search="${P.searchText([status, count])}">
+                <span class="status-pill ${statusClass(biEquipmentStatusTone(status))}">${status}</span>
+                <strong>${count}</strong>
+                <small>equipamento(s)</small>
+              </article>
+            `).join("") || `<div class="empty-state">Sem status carregado.</div>`}
+          </div>
+        </article>
+
+        <article class="settings-section">
+          <div class="box-head"><div><strong>Tipo equipamento</strong><small>Top categorias inferidas.</small></div></div>
+          <div class="row-list compact">
+            ${byType.map(([type, count]) => `
+              <div class="data-row compact" data-search="${P.searchText([type, count])}">
+                <span><strong>${type}</strong><small>${count} equipamento(s)</small></span>
+                <i style="--pct:${Math.round((count / maxType) * 100)}%"></i>
+              </div>
+            `).join("") || `<div class="empty-state">Sem tipos carregados.</div>`}
+          </div>
+        </article>
+
+        <article class="settings-section span-2">
+          <div class="box-head"><div><strong>Fonte Power BI</strong><small>Metadados extraidos do arquivo bi_inventario.pbix.</small></div></div>
+          <div class="source-list">
+            <div class="source-card">
+              <div><strong>${report.title || "BI Equipamentos"}</strong><small>${report.page || "Painel URE ITAPEVA"} | ${report.table || "InventarioEquipamentosEscolas"}</small></div>
+              <span class="status-pill info">admin</span>
+            </div>
+            <div class="source-card">
+              <div><strong>Dataset</strong><small>${report.datasetId || "nao identificado"}</small></div>
+              <span class="status-pill info">Power BI</span>
+            </div>
+            <div class="source-card">
+              <div><strong>Relatorio</strong><small>${report.reportId || "nao identificado"}</small></div>
+              <span class="status-pill ok">${report.createdFrom || "PBIX"}</span>
+            </div>
+          </div>
+        </article>
+      </section>
+    `;
+
+    host.querySelectorAll("[data-open-inventory]").forEach(button => {
+      button.addEventListener("click", () => focusInventorySchool(button.dataset.openInventory));
     });
   }
 
@@ -2763,6 +2881,7 @@
   P.renderSchools = renderSchools;
   P.renderNetworkOptions = renderNetworkOptions;
   P.renderInventory = renderInventory;
+  P.renderBiEquipment = renderBiEquipment;
   P.renderContacts = renderContacts;
   P.renderCalendar = renderCalendar;
   P.renderCars = renderCars;

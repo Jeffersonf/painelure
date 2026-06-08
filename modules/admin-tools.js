@@ -10,7 +10,7 @@
   let backendToken = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || "";
 
   const ROLE_ACCESS = {
-    Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+    Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -33,7 +33,7 @@
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
-  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"];
+  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"];
 
   function currentRole() {
     return P.onlineUser?.()?.role || localStorage.getItem(ROLE_KEY) || P.displayUser?.().role || "Administrador";
@@ -50,6 +50,7 @@
 
   function canAccess(page, role = currentRole()) {
     if (["user", "school-detail", "supervisor-detail"].includes(page)) return true;
+    if (page === "bi-equipment") return P.roleKey ? P.roleKey(role) === "Administrador" : P.normalize(role).includes("administrador");
     if (page === "network") return true;
     const access = accessForRole(role);
     if (page === "calls" || page === "ctc") return access.includes("calls") || access.includes("ctc");
@@ -1135,7 +1136,7 @@
   function defaultPrefs() {
     return {
       widgets: { shortcuts: true, metrics: true, operations: true },
-      shortcuts: { network: true, inventory: true, ctc: true, cars: true, calendar: true, satisfaction: true, reports: true }
+      shortcuts: { network: true, inventory: true, "bi-equipment": true, ctc: true, cars: true, calendar: true, satisfaction: true, reports: true }
     };
   }
 

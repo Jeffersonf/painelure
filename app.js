@@ -21,6 +21,9 @@
     inventory(data) {
       P.renderInventory(data);
     },
+    "bi-equipment"(data) {
+      P.renderBiEquipment(data);
+    },
     supervision(data) {
       P.renderSupervisors(data.supervisors);
     },

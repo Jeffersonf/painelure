@@ -43,7 +43,7 @@ let dbReady = false;
 let dbError = "";
 let frontendSeedStore = null;
 const DATA_ACCESS = {
-  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+  Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
   "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
@@ -66,7 +66,7 @@ const DATA_ACCESS = {
   Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
   Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
 };
-const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => page !== "admin");
+const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "bi-equipment"].includes(page));
 const OFFICIAL_SOURCE_FIXES = {
   satisfaction: {
     label: "Pesquisa de satisfação",
@@ -157,6 +157,7 @@ function loadFrontendSeedData() {
     "data/school-profiles.js",
     "data/school-operational.js",
     "data/inventory.js",
+    "data/bi-equipments.js",
     "data/supervision.js",
     "data/contacts.js",
     "data/users.js",
@@ -737,6 +738,7 @@ function accessForRole(role, appData = {}) {
 }
 
 function canAccessData(page, user = null, appData = {}) {
+  if (page === "bi-equipment") return normalizeText(user?.role || "Consulta").includes("administrador");
   if (page === "network") return true;
   const access = accessForRole(user?.role || "Consulta", appData);
   if (page === "calls" || page === "ctc") return access.includes("calls") || access.includes("ctc");
@@ -875,6 +877,7 @@ function scopeAppDataForUser(appData = {}, user = null) {
     supervisors: canAccessData("supervision", user, appData) ? supervisors : [],
     networkData: canAccessData("network", user, appData) ? networkScopedObject(appData.networkData || {}) : {},
     schoolInventoryMetrics: canAccessData("inventory", user, appData) ? schoolScopedObject(appData.schoolInventoryMetrics || {}) : {},
+    biEquipmentReport: canAccessData("bi-equipment", user, appData) ? (appData.biEquipmentReport || null) : null,
     schoolProfiles: canAccessData("schools", user, appData) ? schoolScopedItems(appData.schoolProfiles || []) : [],
     schoolAssets: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.schoolAssets || []) : [],
     inventory: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.inventory || []) : [],
@@ -1488,7 +1491,10 @@ function safeStaticPath(urlPath) {
 }
 
 function serveStatic(req, res, urlPath) {
-  const file = safeStaticPath(urlPath);
+  let file = safeStaticPath(urlPath);
+  if ((!file || !fs.existsSync(file) || fs.statSync(file).isDirectory()) && !path.extname(urlPath)) {
+    file = safeStaticPath("/index.html");
+  }
   if (!file || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     send(res, 404, "Não encontrado.");
     return;
