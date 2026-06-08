@@ -162,6 +162,7 @@ function loadFrontendSeedData() {
     "data/contacts.js",
     "data/users.js",
     "data/governance.js",
+    "data/satisfaction.js",
     "data/operations.js",
     "data/calls-report.js"
   ];

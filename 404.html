@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "bi-equipment-dashboard-20260608";
+      window.PAINELURE_BUILD = "satisfaction-bi-dashboard-20260608";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -74,7 +74,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=bi-equipment-dashboard-20260608">
+  <link rel="stylesheet" href="./styles.css?v=satisfaction-bi-dashboard-20260608">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -806,6 +806,7 @@
   <script src="./data/contacts.js?v=stability-polish-20260528"></script>
   <script src="./data/users.js?v=stability-polish-20260528"></script>
   <script src="./data/governance.js?v=stability-polish-20260528"></script>
+  <script src="./data/satisfaction.js?v=satisfaction-dashboard-20260608"></script>
   <script src="./data/operations.js?v=stability-polish-20260528"></script>
   <script src="./data/calls-report.js?v=stability-polish-20260528"></script>
   <script src="./data/sources.js?v=satisfaction-sharepoint-20260602"></script>
@@ -821,7 +822,7 @@
   <script src="./config.js?v=stability-polish-20260528"></script>
   <script src="./modules/backend-client.js?v=bi-inventory-csv-20260608"></script>
   <script src="./modules/search.js?v=chamados-ctc-20260602"></script>
-  <script src="./modules/render.js?v=bi-equipment-dashboard-20260608"></script>
+  <script src="./modules/render.js?v=satisfaction-bi-dashboard-20260608"></script>
   <script src="./modules/supervision-render.js?v=supervision-month-summary-20260602"></script>
   <script src="./modules/navigation.js?v=bi-equipamentos-20260608"></script>
   <script src="./modules/admin-tools.js?v=bi-equipamentos-20260608"></script>

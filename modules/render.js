@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const P = window.PainelURE;
 
   function statusClass(status) {
@@ -1695,6 +1695,8 @@
     const maxType = Math.max(...byType.map(([, count]) => count), 1);
     const maxStatus = Math.max(...byStatus.map(([, count]) => count), 1);
     const activeFilters = [filterState.school, filterState.status, filterState.type, filterState.query].filter(Boolean).length;
+    const healthPct = Math.round((functioning / Math.max(totals.units, 1)) * 100);
+    const latestDate = recent[0]?.collectedAt || "";
     const cards = [
       { label: "Total equipamentos", value: totals.units, note: `${totals.lines} de ${allTotals.lines} linha(s)`, tone: "info" },
       { label: "Escolas/unidades", value: schoolsWithAssets.size, note: activeFilters ? "no filtro atual" : "com item vinculado", tone: schoolsWithAssets.size ? "ok" : "warn" },
@@ -1742,6 +1744,29 @@
             <p>${card.note}</p>
           </article>
         `).join("")}
+      </section>
+
+      <section class="bi-snapshot-strip">
+        <article>
+          <span>Saude do parque</span>
+          <strong>${healthPct}%</strong>
+          <i><b style="--pct:${healthPct}%"></b></i>
+        </article>
+        <article>
+          <span>Status no recorte</span>
+          <strong>${byStatus.length}</strong>
+          <small>${byStatus.slice(0, 3).map(([status, count]) => `${status}: ${count}`).join(" | ") || "Sem dados"}</small>
+        </article>
+        <article>
+          <span>Ultima coleta</span>
+          <strong>${latestDate || "-"}</strong>
+          <small>${activeFilters ? "recorte filtrado" : "base completa"}</small>
+        </article>
+        <article>
+          <span>Linhas visiveis</span>
+          <strong>${filteredAssets.length}</strong>
+          <small>${totals.units} unidade(s) consolidadas</small>
+        </article>
       </section>
 
       <section class="bi-layout">
@@ -2759,6 +2784,44 @@
     return "info";
   }
 
+  function satisfactionScore(item = {}) {
+    const numberScore = Number(String(item.score ?? "").replace(",", "."));
+    if (Number.isFinite(numberScore) && numberScore > 0) return numberScore;
+    const text = P.normalize([item.rating, item.score].join(" "));
+    if (text.includes("otimo")) return 5;
+    if (text.includes("bom")) return 4;
+    if (text.includes("regular")) return 3;
+    if (text.includes("ruim")) return 2;
+    if (text.includes("pessimo")) return 1;
+    return 0;
+  }
+
+  function satisfactionResolved(item = {}) {
+    return P.normalize([item.resolved, item.status].join(" ")).includes("sim");
+  }
+
+  function satisfactionMonthKey(item = {}) {
+    const period = String(item.period || "").trim();
+    const match = period.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (match) return `${match[3]}-${match[2]}`;
+    return [item.year, item.month].filter(Boolean).join("-");
+  }
+
+  function satisfactionMonthLabel(item = {}) {
+    const period = String(item.period || "").trim();
+    const match = period.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    if (match) return `${match[2]}/${match[3]}`;
+    return [item.month, item.year].filter(Boolean).join("/");
+  }
+
+  function satisfactionGroup(items = [], getter, mode = "count") {
+    return Object.entries(items.reduce((acc, item) => {
+      const key = getter(item) || "Nao informado";
+      acc[key] = (acc[key] || 0) + (mode === "responses" ? Number(item.responses || 1) : 1);
+      return acc;
+    }, {})).sort((a, b) => b[1] - a[1]);
+  }
+
   function renderSatisfaction(items = []) {
     const grid = P.$("#satisfactionGrid");
     if (!grid) return;
@@ -2774,42 +2837,232 @@
           P.renderSourceStatus?.();
         })
         .catch(error => {
-          console.warn("[PainelURE] Pesquisa de satisfação não carregada:", error);
+          console.warn("[PainelURE] Pesquisa de satisfacao nao carregada:", error);
         });
     }
-    const active = list.filter(item => !["encerrada", "finalizada", "cancelada"].some(term => (P.normalize?.(item.status) || "").includes(term))).length;
-    const responses = list.reduce((sum, item) => sum + Number(item.responses || 0), 0);
-    const links = list.filter(item => item.link).length;
+    const previous = grid.dataset.satisfactionFilters ? JSON.parse(grid.dataset.satisfactionFilters) : {};
+    const filterState = {
+      sector: P.$("#satisfactionSectorFilter")?.value ?? previous.sector ?? "",
+      month: P.$("#satisfactionMonthFilter")?.value ?? previous.month ?? "",
+      rating: P.$("#satisfactionRatingFilter")?.value ?? previous.rating ?? "",
+      wait: P.$("#satisfactionWaitFilter")?.value ?? previous.wait ?? "",
+      query: P.$("#satisfactionSearchInput")?.value ?? previous.query ?? "",
+      selected: previous.selected ?? ""
+    };
+    const normalizedQuery = P.normalize(filterState.query);
+    const uniqueSectors = [...new Set(list.map(item => item.sector || item.audience).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const uniqueMonths = [...new Set(list.map(satisfactionMonthLabel).filter(Boolean))].sort((a, b) => {
+      const [ma, ya] = String(a).split("/");
+      const [mb, yb] = String(b).split("/");
+      return String(`${ya || ""}${ma || ""}`).localeCompare(String(`${yb || ""}${mb || ""}`));
+    });
+    const uniqueRatings = [...new Set(list.map(item => item.rating || item.score).filter(Boolean))].sort((a, b) => String(b).localeCompare(String(a), "pt-BR"));
+    const uniqueWaits = [...new Set(list.map(item => item.wait).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const filtered = list.filter(item => {
+      const sector = item.sector || item.audience || "";
+      const month = satisfactionMonthLabel(item);
+      const rating = item.rating || String(item.score || "");
+      if (filterState.sector && sector !== filterState.sector) return false;
+      if (filterState.month && month !== filterState.month) return false;
+      if (filterState.rating && rating !== filterState.rating) return false;
+      if (filterState.wait && item.wait !== filterState.wait) return false;
+      if (!normalizedQuery) return true;
+      return P.normalize([item.sourceId, item.title, item.subject, sector, item.rating, item.resolved, item.wait, item.observation, item.note].join(" ")).includes(normalizedQuery);
+    });
+    const responses = filtered.reduce((sum, item) => sum + Number(item.responses || 1), 0);
+    const scoreItems = filtered.map(satisfactionScore).filter(Boolean);
+    const avgScore = scoreItems.length ? scoreItems.reduce((sum, value) => sum + value, 0) / scoreItems.length : 0;
+    const resolved = filtered.filter(satisfactionResolved).length;
+    const immediate = filtered.filter(item => P.normalize(item.wait).includes("imediato")).length;
+    const comments = filtered.filter(item => {
+      const text = P.normalize(item.observation || "").replace(/[.]/g, "").trim();
+      return text && !["nao", "nada", "nada a declarar"].includes(text);
+    }).length;
+    const activeFilters = [filterState.sector, filterState.month, filterState.rating, filterState.wait, filterState.query].filter(Boolean).length;
+    const bySector = satisfactionGroup(filtered, item => item.sector || item.audience).slice(0, 10);
+    const byMonth = Object.entries(filtered.reduce((acc, item) => {
+      const key = satisfactionMonthLabel(item) || "Nao informado";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {})).sort((a, b) => {
+      const [ma, ya] = String(a[0]).split("/");
+      const [mb, yb] = String(b[0]).split("/");
+      return String(`${ya || ""}${ma || ""}`).localeCompare(String(`${yb || ""}${mb || ""}`));
+    });
+    const byRating = satisfactionGroup(filtered, item => item.rating || item.score || "Sem nota");
+    const byWait = satisfactionGroup(filtered, item => item.wait || "Nao informado");
+    const maxSector = Math.max(...bySector.map(([, count]) => count), 1);
+    const maxMonth = Math.max(...byMonth.map(([, count]) => count), 1);
+    const maxRating = Math.max(...byRating.map(([, count]) => count), 1);
+    const maxWait = Math.max(...byWait.map(([, count]) => count), 1);
+    const selected = filtered.find(item => item.id === filterState.selected) || filtered[0] || null;
+    const tableRows = [...filtered].sort((a, b) => String(satisfactionMonthKey(b)).localeCompare(String(satisfactionMonthKey(a))) || Number(b.sourceId || 0) - Number(a.sourceId || 0)).slice(0, 120);
+    grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, selected: selected?.id || "" });
     renderSummaryRows("#satisfactionSummaryRows", [
-      { icon: "PS", title: "Pesquisas", note: "Campanhas cadastradas", label: String(list.length), tone: list.length ? "info" : "warn" },
-      { icon: "RP", title: "Respostas", note: "Total consolidado na base", label: String(responses), tone: responses ? "ok" : "warn" },
-      { icon: "AT", title: "Ativas", note: "Campanhas em acompanhamento", label: String(active), tone: active ? "info" : "ok" },
-      { icon: "LK", title: "Formulários", note: "Links oficiais disponíveis", label: String(links), tone: links ? "ok" : "warn" }
+      { icon: "PS", title: "Respostas", note: `${filtered.length}/${list.length} registro(s) no filtro`, label: String(responses), tone: responses ? "info" : "warn" },
+      { icon: "NT", title: "Nota media", note: `${scoreItems.length} resposta(s) com avaliacao`, label: avgScore ? avgScore.toFixed(1) : "-", tone: avgScore >= 4 ? "ok" : avgScore ? "warn" : "info" },
+      { icon: "OK", title: "Resolvidos", note: `${resolved} atendimento(s) marcados como resolvidos`, label: `${Math.round((resolved / Math.max(filtered.length, 1)) * 100)}%`, tone: resolved === filtered.length && filtered.length ? "ok" : "warn" },
+      { icon: "TE", title: "Espera imediata", note: `${immediate} atendimento(s) imediatos`, label: `${Math.round((immediate / Math.max(filtered.length, 1)) * 100)}%`, tone: immediate ? "ok" : "warn" },
+      { icon: "CM", title: "Comentarios", note: "Observacoes com conteudo util", label: String(comments), tone: comments ? "info" : "ok" }
     ]);
-    grid.innerHTML = list.length ? list.map(item => {
-      const tone = satisfactionTone(item.status);
-      const search = P.searchText([item.title, item.audience, item.status, item.period, item.note]);
-      return `
-        <article class="detail-widget" data-search="${search}">
-          <div>
-            <small>${item.period || "Periodo a definir"}</small>
-            <strong>${item.title || "Pesquisa de satisfação"}</strong>
-            <p>${item.note || item.audience || "Aguardando fonte oficial da pesquisa."}</p>
-            <div class="mini-metrics">
-              <span><b>Público</b>${item.audience || "Não informado"}</span>
-              <span><b>Respostas</b>${Number(item.responses || 0)}</span>
-              <span><b>Nota</b>${item.score || "sem média"}</span>
-            </div>
-          </div>
-          <div class="detail-actions">
-            <span class="status-pill ${tone}">${item.status || "ativa"}</span>
-            ${item.link ? `<a class="ghost-btn" href="${item.link}" target="_blank" rel="noopener">Abrir formulário</a>` : ""}
+    grid.innerHTML = list.length ? `
+      <section class="bi-command-panel satisfaction-command-panel">
+        <div>
+          <span class="eyebrow">Pesquisa institucional</span>
+          <strong>Atendimentos avaliados</strong>
+          <p>${P.satisfactionMeta?.file || "dados csv.csv"} | ${list.length} resposta(s) carregada(s) | ${activeFilters ? `${activeFilters} filtro(s) ativo(s)` : "base completa"}</p>
+        </div>
+        <button class="ghost-btn" type="button" data-satisfaction-reset>Limpar filtros</button>
+      </section>
+
+      <section class="selector-panel satisfaction-filter-panel">
+        <label><span>Setor</span><select id="satisfactionSectorFilter">${biSelectOptions(uniqueSectors, filterState.sector, "Todos")}</select></label>
+        <label><span>Mes</span><select id="satisfactionMonthFilter">${biSelectOptions(uniqueMonths, filterState.month, "Todos")}</select></label>
+        <label><span>Avaliacao</span><select id="satisfactionRatingFilter">${biSelectOptions(uniqueRatings, filterState.rating, "Todas")}</select></label>
+        <label><span>Espera</span><select id="satisfactionWaitFilter">${biSelectOptions(uniqueWaits, filterState.wait, "Todas")}</select></label>
+        <label><span>Busca</span><input id="satisfactionSearchInput" type="search" value="${attrValue(filterState.query)}" placeholder="Assunto, setor, comentario..."></label>
+      </section>
+
+      <section class="satisfaction-layout">
+        <article class="box bi-panel satisfaction-wide">
+          <div class="box-head"><div><strong>Respostas por setor</strong><small>Clique para filtrar por setor.</small></div><span class="status-pill info">${bySector.length}</span></div>
+          <div class="bi-bar-list">
+            ${bySector.map(([sector, count]) => `
+              <button class="bi-bar-row" type="button" data-satisfaction-sector="${attrValue(sector)}" data-search="${P.searchText([sector, count])}">
+                <span><strong>${sector}</strong><small>${count} resposta(s)</small></span>
+                <i><b style="--pct:${Math.round((count / maxSector) * 100)}%"></b></i>
+                <em>${Math.round((count / Math.max(filtered.length, 1)) * 100)}%</em>
+              </button>
+            `).join("") || `<div class="empty-state">Sem setores no filtro atual.</div>`}
           </div>
         </article>
-      `;
-    }).join("") : `<div class="empty-state">Nenhuma pesquisa de satisfação cadastrada. Cadastre a fonte oficial no Painel admin quando o formulário estiver pronto.</div>`;
-  }
 
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Linha do tempo</strong><small>Respostas por mes.</small></div></div>
+          <div class="satisfaction-mini-chart">
+            ${byMonth.map(([month, count]) => `
+              <button type="button" data-satisfaction-month="${attrValue(month)}" style="--pct:${Math.max(8, Math.round((count / maxMonth) * 100))}%">
+                <i></i><span>${month}</span><strong>${count}</strong>
+              </button>
+            `).join("") || `<div class="empty-state">Sem meses no filtro atual.</div>`}
+          </div>
+        </article>
+
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Avaliacao e espera</strong><small>Clique para cruzar o recorte.</small></div></div>
+          <div class="bi-donut-stack">
+            ${byRating.map(([rating, count]) => `
+              <button class="bi-status-row" type="button" data-satisfaction-rating="${attrValue(rating)}">
+                <span class="status-pill ${satisfactionScore({ rating }) >= 4 ? "ok" : "warn"}">${rating}</span>
+                <strong>${count}</strong>
+                <i><b style="--pct:${Math.round((count / maxRating) * 100)}%"></b></i>
+              </button>
+            `).join("")}
+            ${byWait.map(([wait, count]) => `
+              <button class="bi-status-row" type="button" data-satisfaction-wait="${attrValue(wait)}">
+                <span class="status-pill info">${wait}</span>
+                <strong>${count}</strong>
+                <i><b style="--pct:${Math.round((count / maxWait) * 100)}%"></b></i>
+              </button>
+            `).join("")}
+          </div>
+        </article>
+
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Registro selecionado</strong><small>Clique em uma linha da planilha.</small></div></div>
+          ${selected ? `
+            <div class="satisfaction-detail-card" data-search="${P.searchText([selected.sourceId, selected.title, selected.sector, selected.note])}">
+              <span class="status-pill ${satisfactionResolved(selected) ? "ok" : "warn"}">#${selected.sourceId || "-"}</span>
+              <strong>${selected.title || "Pesquisa de satisfacao"}</strong>
+              <p>${selected.note || selected.observation || "Sem observacao adicional."}</p>
+              <div class="mini-metrics">
+                <span><b>Setor</b>${selected.sector || selected.audience || "-"}</span>
+                <span><b>Periodo</b>${selected.period || "-"}</span>
+                <span><b>Avaliacao</b>${selected.rating || selected.score || "-"}</span>
+                <span><b>Espera</b>${selected.wait || "-"}</span>
+              </div>
+            </div>
+          ` : `<div class="empty-state">Nenhum registro selecionado.</div>`}
+        </article>
+
+        <article class="box bi-panel satisfaction-wide">
+          <div class="box-head"><div><strong>Planilha da pesquisa</strong><small>${tableRows.length} de ${filtered.length} resposta(s) no filtro atual.</small></div><span class="status-pill info">clicavel</span></div>
+          <div class="bi-table-wrap">
+            <table class="bi-data-table satisfaction-data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Data</th>
+                  <th>Setor</th>
+                  <th>Assunto</th>
+                  <th>Resolvido</th>
+                  <th>Avaliacao</th>
+                  <th>Cordial</th>
+                  <th>Espera</th>
+                  <th>Observacao</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows.map(item => `
+                  <tr data-satisfaction-select="${attrValue(item.id)}" data-search="${P.searchText([item.sourceId, item.period, item.sector, item.subject, item.resolved, item.rating, item.wait, item.observation])}">
+                    <td>${item.sourceId || "-"}</td>
+                    <td>${item.period || "-"}</td>
+                    <td>${item.sector || item.audience || "-"}</td>
+                    <td>${item.subject || item.title || "-"}</td>
+                    <td><span class="status-pill ${satisfactionResolved(item) ? "ok" : "warn"}">${item.resolved || "-"}</span></td>
+                    <td>${item.rating || item.score || "-"}</td>
+                    <td>${item.cordial || "-"}</td>
+                    <td>${item.wait || "-"}</td>
+                    <td>${item.observation || "-"}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    ` : `<div class="empty-state">Nenhuma pesquisa de satisfacao cadastrada. Cadastre a fonte oficial no Painel admin quando o formulario estiver pronto.</div>`;
+
+    const rerender = () => renderSatisfaction(P.getAppData().satisfaction || []);
+    ["#satisfactionSectorFilter", "#satisfactionMonthFilter", "#satisfactionRatingFilter", "#satisfactionWaitFilter"].forEach(selector => {
+      grid.querySelector(selector)?.addEventListener("change", rerender);
+    });
+    grid.querySelector("#satisfactionSearchInput")?.addEventListener("input", rerender);
+    grid.querySelector("[data-satisfaction-reset]")?.addEventListener("click", () => {
+      grid.dataset.satisfactionFilters = JSON.stringify({ sector: "", month: "", rating: "", wait: "", query: "", selected: "" });
+      renderSatisfaction(P.getAppData().satisfaction || []);
+    });
+    grid.querySelectorAll("[data-satisfaction-sector]").forEach(button => {
+      button.addEventListener("click", () => {
+        grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, sector: button.dataset.satisfactionSector || "", selected: "" });
+        renderSatisfaction(P.getAppData().satisfaction || []);
+      });
+    });
+    grid.querySelectorAll("[data-satisfaction-month]").forEach(button => {
+      button.addEventListener("click", () => {
+        grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, month: button.dataset.satisfactionMonth || "", selected: "" });
+        renderSatisfaction(P.getAppData().satisfaction || []);
+      });
+    });
+    grid.querySelectorAll("[data-satisfaction-rating]").forEach(button => {
+      button.addEventListener("click", () => {
+        grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, rating: button.dataset.satisfactionRating || "", selected: "" });
+        renderSatisfaction(P.getAppData().satisfaction || []);
+      });
+    });
+    grid.querySelectorAll("[data-satisfaction-wait]").forEach(button => {
+      button.addEventListener("click", () => {
+        grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, wait: button.dataset.satisfactionWait || "", selected: "" });
+        renderSatisfaction(P.getAppData().satisfaction || []);
+      });
+    });
+    grid.querySelectorAll("[data-satisfaction-select]").forEach(row => {
+      row.addEventListener("click", () => {
+        grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, selected: row.dataset.satisfactionSelect || "" });
+        renderSatisfaction(P.getAppData().satisfaction || []);
+      });
+    });
+  }
   function renderReports(data) {
     const grid = P.$("#reportsGrid");
     const list = P.$("#reportsList");
