@@ -6,7 +6,7 @@
     schools: { icon: "\uD83C\uDFEB", label: "Escolas", note: "Unidades e detalhes", type: "P\u00E1gina" },
     network: { icon: "\uD83C\uDF10", label: "Redes e c\u00E2meras", note: "Infraestrutura por escola", type: "P\u00E1gina" },
     inventory: { icon: "\uD83D\uDCBB", label: "Invent\u00E1rio", note: "Equipamentos e status", type: "P\u00E1gina" },
-    "bi-equipment": { icon: "BI", label: "BI Equipamentos", note: "Power BI administrativo", type: "P\u00E1gina" },
+    "bi-equipment": { icon: "\uD83D\uDCCA", label: "BI Equipamentos", note: "Power BI administrativo", type: "P\u00E1gina" },
     ctc: { icon: "\uD83D\uDCE5", label: "Chamados CTC", note: "Fila operacional e agenda t\u00E9cnica", type: "P\u00E1gina" },
     calls: { icon: "\uD83D\uDCE5", label: "Chamados CTC", note: "Atalho legado para a fila CTC", type: "P\u00E1gina" },
     cars: { icon: "\uD83D\uDE97", label: "Carros", note: "Agendamento oficial", type: "P\u00E1gina" },

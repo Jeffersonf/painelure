@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "bi-inventory-csv-20260608";
+      window.PAINELURE_BUILD = "bi-equipment-dashboard-20260608";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -74,7 +74,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=supervision-month-summary-20260602">
+  <link rel="stylesheet" href="./styles.css?v=bi-equipment-dashboard-20260608">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -151,7 +151,7 @@
       <div class="sidebar-shortcuts labeled">
         <button type="button" data-jump="network"><span>&#127760; Redes</span></button>
         <button type="button" data-jump="inventory"><span>&#128187; Inventário</span></button>
-        <button type="button" data-jump="bi-equipment"><span>BI Equipamentos</span></button>
+        <button type="button" data-jump="bi-equipment"><span>&#128202; BI Equipamentos</span></button>
         <button type="button" data-jump="ctc"><span>&#128229; Chamados CTC</span></button>
         <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
         <button type="button" data-jump="reports"><span>&#128200; Relatórios</span></button>
@@ -810,7 +810,7 @@
   <script src="./data/calls-report.js?v=stability-polish-20260528"></script>
   <script src="./data/sources.js?v=satisfaction-sharepoint-20260602"></script>
   <script src="./modules/dom.js?v=stability-polish-20260528"></script>
-  <script src="./modules/ui-catalog.js?v=bi-equipamentos-20260608"></script>
+  <script src="./modules/ui-catalog.js?v=bi-equipment-dashboard-20260608"></script>
   <script src="./modules/data-store.js?v=stability-polish-20260528"></script>
   <script src="./modules/identity.js?v=stability-polish-20260528"></script>
   <script src="./modules/access-scope.js?v=bi-equipamentos-20260608"></script>
@@ -821,7 +821,7 @@
   <script src="./config.js?v=stability-polish-20260528"></script>
   <script src="./modules/backend-client.js?v=bi-inventory-csv-20260608"></script>
   <script src="./modules/search.js?v=chamados-ctc-20260602"></script>
-  <script src="./modules/render.js?v=bi-inventory-csv-20260608"></script>
+  <script src="./modules/render.js?v=bi-equipment-dashboard-20260608"></script>
   <script src="./modules/supervision-render.js?v=supervision-month-summary-20260602"></script>
   <script src="./modules/navigation.js?v=bi-equipamentos-20260608"></script>
   <script src="./modules/admin-tools.js?v=bi-equipamentos-20260608"></script>

@@ -6187,6 +6187,274 @@ html:not(.site-maintenance) .maintenance-message {
   background: var(--sf);
 }
 
+.bi-command-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--bd);
+  border-radius: var(--r-lg);
+  background: var(--sf);
+}
+
+.bi-command-panel strong,
+.bi-command-panel p,
+.bi-command-panel span {
+  display: block;
+}
+
+.bi-command-panel strong {
+  margin-top: 4px;
+  font-size: 24px;
+  line-height: 1.05;
+}
+
+.bi-command-panel p {
+  margin-top: 6px;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bi-filter-panel {
+  grid-template-columns: minmax(190px, 1.2fr) minmax(160px, .9fr) minmax(160px, .9fr) minmax(220px, 1.4fr);
+  margin-bottom: 14px;
+}
+
+.bi-kpi-grid {
+  margin-bottom: 14px;
+}
+
+.bi-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+  gap: 14px;
+}
+
+.bi-wide {
+  grid-column: 1 / -1;
+}
+
+.bi-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bi-bar-list,
+.bi-donut-stack,
+.bi-action-list {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.bi-bar-row,
+.bi-status-row,
+.bi-type-card {
+  min-width: 0;
+  border: 1px solid var(--bd);
+  background: var(--sf2);
+  color: var(--tx);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+
+.bi-bar-row:hover,
+.bi-status-row:hover,
+.bi-type-card:hover,
+.bi-data-table tbody tr:hover {
+  background: rgba(255, 255, 255, .055);
+  border-color: rgba(90, 245, 200, .22);
+}
+
+.bi-bar-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 2fr) 46px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.bi-bar-row strong,
+.bi-bar-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bi-bar-row small {
+  margin-top: 3px;
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.bi-bar-row i,
+.bi-status-row i,
+.bi-type-card i {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+}
+
+.bi-bar-row i b,
+.bi-status-row i b,
+.bi-type-card i b {
+  display: block;
+  width: var(--pct);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ac2), var(--ac));
+}
+
+.bi-bar-row em {
+  color: var(--mt);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  text-align: right;
+}
+
+.bi-status-row {
+  display: grid;
+  grid-template-columns: minmax(98px, auto) 56px minmax(90px, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 12px;
+}
+
+.bi-status-row strong {
+  font-size: 18px;
+  text-align: right;
+}
+
+.bi-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+
+.bi-type-card {
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
+  min-height: 104px;
+  padding: 13px;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.bi-type-card strong {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.bi-type-card span {
+  min-height: 30px;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.bi-table-wrap {
+  overflow: auto;
+  max-height: 520px;
+  border-top: 1px solid var(--bd2);
+}
+
+.bi-data-table {
+  width: 100%;
+  min-width: 1040px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.bi-data-table th,
+.bi-data-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--bd2);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.bi-data-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--sf);
+  color: var(--mt);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.bi-data-table tbody tr {
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.bi-data-table td:nth-child(2),
+.bi-data-table td:nth-child(3) {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .bi-filter-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bi-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .bi-command-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .bi-command-panel .ghost-btn {
+    width: 100%;
+  }
+
+  .bi-filter-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .bi-bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bi-bar-row em {
+    text-align: left;
+  }
+
+  .bi-status-row {
+    grid-template-columns: minmax(0, 1fr) 48px;
+  }
+
+  .bi-status-row i {
+    grid-column: 1 / -1;
+  }
+
+  .bi-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .settings-title {
   display: flex;
   align-items: center;

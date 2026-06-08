@@ -670,7 +670,7 @@
       { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
       { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventário", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
-      { id: "biEquipment", roles: ["administrador"], page: "bi-equipment", icon: "BI", label: "BI Equipamentos", value: data.schoolAssets?.length || 0, note: "Power BI do inventario", tone: "info" },
+      { id: "biEquipment", roles: ["administrador"], page: "bi-equipment", icon: "&#128202;", label: "BI Equipamentos", value: data.schoolAssets?.length || 0, note: "Power BI do inventario", tone: "info" },
       { id: "ctc", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados CTC", value: context.openCalls, note: context.openCalls ? "Fila de T.I. em acompanhamento" : "Fila de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
       { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
@@ -1634,38 +1634,109 @@
     return "ok";
   }
 
+  function biEquipmentRawStatus(asset) {
+    return String(asset.originalStatus || assetStatusLabel(asset.status) || "Sem status").trim() || "Sem status";
+  }
+
+  function biEquipmentDateKey(asset) {
+    const text = String(asset.collectedAt || "").trim();
+    const match = text.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+    return match ? `${match[3]}-${match[2]}-${match[1]}` : text;
+  }
+
+  function biSelectOptions(values, selected, allLabel) {
+    return [`<option value="">${allLabel}</option>`, ...values.map(value => {
+      const safeValue = attrValue(value);
+      return `<option value="${safeValue}" ${value === selected ? "selected" : ""}>${value}</option>`;
+    })].join("");
+  }
+
   function renderBiEquipment(data) {
     const host = P.$("#biEquipmentDashboard");
     if (!host) return;
     const report = P.biEquipmentReport || data.biEquipmentReport || {};
     const assets = data.schoolAssets || [];
-    const totals = inventoryTotals(assets);
-    const schoolsWithAssets = new Set(assets.map(asset => asset.school).filter(Boolean));
+    const previous = host.dataset.biFilters ? JSON.parse(host.dataset.biFilters) : {};
+    const filterState = {
+      school: P.$("#biSchoolFilter")?.value ?? previous.school ?? "",
+      status: P.$("#biStatusFilter")?.value ?? previous.status ?? "",
+      type: P.$("#biTypeFilter")?.value ?? previous.type ?? "",
+      query: P.$("#biSearchInput")?.value ?? previous.query ?? ""
+    };
+    const normalizedQuery = P.normalize(filterState.query);
+    const filteredAssets = assets.filter(asset => {
+      const category = assetCategory(asset);
+      const rawStatus = biEquipmentRawStatus(asset);
+      if (filterState.school && asset.school !== filterState.school) return false;
+      if (filterState.status && rawStatus !== filterState.status) return false;
+      if (filterState.type && category !== filterState.type) return false;
+      if (!normalizedQuery) return true;
+      return P.normalize([asset.school, asset.name, asset.sourceName, asset.notes, asset.serial, asset.patrimony, asset.responsible, rawStatus, category].join(" ")).includes(normalizedQuery);
+    });
+    const totals = inventoryTotals(filteredAssets);
+    const allTotals = inventoryTotals(assets);
+    const schoolsWithAssets = new Set(filteredAssets.map(asset => asset.school).filter(Boolean));
     const functioning = Math.max(totals.units - totals.alertUnits, 0);
-    const maintenance = assets
+    const maintenance = filteredAssets
       .filter(asset => asset.status === "manutencao")
       .reduce((sum, asset) => sum + assetUnits(asset), 0);
-    const low = assets
+    const low = filteredAssets
       .filter(asset => asset.status === "defeito")
       .reduce((sum, asset) => sum + assetUnits(asset), 0);
-    const bySchool = biEquipmentGroup(assets, asset => asset.school).slice(0, 10);
-    const byStatus = biEquipmentGroup(assets, asset => assetStatusLabel(asset.status));
-    const byType = biEquipmentGroup(assets, asset => assetCategory(asset)).slice(0, 8);
+    const uniqueSchools = [...new Set(assets.map(asset => asset.school).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const uniqueStatuses = [...new Set(assets.map(biEquipmentRawStatus).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const uniqueTypes = [...new Set(assets.map(assetCategory).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const bySchool = biEquipmentGroup(filteredAssets, asset => asset.school).slice(0, 12);
+    const byStatus = biEquipmentGroup(filteredAssets, biEquipmentRawStatus);
+    const byType = biEquipmentGroup(filteredAssets, assetCategory).slice(0, 10);
+    const recent = [...filteredAssets].sort((a, b) => String(biEquipmentDateKey(b)).localeCompare(String(biEquipmentDateKey(a))) || Number(b.sourceId || 0) - Number(a.sourceId || 0)).slice(0, 80);
+    const needsAction = filteredAssets.filter(asset => asset.status !== "ok").slice(0, 10);
     const maxSchool = Math.max(...bySchool.map(([, count]) => count), 1);
     const maxType = Math.max(...byType.map(([, count]) => count), 1);
+    const maxStatus = Math.max(...byStatus.map(([, count]) => count), 1);
+    const activeFilters = [filterState.school, filterState.status, filterState.type, filterState.query].filter(Boolean).length;
     const cards = [
-      { label: "Total equipamentos", value: totals.units, note: `${totals.lines} linha(s) consolidadas`, tone: "info" },
-      { label: "Escolas inventariadas", value: schoolsWithAssets.size, note: "com item vinculado", tone: schoolsWithAssets.size ? "ok" : "warn" },
+      { label: "Total equipamentos", value: totals.units, note: `${totals.lines} de ${allTotals.lines} linha(s)`, tone: "info" },
+      { label: "Escolas/unidades", value: schoolsWithAssets.size, note: activeFilters ? "no filtro atual" : "com item vinculado", tone: schoolsWithAssets.size ? "ok" : "warn" },
       { label: "Funcionando", value: functioning, note: "status OK", tone: "ok" },
-      { label: "Em manutencao", value: maintenance, note: "pedem acompanhamento", tone: maintenance ? "warn" : "ok" },
-      { label: "Baixa", value: low, note: "defeito/baixa", tone: low ? "danger" : "ok" }
+      { label: "Manutencao/Garantia", value: maintenance, note: "pedem acompanhamento", tone: maintenance ? "warn" : "ok" },
+      { label: "Baixa/defeito", value: low, note: "retirar ou revisar", tone: low ? "danger" : "ok" }
     ];
+    host.dataset.biFilters = JSON.stringify(filterState);
 
     host.innerHTML = `
-      <section class="dashboard-grid">
+      <section class="bi-command-panel">
+        <div>
+          <span class="eyebrow">Painel administrativo</span>
+          <strong>BI Equipamentos</strong>
+          <p>${report.sourceFile || "InventarioEquipamentosEscolas.csv"} | ${assets.length} linha(s) carregada(s) | ${activeFilters ? `${activeFilters} filtro(s) ativo(s)` : "base completa"}</p>
+        </div>
+        <button class="ghost-btn" type="button" data-bi-reset>Limpar filtros</button>
+      </section>
+
+      <section class="selector-panel bi-filter-panel">
+        <label>
+          <span>Escola/unidade</span>
+          <select id="biSchoolFilter">${biSelectOptions(uniqueSchools, filterState.school, "Todas")}</select>
+        </label>
+        <label>
+          <span>Status original</span>
+          <select id="biStatusFilter">${biSelectOptions(uniqueStatuses, filterState.status, "Todos")}</select>
+        </label>
+        <label>
+          <span>Tipo</span>
+          <select id="biTypeFilter">${biSelectOptions(uniqueTypes, filterState.type, "Todos")}</select>
+        </label>
+        <label>
+          <span>Busca</span>
+          <input id="biSearchInput" type="search" value="${attrValue(filterState.query)}" placeholder="Serie, patrimonio, responsavel...">
+        </label>
+      </section>
+
+      <section class="dashboard-grid bi-kpi-grid">
         ${cards.map(card => `
           <article class="dashboard-widget-card dashboard-widget-${card.tone}" data-search="${P.searchText([card.label, card.value, card.note])}">
-            <span>BI</span>
+            <span>&#128202;</span>
             <strong>${card.value}</strong>
             <small>${card.label}</small>
             <p>${card.note}</p>
@@ -1673,45 +1744,93 @@
         `).join("")}
       </section>
 
-      <section class="settings-shell admin-layout">
-        <article class="settings-section span-2">
-          <div class="box-head"><div><strong>Equipamentos por escola</strong><small>Mesmo eixo principal do PBIX.</small></div></div>
-          <div class="row-list compact">
+      <section class="bi-layout">
+        <article class="box bi-panel bi-wide">
+          <div class="box-head"><div><strong>Equipamentos por escola</strong><small>Clique para abrir a escola no inventario.</small></div><span class="status-pill info">${bySchool.length} grupo(s)</span></div>
+          <div class="bi-bar-list">
             ${bySchool.length ? bySchool.map(([school, count]) => `
-              <button class="data-row compact" type="button" data-open-inventory="${attrValue(school)}" data-search="${P.searchText([school, count])}">
+              <button class="bi-bar-row" type="button" data-open-inventory="${attrValue(school)}" data-search="${P.searchText([school, count])}">
                 <span><strong>${school}</strong><small>${count} equipamento(s)</small></span>
-                <i style="--pct:${Math.round((count / maxSchool) * 100)}%"></i>
+                <i><b style="--pct:${Math.round((count / maxSchool) * 100)}%"></b></i>
+                <em>${Math.round((count / Math.max(totals.units, 1)) * 100)}%</em>
               </button>
             `).join("") : `<div class="empty-state">Nenhum equipamento consolidado para montar o BI.</div>`}
           </div>
         </article>
 
-        <article class="settings-section">
-          <div class="box-head"><div><strong>Status do equipamento</strong><small>Funcionando, manutencao e baixa.</small></div></div>
-          <div class="calendar-grid">
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Status</strong><small>Distribuicao da coluna Status do Equipamento.</small></div></div>
+          <div class="bi-donut-stack">
             ${byStatus.map(([status, count]) => `
-              <article class="detail-widget" data-search="${P.searchText([status, count])}">
+              <button class="bi-status-row" type="button" data-bi-status="${attrValue(status)}" data-search="${P.searchText([status, count])}">
                 <span class="status-pill ${statusClass(biEquipmentStatusTone(status))}">${status}</span>
                 <strong>${count}</strong>
-                <small>equipamento(s)</small>
-              </article>
+                <i><b style="--pct:${Math.round((count / maxStatus) * 100)}%"></b></i>
+              </button>
             `).join("") || `<div class="empty-state">Sem status carregado.</div>`}
           </div>
         </article>
 
-        <article class="settings-section">
-          <div class="box-head"><div><strong>Tipo equipamento</strong><small>Top categorias inferidas.</small></div></div>
-          <div class="row-list compact">
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Tipos</strong><small>Categoria inferida pelo nome do equipamento.</small></div></div>
+          <div class="bi-type-grid">
             ${byType.map(([type, count]) => `
-              <div class="data-row compact" data-search="${P.searchText([type, count])}">
-                <span><strong>${type}</strong><small>${count} equipamento(s)</small></span>
-                <i style="--pct:${Math.round((count / maxType) * 100)}%"></i>
-              </div>
+              <button class="bi-type-card" type="button" data-bi-type="${attrValue(type)}" data-search="${P.searchText([type, count])}">
+                <strong>${count}</strong>
+                <span>${type}</span>
+                <i><b style="--pct:${Math.round((count / maxType) * 100)}%"></b></i>
+              </button>
             `).join("") || `<div class="empty-state">Sem tipos carregados.</div>`}
           </div>
         </article>
 
-        <article class="settings-section span-2">
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Fila de acao</strong><small>Itens que precisam de baixa, garantia ou manutencao.</small></div><span class="status-pill ${needsAction.length ? "warn" : "ok"}">${needsAction.length}</span></div>
+          <div class="bi-action-list">
+            ${needsAction.length ? needsAction.map(asset => `
+              <button class="data-row compact" type="button" data-open-inventory="${attrValue(asset.school)}" data-search="${P.searchText([asset.school, asset.name, biEquipmentRawStatus(asset), asset.serial, asset.patrimony])}">
+                <span><strong>${asset.name}</strong><small>${asset.school} | ${biEquipmentRawStatus(asset)} | ${asset.serial || "sem serie"}</small></span>
+                <em class="status-pill ${statusClass(biEquipmentStatusTone(biEquipmentRawStatus(asset)))}">${asset.status}</em>
+              </button>
+            `).join("") : `<div class="empty-state">Nenhum item critico no filtro atual.</div>`}
+          </div>
+        </article>
+
+        <article class="box bi-panel bi-wide">
+          <div class="box-head"><div><strong>Planilha de equipamentos</strong><small>${recent.length} de ${filteredAssets.length} registro(s) no filtro atual.</small></div><span class="status-pill info">clicavel</span></div>
+          <div class="bi-table-wrap">
+            <table class="bi-data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Escola</th>
+                  <th>Equipamento</th>
+                  <th>Status</th>
+                  <th>Serie</th>
+                  <th>Patrimonio</th>
+                  <th>Responsavel</th>
+                  <th>Coleta</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${recent.map(asset => `
+                  <tr data-open-inventory="${attrValue(asset.school)}" data-search="${P.searchText([asset.sourceId, asset.school, asset.name, biEquipmentRawStatus(asset), asset.serial, asset.patrimony, asset.responsible])}">
+                    <td>${asset.sourceId || "-"}</td>
+                    <td>${asset.school || "-"}</td>
+                    <td>${asset.name || "-"}</td>
+                    <td><span class="status-pill ${statusClass(biEquipmentStatusTone(biEquipmentRawStatus(asset)))}">${biEquipmentRawStatus(asset)}</span></td>
+                    <td>${asset.serial || "-"}</td>
+                    <td>${asset.patrimony || "-"}</td>
+                    <td>${asset.responsible || "-"}</td>
+                    <td>${asset.collectedAt || "-"}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="box bi-panel bi-wide">
           <div class="box-head"><div><strong>Fonte do BI Equipamentos</strong><small>Base operacional importada do CSV de inventario.</small></div></div>
           <div class="source-list">
             <div class="source-card">
@@ -1731,8 +1850,29 @@
       </section>
     `;
 
-    host.querySelectorAll("[data-open-inventory]").forEach(button => {
-      button.addEventListener("click", () => focusInventorySchool(button.dataset.openInventory));
+    const rerender = () => renderBiEquipment(P.getAppData());
+    ["#biSchoolFilter", "#biStatusFilter", "#biTypeFilter"].forEach(selector => {
+      host.querySelector(selector)?.addEventListener("change", rerender);
+    });
+    host.querySelector("#biSearchInput")?.addEventListener("input", rerender);
+    host.querySelector("[data-bi-reset]")?.addEventListener("click", () => {
+      host.dataset.biFilters = JSON.stringify({ school: "", status: "", type: "", query: "" });
+      renderBiEquipment(P.getAppData());
+    });
+    host.querySelectorAll("[data-bi-status]").forEach(button => {
+      button.addEventListener("click", () => {
+        host.dataset.biFilters = JSON.stringify({ ...filterState, status: button.dataset.biStatus || "" });
+        renderBiEquipment(P.getAppData());
+      });
+    });
+    host.querySelectorAll("[data-bi-type]").forEach(button => {
+      button.addEventListener("click", () => {
+        host.dataset.biFilters = JSON.stringify({ ...filterState, type: button.dataset.biType || "" });
+        renderBiEquipment(P.getAppData());
+      });
+    });
+    host.querySelectorAll("[data-open-inventory]").forEach(item => {
+      item.addEventListener("click", () => focusInventorySchool(item.dataset.openInventory));
     });
   }
 
