@@ -1691,12 +1691,29 @@
     const byType = biEquipmentGroup(filteredAssets, assetCategory).slice(0, 10);
     const recent = [...filteredAssets].sort((a, b) => String(biEquipmentDateKey(b)).localeCompare(String(biEquipmentDateKey(a))) || Number(b.sourceId || 0) - Number(a.sourceId || 0)).slice(0, 80);
     const needsAction = filteredAssets.filter(asset => asset.status !== "ok").slice(0, 10);
+    const schoolMetrics = uniqueSchools.map(school => {
+      const rows = filteredAssets.filter(asset => asset.school === school);
+      const units = rows.reduce((sum, asset) => sum + assetUnits(asset), 0);
+      const alerts = rows.filter(asset => asset.status !== "ok").reduce((sum, asset) => sum + assetUnits(asset), 0);
+      const health = Math.round(((units - alerts) / Math.max(units, 1)) * 100);
+      return { school, rows: rows.length, units, alerts, health };
+    }).filter(item => item.units).sort((a, b) => b.alerts - a.alerts || b.units - a.units);
+    const riskRows = schoolMetrics.filter(item => item.alerts).slice(0, 8);
+    const coverageRows = [...schoolMetrics].sort((a, b) => b.units - a.units).slice(0, 10);
+    const selectedSchoolMetric = filterState.school ? schoolMetrics.find(item => item.school === filterState.school) : null;
+    const statusTotal = byStatus.reduce((sum, [, count]) => sum + count, 0);
+    const typeTotal = byType.reduce((sum, [, count]) => sum + count, 0);
     const maxSchool = Math.max(...bySchool.map(([, count]) => count), 1);
     const maxType = Math.max(...byType.map(([, count]) => count), 1);
     const maxStatus = Math.max(...byStatus.map(([, count]) => count), 1);
+    const maxRisk = Math.max(...riskRows.map(item => item.alerts), 1);
+    const maxCoverage = Math.max(...coverageRows.map(item => item.units), 1);
     const activeFilters = [filterState.school, filterState.status, filterState.type, filterState.query].filter(Boolean).length;
     const healthPct = Math.round((functioning / Math.max(totals.units, 1)) * 100);
     const latestDate = recent[0]?.collectedAt || "";
+    const riskPct = Math.round((totals.alertUnits / Math.max(totals.units, 1)) * 100);
+    const dominantStatus = byStatus[0] || ["Sem dados", 0];
+    const dominantType = byType[0] || ["Sem dados", 0];
     const cards = [
       { label: "Total equipamentos", value: totals.units, note: `${totals.lines} de ${allTotals.lines} linha(s)`, tone: "info" },
       { label: "Escolas/unidades", value: schoolsWithAssets.size, note: activeFilters ? "no filtro atual" : "com item vinculado", tone: schoolsWithAssets.size ? "ok" : "warn" },
@@ -1735,6 +1752,38 @@
         </label>
       </section>
 
+      <section class="bi-executive-panel">
+        <article class="bi-gauge-card ${riskPct ? "has-risk" : "is-clean"}">
+          <div class="bi-gauge" style="--score:${healthPct}">
+            <strong>${healthPct}%</strong>
+            <span>saude</span>
+          </div>
+          <div>
+            <span class="eyebrow">Indicador principal</span>
+            <strong>${riskPct ? `${riskPct}% do parque exige acao` : "Parque sem alerta no recorte"}</strong>
+            <p>${totals.alertUnits} de ${totals.units} unidade(s) estao em manutencao, garantia, baixa ou defeito.</p>
+          </div>
+        </article>
+        <article class="bi-insight-card">
+          <span>Status dominante</span>
+          <strong>${dominantStatus[0]}</strong>
+          <p>${dominantStatus[1]} unidade(s), ${Math.round((dominantStatus[1] / Math.max(statusTotal, 1)) * 100)}% do recorte.</p>
+          <button type="button" data-bi-status="${attrValue(dominantStatus[0])}">Filtrar status</button>
+        </article>
+        <article class="bi-insight-card">
+          <span>Tipo dominante</span>
+          <strong>${dominantType[0]}</strong>
+          <p>${dominantType[1]} unidade(s), ${Math.round((dominantType[1] / Math.max(typeTotal, 1)) * 100)}% do recorte.</p>
+          <button type="button" data-bi-type="${attrValue(dominantType[0])}">Filtrar tipo</button>
+        </article>
+        <article class="bi-insight-card">
+          <span>${selectedSchoolMetric ? "Escola selecionada" : "Maior ponto de atencao"}</span>
+          <strong>${(selectedSchoolMetric || riskRows[0] || coverageRows[0] || {}).school || "-"}</strong>
+          <p>${selectedSchoolMetric ? `${selectedSchoolMetric.alerts} alerta(s), ${selectedSchoolMetric.units} unidade(s)` : riskRows[0] ? `${riskRows[0].alerts} alerta(s), ${riskRows[0].health}% de saude` : "Sem risco no recorte atual."}</p>
+          ${(selectedSchoolMetric || riskRows[0]) ? `<button type="button" data-bi-school="${attrValue((selectedSchoolMetric || riskRows[0]).school)}">Analisar escola</button>` : ""}
+        </article>
+      </section>
+
       <section class="dashboard-grid bi-kpi-grid">
         ${cards.map(card => `
           <article class="dashboard-widget-card dashboard-widget-${card.tone}" data-search="${P.searchText([card.label, card.value, card.note])}">
@@ -1770,6 +1819,47 @@
       </section>
 
       <section class="bi-layout">
+        <article class="box bi-panel bi-wide">
+          <div class="box-head"><div><strong>Mapa de risco por escola</strong><small>Ranking calculado por unidade em manutencao, garantia, baixa ou defeito.</small></div><span class="status-pill ${riskRows.length ? "warn" : "ok"}">${riskRows.length ? `${totals.alertUnits} alerta(s)` : "sem risco"}</span></div>
+          <div class="bi-risk-grid">
+            ${riskRows.length ? riskRows.map(item => `
+              <button class="bi-risk-card" type="button" data-bi-school="${attrValue(item.school)}" data-search="${P.searchText([item.school, item.alerts, item.units, item.health])}">
+                <span>${item.school}</span>
+                <strong>${item.alerts}</strong>
+                <small>${item.units} unidade(s) | ${item.health}% saude</small>
+                <i><b style="--pct:${Math.round((item.alerts / maxRisk) * 100)}%"></b></i>
+              </button>
+            `).join("") : `<div class="empty-state">Nenhuma escola com equipamento em alerta no recorte atual.</div>`}
+          </div>
+        </article>
+
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Cobertura</strong><small>Maiores parques de equipamentos.</small></div></div>
+          <div class="bi-coverage-list">
+            ${coverageRows.map(item => `
+              <button type="button" data-bi-school="${attrValue(item.school)}" data-search="${P.searchText([item.school, item.units, item.alerts])}">
+                <span><strong>${item.school}</strong><small>${item.rows} linha(s), ${item.alerts} alerta(s)</small></span>
+                <i><b style="--pct:${Math.round((item.units / maxCoverage) * 100)}%"></b></i>
+                <em>${item.units}</em>
+              </button>
+            `).join("") || `<div class="empty-state">Sem cobertura no recorte atual.</div>`}
+          </div>
+        </article>
+
+        <article class="box bi-panel">
+          <div class="box-head"><div><strong>Participacao por status</strong><small>Clique em uma fatia para filtrar.</small></div></div>
+          <div class="bi-share-grid">
+            ${byStatus.map(([status, count]) => `
+              <button type="button" data-bi-status="${attrValue(status)}" data-search="${P.searchText([status, count])}">
+                <span class="status-pill ${statusClass(biEquipmentStatusTone(status))}">${status}</span>
+                <strong>${Math.round((count / Math.max(statusTotal, 1)) * 100)}%</strong>
+                <small>${count} unidade(s)</small>
+                <i><b style="--pct:${Math.round((count / maxStatus) * 100)}%"></b></i>
+              </button>
+            `).join("") || `<div class="empty-state">Sem status no recorte atual.</div>`}
+          </div>
+        </article>
+
         <article class="box bi-panel bi-wide">
           <div class="box-head"><div><strong>Equipamentos por escola</strong><small>Clique para abrir a escola no inventario.</small></div><span class="status-pill info">${bySchool.length} grupo(s)</span></div>
           <div class="bi-bar-list">
@@ -1893,6 +1983,12 @@
     host.querySelectorAll("[data-bi-type]").forEach(button => {
       button.addEventListener("click", () => {
         host.dataset.biFilters = JSON.stringify({ ...filterState, type: button.dataset.biType || "" });
+        renderBiEquipment(P.getAppData());
+      });
+    });
+    host.querySelectorAll("[data-bi-school]").forEach(button => {
+      button.addEventListener("click", () => {
+        host.dataset.biFilters = JSON.stringify({ ...filterState, school: button.dataset.biSchool || "" });
         renderBiEquipment(P.getAppData());
       });
     });

@@ -6227,6 +6227,108 @@ html:not(.site-maintenance) .maintenance-message {
   margin-bottom: 14px;
 }
 
+.bi-executive-panel {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.45fr) repeat(3, minmax(190px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.bi-gauge-card,
+.bi-insight-card {
+  min-width: 0;
+  border: 1px solid var(--bd);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .022));
+}
+
+.bi-gauge-card {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 18px;
+}
+
+.bi-gauge {
+  display: grid;
+  place-items: center;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, var(--sf) 0 56%, transparent 57%),
+    conic-gradient(var(--ok) calc(var(--score) * 1%), rgba(255, 255, 255, .08) 0);
+}
+
+.bi-gauge-card.has-risk .bi-gauge {
+  background:
+    radial-gradient(circle at center, var(--sf) 0 56%, transparent 57%),
+    conic-gradient(var(--warn) calc(var(--score) * 1%), rgba(255, 255, 255, .08) 0);
+}
+
+.bi-gauge strong,
+.bi-gauge span {
+  grid-area: 1 / 1;
+}
+
+.bi-gauge strong {
+  margin-top: -8px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.bi-gauge span {
+  margin-top: 34px;
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bi-gauge-card > div:last-child > strong,
+.bi-insight-card strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 19px;
+  line-height: 1.12;
+}
+
+.bi-gauge-card p,
+.bi-insight-card p {
+  margin-top: 8px;
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.bi-insight-card {
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
+  padding: 16px;
+}
+
+.bi-insight-card > span {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.bi-insight-card button {
+  justify-self: start;
+  padding: 8px 11px;
+  border: 1px solid var(--bd);
+  border-radius: 999px;
+  background: var(--sf2);
+  color: var(--tx);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 850;
+}
+
 .bi-snapshot-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -6287,6 +6389,139 @@ html:not(.site-maintenance) .maintenance-message {
 .bi-panel {
   min-width: 0;
   overflow: hidden;
+}
+
+.bi-risk-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+
+.bi-risk-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--warn) 28%, var(--bd));
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 190, 80, .09), rgba(255, 255, 255, .025));
+  color: var(--tx);
+  cursor: pointer;
+  text-align: left;
+}
+
+.bi-risk-card span,
+.bi-risk-card small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bi-risk-card span {
+  color: var(--mt);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.bi-risk-card strong {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.bi-risk-card small {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.bi-risk-card i,
+.bi-coverage-list i,
+.bi-share-grid i {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+}
+
+.bi-risk-card b,
+.bi-coverage-list b,
+.bi-share-grid b {
+  display: block;
+  width: var(--pct);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--warn), var(--danger));
+}
+
+.bi-coverage-list,
+.bi-share-grid {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.bi-coverage-list button,
+.bi-share-grid button {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  background: var(--sf2);
+  color: var(--tx);
+  cursor: pointer;
+  text-align: left;
+}
+
+.bi-coverage-list button {
+  grid-template-columns: minmax(0, 1fr) minmax(80px, .7fr) 42px;
+  padding: 11px 12px;
+}
+
+.bi-coverage-list strong,
+.bi-coverage-list small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bi-coverage-list small {
+  margin-top: 3px;
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.bi-coverage-list em {
+  color: var(--tx);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 900;
+  text-align: right;
+}
+
+.bi-share-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bi-share-grid button {
+  align-content: space-between;
+  min-height: 118px;
+  padding: 13px;
+}
+
+.bi-share-grid strong {
+  font-size: 25px;
+  line-height: 1;
+}
+
+.bi-share-grid small {
+  color: var(--mt);
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .bi-bar-list,
@@ -6562,6 +6797,18 @@ html:not(.site-maintenance) .maintenance-message {
     grid-template-columns: 1fr;
   }
 
+  .bi-executive-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bi-gauge-card {
+    grid-column: 1 / -1;
+  }
+
+  .bi-risk-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .bi-snapshot-strip,
   .satisfaction-filter-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6578,6 +6825,27 @@ html:not(.site-maintenance) .maintenance-message {
   }
 
   .bi-filter-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .bi-executive-panel,
+  .bi-risk-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bi-gauge-card {
+    grid-template-columns: 1fr;
+  }
+
+  .bi-coverage-list button {
+    grid-template-columns: 1fr;
+  }
+
+  .bi-coverage-list em {
+    text-align: left;
+  }
+
+  .bi-share-grid {
     grid-template-columns: 1fr;
   }
 
