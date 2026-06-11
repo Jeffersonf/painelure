@@ -259,12 +259,20 @@
   async function saveInternalData(token, internal) {
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
-    const payload = await fetchApi("/api/internal", {
-      method: "PUT",
-      headers,
-      body: JSON.stringify({ internal: internal || {} }),
-      timeoutMs: 12000
-    });
+    let payload = null;
+    try {
+      payload = await fetchApi("/api/internal", {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({ internal: internal || {} }),
+        timeoutMs: 12000
+      });
+    } catch (error) {
+      if (!/HTTP 404|HTTP 405|Endpoint/i.test(String(error?.message || error || ""))) throw error;
+      const appData = P.getAppData?.() || {};
+      P.setAppData?.({ ...appData, internal: internal || {} });
+      payload = await pushBackendData(token);
+    }
     if (payload?.data?.updatedAt) {
       P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt };
       P.saveAppData?.();
