@@ -3312,6 +3312,10 @@
       if (!token) return;
       P.saveInternalData(token, state).catch(error => {
         console.warn("[PainelURE] Café salvo localmente; sync online pendente:", error);
+        if (/HTTP 401|HTTP 403|autorizado|forbidden|unauthorized/i.test(String(error?.message || error || ""))) {
+          P.expireOnlineSession?.("Sua sessão foi atualizada no servidor. Entre novamente para salvar o Café online.");
+          return;
+        }
         P.showToast?.("Café salvo localmente", "Não foi possível enviar ao servidor agora. O backup local já está atualizado.", "warn", { delay: 6500 });
       });
     }, 900);

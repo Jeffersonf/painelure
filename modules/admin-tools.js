@@ -329,6 +329,21 @@
     if (token) P.logoutBackend?.(token).catch(() => {});
   }
 
+  function expireOnlineSession(message = "Sessão expirada. Entre novamente para salvar online.") {
+    backendToken = "";
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    P.clearOnlineUser?.();
+    P.closeAccountMenu?.();
+    setAuthenticated(false);
+    document.documentElement.classList.remove("auth-pending");
+    if (P.$("#loginForm")) P.$("#loginForm").hidden = false;
+    if (P.$("#pinChangeForm")) P.$("#pinChangeForm").hidden = true;
+    showLoginStatus(message);
+    P.showToast?.("Sessão expirada", message, "warn", { delay: 7000 });
+    window.setTimeout(() => P.$("#loginUserInput")?.focus?.(), 0);
+  }
+
   function activateOnlineUser(token, user, options = {}) {
     backendToken = token;
     sessionStorage.setItem(TOKEN_KEY, backendToken);
@@ -1549,6 +1564,7 @@
   P.applyConnectionState = applyConnectionState;
   P.bindAdminTools = bindAdminTools;
   P.restoreBackendSession = restoreBackendSession;
+  P.expireOnlineSession = expireOnlineSession;
   P.renderSourceStatus = renderSourceStatus;
   P.renderGlobalSyncBanner = renderGlobalSyncBanner;
   P.renderSourceEditor = renderSourceEditor;
