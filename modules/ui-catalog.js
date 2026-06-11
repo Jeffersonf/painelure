@@ -14,6 +14,7 @@
     contacts: { icon: "\u260E\uFE0F", label: "Contatos", note: "Setores e ramais", type: "P\u00E1gina" },
     calendar: { icon: "\uD83D\uDCC5", label: "Calend\u00E1rio URE", note: "Agenda institucional", type: "P\u00E1gina" },
     satisfaction: { icon: "\uD83D\uDCDD", label: "Pesquisa de satisfa\u00E7\u00E3o", note: "Formul\u00E1rios, respostas e devolutivas", type: "P\u00E1gina" },
+    internal: { icon: "\u2615", label: "Caf\u00E9", note: "Rifa e vaquinha", type: "P\u00E1gina" },
     reports: { icon: "\uD83D\uDCC8", label: "Relat\u00F3rios", note: "Acesso administrativo", type: "P\u00E1gina" },
     profiles: { icon: "\uD83E\uDDE9", label: "Perfis", note: "Matriz de acesso", type: "P\u00E1gina" },
     quality: { icon: "\u2705", label: "Qualidade", note: "Checklist do painel", type: "P\u00E1gina" },

@@ -63,7 +63,8 @@
 
   function onlineUser() {
     try {
-      return JSON.parse(localStorage.getItem(ONLINE_USER_KEY) || sessionStorage.getItem(ONLINE_USER_KEY) || "null");
+      localStorage.removeItem(ONLINE_USER_KEY);
+      return JSON.parse(sessionStorage.getItem(ONLINE_USER_KEY) || "null");
     } catch (error) {
       return null;
     }
@@ -71,7 +72,6 @@
 
   function setOnlineUser(user) {
     if (!user) return null;
-    localStorage.setItem(ONLINE_USER_KEY, JSON.stringify(user));
     sessionStorage.setItem(ONLINE_USER_KEY, JSON.stringify(user));
     return user;
   }

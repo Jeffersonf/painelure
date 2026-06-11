@@ -1,11 +1,11 @@
 (function () {
   const P = window.PainelURE;
   const DEFAULT_ACCESS = {
-    Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+    Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
     CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -84,6 +84,10 @@
     const target = normalized(role);
     const key = Object.keys(DEFAULT_ACCESS).find(name => normalized(name) === target);
     const customAccess = P.getAppData?.()?.accessRules?.roleAccess || {};
+    if (key === "Administrador" || target.includes("admin")) {
+      const saved = Array.isArray(customAccess.Administrador) ? customAccess.Administrador : [];
+      return [...new Set([...(saved.length ? saved : DEFAULT_ACCESS.Administrador), "internal"])];
+    }
     if (key === "SEINTEC" || target.includes("seintec")) {
       const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
       return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
@@ -109,7 +113,6 @@
     if (target.includes("secomse")) return ACCESS.SECOMSE;
     if (target.includes("carro")) return ACCESS.Carros;
     if (target.includes("pedag") || target.includes("pec")) return ACCESS.Pedagogico;
-    if (target.includes("admin")) return ACCESS.Administrador;
     return ACCESS.Consulta;
   }
 
@@ -365,6 +368,7 @@
       cars: canAccessData("cars", role),
       calls: canAccessData("calls", role),
       satisfaction: canAccessData("satisfaction", role),
+      internal: canAccessData("internal", role),
       reports: canAccessData("reports", role),
       profiles: canAccessData("profiles", role),
       quality: canAccessData("quality", role),
@@ -398,6 +402,7 @@
       contacts: byAccess.contacts ? (data.contacts || []) : [],
       calendar: byAccess.calendar ? (byAccess.cars ? (data.calendar || []) : (data.calendar || []).filter(item => !isCarLikeCalendarItem(item))) : [],
       satisfaction: byAccess.satisfaction ? (data.satisfaction || []) : [],
+      internal: byAccess.internal ? (data.internal || []) : [],
       reports: byAccess.reports ? (data.reports || []) : [],
       profiles: byAccess.profiles ? (data.profiles || []) : [],
       quality: byAccess.quality ? (data.quality || []) : [],

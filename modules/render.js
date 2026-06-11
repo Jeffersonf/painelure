@@ -622,6 +622,15 @@
     if (element) element.textContent = value;
   }
 
+  function htmlValue(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function dashboardRow(item, compact = false) {
     if (P.canAccess && item.page !== "calendar" && !P.canAccess(item.page)) return "";
     const modeAttr = item.mode ? ` data-calendar-mode-target="${item.mode}"` : "";
@@ -677,28 +686,28 @@
       { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mês" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
       { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuário" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
       { id: "satisfaction", roles: ["*"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Área pronta para formulários", tone: data.satisfaction?.length ? "info" : "warn" },
-      { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatórios", value: P.selectedMonthLabel?.() || "Mês", note: "Consolidado administrativo", tone: "info" }
+      { id: "internal", roles: ["administrador", "seintec"], page: "internal", icon: "&#9749;", label: "Café", value: "Café", note: "Vaquinha e rifa", tone: "info" },
+      { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatórios", value: P.selectedMonthLabel?.() || "Mês", note: "Consolidado administrativo", tone: "info" },
+      { id: "profiles", roles: ["administrador", "seintec"], page: "profiles", icon: "&#129513;", label: "Perfis", value: "Acessos", note: "Matriz de perfis", tone: "info" },
+      { id: "quality", roles: ["administrador", "seintec"], page: "quality", icon: "&#9989;", label: "Qualidade", value: "Checklist", note: "Publicação e riscos", tone: "info" },
+      { id: "admin", roles: ["administrador"], page: "admin", icon: "&#128274;", label: "Admin", value: "Online", note: "Fontes, usuários e backups", tone: "info" }
     ];
   }
 
   function dashboardWidgetsForRole(data, context) {
-    const role = currentRoleKey();
-    return dashboardWidgetDefinitions(data, context).filter(widget => {
-      if (!roleAllowsDashboardWidget(widget, role)) return false;
-      if (widget.page === "calendar") return true;
-      return !P.canAccess || P.canAccess(widget.page);
-    });
+    return dashboardWidgetDefinitions(data, context);
   }
 
   function dashboardWidgetMarkup(widget) {
     const modeAttr = widget.mode ? ` data-calendar-mode-target="${widget.mode}"` : "";
+    const denied = P.canAccess && !P.canAccess(widget.page);
     const statusLabel = widget.tone === "warn" ? "atenção" : widget.tone === "danger" ? "crítico" : widget.tone === "ok" ? "ok" : "ativo";
     return `
-      <button class="dashboard-widget-card dashboard-widget-${widget.tone}" type="button" data-jump="${widget.page}"${modeAttr} data-search="${P.searchText([widget.label, widget.note, widget.value])}">
+      <button class="dashboard-widget-card dashboard-widget-${widget.tone}${denied ? " access-disabled" : ""}" type="button" data-jump="${widget.page}"${modeAttr} data-search="${P.searchText([widget.label, widget.note, widget.value])}"${denied ? ` title="Acesso indisponível para este perfil"` : ""}>
         <span class="dashboard-widget-head">
           <span class="dashboard-widget-icon">${widget.icon}</span>
           <small>${widget.label}</small>
-          <em class="status-pill ${widget.tone}">${statusLabel}</em>
+          <em class="status-pill ${denied ? "warn" : widget.tone}">${denied ? "bloqueado" : statusLabel}</em>
         </span>
         <span class="dashboard-widget-copy">
           <strong>${widget.value}</strong>
@@ -885,10 +894,7 @@
     const context = { networkCount, calendarCount, carCount, missingNetwork, inventoryAlerts, pendingVisits, openCalls, ctcVisits };
     const profile = dashboardProfile(data, context);
     const dashboardWidgets = dashboardWidgetsForRole(data, context);
-    const dashboardCoreIds = new Set(["schools", "supervision", "network", "inventory", "ctc", "cars"]);
-    const visibleDashboardWidgets = currentRoleKey().includes("administrador")
-      ? dashboardWidgets.filter(widget => dashboardCoreIds.has(widget.id)).slice(0, 7)
-      : dashboardWidgets;
+    const visibleDashboardWidgets = dashboardWidgets;
     const sourceNote = officialSources
       ? `${officialSources} fonte(s) atualizada(s)`
       : "base local pronta para consulta";
@@ -903,13 +909,14 @@
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
     const shortcutGrid = P.$(".shortcut-grid");
     if (shortcutGrid) {
-      shortcutGrid.innerHTML = dashboardWidgets.slice(0, 8).map(widget => {
+      shortcutGrid.innerHTML = dashboardWidgets.map(widget => {
         const modeAttr = widget.mode ? ` data-calendar-mode-target="${widget.mode}"` : "";
+        const denied = P.canAccess && !P.canAccess(widget.page);
         return `
-          <button class="shortcut-card" type="button" data-jump="${widget.page}"${modeAttr}>
+          <button class="shortcut-card${denied ? " access-disabled" : ""}" type="button" data-jump="${widget.page}"${modeAttr}${denied ? ` title="Acesso indisponível para este perfil"` : ""}>
             <span>${widget.icon}</span>
             <strong>${widget.label}</strong>
-            <small>${widget.note}</small>
+            <small>${denied ? "Indisponível para este perfil" : widget.note}</small>
           </button>
         `;
       }).join("");
@@ -953,7 +960,9 @@
 
     const command = P.$("#dashboardCommand");
     if (command) {
-      const focusWidget = dashboardWidgets.find(item => item.page !== "calendar") || dashboardWidgets[0] || { page: "calendar", mode: "shared" };
+      const focusWidget = dashboardWidgets.find(item => item.page !== "calendar" && (!P.canAccess || P.canAccess(item.page)))
+        || dashboardWidgets.find(item => !P.canAccess || P.canAccess(item.page))
+        || { page: "calendar", mode: "shared" };
       const focusModeAttr = focusWidget.mode ? ` data-calendar-mode-target="${focusWidget.mode}"` : "";
       command.innerHTML = `
         <article class="command-primary command-${profile.notice === "Base operacional pronta" ? "info" : "ok"}">
@@ -2896,6 +2905,20 @@
     return P.normalize([item.resolved, item.status].join(" ")).includes("sim");
   }
 
+  function satisfactionAttendanceType(item = {}) {
+    const raw = item.attendanceType || item.tipoAtendimento || item.tipo_atendimento || item.serviceType || "";
+    const text = P.normalize(raw || item.type || "");
+    if (text.includes("extern")) return "Externo";
+    if (text.includes("intern")) return "Interno";
+    return "Interno";
+  }
+
+  function satisfactionShortSector(value = "") {
+    const clean = String(value || "").trim();
+    const match = clean.match(/^([A-Z]{3,8})\b/);
+    return match ? match[1] : clean || "Nao informado";
+  }
+
   function satisfactionMonthKey(item = {}) {
     const period = String(item.period || "").trim();
     const match = period.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
@@ -2942,6 +2965,7 @@
       month: P.$("#satisfactionMonthFilter")?.value ?? previous.month ?? "",
       rating: P.$("#satisfactionRatingFilter")?.value ?? previous.rating ?? "",
       wait: P.$("#satisfactionWaitFilter")?.value ?? previous.wait ?? "",
+      type: previous.type ?? "",
       query: P.$("#satisfactionSearchInput")?.value ?? previous.query ?? "",
       selected: previous.selected ?? ""
     };
@@ -2954,10 +2978,13 @@
     });
     const uniqueRatings = [...new Set(list.map(item => item.rating || item.score).filter(Boolean))].sort((a, b) => String(b).localeCompare(String(a), "pt-BR"));
     const uniqueWaits = [...new Set(list.map(item => item.wait).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const uniqueTypes = [...new Set(list.map(satisfactionAttendanceType).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
     const filtered = list.filter(item => {
       const sector = item.sector || item.audience || "";
       const month = satisfactionMonthLabel(item);
       const rating = item.rating || String(item.score || "");
+      const type = satisfactionAttendanceType(item);
+      if (filterState.type && type !== filterState.type) return false;
       if (filterState.sector && sector !== filterState.sector) return false;
       if (filterState.month && month !== filterState.month) return false;
       if (filterState.rating && rating !== filterState.rating) return false;
@@ -2974,7 +3001,8 @@
       const text = P.normalize(item.observation || "").replace(/[.]/g, "").trim();
       return text && !["nao", "nada", "nada a declarar"].includes(text);
     }).length;
-    const activeFilters = [filterState.sector, filterState.month, filterState.rating, filterState.wait, filterState.query].filter(Boolean).length;
+    const cordial = filtered.filter(item => P.normalize(item.cordial).includes("sim")).length;
+    const activeFilters = [filterState.type, filterState.sector, filterState.month, filterState.rating, filterState.wait, filterState.query].filter(Boolean).length;
     const bySector = satisfactionGroup(filtered, item => item.sector || item.audience).slice(0, 10);
     const byMonth = Object.entries(filtered.reduce((acc, item) => {
       const key = satisfactionMonthLabel(item) || "Nao informado";
@@ -2987,6 +3015,15 @@
     });
     const byRating = satisfactionGroup(filtered, item => item.rating || item.score || "Sem nota");
     const byWait = satisfactionGroup(filtered, item => item.wait || "Nao informado");
+    const waitTotal = byWait.reduce((sum, [, count]) => sum + count, 0) || 1;
+    const waitColors = ["#1e90ff", "#1a2bb3", "#e56b2f", "#5cc8ff"];
+    let waitOffset = 0;
+    const waitSegments = byWait.map(([, count], index) => {
+      const start = waitOffset;
+      const pct = (count / waitTotal) * 100;
+      waitOffset += pct;
+      return `${waitColors[index % waitColors.length]} ${start}% ${waitOffset}%`;
+    }).join(", ");
     const maxSector = Math.max(...bySector.map(([, count]) => count), 1);
     const maxMonth = Math.max(...byMonth.map(([, count]) => count), 1);
     const maxRating = Math.max(...byRating.map(([, count]) => count), 1);
@@ -3002,13 +3039,24 @@
       { icon: "CM", title: "Comentarios", note: "Observacoes com conteudo util", label: String(comments), tone: comments ? "info" : "ok" }
     ]);
     grid.innerHTML = list.length ? `
-      <section class="bi-command-panel satisfaction-command-panel">
-        <div>
-          <span class="eyebrow">Pesquisa institucional</span>
-          <strong>Atendimentos avaliados</strong>
-          <p>${P.satisfactionMeta?.file || "dados csv.csv"} | ${list.length} resposta(s) carregada(s) | ${activeFilters ? `${activeFilters} filtro(s) ativo(s)` : "base completa"}</p>
+      <section class="satisfaction-bi-report">
+        <div class="satisfaction-bi-title">Pesquisa de Satisfação - URE Itapeva</div>
+        <div class="satisfaction-bi-top">
+          <div class="satisfaction-bi-kpis">
+            <article><strong>${responses}</strong><span>Total Pesquisas</span></article>
+            <article><strong>${avgScore ? `${((avgScore / 5) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%` : "-"}</strong><span>Média Avaliação</span></article>
+            <article><strong>${Math.round((resolved / Math.max(filtered.length, 1)) * 100).toLocaleString("pt-BR")}%</strong><span>% Resolvidos</span></article>
+            <article><strong>${Math.round((cordial / Math.max(filtered.length, 1)) * 100).toLocaleString("pt-BR")}%</strong><span>% Cordialidade</span></article>
+          </div>
+          <aside class="satisfaction-bi-type-filter">
+            <strong>Tipo de Atendimento</strong>
+            ${uniqueTypes.map(type => `
+              <button type="button" class="${filterState.type === type ? "active" : ""}" data-satisfaction-type="${attrValue(type)}">
+                <span></span>${type}
+              </button>
+            `).join("")}
+          </aside>
         </div>
-        <button class="ghost-btn" type="button" data-satisfaction-reset>Limpar filtros</button>
       </section>
 
       <section class="selector-panel satisfaction-filter-panel">
@@ -3017,6 +3065,7 @@
         <label><span>Avaliacao</span><select id="satisfactionRatingFilter">${biSelectOptions(uniqueRatings, filterState.rating, "Todas")}</select></label>
         <label><span>Espera</span><select id="satisfactionWaitFilter">${biSelectOptions(uniqueWaits, filterState.wait, "Todas")}</select></label>
         <label><span>Busca</span><input id="satisfactionSearchInput" type="search" value="${attrValue(filterState.query)}" placeholder="Assunto, setor, comentario..."></label>
+        <button class="ghost-btn" type="button" data-satisfaction-reset>Limpar filtros</button>
       </section>
 
       <section class="satisfaction-layout">
@@ -3025,9 +3074,9 @@
           <div class="bi-bar-list">
             ${bySector.map(([sector, count]) => `
               <button class="bi-bar-row" type="button" data-satisfaction-sector="${attrValue(sector)}" data-search="${P.searchText([sector, count])}">
-                <span><strong>${sector}</strong><small>${count} resposta(s)</small></span>
+                <span><strong>${satisfactionShortSector(sector)}</strong><small>${sector}</small></span>
                 <i><b style="--pct:${Math.round((count / maxSector) * 100)}%"></b></i>
-                <em>${Math.round((count / Math.max(filtered.length, 1)) * 100)}%</em>
+                <em>${count}</em>
               </button>
             `).join("") || `<div class="empty-state">Sem setores no filtro atual.</div>`}
           </div>
@@ -3045,20 +3094,24 @@
         </article>
 
         <article class="box bi-panel">
-          <div class="box-head"><div><strong>Avaliacao e espera</strong><small>Clique para cruzar o recorte.</small></div></div>
-          <div class="bi-donut-stack">
+          <div class="box-head"><div><strong>Tempo de Espera para Atendimento</strong><small>Clique na legenda para filtrar.</small></div></div>
+          <div class="satisfaction-wait-donut" style="--donut:${waitSegments || "#1e90ff 0% 100%"}">
+            <div class="satisfaction-donut-shape"></div>
+            <div class="satisfaction-donut-legend">
+              ${byWait.map(([wait, count], index) => `
+                <button type="button" data-satisfaction-wait="${attrValue(wait)}">
+                  <i style="--legend:${waitColors[index % waitColors.length]}"></i>
+                  <span>${wait}</span>
+                  <strong>${count}</strong>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+          <div class="box-head compact"><div><strong>Avaliação dos Atendimentos</strong><small>Clique para filtrar.</small></div></div>
+          <div class="satisfaction-rating-bars">
             ${byRating.map(([rating, count]) => `
-              <button class="bi-status-row" type="button" data-satisfaction-rating="${attrValue(rating)}">
-                <span class="status-pill ${satisfactionScore({ rating }) >= 4 ? "ok" : "warn"}">${rating}</span>
-                <strong>${count}</strong>
-                <i><b style="--pct:${Math.round((count / maxRating) * 100)}%"></b></i>
-              </button>
-            `).join("")}
-            ${byWait.map(([wait, count]) => `
-              <button class="bi-status-row" type="button" data-satisfaction-wait="${attrValue(wait)}">
-                <span class="status-pill info">${wait}</span>
-                <strong>${count}</strong>
-                <i><b style="--pct:${Math.round((count / maxWait) * 100)}%"></b></i>
+              <button type="button" data-satisfaction-rating="${attrValue(rating)}" style="--pct:${Math.max(8, Math.round((count / maxRating) * 100))}%">
+                <i></i><span>${rating}</span><strong>${count}</strong>
               </button>
             `).join("")}
           </div>
@@ -3125,8 +3178,15 @@
     });
     grid.querySelector("#satisfactionSearchInput")?.addEventListener("input", rerender);
     grid.querySelector("[data-satisfaction-reset]")?.addEventListener("click", () => {
-      grid.dataset.satisfactionFilters = JSON.stringify({ sector: "", month: "", rating: "", wait: "", query: "", selected: "" });
+      grid.dataset.satisfactionFilters = JSON.stringify({ type: "", sector: "", month: "", rating: "", wait: "", query: "", selected: "" });
       renderSatisfaction(P.getAppData().satisfaction || []);
+    });
+    grid.querySelectorAll("[data-satisfaction-type]").forEach(button => {
+      button.addEventListener("click", () => {
+        const type = button.dataset.satisfactionType || "";
+        grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, type: filterState.type === type ? "" : type, selected: "" });
+        renderSatisfaction(P.getAppData().satisfaction || []);
+      });
     });
     grid.querySelectorAll("[data-satisfaction-sector]").forEach(button => {
       button.addEventListener("click", () => {
@@ -3159,6 +3219,261 @@
       });
     });
   }
+  const INTERNAL_STORAGE_KEY = "painelure2_internal";
+  const INTERNAL_BACKEND_TOKEN_KEY = "painelure2_backend_token";
+  let internalSaveTimer = null;
+  const INTERNAL_RAFFLE_NAMES = [
+    "Regina", "Débora", "Tereza", "Áurea", "Elvira",
+    "Isabel", "Margarida", "Isaura", "Selma", "Dulce",
+    "Zoraide", "Raquel", "Adriana", "Simone", "Lourdes",
+    "Dolores", "Roberta", "Dirce", "Norma", "Daniela",
+    "Rosália", "Joelma", "Glória", "Fátima", "Zuleika",
+    "Jurema", "Mônica", "Helena", "Eugênia", "Adelaide",
+    "Denise", "Jandira", "Rosana", "Valéria", "Celeste",
+    "Olinda", "Emília", "Jaqueline", "Adélia", "Patrícia",
+    "Miriam", "Clarice", "Aurora", "Lenice", "Solange",
+    "Ivone", "Márcia", "Dora", "Graziela", "Maria"
+  ];
+  const INTERNAL_COFFEE_NAMES = ["Jefferson", "Elcio", "Gustavo", "Rodolfo", "Richard"];
+
+  function internalDefaultState() {
+    return {
+      raffle: {
+        price: 10,
+        prize: "Cafeteira Dolce Gusto",
+        entries: INTERNAL_RAFFLE_NAMES.map((name, index) => ({
+          number: index + 1,
+          chosenName: name,
+          buyer: "",
+          paid: false
+        }))
+      },
+      coffee: {
+        amount: 50,
+        months: {}
+      }
+    };
+  }
+
+  function loadInternalState() {
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(INTERNAL_STORAGE_KEY) || "{}");
+    } catch (error) {}
+    const official = P.getAppData?.().internal;
+    if (official && typeof official === "object" && (official.raffle || official.coffee)) {
+      saved = { ...saved, ...official };
+    }
+    const base = internalDefaultState();
+    const savedEntries = new Map((saved.raffle?.entries || []).map(item => [Number(item.number), item]));
+    const entries = base.raffle.entries.map(entry => ({
+      ...entry,
+      ...(savedEntries.get(entry.number) || {}),
+      number: entry.number,
+      chosenName: entry.chosenName
+    }));
+    return {
+      raffle: {
+        ...base.raffle,
+        ...(saved.raffle || {}),
+        price: 10,
+        entries
+      },
+      coffee: {
+        amount: 50,
+        months: saved.coffee?.months || {}
+      }
+    };
+  }
+
+  function saveInternalState(state, options = {}) {
+    const appData = P.getAppData?.();
+    if (appData) {
+      appData.internal = state;
+      P.setAppData?.(appData);
+      P.saveAppData?.();
+    }
+    try {
+      localStorage.setItem(INTERNAL_STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      P.showToast?.("Não foi possível salvar", "O navegador recusou o armazenamento local.", "danger");
+    }
+    if (options.syncOnline !== false) scheduleInternalOnlineSave(state);
+  }
+
+  function scheduleInternalOnlineSave(state) {
+    if (!P.saveInternalData) return;
+    window.clearTimeout(internalSaveTimer);
+    internalSaveTimer = window.setTimeout(() => {
+      let token = "";
+      try {
+        token = sessionStorage.getItem(INTERNAL_BACKEND_TOKEN_KEY) || "";
+      } catch (error) {}
+      if (!token) return;
+      P.saveInternalData(token, state).catch(error => {
+        console.warn("[PainelURE] Café salvo localmente; sync online pendente:", error);
+        P.showToast?.("Café salvo localmente", "Não foi possível enviar ao servidor agora. O backup local já está atualizado.", "warn", { delay: 6500 });
+      });
+    }, 900);
+  }
+
+  function shiftMonthKey(key, delta) {
+    const match = String(key || "").match(/^(\d{4})-(\d{2})$/);
+    const year = match ? Number(match[1]) : 2026;
+    const month = match ? Number(match[2]) : 6;
+    const date = new Date(year, month - 1 + delta, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function internalCoffeeMonthKeys() {
+    return Array.from({ length: 6 }, (_, index) => shiftMonthKey("2026-06", index));
+  }
+
+  function ensureCoffeeMonth(state, monthKey = "2026-06") {
+    const current = state.coffee.months[monthKey] || {};
+    state.coffee.months[monthKey] = {
+      ...current,
+      people: INTERNAL_COFFEE_NAMES.map(name => {
+        const saved = (current.people || []).find(item => P.normalize(item.name) === P.normalize(name));
+        return { name, paid: Boolean(saved?.paid) };
+      })
+    };
+    return state.coffee.months[monthKey];
+  }
+
+  function ensureCoffeeMonths(state) {
+    return internalCoffeeMonthKeys().map(monthKey => ({
+      monthKey,
+      ...ensureCoffeeMonth(state, monthKey)
+    }));
+  }
+
+  function currency(value) {
+    return Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+
+  function renderInternal() {
+    const host = P.$("#internalDashboard");
+    if (!host) return;
+    const state = loadInternalState();
+    const coffeeMonths = ensureCoffeeMonths(state);
+    saveInternalState(state, { syncOnline: false });
+
+    const price = 10;
+    const coffeeAmount = 50;
+    const entries = state.raffle.entries || [];
+    const sold = entries.filter(item => String(item.buyer || "").trim()).length;
+    const paid = entries.filter(item => item.paid).length;
+    const received = paid * price;
+    const pending = entries.filter(item => String(item.buyer || "").trim() && !item.paid).length;
+    const coffeePaid = coffeeMonths.reduce((sum, month) => sum + month.people.filter(item => item.paid).length, 0);
+    const coffeeSlots = coffeeMonths.length * INTERNAL_COFFEE_NAMES.length;
+    const coffeeTotal = coffeePaid * coffeeAmount;
+
+    host.innerHTML = `
+      <section class="internal-layout">
+        <article class="box internal-coffee-box" data-search="vaquinha cafe Jefferson Elcio Gustavo Rodolfo Richard pago mes">
+          <div class="box-head">
+            <div><strong>&#9749; Vaquinha do café</strong><small>Junho a novembro, ${currency(coffeeAmount)} por pessoa. Arrecadado: ${currency(coffeeTotal)}.</small></div>
+            <span class="status-pill ${coffeePaid === coffeeSlots ? "ok" : "warn"}">${coffeePaid}/${coffeeSlots} pago(s)</span>
+          </div>
+          <div class="internal-coffee-table-wrap">
+            <table class="internal-coffee-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  ${coffeeMonths.map(month => `<th>${htmlValue((P.selectedMonthLabel?.(month.monthKey) || month.monthKey).split(" ")[0])}</th>`).join("")}
+                  <th>Arrecadado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${INTERNAL_COFFEE_NAMES.map(name => {
+                  const personPaid = coffeeMonths.filter(month => month.people.some(person => P.normalize(person.name) === P.normalize(name) && person.paid)).length;
+                  return `
+                    <tr data-search="${P.searchText([name, personPaid, "vaquinha cafe"])}">
+                      <th>${htmlValue(name)}</th>
+                      ${coffeeMonths.map(month => {
+                        const person = month.people.find(item => P.normalize(item.name) === P.normalize(name)) || { name, paid: false };
+                        return `
+                        <td>
+                          <label class="internal-coffee-cell" title="${htmlValue(name)} - ${htmlValue(P.selectedMonthLabel?.(month.monthKey) || month.monthKey)}">
+                            <input type="checkbox" data-coffee-month="${month.monthKey}" data-coffee-paid="${htmlValue(person.name)}"${person.paid ? " checked" : ""}>
+                            <span class="internal-toggle ${person.paid ? "is-paid" : ""}">${person.paid ? "Pago" : "Pendente"}</span>
+                          </label>
+                        </td>
+                      `; }).join("")}
+                      <td><strong>${currency(personPaid * coffeeAmount)}</strong></td>
+                    </tr>
+                  `;
+                }).join("")}
+              </tbody>
+            </table>
+          </div>
+          <div class="internal-coffee-total">
+            <strong>Total arrecadado</strong>
+            <span>${currency(coffeeTotal)}</span>
+          </div>
+        </article>
+        <article class="box internal-raffle-box" data-search="rifa 50 nomes comprador nome escolhido pago">
+          <div class="box-head">
+            <div><strong>&#127915; Rifa da cafeteira</strong><small>Cartela 5x10, ${currency(price)} por nome. Arrecadado: ${currency(received)} de ${currency(entries.length * price)}.</small></div>
+            <span class="status-pill ${pending ? "warn" : "info"}">${sold}/50 vendido(s)</span>
+          </div>
+          <div class="internal-raffle-summary" data-search="rifa arrecadado vendido pendente">
+            <span><strong>${sold}/50</strong><small>vendido(s)</small></span>
+            <span><strong>${paid}</strong><small>pago(s)</small></span>
+            <span><strong>${pending}</strong><small>pendente(s)</small></span>
+            <span><strong>${currency(received)}</strong><small>arrecadado</small></span>
+          </div>
+          <div class="internal-raffle-calendar" aria-label="Cartela da rifa">
+            ${entries.map(item => `
+              <div class="internal-raffle-day${item.paid ? " paid" : ""}${String(item.buyer || "").trim() ? " sold" : ""}" data-search="${P.searchText([item.number, item.chosenName, item.buyer, item.paid ? "pago" : "pendente"])}">
+                <div class="internal-raffle-name">
+                  <span>${String(item.number).padStart(2, "0")}</span>
+                  <strong>${htmlValue(item.chosenName)}</strong>
+                </div>
+                <input type="text" value="${htmlValue(item.buyer)}" placeholder="Quem comprou" data-raffle-buyer="${item.number}">
+                <label>
+                  <input type="checkbox" data-raffle-paid="${item.number}"${item.paid ? " checked" : ""}>
+                  <em class="internal-toggle ${item.paid ? "is-paid" : ""}">${item.paid ? "Pago" : "Pendente"}</em>
+                </label>
+              </div>
+            `).join("")}
+          </div>
+        </article>
+      </section>
+    `;
+
+    host.querySelectorAll("[data-raffle-buyer]").forEach(input => {
+      input.addEventListener("change", () => {
+        const current = loadInternalState();
+        const entry = current.raffle.entries.find(item => Number(item.number) === Number(input.dataset.raffleBuyer));
+        if (entry) entry.buyer = input.value.trim();
+        saveInternalState(current);
+        renderInternal();
+      });
+    });
+    host.querySelectorAll("[data-raffle-paid]").forEach(input => {
+      input.addEventListener("change", () => {
+        const current = loadInternalState();
+        const entry = current.raffle.entries.find(item => Number(item.number) === Number(input.dataset.rafflePaid));
+        if (entry) entry.paid = input.checked;
+        saveInternalState(current);
+        renderInternal();
+      });
+    });
+    host.querySelectorAll("[data-coffee-paid]").forEach(input => {
+      input.addEventListener("change", () => {
+        const current = loadInternalState();
+        const currentMonth = ensureCoffeeMonth(current, input.dataset.coffeeMonth || "2026-06");
+        const person = currentMonth.people.find(item => P.normalize(item.name) === P.normalize(input.dataset.coffeePaid));
+        if (person) person.paid = input.checked;
+        saveInternalState(current);
+        renderInternal();
+      });
+    });
+  }
+
   function renderReports(data) {
     const grid = P.$("#reportsGrid");
     const list = P.$("#reportsList");
@@ -3377,6 +3692,7 @@
   P.renderProfiles = renderProfiles;
   P.renderQuality = renderQuality;
   P.renderSatisfaction = renderSatisfaction;
+  P.renderInternal = renderInternal;
   P.renderCtc = renderCtc;
   P.renderCalls = renderCalls;
   P.renderReports = renderReports;

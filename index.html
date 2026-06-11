@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "bi-analytics-dashboard-20260609";
+      window.PAINELURE_BUILD = "cafe-dashboard-20260611";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -26,6 +26,7 @@
         contacts: "contatos",
         calendar: "calendario",
         satisfaction: "pesquisa-de-satisfacao",
+        internal: "cafe",
         reports: "relatorios",
         cars: "carros",
         ctc: "ctc",
@@ -36,6 +37,7 @@
         quality: "qualidade"
       };
       const bySlug = Object.fromEntries(Object.entries(slugs).map(([page, slug]) => [slug, page]));
+      bySlug.interno = "internal";
       const basePath = (() => {
         const path = location.pathname.replace(/\/+$/, "");
         const marker = "/painelure";
@@ -69,12 +71,11 @@
       if (localStorage.getItem("painelure2_theme") === "light") {
         document.documentElement.dataset.theme = "light";
       }
-      document.documentElement.classList.remove("auth-pending");
     } catch (error) {}
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=bi-analytics-dashboard-20260609">
+  <link rel="stylesheet" href="./styles.css?v=cafe-dashboard-20260611">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -137,24 +138,21 @@
     <div class="nav-label">Menu</div>
     <nav class="nav" aria-label="Navegação principal">
       <button class="nav-item active" type="button" data-page="dashboard"><span>&#128202;</span>Painel</button>
-      <button class="nav-item" type="button" data-page="schools"><span>&#127979;</span>Escolas</button>
       <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>Supervisão</button>
       <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
       <button class="nav-item" type="button" data-page="satisfaction"><span>&#128221;</span>Pesquisa</button>
       <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
     </nav>
-
-    <section class="sidebar-card">
-      <div class="sidebar-card-head">
-        <span>Ferramentas</span>
-      </div>
-      <div class="sidebar-shortcuts labeled">
-        <button type="button" data-jump="network"><span>&#127760; Redes</span></button>
-        <button type="button" data-jump="inventory"><span>&#128187; Inventário</span></button>
-        <button type="button" data-jump="bi-equipment"><span>&#128202; BI Equipamentos</span></button>
-        <button type="button" data-jump="ctc"><span>&#128229; Chamados CTC</span></button>
-        <button type="button" data-jump="calendar"><span>&#128197; Agenda</span></button>
-        <button type="button" data-jump="reports"><span>&#128200; Relatórios</span></button>
+    <section class="sidebar-card sidebar-tools-card" aria-label="Atalhos">
+      <div class="sidebar-shortcuts icon-only">
+        <button type="button" data-jump="schools" title="Escolas" aria-label="Escolas">&#127979;</button>
+        <button type="button" data-jump="network" title="Redes e câmeras" aria-label="Redes e câmeras">&#127760;</button>
+        <button type="button" data-jump="inventory" title="Inventário" aria-label="Inventário">&#128187;</button>
+        <button type="button" data-jump="bi-equipment" title="BI Equipamentos" aria-label="BI Equipamentos">&#128202;</button>
+        <button type="button" data-jump="ctc" title="Chamados CTC" aria-label="Chamados CTC">&#128229;</button>
+        <button type="button" data-jump="calendar" title="Agenda" aria-label="Agenda">&#128197;</button>
+        <button type="button" data-jump="internal" title="Café" aria-label="Café">&#9749;</button>
+        <button type="button" data-jump="reports" title="Relatórios" aria-label="Relatórios">&#128200;</button>
       </div>
     </section>
     <div class="account">
@@ -203,24 +201,6 @@
         </div>
       </header>
 
-      <button class="notice-card" type="button" data-jump="reports">
-        <span class="notice-icon">i</span>
-        <span>
-          <strong id="dashboardNoticeTitle">Base operacional carregada</strong>
-          <small id="dashboardNoticeNote">Escolas, supervisão, inventário e redes disponíveis para consulta. Calendário aguarda fonte oficial.</small>
-        </span>
-        <em>Relatórios</em>
-      </button>
-
-      <div class="manager-strip">
-        <div>
-          <strong>Pagina inicial da URE</strong>
-          <span id="dashboardSummary">consulta rápida | dados locais primeiro | fontes oficiais em segundo plano</span>
-        </div>
-      </div>
-
-      <section class="dashboard-command" id="dashboardCommand"></section>
-
       <section class="workbench widget" data-widget-area="shortcuts">
         <div class="widget-head">
           <div>
@@ -255,6 +235,24 @@
           </button>
         </div>
       </section>
+
+      <button class="notice-card" type="button" data-jump="reports">
+        <span class="notice-icon">i</span>
+        <span>
+          <strong id="dashboardNoticeTitle">Base operacional carregada</strong>
+          <small id="dashboardNoticeNote">Escolas, supervisão, inventário e redes disponíveis para consulta. Calendário aguarda fonte oficial.</small>
+        </span>
+        <em>Relatórios</em>
+      </button>
+
+      <div class="manager-strip">
+        <div>
+          <strong>Pagina inicial da URE</strong>
+          <span id="dashboardSummary">consulta rápida | dados locais primeiro | fontes oficiais em segundo plano</span>
+        </div>
+      </div>
+
+      <section class="dashboard-command" id="dashboardCommand"></section>
 
       <section class="content-grid" data-widget-area="operations">
         <article class="box">
@@ -519,6 +517,19 @@
         <div class="row-list compact" id="satisfactionSummaryRows"></div>
       </article>
       <div class="calendar-grid" id="satisfactionGrid"></div>
+    </section>
+
+    <section class="page" id="page-internal">
+      <header class="page-header compact">
+        <div><h1>Café</h1><p>Organização da rifa e da vaquinha do café.</p></div>
+      </header>
+      <section class="reports-hero-panel internal-hero-panel" data-search="interno rifa vaquinha cafe seintec administracao">
+        <div>
+          <span class="eyebrow">Controle interno</span>
+          <strong>Café e rifa</strong>
+        </div>
+      </section>
+      <div id="internalDashboard"></div>
     </section>
 
     <section class="page" id="page-reports">
@@ -791,8 +802,9 @@
 
   <nav class="mobile-nav" aria-label="Navegação mobile">
     <button class="active" type="button" data-page="dashboard">&#128202;<span>Painel</span></button>
-    <button type="button" data-page="schools">&#127979;<span>Escolas</span></button>
     <button type="button" data-page="supervision">&#129517;<span>Supervisão</span></button>
+    <button type="button" data-page="cars">&#128663;<span>Carros</span></button>
+    <button type="button" data-page="satisfaction">&#128221;<span>Pesquisa</span></button>
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
@@ -811,21 +823,21 @@
   <script src="./data/calls-report.js?v=stability-polish-20260528"></script>
   <script src="./data/sources.js?v=satisfaction-sharepoint-20260602"></script>
   <script src="./modules/dom.js?v=stability-polish-20260528"></script>
-  <script src="./modules/ui-catalog.js?v=bi-equipment-dashboard-20260608"></script>
-  <script src="./modules/data-store.js?v=stability-polish-20260528"></script>
+  <script src="./modules/ui-catalog.js?v=cafe-dashboard-20260611"></script>
+  <script src="./modules/data-store.js?v=cafe-dashboard-20260611"></script>
   <script src="./modules/identity.js?v=stability-polish-20260528"></script>
-  <script src="./modules/access-scope.js?v=bi-equipamentos-20260608"></script>
+  <script src="./modules/access-scope.js?v=cafe-dashboard-20260611"></script>
   <script src="./modules/month-state.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/csv.js?v=stability-polish-20260528"></script>
   <script src="./modules/normalizers.js?v=bi-inventory-csv-20260608"></script>
   <script src="./modules/source-loader.js?v=inventory-school-map-20260601"></script>
   <script src="./config.js?v=stability-polish-20260528"></script>
-  <script src="./modules/backend-client.js?v=bi-inventory-csv-20260608"></script>
-  <script src="./modules/search.js?v=chamados-ctc-20260602"></script>
-  <script src="./modules/render.js?v=bi-analytics-dashboard-20260609"></script>
+  <script src="./modules/backend-client.js?v=cafe-dashboard-20260611"></script>
+  <script src="./modules/search.js?v=cafe-dashboard-20260611"></script>
+  <script src="./modules/render.js?v=cafe-dashboard-20260611"></script>
   <script src="./modules/supervision-render.js?v=supervision-month-summary-20260602"></script>
-  <script src="./modules/navigation.js?v=bi-equipamentos-20260608"></script>
-  <script src="./modules/admin-tools.js?v=bi-equipamentos-20260608"></script>
-  <script src="./app.js?v=bi-equipamentos-20260608"></script>
+  <script src="./modules/navigation.js?v=cafe-dashboard-20260611"></script>
+  <script src="./modules/admin-tools.js?v=cafe-dashboard-20260611"></script>
+  <script src="./app.js?v=cafe-dashboard-20260611"></script>
 </body>
 </html>

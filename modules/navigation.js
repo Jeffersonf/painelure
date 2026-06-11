@@ -15,6 +15,7 @@
     contacts: "contatos",
     calendar: "calendario",
     satisfaction: "pesquisa-de-satisfacao",
+    internal: "cafe",
     reports: "relatorios",
     cars: "carros",
     ctc: "ctc",
@@ -25,6 +26,7 @@
     quality: "qualidade"
   };
   const PAGE_BY_SLUG = Object.fromEntries(Object.entries(PAGE_SLUGS).map(([page, slug]) => [slug, page]));
+  PAGE_BY_SLUG.interno = "internal";
 
   let previousPage = "dashboard";
 
