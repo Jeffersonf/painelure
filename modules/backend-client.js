@@ -271,7 +271,18 @@
       if (!/HTTP 404|HTTP 405|Endpoint/i.test(String(error?.message || error || ""))) throw error;
       const appData = P.getAppData?.() || {};
       P.setAppData?.({ ...appData, internal: internal || {} });
-      payload = await pushBackendData(token);
+      try {
+        payload = await pushBackendData(token);
+      } catch (fallbackError) {
+        if (!/HTTP 401|HTTP 403|autorizado|forbidden|unauthorized/i.test(String(fallbackError?.message || fallbackError || ""))) throw fallbackError;
+        P.backendStatus = {
+          ok: false,
+          pending: true,
+          error: "Aguardando API do Café para sincronizar online."
+        };
+        P.saveAppData?.();
+        return { ok: true, pending: true };
+      }
     }
     if (payload?.data?.updatedAt) {
       P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt };

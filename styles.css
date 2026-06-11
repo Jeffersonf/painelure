@@ -1050,21 +1050,21 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .sidebar-tools-card {
-  padding: 10px;
+  padding: 12px;
   border-radius: 16px;
 }
 
 .sidebar-shortcuts.icon-only {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
   margin-top: 0;
 }
 
 .sidebar-shortcuts.icon-only button {
-  min-height: 38px;
+  min-height: 46px;
   padding: 0;
   border-radius: 12px;
-  font-size: 17px;
+  font-size: 21px;
   line-height: 1;
 }
 
