@@ -43,11 +43,11 @@ let dbReady = false;
 let dbError = "";
 let frontendSeedStore = null;
 const DATA_ACCESS = {
-  Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+  Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
   "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
-  SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality"],
+  SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
   CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
   Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
   Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
@@ -710,6 +710,10 @@ function accessForRole(role, appData = {}) {
   const target = normalizeText(role);
   const key = Object.keys(DATA_ACCESS).find(item => normalizeText(item) === target);
   const customAccess = appData?.accessRules?.roleAccess || {};
+  if (key === "Administrador" || target.includes("admin")) {
+    const saved = Array.isArray(customAccess.Administrador) ? customAccess.Administrador : [];
+    return [...new Set([...(saved.length ? saved : DATA_ACCESS.Administrador), "internal"])];
+  }
   if (key === "SEINTEC" || target.includes("seintec")) {
     const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
     return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
@@ -734,7 +738,6 @@ function accessForRole(role, appData = {}) {
   if (target.includes("secomse")) return DATA_ACCESS.SECOMSE;
   if (target.includes("carro")) return DATA_ACCESS.Carros;
   if (target.includes("pedag") || target.includes("pec")) return DATA_ACCESS.Pedagogico;
-  if (target.includes("admin")) return DATA_ACCESS.Administrador;
   return DATA_ACCESS.Consulta;
 }
 
@@ -892,6 +895,7 @@ function scopeAppDataForUser(appData = {}, user = null) {
       : [],
     calendar: canAccessData("calendar", user, appData) ? (appData.calendar || []) : [],
     satisfaction: canAccessData("satisfaction", user, appData) ? (appData.satisfaction || []) : [],
+    internal: canAccessData("internal", user, appData) ? (appData.internal || []) : [],
     reports: canAccessData("reports", user, appData) ? (appData.reports || []) : [],
     profiles: canAccessData("profiles", user, appData) ? (appData.profiles || []) : [],
     quality: canAccessData("quality", user, appData) ? (appData.quality || []) : [],
@@ -1511,6 +1515,20 @@ function requireAdmin(req, res, message = "Apenas administrador pode executar es
   return false;
 }
 
+function isInternalWriterRequest(req) {
+  if (!ADMIN_KEY) return true;
+  const session = currentSession(req);
+  const role = normalizeKey(session?.role || "");
+  return Boolean(session && (role.includes("administrador") || role.includes("seintec")));
+}
+
+function requireInternalWriter(req, res, message = "Apenas Administrador ou SEINTEC pode salvar os dados do cafe.") {
+  if (!requireAuth(req, res)) return false;
+  if (isInternalWriterRequest(req)) return true;
+  send(res, 403, { ok: false, error: message });
+  return false;
+}
+
 function safeStaticPath(urlPath) {
   const requested = urlPath === "/" ? "/index.html" : decodeURIComponent(urlPath);
   const file = path.resolve(ROOT, `.${requested}`);
@@ -1672,6 +1690,20 @@ async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/data") {
     if (!requireAuth(req, res)) return;
     send(res, 200, { ok: true, data: await scopedStoreForRequest(req), storage: await storeStatus() });
+    return;
+  }
+
+  if (req.method === "PUT" && pathname === "/api/internal") {
+    if (!requireInternalWriter(req, res)) return;
+    const body = JSON.parse(await readBody(req) || "{}");
+    const store = await readStore() || { appData: {} };
+    const appData = {
+      ...(store.appData || {}),
+      internal: body.internal && typeof body.internal === "object" ? body.internal : {}
+    };
+    const data = await saveStore(appData, "internal", { force: true });
+    await audit(req, "update", "internal", "cafe", "Dados internos do cafe atualizados.", {});
+    send(res, 200, { ok: true, data, storage: await storeStatus() });
     return;
   }
 

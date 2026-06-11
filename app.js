@@ -36,6 +36,9 @@
     satisfaction(data) {
       P.renderSatisfaction(data.satisfaction);
     },
+    internal() {
+      P.renderInternal?.();
+    },
     profiles(data) {
       P.renderProfiles(data.profiles);
     },

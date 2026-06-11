@@ -256,6 +256,22 @@
     });
   }
 
+  async function saveInternalData(token, internal) {
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const payload = await fetchApi("/api/internal", {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ internal: internal || {} }),
+      timeoutMs: 12000
+    });
+    if (payload?.data?.updatedAt) {
+      P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt };
+      P.saveAppData?.();
+    }
+    return payload;
+  }
+
   async function loadBackendSnapshots(token, limit = 20) {
     const headers = {};
     if (token) headers.Authorization = `Bearer ${token}`;
@@ -287,6 +303,7 @@
   P.loadBackendHealth = loadBackendHealth;
   P.loadBackendSources = loadBackendSources;
   P.saveBackendSources = saveBackendSources;
+  P.saveInternalData = saveInternalData;
   P.loadBackendSnapshots = loadBackendSnapshots;
   P.loadBackendAudit = loadBackendAudit;
   P.loadBackendImports = loadBackendImports;

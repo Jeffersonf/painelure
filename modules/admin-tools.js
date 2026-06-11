@@ -7,14 +7,15 @@
   const AVATAR_PREFIX = "painelure2_avatar_";
   const ADMIN_COLLAPSE_KEY = "painelure2_admin_sections";
   const TOKEN_KEY = "painelure2_backend_token";
-  let backendToken = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || "";
+  localStorage.removeItem(TOKEN_KEY);
+  let backendToken = sessionStorage.getItem(TOKEN_KEY) || "";
 
   const ROLE_ACCESS = {
-    Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"],
+    Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
-    SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality"],
+    SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
     CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -33,7 +34,7 @@
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
-  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "cars", "supervision", "contacts", "calendar", "satisfaction", "reports", "profiles", "quality", "admin"];
+  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"];
 
   function currentRole() {
     return P.onlineUser?.()?.role || localStorage.getItem(ROLE_KEY) || P.displayUser?.().role || "Administrador";
@@ -196,7 +197,6 @@
     const result = await P.loginBackend?.({ key });
     backendToken = result?.token || "";
     if (backendToken) {
-      localStorage.setItem(TOKEN_KEY, backendToken);
       sessionStorage.setItem(TOKEN_KEY, backendToken);
     }
     return backendToken;
@@ -331,7 +331,6 @@
 
   function activateOnlineUser(token, user, options = {}) {
     backendToken = token;
-    localStorage.setItem(TOKEN_KEY, backendToken);
     sessionStorage.setItem(TOKEN_KEY, backendToken);
     P.setOnlineUser?.(user);
     localStorage.setItem(ROLE_KEY, user.role || "Consulta");
@@ -434,7 +433,8 @@
   }
 
   async function restoreBackendSession() {
-    backendToken = backendToken || localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || "";
+    localStorage.removeItem(TOKEN_KEY);
+    backendToken = backendToken || sessionStorage.getItem(TOKEN_KEY) || "";
     if (!backendToken || !P.loadBackendUser) {
       document.documentElement.classList.remove("auth-pending");
       if ((location.hostname === "localhost" || location.hostname === "127.0.0.1") && location.port === "4173") {

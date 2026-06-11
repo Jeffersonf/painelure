@@ -46,6 +46,7 @@
       "ctc",
       "cars",
       "satisfaction",
+      "internal",
       "reports"
     ].map(page => {
       const meta = P.pageMeta(page);
