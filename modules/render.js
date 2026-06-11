@@ -3326,7 +3326,7 @@
   }
 
   function internalCoffeeMonthKeys() {
-    return Array.from({ length: 6 }, (_, index) => shiftMonthKey("2026-06", index));
+    return Array.from({ length: 5 }, (_, index) => shiftMonthKey("2026-06", index));
   }
 
   function ensureCoffeeMonth(state, monthKey = "2026-06") {
@@ -3361,6 +3361,7 @@
 
     const price = 10;
     const coffeeAmount = 50;
+    const coffeeGoal = 935.18;
     const entries = state.raffle.entries || [];
     const sold = entries.filter(item => String(item.buyer || "").trim()).length;
     const paid = entries.filter(item => item.paid).length;
@@ -3369,13 +3370,15 @@
     const coffeePaid = coffeeMonths.reduce((sum, month) => sum + month.people.filter(item => item.paid).length, 0);
     const coffeeSlots = coffeeMonths.length * INTERNAL_COFFEE_NAMES.length;
     const coffeeTotal = coffeePaid * coffeeAmount;
+    const coffeeCash = Math.max(0, coffeeTotal - coffeeGoal);
+    const coffeeMissing = Math.max(0, coffeeGoal - coffeeTotal);
 
     host.innerHTML = `
       <section class="internal-layout">
         <article class="box internal-coffee-box" data-search="vaquinha cafe Jefferson Elcio Gustavo Rodolfo Richard pago mes">
           <div class="box-head">
-            <div><strong>&#9749; Vaquinha do café</strong><small>Junho a novembro, ${currency(coffeeAmount)} por pessoa. Arrecadado: ${currency(coffeeTotal)}.</small></div>
-            <span class="status-pill ${coffeePaid === coffeeSlots ? "ok" : "warn"}">${coffeePaid}/${coffeeSlots} pago(s)</span>
+            <div><strong>&#9749; Vaquinha do café</strong><small>Junho a outubro, ${currency(coffeeAmount)} por pessoa. Meta: ${currency(coffeeGoal)}.</small></div>
+            <span class="status-pill ${coffeeTotal >= coffeeGoal ? "ok" : "warn"}">${coffeePaid}/${coffeeSlots} pago(s)</span>
           </div>
           <div class="internal-coffee-table-wrap">
             <table class="internal-coffee-table">
@@ -3410,8 +3413,9 @@
             </table>
           </div>
           <div class="internal-coffee-total">
-            <strong>Total arrecadado</strong>
-            <span>${currency(coffeeTotal)}</span>
+            <span><strong>Total arrecadado</strong><em>${currency(coffeeTotal)}</em></span>
+            <span><strong>Meta</strong><em>${currency(coffeeGoal)}</em></span>
+            <span><strong>${coffeeTotal >= coffeeGoal ? "Em caixa" : "Falta"}</strong><em>${currency(coffeeTotal >= coffeeGoal ? coffeeCash : coffeeMissing)}</em></span>
           </div>
         </article>
         <article class="box internal-raffle-box" data-search="rifa 50 nomes comprador nome escolhido pago">

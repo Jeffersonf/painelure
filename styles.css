@@ -2521,9 +2521,8 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .internal-coffee-total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   padding: 16px 18px;
   border-top: 1px solid var(--bd2);
@@ -2531,9 +2530,23 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .internal-coffee-total span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.internal-coffee-total strong {
+  color: var(--mt);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.internal-coffee-total em {
   font-family: var(--font-money);
   font-size: 20px;
   font-weight: 850;
+  font-style: normal;
+  color: var(--tx);
 }
 
 .internal-raffle-summary {
