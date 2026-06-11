@@ -3444,6 +3444,13 @@
             <span><strong>${pending}</strong><small>pendente(s)</small></span>
             <span><strong>${currency(received)}</strong><small>arrecadado</small></span>
           </div>
+          <div class="internal-raffle-search">
+            <label>
+              <span>Pesquisar na rifa</span>
+              <input type="search" id="internalRaffleSearch" placeholder="Nome, número ou comprador">
+            </label>
+            <small id="internalRaffleSearchResult">${raffleTotal} nome(s)</small>
+          </div>
           <div class="internal-raffle-calendar" aria-label="Cartela da rifa">
             ${entries.map(item => `
               <div class="internal-raffle-day${item.paid ? " paid" : ""}${String(item.buyer || "").trim() ? " sold" : ""}" data-search="${P.searchText([item.number, item.chosenName, item.buyer, item.paid ? "pago" : "pendente"])}">
@@ -3481,6 +3488,22 @@
         renderInternal();
       });
     });
+    const raffleSearch = host.querySelector("#internalRaffleSearch");
+    const raffleSearchResult = host.querySelector("#internalRaffleSearchResult");
+    const filterRaffle = () => {
+      const term = P.searchText(raffleSearch?.value || "");
+      let visible = 0;
+      host.querySelectorAll(".internal-raffle-day").forEach(card => {
+        const match = !term || String(card.dataset.search || "").includes(term);
+        card.hidden = !match;
+        card.classList.toggle("search-match", Boolean(term && match));
+        if (match) visible += 1;
+      });
+      if (raffleSearchResult) {
+        raffleSearchResult.textContent = term ? `${visible}/${raffleTotal} encontrado(s)` : `${raffleTotal} nome(s)`;
+      }
+    };
+    raffleSearch?.addEventListener("input", filterRaffle);
     host.querySelectorAll("[data-coffee-paid]").forEach(input => {
       input.addEventListener("change", () => {
         const current = loadInternalState();
