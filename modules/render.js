@@ -3223,16 +3223,26 @@
   const INTERNAL_BACKEND_TOKEN_KEY = "painelure2_backend_token";
   let internalSaveTimer = null;
   const INTERNAL_RAFFLE_NAMES = [
-    "Regina", "Débora", "Tereza", "Áurea", "Elvira",
-    "Isabel", "Margarida", "Isaura", "Selma", "Dulce",
-    "Zoraide", "Raquel", "Adriana", "Simone", "Lourdes",
-    "Dolores", "Roberta", "Dirce", "Norma", "Daniela",
-    "Rosália", "Joelma", "Glória", "Fátima", "Zuleika",
-    "Jurema", "Mônica", "Helena", "Eugênia", "Adelaide",
-    "Denise", "Jandira", "Rosana", "Valéria", "Celeste",
-    "Olinda", "Emília", "Jaqueline", "Adélia", "Patrícia",
-    "Miriam", "Clarice", "Aurora", "Lenice", "Solange",
-    "Ivone", "Márcia", "Dora", "Graziela", "Maria"
+    "Maria", "Graziela", "Claudia", "Regiane", "Vilma",
+    "Fernanda", "Emília", "Daniela", "Sandra", "Zuleika",
+    "Marisa", "Emanoele", "Dolores", "Celina", "Tereza",
+    "Solange", "Ângela", "Guiomar", "Margot", "Dalila",
+    "Anadark", "Cristina", "Débora", "Eliane", "Genilda",
+    "Rosália", "Simone", "Helena", "Valquiria", "Andréa",
+    "Cleide", "Elaine", "Roberta", "Glória", "Suzana",
+    "Adriana", "Olga", "Izabel", "Juliana", "Kátia",
+    "Irene", "Jurema", "Letícia", "Marta", "Paula",
+    "Marcela", "Olívia", "Joana", "Lenice", "Fátima",
+    "Rosimeire", "Denise", "Elizabeth", "Claudete", "Regina",
+    "Celeste", "Aurora", "Rosângela", "Lourdes", "Isaura",
+    "Mônica", "Leonor", "Janete", "Raquel", "Virginia",
+    "Camila", "Roseli", "Valéria", "Adelaide", "Salete",
+    "Zulmira", "Sheila", "Cleuza", "Antônia", "Joelma",
+    "Iolanda", "Miriam", "Olinda", "Norma", "Luciana",
+    "Alessandra", "Clarice", "Sônia", "Dirce", "Marlene",
+    "Jaqueline", "Noêmia", "Margarida", "Patrícia", "Estela",
+    "Dinorá", "Márcia", "Rosana", "Silvana", "Neuza",
+    "Margarete", "Eugênia", "Renata", "Nazaré", "Mirtes"
   ];
   const INTERNAL_COFFEE_NAMES = ["Jefferson", "Elcio", "Gustavo", "Rodolfo", "Richard"];
 
@@ -3367,6 +3377,7 @@
     const coffeeAmount = 50;
     const coffeeGoal = 935.18;
     const entries = state.raffle.entries || [];
+    const raffleTotal = entries.length;
     const sold = entries.filter(item => String(item.buyer || "").trim()).length;
     const paid = entries.filter(item => item.paid).length;
     const received = paid * price;
@@ -3422,13 +3433,13 @@
             <span><strong>${coffeeTotal >= coffeeGoal ? "Em caixa" : "Falta"}</strong><em>${currency(coffeeTotal >= coffeeGoal ? coffeeCash : coffeeMissing)}</em></span>
           </div>
         </article>
-        <article class="box internal-raffle-box" data-search="rifa 50 nomes comprador nome escolhido pago">
+        <article class="box internal-raffle-box" data-search="rifa 100 nomes comprador nome escolhido pago">
           <div class="box-head">
-            <div><strong>&#127915; Rifa da cafeteira</strong><small>Cartela 5x10, ${currency(price)} por nome. Arrecadado: ${currency(received)} de ${currency(entries.length * price)}.</small></div>
-            <span class="status-pill ${pending ? "warn" : "info"}">${sold}/50 vendido(s)</span>
+            <div><strong>&#127915; Rifa da cafeteira</strong><small>Cartela 10x10, ${currency(price)} por nome. Arrecadado: ${currency(received)} de ${currency(raffleTotal * price)}.</small></div>
+            <span class="status-pill ${pending ? "warn" : "info"}">${sold}/${raffleTotal} vendido(s)</span>
           </div>
           <div class="internal-raffle-summary" data-search="rifa arrecadado vendido pendente">
-            <span><strong>${sold}/50</strong><small>vendido(s)</small></span>
+            <span><strong>${sold}/${raffleTotal}</strong><small>vendido(s)</small></span>
             <span><strong>${paid}</strong><small>pago(s)</small></span>
             <span><strong>${pending}</strong><small>pendente(s)</small></span>
             <span><strong>${currency(received)}</strong><small>arrecadado</small></span>
