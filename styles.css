@@ -980,22 +980,6 @@ html:not(.site-maintenance) .maintenance-message {
   z-index: 1;
 }
 
-.sidebar-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.sidebar-card-head span {
-  color: var(--ac);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .02em;
-  text-transform: uppercase;
-}
-
-.sidebar-card-head button,
 .ghost-btn {
   min-height: 30px;
   display: inline-flex;
@@ -1028,29 +1012,6 @@ html:not(.site-maintenance) .maintenance-message {
   font-size: 20px;
   color: var(--tx);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
-}
-
-.sidebar-shortcuts.labeled {
-  grid-template-columns: 1fr;
-  gap: 7px;
-}
-
-.sidebar-shortcuts.labeled button {
-  min-height: 36px;
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 750;
-  text-align: left;
-  text-transform: none;
-}
-
-.sidebar-shortcuts.labeled span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow: visible;
-  text-overflow: clip;
-  white-space: nowrap;
 }
 
 .sidebar-tools-card {
@@ -1785,7 +1746,6 @@ html:not(.site-maintenance) .maintenance-message {
   font-weight: 750;
 }
 
-.ctc-workspace,
 .reports-layout {
   display: grid;
   grid-template-columns: minmax(0, .92fr) minmax(360px, 1.08fr);
@@ -1798,8 +1758,7 @@ html:not(.site-maintenance) .maintenance-message {
   margin-bottom: 16px;
 }
 
-.ctc-call-card .row-list,
-.ctc-summary-card .row-list {
+.ctc-call-card .row-list {
   min-height: 100%;
 }
 
@@ -2222,90 +2181,6 @@ html:not(.site-maintenance) .maintenance-message {
     var(--sf);
 }
 
-.internal-table-head,
-.internal-table-row {
-  display: grid;
-  grid-template-columns: 42px minmax(112px, .75fr) minmax(170px, 1fr) 96px;
-  gap: 10px;
-  align-items: center;
-}
-
-.internal-table-head {
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--bd2);
-  color: var(--mt);
-  font-size: 11px;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.internal-raffle-grid {
-  display: grid;
-  gap: 8px;
-  max-height: 660px;
-  overflow: auto;
-  padding: 12px;
-}
-
-.internal-table-row {
-  min-height: 54px;
-  padding: 8px;
-  border: 1px solid var(--bd2);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .025);
-}
-
-.internal-table-row strong {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.internal-number {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(90, 245, 200, .1);
-  color: var(--ac2);
-  font-weight: 900;
-}
-
-.internal-table-row input[type="text"] {
-  width: 100%;
-  min-width: 0;
-}
-
-.internal-paid-check,
-.internal-coffee-action {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.internal-paid-check {
-  color: var(--mt);
-  font-size: 12px;
-  font-weight: 850;
-}
-
-.internal-paid-check input,
-.internal-coffee-action input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--ac2);
-}
-
-.internal-coffee-row {
-  cursor: pointer;
-}
-
-.internal-coffee-action .status-pill {
-  min-width: 74px;
-  text-align: center;
-}
-
 .internal-raffle-calendar {
   display: grid;
   grid-template-columns: repeat(5, minmax(130px, 1fr));
@@ -2608,7 +2483,6 @@ html:not(.site-maintenance) .maintenance-message {
 
 @media (max-width: 1100px) {
   .inventory-hero,
-  .ctc-workspace,
   .reports-layout,
   .internal-layout {
     grid-template-columns: 1fr;
@@ -2885,9 +2759,7 @@ html:not(.site-maintenance) .maintenance-message {
   margin: 0 0 18px;
 }
 
-.command-primary,
-.command-metrics,
-.command-metric {
+.command-primary {
   border: 1px solid var(--bd);
   background: var(--sf);
 }
@@ -2950,47 +2822,6 @@ html:not(.site-maintenance) .maintenance-message {
     align-items: flex-start;
   }
 
-}
-
-.command-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  border-radius: 18px;
-}
-
-.command-metric {
-  min-height: 76px;
-  display: grid;
-  align-content: center;
-  gap: 5px;
-  padding: 14px 16px;
-  border-width: 0;
-  background: color-mix(in srgb, var(--sf) 92%, transparent);
-  color: var(--tx);
-  cursor: pointer;
-  text-align: left;
-}
-
-.command-metric:hover {
-  background: rgba(255, 255, 255, .055);
-}
-
-.command-metric small,
-.command-metric span {
-  overflow: hidden;
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 850;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.command-metric strong {
-  font-size: 24px;
-  line-height: 1;
 }
 
 .dashboard-widget-grid {
@@ -3978,17 +3809,6 @@ html:not(.site-maintenance) .maintenance-message {
   justify-content: center;
 }
 
-.school-top {
-  display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-}
-
-.school-top .status-pill {
-  justify-self: end;
-}
-
 .school-avatar {
   width: 46px;
   height: 46px;
@@ -4029,73 +3849,6 @@ html:not(.site-maintenance) .maintenance-message {
 .school-city-filter {
   max-width: 360px;
   margin-bottom: 14px;
-}
-
-.school-note {
-  min-height: 16px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-}
-
-.school-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--mt);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.school-foot span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.school-foot em {
-  flex: 0 0 auto;
-  color: var(--ac);
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.school-scoreboard {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.school-scoreboard span {
-  min-width: 0;
-  padding: 9px 10px;
-  border: 1px solid var(--bd2);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .025);
-}
-
-.school-scoreboard strong,
-.school-scoreboard small {
-  display: block;
-}
-
-.school-scoreboard strong {
-  color: var(--tx);
-  font-size: 14px;
-  line-height: 1;
-}
-
-.school-scoreboard small {
-  margin-top: 4px;
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
 }
 
 .schools-board {
@@ -4143,264 +3896,6 @@ html:not(.site-maintenance) .maintenance-message {
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.school-command-concise {
-  border-radius: 18px;
-}
-
-.school-work-command {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 12px;
-  padding: 18px 20px;
-  border: 1px solid var(--bd);
-  border-radius: 16px;
-  background: var(--sf);
-}
-
-.school-work-command strong,
-.school-work-command p {
-  display: block;
-}
-
-.school-work-command strong {
-  margin-top: 6px;
-  font-family: var(--font-display);
-  font-size: 28px;
-  line-height: 1;
-}
-
-.school-work-command p {
-  margin: 7px 0 0;
-  color: var(--mt);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.school-work-totals {
-  display: flex;
-  gap: 8px;
-}
-
-.school-work-totals span {
-  min-width: 92px;
-  padding: 10px 12px;
-  border: 1px solid var(--bd2);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .025);
-}
-
-.school-work-totals strong,
-.school-work-totals small {
-  display: block;
-}
-
-.school-work-totals strong {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.school-work-totals small {
-  margin-top: 5px;
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.school-worklist {
-  overflow: hidden;
-  border: 1px solid var(--bd);
-  border-radius: 16px;
-  background: var(--sf);
-}
-
-.school-work-header,
-.school-work-row {
-  display: grid;
-  grid-template-columns: minmax(260px, 1.35fr) minmax(190px, 1fr) 110px 130px 92px 120px;
-  gap: 12px;
-  align-items: center;
-}
-
-.school-work-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--bd2);
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 850;
-  text-transform: uppercase;
-}
-
-.school-work-row {
-  width: 100%;
-  min-height: 76px;
-  padding: 12px 16px;
-  border: 0;
-  border-bottom: 1px solid var(--bd2);
-  border-radius: 0;
-  background: transparent;
-  color: var(--tx);
-  cursor: pointer;
-  text-align: left;
-}
-
-.school-work-row:last-child {
-  border-bottom: 0;
-}
-
-.school-work-row:hover {
-  background: rgba(255, 255, 255, .045);
-}
-
-.school-work-name,
-.school-work-owner,
-.school-work-meter,
-.school-work-action {
-  min-width: 0;
-}
-
-.school-work-name strong,
-.school-work-name small,
-.school-work-owner strong,
-.school-work-owner small,
-.school-work-meter strong,
-.school-work-meter small,
-.school-work-action small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.school-work-name strong,
-.school-work-owner strong {
-  font-size: 13px;
-  line-height: 1.25;
-}
-
-.school-work-name small,
-.school-work-owner small,
-.school-work-meter small,
-.school-work-action small {
-  margin-top: 4px;
-  color: var(--mt);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.school-work-meter i {
-  display: block;
-  width: 92px;
-  height: 6px;
-  margin-top: 7px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--sf2);
-}
-
-.school-work-meter i::before {
-  content: "";
-  display: block;
-  width: var(--pct);
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--ac), var(--ac2));
-}
-
-.school-detail-head {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-}
-
-.school-operational-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 16px;
-  margin: 14px 18px 0;
-  padding: 16px;
-  border: 1px solid rgba(200, 245, 90, .18);
-  border-radius: 18px;
-  background:
-    linear-gradient(160deg, rgba(200, 245, 90, .05), transparent 62%),
-    var(--sf);
-}
-
-.school-operational-warn {
-  border-color: rgba(245, 200, 90, .24);
-  background:
-    linear-gradient(160deg, rgba(245, 200, 90, .045), transparent 58%),
-    var(--sf);
-}
-
-.school-operational-info {
-  border-color: rgba(90, 245, 200, .2);
-}
-
-.school-operational-hero small,
-.school-operational-hero strong,
-.school-operational-hero p {
-  display: block;
-}
-
-.school-operational-hero small {
-  color: var(--mt);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.school-operational-hero strong {
-  margin-top: 5px;
-  font-family: var(--font-display);
-  font-size: 20px;
-  line-height: 1.15;
-}
-
-.school-operational-hero p {
-  margin: 5px 0 0;
-  color: var(--mt);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.school-operational-score {
-  display: grid;
-  grid-template-columns: repeat(4, 86px);
-  gap: 8px;
-}
-
-.school-operational-score span {
-  min-height: 58px;
-  display: grid;
-  align-content: center;
-  padding: 8px 10px;
-  border: 1px solid var(--bd2);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .025);
-}
-
-.school-operational-score strong,
-.school-operational-score small {
-  display: block;
-}
-
-.school-operational-score strong {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.school-operational-score small {
-  margin-top: 5px;
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .progress {
@@ -4594,45 +4089,6 @@ html:not(.site-maintenance) .maintenance-message {
   font-size: 12px;
 }
 
-.cars-hero {
-  grid-column: 1 / -1;
-  min-height: 142px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: center;
-  padding: 20px;
-  border: 1px solid rgba(200, 245, 90, .2);
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at right top, rgba(200, 245, 90, .14), transparent 34%),
-    linear-gradient(145deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, .012)),
-    var(--sf);
-}
-
-.cars-hero strong {
-  display: block;
-  margin-top: 8px;
-  color: var(--tx);
-  font-family: var(--font-display);
-  font-size: clamp(30px, 4vw, 52px);
-  line-height: .9;
-}
-
-.cars-hero p {
-  margin: 10px 0 0;
-  color: var(--mt);
-  font-size: 13px;
-  font-weight: 750;
-}
-
-.cars-hero-score {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(82px, 1fr));
-  gap: 8px;
-}
-
-.cars-hero-score span,
 .car-booking-grid span {
   min-width: 0;
   padding: 10px 12px;
@@ -4641,19 +4097,11 @@ html:not(.site-maintenance) .maintenance-message {
   background: rgba(255, 255, 255, .025);
 }
 
-.cars-hero-score strong,
-.cars-hero-score small,
 .car-booking-grid strong,
 .car-booking-grid small {
   display: block;
 }
 
-.cars-hero-score strong {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.cars-hero-score small,
 .car-booking-grid small {
   margin-top: 5px;
   color: var(--mt);
@@ -4738,53 +4186,6 @@ html:not(.site-maintenance) .maintenance-message {
   font-weight: 700;
 }
 
-.car-resource-strip,
-.car-widget-strip {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 8px;
-}
-
-.car-resource-strip span,
-.car-widget-strip span {
-  padding: 12px 14px;
-  border: 1px solid var(--bd);
-  border-radius: 14px;
-  background: var(--sf);
-}
-
-.car-resource-strip strong,
-.car-resource-strip small,
-.car-widget-strip strong,
-.car-widget-strip small {
-  display: block;
-}
-
-.car-widget-strip strong {
-  overflow: hidden;
-  color: var(--tx);
-  font-size: 16px;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.car-resource-strip small,
-.car-widget-strip small {
-  margin-top: 5px;
-  color: var(--mt);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.car-day-list {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 10px;
-}
-
 .car-day-group {
   overflow: hidden;
   border: 1px solid var(--bd);
@@ -4831,36 +4232,22 @@ html:not(.site-maintenance) .maintenance-message {
   background: rgba(255, 255, 255, .045);
 }
 
-.car-time strong,
-.car-time small,
 .car-route strong,
 .car-route small,
 .car-requester strong,
-.car-requester small,
-.car-request-id strong,
-.car-request-id small {
+.car-requester small {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.car-time strong {
-  font-size: 16px;
-}
-
-.car-time small,
 .car-route small,
-.car-requester small,
-.car-request-id small {
+.car-requester small {
   margin-top: 4px;
   color: var(--mt);
   font-size: 11px;
   font-weight: 750;
-}
-
-.car-request-id strong {
-  font-size: 15px;
 }
 
 .detail-widget {
@@ -4878,10 +4265,6 @@ html:not(.site-maintenance) .maintenance-message {
     var(--sf);
   transition: border-color .15s, background .15s;
   contain: layout paint;
-}
-
-.detail-widget.profile-wide {
-  grid-column: 1 / -1;
 }
 
 .inventory-category {
@@ -5179,39 +4562,6 @@ html:not(.site-maintenance) .maintenance-message {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-}
-
-.bar-stat {
-  display: grid;
-  gap: 6px;
-}
-
-.bar-stat small {
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.bar-stat span {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.bar-stat i {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--sf2);
-}
-
-.bar-stat i::before {
-  content: "";
-  display: block;
-  width: var(--pct);
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--ac), var(--ac2));
 }
 
 .supervision-source,
@@ -5964,35 +5314,6 @@ html:not(.site-maintenance) .maintenance-message {
   line-height: 1.35;
 }
 
-.school-overview-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.school-overview-kpis > div {
-  min-width: 0;
-  padding: 11px 12px;
-  border: 1px solid var(--bd);
-  border-radius: 8px;
-  background: rgba(255,255,255,.035);
-}
-
-.school-overview-kpis span {
-  display: block;
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.school-overview-kpis strong {
-  display: block;
-  margin-top: 3px;
-  color: var(--tx);
-  font-size: 17px;
-  line-height: 1.1;
-}
-
 .supervisor-list-card {
   border-color: color-mix(in srgb, var(--bd) 82%, transparent);
   background: rgba(255,255,255,.03);
@@ -6401,21 +5722,6 @@ html:not(.site-maintenance) .maintenance-message {
 .supervisor-score-card.ok { border-color: rgba(74, 222, 128, .18); }
 .supervisor-score-card.warn { border-color: rgba(245, 200, 90, .24); }
 .supervisor-score-card.info { border-color: rgba(90, 245, 200, .2); }
-
-.score-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.score-card-head small,
-.score-card-head span {
-  color: var(--mt);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
 
 .supervisor-score-card strong {
   display: block;
@@ -7681,10 +6987,6 @@ html:not(.site-maintenance) .maintenance-message {
   align-items: end;
 }
 
-.admin-center {
-  margin-top: 16px;
-}
-
 .admin-tools label:not(.file-btn) {
   display: grid;
   gap: 7px;
@@ -7796,58 +7098,6 @@ html:not(.site-maintenance) .maintenance-message {
 .file-btn {
   display: inline-grid;
   place-items: center;
-}
-
-.sync-note {
-  margin: 12px 0 0;
-  color: var(--mt);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.linked-school-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.linked-school {
-  min-height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--bd);
-  border-radius: 16px;
-  background: var(--sf2);
-  color: inherit;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-}
-
-.linked-school:hover {
-  border-color: rgba(200, 245, 90, .3);
-  background: rgba(255, 255, 255, .045);
-}
-
-.linked-school strong,
-.linked-school small {
-  display: block;
-}
-
-.linked-school strong {
-  font-size: 13px;
-  line-height: 1.25;
-}
-
-.linked-school small {
-  margin-top: 4px;
-  color: var(--mt);
-  font-size: 11px;
 }
 
 .contact-tabs {
@@ -8017,13 +7267,11 @@ html:not(.site-maintenance) .maintenance-message {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .dashboard-command,
-  .school-work-command {
+  .dashboard-command {
     grid-template-columns: 1fr;
   }
 
-  .dashboard-command,
-  .school-work-command {
+  .dashboard-command {
     display: grid;
   }
 
@@ -8034,8 +7282,7 @@ html:not(.site-maintenance) .maintenance-message {
 
   .supervisor-score-grid,
   .supervisor-workbench,
-  .inventory-hero,
-  .school-operational-hero {
+  .inventory-hero {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -8054,7 +7301,6 @@ html:not(.site-maintenance) .maintenance-message {
 
   .supervision-v1-layout,
   .supervisor-record-columns,
-  .cars-hero,
   .school-profile-hero,
   .school-profile-grid {
     grid-template-columns: 1fr;
@@ -8078,15 +7324,6 @@ html:not(.site-maintenance) .maintenance-message {
 
   .supervision-v1-selector {
     position: static;
-  }
-
-  .school-work-header {
-    display: none;
-  }
-
-  .school-work-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
   }
 
   .supervision-ledger-head {
@@ -8222,10 +7459,6 @@ html:not(.site-maintenance) .maintenance-message {
     margin-top: 9px;
   }
 
-  .sidebar-shortcuts.labeled button {
-    min-height: 32px;
-  }
-
   .account {
     padding-top: 10px;
   }
@@ -8260,7 +7493,6 @@ html:not(.site-maintenance) .maintenance-message {
   .school-grid,
   .schools-board,
   .school-guide-grid,
-  .cars-hero-score,
   .car-booking-grid,
   .school-profile-metrics,
   .school-profile-fields,
@@ -8270,9 +7502,7 @@ html:not(.site-maintenance) .maintenance-message {
   .supervisor-workbench,
   .supervision-focus-list,
   .inventory-hero,
-  .inventory-hero-score,
-  .school-operational-hero,
-  .school-operational-score {
+  .inventory-hero-score {
     grid-template-columns: 1fr;
   }
 
@@ -8322,23 +7552,6 @@ html:not(.site-maintenance) .maintenance-message {
 
   .table-row {
     grid-template-columns: 1fr;
-  }
-
-  .internal-table-head {
-    display: none;
-  }
-
-  .internal-table-row {
-    grid-template-columns: 38px minmax(0, 1fr);
-  }
-
-  .internal-table-row input[type="text"],
-  .internal-paid-check {
-    grid-column: 1 / -1;
-  }
-
-  .internal-paid-check {
-    justify-content: flex-start;
   }
 
   .internal-raffle-calendar {
@@ -8393,7 +7606,6 @@ html:not(.site-maintenance) .maintenance-message {
 [data-theme="light"] .page-header,
 [data-theme="light"] .metric-card,
 [data-theme="light"] .notice-card,
-[data-theme="light"] .command-metric,
 [data-theme="light"] .data-row,
 [data-theme="light"] .settings-row {
   background: #ffffff;
@@ -8501,49 +7713,6 @@ html:not(.site-maintenance) .maintenance-message {
   align-items: start;
 }
 
-.car-widget-strip {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(96px, 132px));
-  gap: 10px;
-  align-items: stretch;
-}
-
-.car-widget-strip span {
-  min-height: 62px;
-  padding: 10px 11px;
-  border: 1px solid var(--bd);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--sf) 90%, transparent), color-mix(in srgb, var(--sf2) 75%, transparent));
-}
-
-.car-widget-strip strong,
-.car-widget-strip small {
-  display: block;
-}
-
-.car-widget-strip strong {
-  color: var(--tx);
-  font-family: var(--font-display);
-  font-size: 20px;
-  line-height: 1;
-}
-
-.car-widget-strip small {
-  margin-top: 7px;
-  color: var(--mt);
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.car-widget-primary {
-  border-color: color-mix(in srgb, var(--ac2) 34%, var(--bd)) !important;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--ac2) 15%, var(--sf)), color-mix(in srgb, var(--sf2) 82%, transparent)) !important;
-}
-
-.car-widget-strip span,
 .car-day-group {
   border-radius: 12px;
 }
@@ -8838,10 +8007,6 @@ html:not(.site-maintenance) .maintenance-message {
     grid-column: 1 / -1;
   }
 
-  .car-widget-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .car-widget-agenda .car-day-group {
     grid-template-columns: repeat(2, minmax(240px, 1fr));
   }
@@ -8897,10 +8062,6 @@ html:not(.site-maintenance) .maintenance-message {
   .supervisor-sheet-foot,
   .setechub-head {
     flex-direction: column;
-  }
-
-  .school-overview-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .supervisor-list-card .setechub-head > .diag-pill {
