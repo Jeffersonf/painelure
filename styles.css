@@ -135,6 +135,10 @@ body:not(.is-authenticated) .mobile-nav {
   display: none;
 }
 
+html.auth-pending body:not(.site-maintenance) .login-screen {
+  display: none;
+}
+
 body.is-authenticated .login-screen {
   display: none;
 }

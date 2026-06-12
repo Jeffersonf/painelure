@@ -174,7 +174,6 @@
     const active = P.$(".page.active");
     const activeId = active?.id?.replace("page-", "");
     if (activeId && activeId !== target) previousPage = activeId;
-    P.renderPage?.(target, { force: true });
     P.$all(".page").forEach(page => page.classList.toggle("active", page.id === pageId(target)));
     P.$all("[data-page]").forEach(btn => btn.classList.toggle("active", canonicalPage(btn.dataset.page) === target));
     updateGlobalPageHeading(target);
@@ -183,6 +182,12 @@
     history.replaceState(null, "", pageRoute(target));
     P.clearSearch();
     window.scrollTo(0, 0);
+    try {
+      P.renderPage?.(target, { force: true });
+    } catch (error) {
+      console.error(`[PainelURE] Falha ao abrir ${target}:`, error);
+      P.showToast?.("Erro ao abrir categoria", `Não foi possível renderizar ${pageLabel(target)} agora.`, "danger", { delay: 9000 });
+    }
     return true;
   }
 
