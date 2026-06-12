@@ -7822,7 +7822,6 @@ html:not(.site-maintenance) .maintenance-message {
 
 [data-presentation="true"] .sidebar-card,
 [data-presentation="true"] .account,
-[data-presentation="true"] #page-admin,
 [data-presentation="true"] #page-profiles,
 [data-presentation="true"] #page-quality {
   display: none !important;

@@ -148,6 +148,18 @@
     showAccessDenied.timer = window.setTimeout(() => toast.classList.remove("show"), 5200);
   }
 
+  function isAdminRole() {
+    const role = P.currentRole?.() || "";
+    const key = P.roleKey?.(role) || "";
+    const text = P.normalize?.(role) || String(role || "").toLowerCase();
+    return key === "Administrador" || text.includes("administrador") || text.includes("admin");
+  }
+
+  function canOpenPage(target) {
+    if (target === "admin" && isAdminRole()) return true;
+    return !P.canAccess || P.canAccess(target);
+  }
+
   function updatePageMaintenanceNotice(id) {
     let notice = P.$("#pageMaintenanceNotice");
     const config = P.pageMaintenanceConfig?.(id) || {};
@@ -167,10 +179,11 @@
 
   function setPage(id) {
     const target = canonicalPage(id || "dashboard");
-    if (P.canAccess && !P.canAccess(target)) {
+    if (!canOpenPage(target)) {
       showAccessDenied(target);
       return false;
     }
+    if (target === "admin") document.documentElement.dataset.presentation = "false";
     const active = P.$(".page.active");
     const activeId = active?.id?.replace("page-", "");
     if (activeId && activeId !== target) previousPage = activeId;
