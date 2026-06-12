@@ -1309,6 +1309,11 @@
   function renderNetworkOptions(networkData) {
     const data = networkData || {};
     const grid = P.$("#networkSchoolGrid");
+    const countItems = value => {
+      if (Array.isArray(value)) return value.filter(item => item !== null && item !== undefined && String(item).trim()).length;
+      if (value && typeof value === "object") return Object.keys(value).length;
+      return String(value || "").split(/\r?\n|;/).map(item => item.trim()).filter(Boolean).length;
+    };
     const names = Object.keys(data);
     if (grid) {
       const sorted = names.sort((a, b) => {
@@ -1322,7 +1327,7 @@
           ${sorted.map((name, index) => {
             const school = findSchool(name);
             const item = data[name] || {};
-            const cameras = item.cameras || item.câmeras || [];
+            const cameraCount = countItems(item.cameras || item.câmeras);
             return `
               <button class="school-card school-compact-card network-school-card ${index === 0 ? "active" : ""}" type="button" data-network-school="${name}" data-network-school-key="${P.searchText([name])}" data-search="${P.searchText([name, schoolCity(school), schoolCie(school)])}">
                 <div class="school-compact-main">
@@ -1333,9 +1338,9 @@
                   </div>
                 </div>
                 <div class="network-school-metrics">
-                  <span><b>${item.network?.length || 0}</b><small>redes</small></span>
-                  <span><b>${item.ips?.length || 0}</b><small>IPs</small></span>
-                  <span><b>${cameras.length}</b><small>câmeras</small></span>
+                  <span><b>${countItems(item.network)}</b><small>redes</small></span>
+                  <span><b>${countItems(item.ips)}</b><small>IPs</small></span>
+                  <span><b>${cameraCount}</b><small>câmeras</small></span>
                 </div>
               </button>
             `;
@@ -1352,6 +1357,17 @@
   function renderNetwork(networkData, requestedName = "") {
     const layout = P.$("#networkLayout");
     if (!layout) return;
+    const list = value => {
+      if (Array.isArray(value)) return value.filter(item => item !== null && item !== undefined && String(item).trim());
+      if (value && typeof value === "object") {
+        return Object.entries(value)
+          .map(([key, item]) => item && typeof item === "object"
+            ? `${key}: ${Object.values(item).filter(Boolean).join(" | ")}`
+            : `${key}: ${item}`)
+          .filter(item => String(item).trim());
+      }
+      return String(value || "").split(/\r?\n|;/).map(item => item.trim()).filter(Boolean);
+    };
     const names = Object.keys(networkData || {});
     const selectedName = requestedName || layout.dataset.selectedNetworkSchool || names[0] || "";
     const data = networkData?.[selectedName] || networkData?.[names[0]];
@@ -1366,13 +1382,15 @@
     }
     const school = findSchool(effectiveName);
     const supervisor = supervisorForSchool(effectiveName);
-    const cameraItems = data.cameras || data.câmeras || [];
-    const credentialItems = data.credentials || [];
+    const networkItems = list(data.network);
+    const ipItems = list(data.ips);
+    const cameraItems = list(data.cameras || data.câmeras);
+    const credentialItems = list(data.credentials);
     const widgets = [
-      ["network", "Rede administrativa e pedagógica", data.network || [], "RD", "info", "redes"],
-      ["ips", "IPs, banda e CIE", data.ips || [], "IP", "info", "endereços"],
+      ["network", "Rede administrativa e pedagógica", networkItems, "RD", "info", "redes"],
+      ["ips", "IPs, banda e CIE", ipItems, "IP", "info", "endereços"],
       ["cameras", "Câmeras e DVR", cameraItems, "CM", "ok", "monitoramento"],
-      ["credentials", "Credenciais", data.credentials || [], "CR", "warn", "restrito"]
+      ["credentials", "Credenciais", credentialItems, "CR", "warn", "restrito"]
     ].filter(([, , items]) => items.length);
     if (credentialItems.length && !canViewCredentials()) {
       const credentialIndex = widgets.findIndex(([key]) => key === "credentials");
@@ -1409,8 +1427,8 @@
           <p>${school ? schoolSubtitle(school) : "Escola fora da lista mestre."}</p>
         </div>
         <div class="network-score">
-          <span><b>${data.network?.length || 0}</b><small>redes</small></span>
-          <span><b>${data.ips?.length || 0}</b><small>IPs</small></span>
+          <span><b>${networkItems.length}</b><small>redes</small></span>
+          <span><b>${ipItems.length}</b><small>IPs</small></span>
           <span><b>${cameraItems.length}</b><small>câmeras</small></span>
         </div>
         <div class="detail-actions">
