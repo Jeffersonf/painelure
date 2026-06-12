@@ -86,13 +86,15 @@
     const customAccess = P.getAppData?.()?.accessRules?.roleAccess || {};
     if (key === "Administrador" || target.includes("admin")) {
       const saved = Array.isArray(customAccess.Administrador) ? customAccess.Administrador : [];
-      return [...new Set([...(saved.length ? saved : DEFAULT_ACCESS.Administrador), "internal"])];
+      return [...new Set([...DEFAULT_ACCESS.Administrador, ...saved, "internal"])];
     }
     if (key === "SEINTEC" || target.includes("seintec")) {
       const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
       return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
     }
-    if (key && Array.isArray(customAccess[key])) return customAccess[key];
+    if (key && Array.isArray(customAccess[key])) {
+      return [...new Set([...customAccess[key], ...(DEFAULT_ACCESS[key]?.includes("internal") ? ["internal"] : [])])];
+    }
     if (key) return DEFAULT_ACCESS[key];
     if (target.includes("supervis")) return ACCESS.Supervisao;
     if (target.includes("ctc")) return ACCESS["Tecnicos CTC"];

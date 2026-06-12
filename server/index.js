@@ -712,13 +712,15 @@ function accessForRole(role, appData = {}) {
   const customAccess = appData?.accessRules?.roleAccess || {};
   if (key === "Administrador" || target.includes("admin")) {
     const saved = Array.isArray(customAccess.Administrador) ? customAccess.Administrador : [];
-    return [...new Set([...(saved.length ? saved : DATA_ACCESS.Administrador), "internal"])];
+    return [...new Set([...DATA_ACCESS.Administrador, ...saved, "internal"])];
   }
   if (key === "SEINTEC" || target.includes("seintec")) {
     const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
     return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
   }
-  if (key && Array.isArray(customAccess[key])) return customAccess[key];
+  if (key && Array.isArray(customAccess[key])) {
+    return [...new Set([...customAccess[key], ...(DATA_ACCESS[key]?.includes("internal") ? ["internal"] : [])])];
+  }
   if (key) return DATA_ACCESS[key];
   if (target.includes("supervis")) return DATA_ACCESS.Supervisao;
   if (target.includes("ctc")) return DATA_ACCESS["Técnicos CTC"];
