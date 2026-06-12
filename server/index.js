@@ -45,10 +45,10 @@ let frontendSeedStore = null;
 const DATA_ACCESS = {
   Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
-  "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+  "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
   SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
-  CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+  CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
   Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
   Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
   SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "satisfaction", "reports"],
@@ -1519,10 +1519,15 @@ function isInternalWriterRequest(req) {
   if (!ADMIN_KEY) return true;
   const session = currentSession(req);
   const role = normalizeKey(session?.role || "");
-  return Boolean(session && (role.includes("administrador") || role.includes("seintec")));
+  return Boolean(session && (
+    role.includes("administrador")
+    || role.includes("seintec")
+    || role === "ctc"
+    || role.includes("tecnicos ctc")
+  ));
 }
 
-function requireInternalWriter(req, res, message = "Apenas Administrador ou SEINTEC pode salvar os dados do cafe.") {
+function requireInternalWriter(req, res, message = "Apenas Administrador, SEINTEC ou CTC pode salvar os dados do cafe.") {
   if (!requireAuth(req, res)) return false;
   if (isInternalWriterRequest(req)) return true;
   send(res, 403, { ok: false, error: message });

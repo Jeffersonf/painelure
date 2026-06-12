@@ -13,10 +13,10 @@
   const ROLE_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
-    "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
-    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
+    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "satisfaction"],
