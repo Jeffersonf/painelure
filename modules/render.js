@@ -3240,6 +3240,7 @@
   const INTERNAL_STORAGE_KEY = "painelure2_internal";
   const INTERNAL_BACKEND_TOKEN_KEY = "painelure2_backend_token";
   let internalSaveTimer = null;
+  let internalSyncWarningShown = false;
   const INTERNAL_RAFFLE_NAMES = [
     "Maria", "Graziela", "Claudia", "Regiane", "Vilma",
     "Fernanda", "Emília", "Daniela", "Sandra", "Zuleika",
@@ -3340,8 +3341,16 @@
       if (!token) return;
       P.saveInternalData(token, state).catch(error => {
         console.warn("[PainelURE] Café salvo localmente; sync online pendente:", error);
-        if (/HTTP 401|HTTP 403|autorizado|forbidden|unauthorized/i.test(String(error?.message || error || ""))) {
+        const message = String(error?.message || error || "");
+        if (error?.status === 401 || /HTTP 401|unauthorized/i.test(message)) {
           P.expireOnlineSession?.("Sua sessão foi atualizada no servidor. Entre novamente para salvar o Café online.");
+          return;
+        }
+        if (error?.status === 403 || /HTTP 403|forbidden/i.test(message)) {
+          if (!internalSyncWarningShown) {
+            internalSyncWarningShown = true;
+            P.showToast?.("Café salvo localmente", "Seu perfil ainda não tem permissão online no servidor atual. O backup local foi atualizado.", "warn", { delay: 8000 });
+          }
           return;
         }
         P.showToast?.("Café salvo localmente", "Não foi possível enviar ao servidor agora. O backup local já está atualizado.", "warn", { delay: 6500 });
