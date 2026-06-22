@@ -45,10 +45,10 @@ let frontendSeedStore = null;
 const DATA_ACCESS = {
   Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
-  "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
+  "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
   SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
-  CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
+  CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
   Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
   Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction", "reports"],
   SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "satisfaction", "reports"],
@@ -714,8 +714,9 @@ function accessForRole(role, appData = {}) {
     const saved = Array.isArray(customAccess.Administrador) ? customAccess.Administrador : [];
     return [...new Set([...DATA_ACCESS.Administrador, ...saved, "internal"])];
   }
-  if (key === "SEINTEC" || target.includes("seintec")) {
-    const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
+  if (key === "SEINTEC" || target.includes("seintec") || key === "CTC" || key === "Técnicos CTC" || target.includes("ctc")) {
+    const savedKeys = ["SEINTEC", "CTC", "Técnicos CTC"];
+    const saved = savedKeys.flatMap(savedKey => Array.isArray(customAccess[savedKey]) ? customAccess[savedKey] : []);
     return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
   }
   if (key && Array.isArray(customAccess[key])) {
@@ -723,7 +724,7 @@ function accessForRole(role, appData = {}) {
   }
   if (key) return DATA_ACCESS[key];
   if (target.includes("supervis")) return DATA_ACCESS.Supervisao;
-  if (target.includes("ctc")) return DATA_ACCESS["Técnicos CTC"];
+  if (target.includes("ctc")) return FULL_NON_ADMIN_ACCESS;
   if (target.includes("seintec")) return DATA_ACCESS.SEINTEC;
   if (target.includes("setec")) return DATA_ACCESS.SETEC;
   if (target.includes("gabinete") || target.includes("dirigente")) return DATA_ACCESS.Gabinete;

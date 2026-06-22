@@ -3,10 +3,10 @@
   const DEFAULT_ACCESS = {
     Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
-    "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
+    "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SEINTEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
-    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction", "internal"],
+    CTC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
     Gabinete: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     Dirigente: ["dashboard", "schools", "calls", "contacts", "cars", "calendar", "satisfaction"],
     SEOM: ["dashboard", "schools", "contacts", "cars", "calendar", "satisfaction"],
@@ -88,8 +88,9 @@
       const saved = Array.isArray(customAccess.Administrador) ? customAccess.Administrador : [];
       return [...new Set([...DEFAULT_ACCESS.Administrador, ...saved, "internal"])];
     }
-    if (key === "SEINTEC" || target.includes("seintec")) {
-      const saved = Array.isArray(customAccess.SEINTEC) ? customAccess.SEINTEC : [];
+    if (key === "SEINTEC" || target.includes("seintec") || key === "CTC" || key === "Tecnicos CTC" || target.includes("ctc")) {
+      const savedKeys = ["SEINTEC", "CTC", "Tecnicos CTC"];
+      const saved = savedKeys.flatMap(savedKey => Array.isArray(customAccess[savedKey]) ? customAccess[savedKey] : []);
       return [...new Set([...FULL_NON_ADMIN_ACCESS, ...saved])].filter(page => page !== "admin");
     }
     if (key && Array.isArray(customAccess[key])) {
@@ -97,7 +98,7 @@
     }
     if (key) return DEFAULT_ACCESS[key];
     if (target.includes("supervis")) return ACCESS.Supervisao;
-    if (target.includes("ctc")) return ACCESS["Tecnicos CTC"];
+    if (target.includes("ctc")) return FULL_NON_ADMIN_ACCESS;
     if (target.includes("seintec")) return ACCESS.SEINTEC;
     if (target.includes("setec")) return ACCESS.SETEC;
     if (target.includes("ctc")) return ACCESS.CTC;

@@ -109,7 +109,13 @@ function run() {
     assert(scoped.schoolAssets.length > 0, "Tecnicos CTC devem receber inventario.");
     assert(scoped.cars.length === data.cars.length, "Tecnicos CTC devem receber agendamentos de carro.");
     assert(hasCredentials(scoped.networkData), "Tecnicos CTC devem receber credenciais.");
+    assert(scoped.calls.length === data.calls.length, "Tecnicos CTC devem receber chamados.");
+    assert(scoped.supervisors.length === data.supervisors.length, "Tecnicos CTC devem receber supervisao.");
+    assert(scoped.reports.length === data.reports.length, "Tecnicos CTC devem receber relatorios.");
+    assert(scoped.profiles.length === data.profiles.length, "Tecnicos CTC devem receber perfis.");
+    assert(scoped.quality.length === data.quality.length, "Tecnicos CTC devem receber qualidade.");
     assert(scoped.users.length === 0, "Tecnicos CTC nao devem receber usuarios admin.");
+    assert(!P.roleAccess("Tecnicos CTC").includes("admin"), "Tecnicos CTC nao deve acessar admin.");
   });
 
   withUser(P, { name: "SETEC", role: "SETEC" }, scoped => {
@@ -228,7 +234,8 @@ function run() {
 
   assertAccess(P, "Administrador", ["admin", "network", "inventory", "bi-equipment", "profiles"], []);
   assertAccess(P, "Supervisao", ["dashboard", "schools", "network", "supervision", "satisfaction"], ["inventory", "bi-equipment", "cars", "reports", "admin"]);
-  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "cars", "satisfaction"], ["bi-equipment", "reports", "admin", "profiles"]);
+  assertAccess(P, "Tecnicos CTC", ["network", "inventory", "ctc", "calls", "cars", "supervision", "calendar", "satisfaction", "reports", "profiles", "quality"], ["bi-equipment", "admin"]);
+  assertAccess(P, "CTC", ["network", "inventory", "ctc", "calls", "cars", "supervision", "calendar", "satisfaction", "reports", "profiles", "quality"], ["bi-equipment", "admin"]);
   assertAccess(P, "SETEC", ["network", "inventory", "calendar", "satisfaction"], ["bi-equipment", "reports", "admin"]);
   assertAccess(P, "SEINTEC", ["network", "inventory", "ctc", "calls", "cars", "supervision", "calendar", "satisfaction", "reports", "profiles", "quality"], ["bi-equipment", "admin"]);
   assertAccess(P, "Gabinete", ["network", "calls", "calendar", "cars", "satisfaction"], ["reports", "inventory", "bi-equipment", "admin"]);
