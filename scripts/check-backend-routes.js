@@ -39,4 +39,8 @@ const selfUserBlock = routeBlock('if (req.method === "PUT" && pathname === "/api
 assert(selfUserBlock.includes("requireAuth(req, res"), "PUT /api/users/me precisa exigir sessao.");
 assert(!selfUserBlock.includes("requireAdmin(req, res"), "PUT /api/users/me deve permitir atualizacao do proprio usuario.");
 
+const supervisionJustificationBlock = routeBlock('if (req.method === "PUT" && pathname === "/api/supervision/justification")');
+assert(supervisionJustificationBlock.includes("requireAuth(req, res"), "Justificativa da supervisao precisa exigir sessao.");
+assert(supervisionJustificationBlock.includes("supervisorForUser(appData, user)"), "Supervisor deve poder alterar apenas a propria justificativa.");
+
 console.log("Rotas administrativas OK");

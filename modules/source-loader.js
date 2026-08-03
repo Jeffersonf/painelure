@@ -101,7 +101,13 @@
   }
 
   function applySourceData(appData, key, data) {
-    if (key === "supervision") appData.supervisors = data;
+    if (key === "supervision") {
+      const currentByName = new Map((appData.supervisors || []).map(supervisor => [P.normalize(supervisor.name), supervisor]));
+      appData.supervisors = data.map(supervisor => ({
+        ...supervisor,
+        justifications: { ...(currentByName.get(P.normalize(supervisor.name))?.justifications || {}) }
+      }));
+    }
     else if (key === "network") appData.networkData = data;
     else if (key === "inventory") {
       if (Array.isArray(data) && data.some(item => item?.school)) appData.schoolAssets = data;

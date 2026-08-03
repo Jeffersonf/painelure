@@ -30,6 +30,20 @@
     return parts.total ? Math.min(100, Math.round((parts.done / parts.total) * 100)) : 0;
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function supervisorJustification(supervisor) {
+    const monthKey = P.selectedMonthKey?.() || "";
+    return String(supervisor?.justifications?.[monthKey] || "");
+  }
+
   function monthSourceIsSelected() {
     return (P.selectedMonthKey?.() || "") === (P.supervisionMonthKey?.() || P.sources?.supervision?.monthKey || P.sources?.supervision?.metadata?.monthKey || "");
   }
@@ -241,6 +255,7 @@
                   <col class="supervisor-col-week">
                   <col class="supervisor-col-indicator">
                   <col class="supervisor-col-indicator">
+                  <col class="supervisor-col-justification">
                 </colgroup>
                 <thead>
                   <tr>
@@ -251,6 +266,7 @@
                     <th>Semana</th>
                     <th>Indicador semana</th>
                     <th>Indicador mês</th>
+                    <th>Justificativa</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,6 +281,10 @@
                       <td>${metrics.currentWeek || "--"}</td>
                       <td><span class="diag-pill pill-${metrics.weeklyIndicator.tone}">${metrics.weeklyIndicator.label}</span></td>
                       <td><span class="diag-pill pill-${metrics.monthlyIndicator.tone}">${metrics.monthlyIndicator.label}</span></td>
+                      <td class="supervisor-justification-cell">
+                        <textarea data-supervisor-justification="${index}" maxlength="2000" rows="3" placeholder="Digite a justificativa do mês">${escapeHtml(supervisorJustification(item.supervisor))}</textarea>
+                        <div><small data-justification-status="${index}"></small><button class="btn btn-p btn-sm" type="button" data-save-justification="${index}">Salvar</button></div>
+                      </td>
                     </tr>`;
                   }).join("")}
                 </tbody>
@@ -313,6 +333,45 @@
     });
     host.querySelector("#supervisorFullscreenBtn")?.addEventListener("click", () => {
       P.$("#painelSupervisor")?.requestFullscreen?.();
+    });
+    host.querySelectorAll("[data-supervisor-justification]").forEach(field => {
+      field.addEventListener("click", event => event.stopPropagation());
+    });
+    host.querySelectorAll("[data-save-justification]").forEach(button => {
+      button.addEventListener("click", async event => {
+        event.stopPropagation();
+        const index = Number(button.dataset.saveJustification);
+        const item = stats[index];
+        const field = host.querySelector(`[data-supervisor-justification="${index}"]`);
+        const status = host.querySelector(`[data-justification-status="${index}"]`);
+        const monthKey = P.selectedMonthKey?.() || "";
+        const justification = String(field?.value || "").trim();
+        const currentData = P.getAppData();
+        const supervisorsNext = (currentData.supervisors || []).map(supervisor => {
+          if (P.normalize(supervisor.name) !== P.normalize(item.supervisor.name)) return supervisor;
+          const justifications = { ...(supervisor.justifications || {}) };
+          if (justification) justifications[monthKey] = justification;
+          else delete justifications[monthKey];
+          return { ...supervisor, justifications };
+        });
+        P.setAppData({ ...currentData, supervisors: supervisorsNext });
+        P.saveAppData?.();
+        button.disabled = true;
+        if (status) status.textContent = "Salvando...";
+        try {
+          const token = sessionStorage.getItem("painelure2_backend_token") || "";
+          const payload = await P.saveSupervisionJustification?.(token, item.supervisor.name, monthKey, justification);
+          if (!payload?.ok) throw new Error("Não foi possível salvar.");
+          if (payload?.data?.updatedAt) P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt };
+          if (status) status.textContent = "Salva";
+          P.showToast?.("Justificativa salva", `${item.supervisor.name} • ${P.selectedMonthLabel?.() || monthKey}`, "ok");
+        } catch (error) {
+          if (status) status.textContent = "Pendente de sincronização";
+          P.showToast?.("Justificativa salva localmente", error.message, "warn", { delay: 7000 });
+        } finally {
+          button.disabled = false;
+        }
+      });
     });
     host.querySelectorAll("[data-supervisor-index], [data-supervisor-selector]").forEach(button => {
       button.addEventListener("click", () => {

@@ -1728,6 +1728,48 @@ async function handleApi(req, res, pathname) {
     return;
   }
 
+  if (req.method === "PUT" && pathname === "/api/supervision/justification") {
+    if (!requireAuth(req, res)) return;
+    const body = JSON.parse(await readBody(req) || "{}");
+    const supervisorName = String(body.supervisorName || "").trim();
+    const monthKey = String(body.monthKey || "").trim();
+    const justification = String(body.justification || "").trim().slice(0, 2000);
+    if (!supervisorName || !/^\d{4}-\d{2}$/.test(monthKey)) {
+      send(res, 400, { ok: false, error: "Supervisor e mês são obrigatórios." });
+      return;
+    }
+
+    const store = await readStore() || { appData: {} };
+    const appData = store.appData || {};
+    const supervisors = Array.isArray(appData.supervisors) ? appData.supervisors : [];
+    const targetIndex = supervisors.findIndex(item => normalizeKey(item?.name || "") === normalizeKey(supervisorName));
+    if (targetIndex < 0) {
+      send(res, 404, { ok: false, error: "Supervisor não encontrado." });
+      return;
+    }
+
+    if (!isAdminRequest(req)) {
+      const user = await currentSessionUser(req);
+      const ownSupervisor = supervisorForUser(appData, user);
+      if (!ownSupervisor || normalizeKey(ownSupervisor.name) !== normalizeKey(supervisors[targetIndex].name)) {
+        send(res, 403, { ok: false, error: "Você só pode editar a própria justificativa." });
+        return;
+      }
+    }
+
+    const current = supervisors[targetIndex];
+    const justifications = { ...(current.justifications || {}) };
+    if (justification) justifications[monthKey] = justification;
+    else delete justifications[monthKey];
+    const updatedSupervisor = { ...current, justifications };
+    const nextSupervisors = [...supervisors];
+    nextSupervisors[targetIndex] = updatedSupervisor;
+    const data = await saveStore({ ...appData, supervisors: nextSupervisors }, "supervision:justification", { force: true });
+    await audit(req, "update", "supervision_justification", supervisorName, `Justificativa de ${monthKey} atualizada.`, {});
+    send(res, 200, { ok: true, supervisor: updatedSupervisor, data: { updatedAt: data.updatedAt } });
+    return;
+  }
+
   if (req.method === "POST" && pathname.startsWith("/api/import/")) {
     if (!requireAdmin(req, res, "Apenas administrador pode importar CSV.")) return;
     const type = pathname.split("/").pop();

@@ -4987,7 +4987,7 @@ html:not(.site-maintenance) .maintenance-message {
 
 .supervisor-sheet-table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 1460px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -4997,6 +4997,39 @@ html:not(.site-maintenance) .maintenance-message {
 .supervisor-col-goal { width: 13%; }
 .supervisor-col-week { width: 7%; }
 .supervisor-col-indicator { width: 16%; }
+.supervisor-col-justification { width: 25%; }
+
+.supervisor-justification-cell textarea {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  border: 1px solid var(--bd);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: var(--bg);
+  color: var(--tx);
+  font: inherit;
+  line-height: 1.35;
+}
+
+.supervisor-justification-cell textarea:focus {
+  border-color: var(--ac);
+  outline: 2px solid color-mix(in srgb, var(--ac) 24%, transparent);
+}
+
+.supervisor-justification-cell > div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 7px;
+}
+
+.supervisor-justification-cell small {
+  flex: 1;
+  color: var(--mt);
+  font-size: 11px;
+}
 
 .supervisor-sheet-table th,
 .supervisor-sheet-table td {

@@ -153,6 +153,17 @@
     return payload;
   }
 
+  async function saveSupervisionJustification(token, supervisorName, monthKey, justification) {
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return fetchApi("/api/supervision/justification", {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ supervisorName, monthKey, justification }),
+      timeoutMs: 12000
+    });
+  }
+
   async function loginBackend(credentials) {
     const options = {
       method: "POST",
@@ -311,6 +322,7 @@
 
   P.loadBackendData = loadBackendData;
   P.pushBackendData = pushBackendData;
+  P.saveSupervisionJustification = saveSupervisionJustification;
   P.loginBackend = loginBackend;
   P.logoutBackend = logoutBackend;
   P.loadBackendUser = loadBackendUser;
