@@ -91,9 +91,20 @@
       document.body.appendChild(stack);
     }
     const icons = { ok: "OK", warn: "!", danger: "!", info: "i" };
-    const delay = Number(options.delay || 7600);
+    const delay = Number(options.delay || 12000);
+    const progress = Number.isFinite(Number(options.progress))
+      ? Math.max(0, Math.min(100, Math.round(Number(options.progress))))
+      : null;
+    if (options.id) {
+      const previous = document.getElementById(`toast-${options.id}`);
+      if (previous) {
+        window.clearTimeout(previous.removeTimer);
+        previous.remove();
+      }
+    }
     const toast = document.createElement("div");
-    toast.className = `app-toast toast-${tone || "info"}`;
+    toast.className = `app-toast toast-${tone || "info"}${progress !== null ? " toast-with-progress" : ""}`;
+    if (options.id) toast.id = `toast-${options.id}`;
     toast.setAttribute("role", tone === "danger" ? "alert" : "status");
     toast.style.setProperty("--toast-delay", `${delay}ms`);
     toast.innerHTML = `
@@ -103,7 +114,10 @@
         ${message ? `<span>${message}</span>` : ""}
       </span>
       <button type="button" aria-label="Fechar aviso">x</button>
-      <b class="toast-life" aria-hidden="true"></b>
+      ${progress !== null ? `
+        <span class="toast-progress-copy"><span>Progresso da sincronização</span><strong>${progress}%</strong></span>
+        <b class="toast-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><i style="width:${progress}%"></i></b>
+      ` : `<b class="toast-life" aria-hidden="true"></b>`}
     `;
     toast.querySelector("button")?.addEventListener("click", () => {
       toast.classList.remove("show");
@@ -111,11 +125,27 @@
     });
     stack.appendChild(toast);
     window.setTimeout(() => toast.classList.add("show"), 20);
-    window.setTimeout(() => {
+    toast.removeTimer = window.setTimeout(() => {
       toast.classList.remove("show");
       window.setTimeout(() => toast.remove(), 180);
     }, delay);
     return toast;
+  }
+
+  function showSyncProgress(progress, title, message, tone = "info", options = {}) {
+    const done = Number(progress) >= 100;
+    return showToast(
+      title || (done ? "Sincronização concluída" : "Sincronizando dados"),
+      message || (done
+        ? "Os dados mais recentes já estão disponíveis no painel."
+        : "Aguarde enquanto o PainelURE confere e atualiza as informações oficiais."),
+      tone,
+      {
+        id: options.id || "official-sync",
+        progress,
+        delay: options.delay || (done ? 18000 : 60000)
+      }
+    );
   }
 
   function updateGlobalPageHeading(id) {
@@ -275,6 +305,7 @@
   P.setPage = setPage;
   P.showAccessDenied = showAccessDenied;
   P.showToast = showToast;
+  P.showSyncProgress = showSyncProgress;
   P.updatePageMaintenanceNotice = updatePageMaintenanceNotice;
   P.updateGlobalPageHeading = updateGlobalPageHeading;
   P.bindNavigation = bindNavigation;

@@ -1496,7 +1496,7 @@ function deleteSession(req) {
 function isAdminRequest(req) {
   if (!ADMIN_KEY) return true;
   const session = currentSession(req);
-  return Boolean(session && session.role === "Administrador");
+  return Boolean(session && normalizeKey(session.role || "").includes("administrador"));
 }
 
 async function currentSessionUser(req) {
@@ -1732,6 +1732,7 @@ async function handleApi(req, res, pathname) {
     if (!requireAuth(req, res)) return;
     const body = JSON.parse(await readBody(req) || "{}");
     const supervisorName = String(body.supervisorName || "").trim();
+    const supervisorEmail = String(body.supervisorEmail || "").trim();
     const monthKey = String(body.monthKey || "").trim();
     const justification = String(body.justification || "").trim().slice(0, 2000);
     if (!supervisorName || !/^\d{4}-\d{2}$/.test(monthKey)) {
@@ -1742,7 +1743,10 @@ async function handleApi(req, res, pathname) {
     const store = await readStore() || { appData: {} };
     const appData = store.appData || {};
     const supervisors = Array.isArray(appData.supervisors) ? appData.supervisors : [];
-    const targetIndex = supervisors.findIndex(item => normalizeKey(item?.name || "") === normalizeKey(supervisorName));
+    const targetIndex = supervisors.findIndex(item => (
+      normalizeKey(item?.name || "") === normalizeKey(supervisorName)
+      || (supervisorEmail && normalizeKey(item?.email || "") === normalizeKey(supervisorEmail))
+    ));
     if (targetIndex < 0) {
       send(res, 404, { ok: false, error: "Supervisor não encontrado." });
       return;

@@ -368,19 +368,27 @@
 
   async function syncOfficialDataBeforeOpen() {
     showLoginStatus("Sincronizando dados oficiais...");
+    P.showSyncProgress?.(5, "Preparando seu painel", "Sua sessão foi reconhecida. Agora vamos conferir os dados salvos no servidor e as planilhas oficiais.", "info", { id: "login-sync" });
     let backendPayload = null;
     try {
       backendPayload = await loadScopedBackendData({ render: false });
+      if (backendPayload?.data?.appData) {
+        P.showSyncProgress?.(24, "Base online conferida", "Os dados do servidor foram carregados. Agora estamos verificando as fontes oficiais de cada área.", "info", { id: "login-sync" });
+      } else {
+        P.showSyncProgress?.(24, "Usando a cópia deste navegador", "O servidor não enviou dados agora. O painel preservou sua cópia local e continuará conferindo as planilhas oficiais.", "warn", { id: "login-sync", delay: 22000 });
+      }
     } catch (error) {
-      P.showToast?.("Base online indisponível", "Entrando com dados locais; tente sincronizar novamente no painel.", "warn", { delay: 9000 });
+      P.showSyncProgress?.(24, "Servidor temporariamente indisponível", "O painel continuará com a cópia salva neste navegador. Nenhum dado local foi apagado.", "warn", { id: "login-sync", delay: 22000 });
     }
     if (P.loadConfiguredSources) {
       showLoginStatus("Sincronizando fontes oficiais...");
-      const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision", "satisfaction"], order: ["cars", "supervision", "satisfaction"] });
+      const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision", "satisfaction"], order: ["cars", "supervision", "satisfaction"], progressStart: 24, progressEnd: 94, progressId: "login-sync" });
       const failed = (results || []).filter(item => item.status === "error");
       if (failed.length) {
         const labels = failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ");
-        P.showToast?.("Sincronização parcial", `${labels} não respondeu agora.`, "warn", { delay: 9000 });
+        P.showSyncProgress?.(100, "Painel aberto com avisos", `${labels} não respondeu agora. Mantivemos os dados anteriores dessas áreas para você continuar trabalhando.`, "warn", { id: "login-sync", delay: 24000 });
+      } else {
+        P.showSyncProgress?.(100, "Painel pronto para uso", "A base online e as fontes oficiais foram conferidas. As informações mais recentes já estão disponíveis.", "ok", { id: "login-sync", delay: 18000 });
       }
     }
     P.saveAppData?.();
@@ -408,7 +416,7 @@
     activateOnlineUser(result.token, result.user, { render: false });
     const syncPayload = await syncOfficialDataBeforeOpen();
     activateOnlineUser(result.token, result.user);
-    P.showToast?.("Online", syncPayload?.data?.appData ? "Sessão conectada com dados oficiais." : "Sessão conectada; servidor sem dados novos.", "ok", { delay: 7600 });
+    if (!syncPayload?.data?.appData) P.showToast?.("Sessão conectada", "Você entrou normalmente. O servidor não enviou alterações novas desta vez.", "ok", { delay: 16000 });
     if (result.user.preferences?.forcePinChange) {
       showPinChange(true);
       showLoginStatus("Troque o PIN inicial para continuar.");

@@ -62,7 +62,7 @@
   async function refreshSource(key) {
     const appData = { ...P.getAppData() };
     const label = P.sources?.[key]?.label || key;
-    P.showToast?.("Atualizando", `${label} em sincronização.`, "info", { delay: 7600 });
+    P.showSyncProgress?.(8, "Atualizando dados oficiais", `Estamos buscando as informações mais recentes de ${label}. Você pode continuar usando o painel enquanto isso.`, "info", { id: `source-${key}` });
     const result = await loadSourceOnce(key);
     result.updatedAt = new Date().toISOString();
     if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
@@ -77,8 +77,8 @@
       ...(P.sourceStatus || []).filter(item => item.key !== key),
       result
     ];
-    if (result.status === "loaded") P.showToast?.("Atualizado", `${label}: ${result.rows?.length || 0} linha(s) carregada(s).`, "ok", { delay: 7600 });
-    if (result.status === "empty") P.showToast?.("Fonte vazia", `${label} não substituiu os dados atuais.`, "warn", { delay: 9000 });
+    if (result.status === "loaded") P.showSyncProgress?.(100, "Atualização concluída", `${label} foi conferida e ${result.rows?.length || 0} registro(s) foram carregados com sucesso.`, "ok", { id: `source-${key}` });
+    if (result.status === "empty") P.showSyncProgress?.(100, "Nenhum dado novo encontrado", `${label} respondeu sem registros. Para sua segurança, as informações anteriores foram mantidas.`, "warn", { id: `source-${key}`, delay: 20000 });
     return result;
   }
 
@@ -161,6 +161,13 @@
       ...orderedKeys.filter(key => P.sources?.[key]),
       ...Object.keys(P.sources || {}).filter(key => !orderedKeys.includes(key))
     ];
+    const progressKeys = keys.filter(key => (!onlyKeys || onlyKeys.has(key)) && (includeManual || P.sources[key]?.metadata?.autoLoad !== false));
+    const progressStart = Number(options.progressStart ?? 0);
+    const progressEnd = Number(options.progressEnd ?? 100);
+    let progressDone = 0;
+    if (progressKeys.length) {
+      P.showSyncProgress?.(progressStart, "Sincronizando fontes oficiais", `O PainelURE vai conferir ${progressKeys.length} fonte(s) de informação. Isso pode levar alguns instantes.`, "info", { id: options.progressId || "official-sync" });
+    }
 
     for (const key of keys) {
       try {
@@ -181,6 +188,13 @@
       } catch (error) {
         results.push({ key, status: "error", error, updatedAt: new Date().toISOString() });
         console.warn(`[PainelURE] Fonte ${key} falhou:`, error);
+      } finally {
+        if (progressKeys.includes(key)) {
+          progressDone += 1;
+          const progress = progressStart + ((progressEnd - progressStart) * progressDone / progressKeys.length);
+          const label = P.sources?.[key]?.label || key;
+          P.showSyncProgress?.(progress, "Sincronizando fontes oficiais", `${label} foi conferida. Restam ${Math.max(0, progressKeys.length - progressDone)} fonte(s).`, "info", { id: options.progressId || "official-sync" });
+        }
       }
     }
 
@@ -188,6 +202,17 @@
     P.sourceStatus = results;
     if (results.some(result => result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data))) {
       P.saveAppData?.();
+    }
+    if (progressKeys.length && progressEnd >= 100) {
+      const failed = results.filter(result => result.status === "error");
+      P.showSyncProgress?.(100,
+        failed.length ? "Sincronização concluída com avisos" : "Sincronização concluída",
+        failed.length
+          ? `${failed.length} fonte(s) não responderam. Os dados anteriores foram mantidos e você pode tentar novamente mais tarde.`
+          : "Todas as fontes disponíveis foram conferidas. O painel já mostra as informações mais recentes.",
+        failed.length ? "warn" : "ok",
+        { id: options.progressId || "official-sync", delay: failed.length ? 22000 : 18000 }
+      );
     }
     return results;
   }

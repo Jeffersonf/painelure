@@ -42,5 +42,7 @@ assert(!selfUserBlock.includes("requireAdmin(req, res"), "PUT /api/users/me deve
 const supervisionJustificationBlock = routeBlock('if (req.method === "PUT" && pathname === "/api/supervision/justification")');
 assert(supervisionJustificationBlock.includes("requireAuth(req, res"), "Justificativa da supervisao precisa exigir sessao.");
 assert(supervisionJustificationBlock.includes("supervisorForUser(appData, user)"), "Supervisor deve poder alterar apenas a propria justificativa.");
+assert(supervisionJustificationBlock.includes("supervisorEmail"), "Administrador deve localizar supervisor pelo email quando o nome da planilha variar.");
+assert(source.includes('normalizeKey(session.role || "").includes("administrador")'), "Perfil administrador deve aceitar variacoes normalizadas na sessao.");
 
 console.log("Rotas administrativas OK");

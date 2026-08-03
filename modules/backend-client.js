@@ -153,13 +153,13 @@
     return payload;
   }
 
-  async function saveSupervisionJustification(token, supervisorName, monthKey, justification) {
+  async function saveSupervisionJustification(token, supervisorName, supervisorEmail, monthKey, justification) {
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
     return fetchApi("/api/supervision/justification", {
       method: "PUT",
       headers,
-      body: JSON.stringify({ supervisorName, monthKey, justification }),
+      body: JSON.stringify({ supervisorName, supervisorEmail, monthKey, justification }),
       timeoutMs: 12000
     });
   }

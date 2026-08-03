@@ -363,7 +363,7 @@
         if (status) status.textContent = "Salvando...";
         try {
           const token = sessionStorage.getItem("painelure2_backend_token") || "";
-          const payload = await P.saveSupervisionJustification?.(token, item.supervisor.name, monthKey, justification);
+          const payload = await P.saveSupervisionJustification?.(token, item.supervisor.name, item.supervisor.email || "", monthKey, justification);
           if (!payload?.ok) throw new Error("Não foi possível salvar.");
           if (payload?.data?.updatedAt) P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt };
           if (status) status.textContent = "Salva";

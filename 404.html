@@ -1,5 +1,5 @@
 ﻿<!doctype html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="dark" class="auth-pending">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "ctc-supervision-access-20260622";
+      window.PAINELURE_BUILD = "sync-feedback-20260803";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -75,7 +75,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=supervision-justification-compact-20260803">
+  <link rel="stylesheet" href="./styles.css?v=sync-feedback-20260803">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -830,14 +830,14 @@
   <script src="./modules/month-state.js?v=supervision-monthkey-fix-20260601"></script>
   <script src="./modules/csv.js?v=stability-polish-20260528"></script>
   <script src="./modules/normalizers.js?v=bi-inventory-csv-20260608"></script>
-  <script src="./modules/source-loader.js?v=supervision-justification-20260803b"></script>
+  <script src="./modules/source-loader.js?v=sync-feedback-20260803"></script>
   <script src="./config.js?v=stability-polish-20260528"></script>
-  <script src="./modules/backend-client.js?v=supervision-justification-20260803b"></script>
+  <script src="./modules/backend-client.js?v=sync-feedback-20260803"></script>
   <script src="./modules/search.js?v=cafe-dashboard-20260612g"></script>
   <script src="./modules/render.js?v=cafe-dashboard-20260612g"></script>
-  <script src="./modules/supervision-render.js?v=supervision-justification-compact-20260803"></script>
-  <script src="./modules/navigation.js?v=cafe-dashboard-20260612g"></script>
-  <script src="./modules/admin-tools.js?v=ctc-supervision-access-20260622"></script>
+  <script src="./modules/supervision-render.js?v=sync-feedback-20260803"></script>
+  <script src="./modules/navigation.js?v=sync-feedback-20260803"></script>
+  <script src="./modules/admin-tools.js?v=sync-feedback-20260803"></script>
   <script src="./app.js?v=cafe-dashboard-20260612g"></script>
 </body>
 </html>
