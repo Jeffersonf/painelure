@@ -746,6 +746,9 @@ function accessForRole(role, appData = {}) {
 }
 
 function canAccessData(page, user = null, appData = {}) {
+  const userValues = [user?.name, user?.username, user?.login, user?.email].map(normalizeText).filter(Boolean);
+  const isVanessa = userValues.some(value => value === "vanessa" || value === "deitv@educacao.sp.gov.br");
+  if (page === "supervision" && isVanessa) return true;
   if (page === "bi-equipment") return normalizeText(user?.role || "Consulta").includes("administrador");
   if (page === "network") return true;
   const access = accessForRole(user?.role || "Consulta", appData);

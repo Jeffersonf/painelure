@@ -51,6 +51,11 @@
 
   function canAccess(page, role = currentRole()) {
     if (["user", "school-detail", "supervisor-detail"].includes(page)) return true;
+    if (page === "supervision") {
+      const user = P.onlineUser?.() || P.activeUser?.() || {};
+      const values = [user.name, user.login, user.username, user.email].map(value => P.normalize?.(value) || "").filter(Boolean);
+      if (values.some(value => value === "vanessa" || value === "deitv@educacao.sp.gov.br")) return true;
+    }
     if (page === "bi-equipment") return P.roleKey ? P.roleKey(role) === "Administrador" : P.normalize(role).includes("administrador");
     if (page === "network") return true;
     const access = accessForRole(role);

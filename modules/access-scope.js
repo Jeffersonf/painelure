@@ -76,6 +76,11 @@
     return P.onlineUser?.() || P.activeUser?.() || null;
   }
 
+  function isVanessaSupervisionUser(user = activeIdentity()) {
+    const values = [user?.name, user?.login, user?.username, user?.email].map(normalized).filter(Boolean);
+    return values.some(value => value === "vanessa" || value === "deitv@educacao.sp.gov.br");
+  }
+
   function isSupervisorRole(role = P.currentRole?.()) {
     return normalized(role).includes("supervis");
   }
@@ -162,6 +167,7 @@
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
+    if (page === "supervision" && isVanessaSupervisionUser()) return true;
     if (page === "bi-equipment") return roleKey(role) === "Administrador";
     if (page === "network") return true;
     if (page === "calls" || page === "ctc") {

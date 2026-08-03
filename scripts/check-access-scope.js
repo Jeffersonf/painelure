@@ -145,6 +145,12 @@ function run() {
     assert(scoped.schoolAssets.length === 0, "Gabinete nao deve receber inventario tecnico.");
   });
 
+  withUser(P, { name: "Vanessa", username: "Vanessa", email: "deitv@educacao.sp.gov.br", role: "Gabinete" }, scoped => {
+    assert(P.canAccessData("supervision", "Gabinete"), "Vanessa deve acessar a pagina de supervisao.");
+    assert(scoped.supervisors.length === data.supervisors.length, "Vanessa deve receber os dados de supervisao.");
+    assert(scoped.schoolAssets.length === 0, "Vanessa nao deve ganhar acesso ao inventario tecnico.");
+  });
+
   withUser(P, { name: "Dirigente", role: "Gabinete", contactRole: "Dirigente Regional de Ensino" }, () => {
     assert(P.canViewAllCarBookings(), "Dirigente deve ver detalhes completos de carros.");
   });
