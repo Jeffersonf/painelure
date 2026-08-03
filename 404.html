@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "supervision-session-fix-20260803";
+      window.PAINELURE_BUILD = "supervision-empty-copy-20260803";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -835,7 +835,7 @@
   <script src="./modules/backend-client.js?v=supervision-session-fix-20260803"></script>
   <script src="./modules/search.js?v=cafe-dashboard-20260612g"></script>
   <script src="./modules/render.js?v=cafe-dashboard-20260612g"></script>
-  <script src="./modules/supervision-render.js?v=supervision-session-fix-20260803"></script>
+  <script src="./modules/supervision-render.js?v=supervision-empty-copy-20260803"></script>
   <script src="./modules/navigation.js?v=sync-feedback-20260803"></script>
   <script src="./modules/admin-tools.js?v=sync-feedback-20260803"></script>
   <script src="./app.js?v=cafe-dashboard-20260612g"></script>

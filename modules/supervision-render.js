@@ -192,13 +192,9 @@
   function noMonthDataMarkup(stats) {
     const hasData = stats.some(item => item.visitCount > 0) || (monthSourceIsSelected() && stats.some(item => Number(item.supervisor?.monthlyVisits || 0) > 0));
     if (hasData) return "";
-    const selected = P.selectedMonthLabel?.() || "mês selecionado";
-    const officialMonth = P.supervisionMonthKey?.() || P.sources?.supervision?.monthKey || P.sources?.supervision?.metadata?.monthKey || "";
-    const official = officialMonth ? P.selectedMonthLabel?.(officialMonth) : "";
     return `
       <article class="supervisor-no-data-warning" role="status">
-        <strong>Não há dados de supervisão para ${selected}</strong>
-        <p>${official ? `A planilha oficial carregada atualmente é de ${official}.` : "Nenhuma fonte mensal oficial está carregada para este período."} Selecione um mês com registros ou sincronize uma fonte oficial deste mês.</p>
+        <strong>A planilha atual carregada ainda não contém dados para este mês.</strong>
       </article>
     `;
   }
