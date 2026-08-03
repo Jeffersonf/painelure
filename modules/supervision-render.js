@@ -41,7 +41,16 @@
 
   function supervisorJustification(supervisor) {
     const monthKey = P.selectedMonthKey?.() || "";
+    try {
+      const draft = sessionStorage.getItem(supervisorJustificationDraftKey(supervisor, monthKey));
+      if (draft !== null) return draft;
+    } catch (error) {}
     return String(supervisor?.justifications?.[monthKey] || "");
+  }
+
+  function supervisorJustificationDraftKey(supervisor, monthKey = P.selectedMonthKey?.() || "") {
+    const identity = P.normalize(supervisor?.email || supervisor?.name || "supervisor").replace(/\s+/g, "-");
+    return `painelure2_supervision_draft_${monthKey}_${identity}`;
   }
 
   function monthSourceIsSelected() {
@@ -349,28 +358,45 @@
         const status = host.querySelector(`[data-justification-status="${index}"]`);
         const monthKey = P.selectedMonthKey?.() || "";
         const justification = String(field?.value || "").trim();
-        const currentData = P.getAppData();
-        const supervisorsNext = (currentData.supervisors || []).map(supervisor => {
-          if (P.normalize(supervisor.name) !== P.normalize(item.supervisor.name)) return supervisor;
-          const justifications = { ...(supervisor.justifications || {}) };
-          if (justification) justifications[monthKey] = justification;
-          else delete justifications[monthKey];
-          return { ...supervisor, justifications };
-        });
-        P.setAppData({ ...currentData, supervisors: supervisorsNext });
-        P.saveAppData?.();
+        const draftKey = supervisorJustificationDraftKey(item.supervisor, monthKey);
+        try {
+          sessionStorage.setItem(draftKey, justification);
+        } catch (error) {}
+        const token = sessionStorage.getItem("painelure2_backend_token") || "";
+        if (!token) {
+          if (status) status.textContent = "Entre novamente para salvar";
+          P.showToast?.("Sua sessão online expirou", "A justificativa foi mantida como rascunho. Entre novamente para confirmar o salvamento no servidor.", "warn", { delay: 22000 });
+          P.expireOnlineSession?.("Sua sessão online expirou. Entre novamente; sua justificativa foi preservada como rascunho.");
+          return;
+        }
         button.disabled = true;
         if (status) status.textContent = "Salvando...";
         try {
-          const token = sessionStorage.getItem("painelure2_backend_token") || "";
           const payload = await P.saveSupervisionJustification?.(token, item.supervisor.name, item.supervisor.email || "", monthKey, justification);
           if (!payload?.ok) throw new Error("Não foi possível salvar.");
+          const currentData = P.getAppData();
+          const supervisorsNext = (currentData.supervisors || []).map(supervisor => {
+            const sameEmail = item.supervisor.email && P.normalize(supervisor.email) === P.normalize(item.supervisor.email);
+            const sameName = P.normalize(supervisor.name) === P.normalize(item.supervisor.name);
+            return sameEmail || sameName ? { ...supervisor, justifications: { ...(payload.supervisor?.justifications || {}) } } : supervisor;
+          });
+          P.setAppData({ ...currentData, supervisors: supervisorsNext });
+          P.saveAppData?.();
+          try {
+            sessionStorage.removeItem(draftKey);
+          } catch (error) {}
           if (payload?.data?.updatedAt) P.backendStatus = { ok: true, updatedAt: payload.data.updatedAt };
           if (status) status.textContent = "Salva";
           P.showToast?.("Justificativa salva", `${item.supervisor.name} • ${P.selectedMonthLabel?.() || monthKey}`, "ok");
         } catch (error) {
-          if (status) status.textContent = "Pendente de sincronização";
-          P.showToast?.("Justificativa salva localmente", error.message, "warn", { delay: 7000 });
+          const unauthorized = error?.status === 401 || /não autorizado|unauthorized|sessão/i.test(String(error?.message || error || ""));
+          if (status) status.textContent = unauthorized ? "Entre novamente para salvar" : "Não foi salva";
+          if (unauthorized) {
+            P.showToast?.("Sua sessão online expirou", "A justificativa ficou guardada como rascunho. Entre novamente para confirmar o salvamento no servidor.", "warn", { delay: 22000 });
+            P.expireOnlineSession?.("Sua sessão online expirou. Entre novamente; sua justificativa foi preservada como rascunho.");
+          } else {
+            P.showToast?.("Justificativa não foi salva", `${error.message || "O servidor não confirmou a gravação."} O texto continua como rascunho para você tentar novamente.`, "danger", { delay: 22000 });
+          }
         } finally {
           button.disabled = false;
         }

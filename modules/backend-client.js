@@ -63,6 +63,18 @@
     if (currentSupervisionScore > backendSupervisionScore) {
       merged.supervisors = currentData.supervisors;
     }
+    const backendSupervisors = Array.isArray(backendData?.supervisors) ? backendData.supervisors : [];
+    if (Array.isArray(merged.supervisors) && backendSupervisors.length) {
+      merged.supervisors = merged.supervisors.map(supervisor => {
+        const backendSupervisor = backendSupervisors.find(item => (
+          (supervisor.email && P.normalize(item.email) === P.normalize(supervisor.email))
+          || P.normalize(item.name) === P.normalize(supervisor.name)
+        ));
+        return backendSupervisor
+          ? { ...supervisor, justifications: { ...(backendSupervisor.justifications || {}) } }
+          : supervisor;
+      });
+    }
     if (sourceDataCount(currentData?.satisfaction) > sourceDataCount(backendData?.satisfaction)) {
       merged.satisfaction = currentData.satisfaction;
     }
