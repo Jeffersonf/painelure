@@ -282,8 +282,11 @@
                       <td><span class="diag-pill pill-${metrics.weeklyIndicator.tone}">${metrics.weeklyIndicator.label}</span></td>
                       <td><span class="diag-pill pill-${metrics.monthlyIndicator.tone}">${metrics.monthlyIndicator.label}</span></td>
                       <td class="supervisor-justification-cell">
-                        <textarea data-supervisor-justification="${index}" maxlength="2000" rows="3" placeholder="Digite a justificativa do mês">${escapeHtml(supervisorJustification(item.supervisor))}</textarea>
-                        <div><small data-justification-status="${index}"></small><button class="btn btn-p btn-sm" type="button" data-save-justification="${index}">Salvar</button></div>
+                        <div class="supervisor-justification-editor">
+                          <textarea data-supervisor-justification="${index}" maxlength="2000" rows="1" aria-label="Justificativa de ${escapeHtml(item.supervisor.name)}" placeholder="Digite a justificativa...">${escapeHtml(supervisorJustification(item.supervisor))}</textarea>
+                          <button class="supervisor-justification-save" type="button" data-save-justification="${index}" title="Salvar justificativa" aria-label="Salvar justificativa">Salvar</button>
+                        </div>
+                        <small data-justification-status="${index}"></small>
                       </td>
                     </tr>`;
                   }).join("")}
