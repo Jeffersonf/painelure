@@ -66,6 +66,9 @@ const DATA_ACCESS = {
   Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
   Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
 };
+Object.keys(DATA_ACCESS).forEach(role => {
+  if (role !== "Administrador") DATA_ACCESS[role] = DATA_ACCESS[role].filter(page => page !== "satisfaction");
+});
 const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "bi-equipment"].includes(page));
 const OFFICIAL_SOURCE_FIXES = {
   satisfaction: {
@@ -746,6 +749,7 @@ function accessForRole(role, appData = {}) {
 }
 
 function canAccessData(page, user = null, appData = {}) {
+  if (page === "satisfaction") return normalizeText(user?.role || "Consulta").includes("administrador");
   const userValues = [user?.name, user?.username, user?.login, user?.email].map(normalizeText).filter(Boolean);
   const isVanessa = userValues.some(value => value === "vanessa" || value === "deitv@educacao.sp.gov.br");
   if (page === "supervision" && isVanessa) return true;

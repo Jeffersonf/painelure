@@ -34,6 +34,9 @@
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
+  Object.keys(ROLE_ACCESS).forEach(role => {
+    if (role !== "Administrador") ROLE_ACCESS[role] = ROLE_ACCESS[role].filter(page => page !== "satisfaction");
+  });
   const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"];
 
   function currentRole() {
@@ -51,6 +54,7 @@
 
   function canAccess(page, role = currentRole()) {
     if (["user", "school-detail", "supervisor-detail"].includes(page)) return true;
+    if (page === "satisfaction") return P.roleKey ? P.roleKey(role) === "Administrador" : P.normalize(role).includes("administrador");
     if (page === "supervision") {
       const user = P.onlineUser?.() || P.activeUser?.() || {};
       const values = [user.name, user.login, user.username, user.email].map(value => P.normalize?.(value) || "").filter(Boolean);

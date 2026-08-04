@@ -24,6 +24,9 @@
     Pedagogico: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
+  Object.keys(DEFAULT_ACCESS).forEach(role => {
+    if (role !== "Administrador") DEFAULT_ACCESS[role] = DEFAULT_ACCESS[role].filter(page => page !== "satisfaction");
+  });
   const ACCESS = DEFAULT_ACCESS;
   const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => !["admin", "bi-equipment"].includes(page));
   const ROLE_EMOJI = {
@@ -167,6 +170,7 @@
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
+    if (page === "satisfaction") return roleKey(role) === "Administrador";
     if (page === "supervision" && isVanessaSupervisionUser()) return true;
     if (page === "bi-equipment") return roleKey(role) === "Administrador";
     if (page === "network") return true;
