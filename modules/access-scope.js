@@ -28,7 +28,7 @@
     if (role !== "Administrador") DEFAULT_ACCESS[role] = DEFAULT_ACCESS[role].filter(page => page !== "satisfaction");
   });
   const ACCESS = DEFAULT_ACCESS;
-  const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => !["admin", "bi-equipment"].includes(page));
+  const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => !["admin", "bi-equipment", "satisfaction"].includes(page));
   const ROLE_EMOJI = {
     Administrador: "🛡️",
     Supervisao: "🧭",

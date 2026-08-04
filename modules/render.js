@@ -685,7 +685,7 @@
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
       { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mês" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
       { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuário" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
-      { id: "satisfaction", roles: ["*"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Área pronta para formulários", tone: data.satisfaction?.length ? "info" : "warn" },
+      { id: "satisfaction", roles: ["administrador"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Área pronta para formulários", tone: data.satisfaction?.length ? "info" : "warn" },
       { id: "internal", roles: ["administrador", "seintec", "ctc", "tecnicos ctc"], page: "internal", icon: "&#9749;", label: "Café", value: "Café", note: "Vaquinha e rifa", tone: "info" },
       { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatórios", value: P.selectedMonthLabel?.() || "Mês", note: "Consolidado administrativo", tone: "info" },
       { id: "profiles", roles: ["administrador", "seintec"], page: "profiles", icon: "&#129513;", label: "Perfis", value: "Acessos", note: "Matriz de perfis", tone: "info" },
@@ -695,7 +695,9 @@
   }
 
   function dashboardWidgetsForRole(data, context) {
-    return dashboardWidgetDefinitions(data, context);
+    const role = P.normalize(P.currentRole?.() || "");
+    return dashboardWidgetDefinitions(data, context)
+      .filter(widget => widget.page !== "satisfaction" || role.includes("administrador"));
   }
 
   function dashboardWidgetMarkup(widget) {

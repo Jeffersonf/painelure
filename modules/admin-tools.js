@@ -73,6 +73,7 @@
 
   function allowedPageLabels(role = currentRole()) {
     return [...new Set(accessForRole(role)
+      .filter(page => page !== "satisfaction" || canAccess("satisfaction", role))
       .map(page => pageLabel(page))
       .filter(Boolean))]
       .join(", ");
@@ -115,6 +116,7 @@
     P.$all("[data-page], [data-jump]").forEach(button => {
       const page = button.dataset.page || button.dataset.jump;
       const denied = !canAccess(page, role);
+      button.hidden = page === "satisfaction" && denied;
       button.classList.toggle("access-disabled", denied);
       button.setAttribute("aria-disabled", denied ? "true" : "false");
       if (denied) {

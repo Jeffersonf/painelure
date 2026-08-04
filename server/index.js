@@ -69,7 +69,7 @@ const DATA_ACCESS = {
 Object.keys(DATA_ACCESS).forEach(role => {
   if (role !== "Administrador") DATA_ACCESS[role] = DATA_ACCESS[role].filter(page => page !== "satisfaction");
 });
-const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "bi-equipment"].includes(page));
+const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "bi-equipment", "satisfaction"].includes(page));
 const OFFICIAL_SOURCE_FIXES = {
   satisfaction: {
     label: "Pesquisa de satisfação",
