@@ -91,7 +91,8 @@
       document.body.appendChild(stack);
     }
     const icons = { ok: "OK", warn: "!", danger: "!", info: "i" };
-    const delay = Number(options.delay || 12000);
+    const requestedDelay = Number(options.delay || 12000);
+    const delay = Math.min(30000, Math.max(2500, Number.isFinite(requestedDelay) ? requestedDelay : 12000));
     const progress = Number.isFinite(Number(options.progress))
       ? Math.max(0, Math.min(100, Math.round(Number(options.progress))))
       : null;
@@ -117,18 +118,22 @@
       ${progress !== null ? `
         <span class="toast-progress-copy"><span>Progresso da sincronização</span><strong>${progress}%</strong></span>
         <b class="toast-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><i style="width:${progress}%"></i></b>
-      ` : `<b class="toast-life" aria-hidden="true"></b>`}
+      ` : ""}
+      <b class="toast-life" aria-hidden="true"></b>
     `;
-    toast.querySelector("button")?.addEventListener("click", () => {
+    let closing = false;
+    const dismiss = () => {
+      if (closing || !toast.isConnected) return;
+      closing = true;
+      window.clearTimeout(toast.removeTimer);
       toast.classList.remove("show");
       window.setTimeout(() => toast.remove(), 180);
-    });
+    };
+    toast.querySelector("button")?.addEventListener("click", dismiss);
+    toast.querySelector(".toast-life")?.addEventListener("animationend", dismiss, { once: true });
     stack.appendChild(toast);
     window.setTimeout(() => toast.classList.add("show"), 20);
-    toast.removeTimer = window.setTimeout(() => {
-      toast.classList.remove("show");
-      window.setTimeout(() => toast.remove(), 180);
-    }, delay);
+    toast.removeTimer = window.setTimeout(dismiss, delay);
     return toast;
   }
 
@@ -143,7 +148,7 @@
       {
         id: options.id || "official-sync",
         progress,
-        delay: options.delay || (done ? 18000 : 60000)
+        delay: options.delay || (done ? 18000 : 30000)
       }
     );
   }
