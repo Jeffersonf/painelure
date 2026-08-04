@@ -6439,21 +6439,22 @@ html:not(.site-maintenance) .maintenance-message {
 
 .satisfaction-bi-report {
   margin-bottom: 14px;
-  padding: 14px;
-  border: 1px solid rgba(28, 39, 62, .12);
-  border-radius: 8px;
-  background: #f7f7f7;
-  color: #222;
+  padding: 18px;
+  border: 1px solid var(--bd);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(30, 144, 242, .12), var(--sf));
+  color: var(--tx);
 }
 
 .satisfaction-bi-title {
   display: grid;
   place-items: center;
-  min-height: 46px;
-  margin-bottom: 28px;
-  background: #1e90f2;
+  min-height: 52px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  background: linear-gradient(110deg, #1478d0, #1e90f2);
   color: #fff;
-  font-size: 24px;
+  font-size: clamp(17px, 2vw, 24px);
   font-weight: 900;
   text-align: center;
   text-transform: uppercase;
@@ -6469,21 +6470,20 @@ html:not(.site-maintenance) .maintenance-message {
 .satisfaction-bi-kpis {
   display: grid;
   grid-template-columns: repeat(4, minmax(130px, 1fr));
-  gap: 30px;
+  gap: 12px;
 }
 
 .satisfaction-bi-kpis article {
   min-height: 66px;
   padding: 8px 12px;
-  border: 1px solid #d0d0d0;
-  border-radius: 3px;
-  background: #fff;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, .08);
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .045);
 }
 
 .satisfaction-bi-kpis strong {
   display: block;
-  color: #222;
+  color: var(--tx);
   font-size: 29px;
   line-height: 1;
 }
@@ -6491,14 +6491,14 @@ html:not(.site-maintenance) .maintenance-message {
 .satisfaction-bi-kpis span {
   display: block;
   margin-top: 7px;
-  color: #6b6b6b;
+  color: var(--mt);
   font-size: 14px;
 }
 
 .satisfaction-bi-type-filter {
   display: grid;
   gap: 7px;
-  color: #333;
+  color: var(--tx);
   font-size: 13px;
 }
 
@@ -6512,7 +6512,7 @@ html:not(.site-maintenance) .maintenance-message {
   gap: 7px;
   border: 0;
   background: transparent;
-  color: #333;
+  color: var(--tx);
   cursor: pointer;
   text-align: left;
 }
@@ -6520,12 +6520,14 @@ html:not(.site-maintenance) .maintenance-message {
 .satisfaction-bi-type-filter button span {
   width: 15px;
   height: 15px;
-  border: 1px solid #777;
-  background: #fff;
+  border: 1px solid var(--bd2);
+  border-radius: 4px;
+  background: var(--sf2);
 }
 
 .satisfaction-bi-type-filter button.active span {
-  background: #222;
+  border-color: var(--ac);
+  background: var(--ac);
 }
 
 .satisfaction-layout {
@@ -6535,9 +6537,9 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 #page-satisfaction .bi-panel {
-  background: #fff;
-  color: #262626;
-  border-color: rgba(28, 39, 62, .12);
+  background: var(--sf);
+  color: var(--tx);
+  border-color: var(--bd);
 }
 
 #page-satisfaction .box-head {
@@ -6546,12 +6548,12 @@ html:not(.site-maintenance) .maintenance-message {
 
 #page-satisfaction .box-head strong,
 #page-satisfaction .box-head small {
-  color: #333;
+  color: var(--tx);
 }
 
 #page-satisfaction .bi-bar-row {
   background: transparent;
-  color: #333;
+  color: var(--tx);
 }
 
 #page-satisfaction .bi-bar-row i {
@@ -6560,7 +6562,7 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 #page-satisfaction .bi-bar-row i b {
-  background: #1e90f2;
+  background: linear-gradient(90deg, var(--ac), var(--ac2));
   border-radius: 0;
 }
 
@@ -6585,7 +6587,7 @@ html:not(.site-maintenance) .maintenance-message {
   position: absolute;
   inset: 28px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--sf);
 }
 
 .satisfaction-donut-legend {
@@ -6600,7 +6602,7 @@ html:not(.site-maintenance) .maintenance-message {
   align-items: center;
   border: 0;
   background: transparent;
-  color: #555;
+  color: var(--mt);
   cursor: pointer;
   text-align: left;
 }
@@ -6629,7 +6631,7 @@ html:not(.site-maintenance) .maintenance-message {
   gap: 5px;
   border: 0;
   background: transparent;
-  color: #555;
+  color: var(--mt);
   cursor: pointer;
 }
 
@@ -6637,11 +6639,11 @@ html:not(.site-maintenance) .maintenance-message {
   align-self: end;
   height: var(--pct);
   min-height: 8px;
-  background: #1e90f2;
+  background: linear-gradient(180deg, var(--ac), var(--ac2));
 }
 
 .satisfaction-rating-bars strong {
-  color: #333;
+  color: var(--tx);
 }
 
 .satisfaction-wide {
@@ -6727,6 +6729,11 @@ html:not(.site-maintenance) .maintenance-message {
   white-space: nowrap;
 }
 
+.satisfaction-data-table tbody tr:hover,
+.satisfaction-data-table tbody tr:focus-within {
+  background: rgba(90, 245, 200, .07);
+}
+
 @media (max-width: 1180px) {
   .bi-filter-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6753,6 +6760,14 @@ html:not(.site-maintenance) .maintenance-message {
   .satisfaction-filter-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .satisfaction-bi-top {
+    grid-template-columns: 1fr;
+  }
+
+  .satisfaction-bi-type-filter {
+    grid-template-columns: repeat(auto-fit, minmax(130px, max-content));
+  }
 }
 
 @media (max-width: 720px) {
@@ -6766,6 +6781,33 @@ html:not(.site-maintenance) .maintenance-message {
 
   .bi-filter-panel {
     grid-template-columns: 1fr;
+  }
+
+  .satisfaction-filter-panel,
+  .satisfaction-bi-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .satisfaction-bi-report {
+    padding: 12px;
+  }
+
+  .satisfaction-bi-kpis strong {
+    font-size: 24px;
+  }
+
+  .satisfaction-wait-donut {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .satisfaction-donut-legend {
+    width: 100%;
+  }
+
+  .satisfaction-rating-bars {
+    justify-content: flex-start;
+    overflow-x: auto;
   }
 
   .bi-executive-panel,

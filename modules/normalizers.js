@@ -478,23 +478,42 @@
   }
 
   function normalizeSatisfactionRows(rows) {
-    return rows.map(row => {
-      const title = firstValue(row, ["descrevaresumidamenteomotivodoat", "motivo", "descricao", "titulo", "pesquisa", "campanha", "title", "nome"], "Pesquisa de satisfação");
-      const rating = firstValue(row, ["comovoc_x00ea_avaliaoatendimento", "avaliacao_atendimento", "avaliacao", "nota", "média", "score", "satisfacao"], "");
-      const attended = firstValue(row, ["suasolicita_x00e7__x00e3_ofoiate", "solicitacao_atendida", "solicitacao_foi_atendida", "status", "situacao", "andamento"], "");
-      const wait = firstValue(row, ["comovoc_x00ea_avaliaotempodeespe", "tempo_de_espera", "espera"], "");
-      const cordial = firstValue(row, ["oservidorfoiclaroecordialdurante", "servidor_claro_cordial", "cordial"], "");
-      const extra = firstValue(row, ["h_x00e1_algumaoutrainforma_x00e7", "outra_informacao", "observação", "observacoes", "note"], "");
-      const action = firstValue(row, ["informeamedidatomada", "medida_tomada"], "");
-      const requestId = firstValue(row, ["id"], "");
+    return rows.map((row, index) => {
+      const title = firstMatchingValue(row, ["descrevaresumidamenteomotivodoat", "motivo", "descricao", "titulo", "assunto", "title"], ["motivo", "assunto", "descricao"], "Pesquisa de satisfação");
+      const rating = firstMatchingValue(row, ["comovoc_x00ea_avaliaoatendimento", "avaliacao_atendimento", "avaliacao", "nota", "media", "score", "satisfacao"], ["avalia", "nota", "satisfa"], "");
+      const attended = firstMatchingValue(row, ["suasolicita_x00e7__x00e3_ofoiate", "solicitacao_atendida", "atendimento_resolvido", "resolvido", "status"], ["resolvid", "solicita", "atendid"], "");
+      const wait = firstMatchingValue(row, ["comovoc_x00ea_avaliaotempodeespe", "tempo_de_espera", "tempo espera", "espera"], ["espera"], "");
+      const cordial = firstMatchingValue(row, ["oservidorfoiclaroecordialdurante", "servidor_claro_cordial", "cordialidade", "cordial"], ["cordial", "claro"], "");
+      const extra = firstMatchingValue(row, ["h_x00e1_algumaoutrainforma_x00e7", "outra_informacao", "observacao", "observacoes", "comentario", "note"], ["observa", "coment", "outra informa"], "");
+      const action = firstMatchingValue(row, ["informeamedidatomada", "medida_tomada"], ["medida tomada"], "");
+      const requestId = firstValue(row, ["id", "ID"], String(index + 1));
+      const period = formatDateValue(firstMatchingValue(row, ["datadoatendimento", "data_atendimento", "data da resposta", "data", "periodo", "competencia", "created"], ["data atendimento", "data resposta", "created"], ""));
+      const sector = firstMatchingValue(row, ["setor", "secao", "seção", "area", "unidade", "audience"], ["setor", "secao", "seção", "area responsavel"], "Não informado");
+      const attendanceType = firstMatchingValue(row, ["tipo_atendimento", "tipo de atendimento", "attendanceType", "serviceType"], ["tipo atendimento"], "Interno");
+      const respondent = firstValue(row, ["respondente", "nome do respondente", "author", "createdby"], "Anônimo");
+      const numericScore = Number(String(rating).replace(",", "."));
       return {
+        id: `satisfaction-${requestId || index + 1}`,
+        sourceId: requestId,
         title,
-        audience: requestId ? `Atendimento #${requestId}` : "Atendimento URE",
-        status: attended ? `Atendida: ${attended}` : "respondida",
-        score: rating,
+        subject: title,
+        audience: sector,
+        sector,
+        status: attended ? `Atendimento resolvido: ${attended}` : "Respondida",
+        resolved: attended,
+        score: Number.isFinite(numericScore) ? numericScore : rating,
+        rating,
         responses: 1,
         link: firstValue(row, ["link", "url", "formulario", "formulário", "forms"], ""),
-        period: formatDateValue(firstValue(row, ["datadoatendimento", "data_atendimento", "data", "periodo", "competencia"], "")),
+        period,
+        month: period ? period.split(/[\/-]/)[1] || "" : "",
+        year: period ? (period.match(/\d{4}/) || [""])[0] : "",
+        type: "Pesquisa de Satisfação",
+        attendanceType,
+        respondent,
+        cordial,
+        wait,
+        observation: extra,
         note: [
           rating && `Avaliação: ${rating}`,
           wait && `Espera: ${wait}`,

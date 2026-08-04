@@ -2919,6 +2919,26 @@
     return 0;
   }
 
+  function satisfactionText(value = "") {
+    const text = String(value ?? "");
+    if (!/[ÃÂâ]/.test(text)) return text;
+    try {
+      const bytes = Uint8Array.from([...text].map(character => character.charCodeAt(0)));
+      return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    } catch (_error) {
+      return text;
+    }
+  }
+
+  function satisfactionRecord(item = {}, index = 0) {
+    const clean = value => satisfactionText(value);
+    const textFields = ["id", "sourceId", "title", "audience", "status", "rating", "period", "month", "year", "type", "respondent", "subject", "resolved", "cordial", "wait", "observation", "sector", "note"];
+    const record = { ...item };
+    textFields.forEach(field => { record[field] = clean(item[field]); });
+    record.id ||= `satisfaction-${index + 1}`;
+    return record;
+  }
+
   function satisfactionResolved(item = {}) {
     return P.normalize([item.resolved, item.status].join(" ")).includes("sim");
   }
@@ -2962,7 +2982,7 @@
   function renderSatisfaction(items = []) {
     const grid = P.$("#satisfactionGrid");
     if (!grid) return;
-    const list = Array.isArray(items) ? items : [];
+    const list = Array.isArray(items) ? items.map(satisfactionRecord) : [];
     const source = P.sources?.satisfaction || {};
     const sourceState = P.sourceResult?.("satisfaction");
     if (source.url && sourceState?.status !== "loaded" && !P.satisfactionAutoRefreshStarted) {
@@ -3000,12 +3020,12 @@
     const filtered = list.filter(item => {
       const sector = item.sector || item.audience || "";
       const month = satisfactionMonthLabel(item);
-      const rating = item.rating || String(item.score || "");
+      const rating = String(item.rating || item.score || "");
       const type = satisfactionAttendanceType(item);
       if (filterState.type && type !== filterState.type) return false;
       if (filterState.sector && sector !== filterState.sector) return false;
       if (filterState.month && month !== filterState.month) return false;
-      if (filterState.rating && rating !== filterState.rating) return false;
+      if (filterState.rating && rating !== String(filterState.rating)) return false;
       if (filterState.wait && item.wait !== filterState.wait) return false;
       if (!normalizedQuery) return true;
       return P.normalize([item.sourceId, item.title, item.subject, sector, item.rating, item.resolved, item.wait, item.observation, item.note].join(" ")).includes(normalizedQuery);
@@ -3140,8 +3160,8 @@
           ${selected ? `
             <div class="satisfaction-detail-card" data-search="${P.searchText([selected.sourceId, selected.title, selected.sector, selected.note])}">
               <span class="status-pill ${satisfactionResolved(selected) ? "ok" : "warn"}">#${selected.sourceId || "-"}</span>
-              <strong>${selected.title || "Pesquisa de satisfacao"}</strong>
-              <p>${selected.note || selected.observation || "Sem observacao adicional."}</p>
+              <strong>${attrValue(selected.title || "Pesquisa de satisfação")}</strong>
+              <p>${attrValue(selected.note || selected.observation || "Sem observação adicional.")}</p>
               <div class="mini-metrics">
                 <span><b>Setor</b>${selected.sector || selected.audience || "-"}</span>
                 <span><b>Periodo</b>${selected.period || "-"}</span>
@@ -3174,13 +3194,13 @@
                   <tr data-satisfaction-select="${attrValue(item.id)}" data-search="${P.searchText([item.sourceId, item.period, item.sector, item.subject, item.resolved, item.rating, item.wait, item.observation])}">
                     <td>${item.sourceId || "-"}</td>
                     <td>${item.period || "-"}</td>
-                    <td>${item.sector || item.audience || "-"}</td>
-                    <td>${item.subject || item.title || "-"}</td>
+                    <td>${attrValue(item.sector || item.audience || "-")}</td>
+                    <td>${attrValue(item.subject || item.title || "-")}</td>
                     <td><span class="status-pill ${satisfactionResolved(item) ? "ok" : "warn"}">${item.resolved || "-"}</span></td>
                     <td>${item.rating || item.score || "-"}</td>
                     <td>${item.cordial || "-"}</td>
                     <td>${item.wait || "-"}</td>
-                    <td>${item.observation || "-"}</td>
+                    <td title="${attrValue(item.observation || "")}">${attrValue(item.observation || "-")}</td>
                   </tr>
                 `).join("")}
               </tbody>
@@ -3194,7 +3214,17 @@
     ["#satisfactionSectorFilter", "#satisfactionMonthFilter", "#satisfactionRatingFilter", "#satisfactionWaitFilter"].forEach(selector => {
       grid.querySelector(selector)?.addEventListener("change", rerender);
     });
-    grid.querySelector("#satisfactionSearchInput")?.addEventListener("input", rerender);
+    grid.querySelector("#satisfactionSearchInput")?.addEventListener("input", event => {
+      const query = event.currentTarget.value;
+      grid.dataset.satisfactionFilters = JSON.stringify({ ...filterState, query, selected: "" });
+      clearTimeout(P.satisfactionSearchTimer);
+      P.satisfactionSearchTimer = setTimeout(() => {
+        renderSatisfaction(P.getAppData().satisfaction || []);
+        const input = grid.querySelector("#satisfactionSearchInput");
+        input?.focus();
+        input?.setSelectionRange(query.length, query.length);
+      }, 280);
+    });
     grid.querySelector("[data-satisfaction-reset]")?.addEventListener("click", () => {
       grid.dataset.satisfactionFilters = JSON.stringify({ type: "", sector: "", month: "", rating: "", wait: "", query: "", selected: "" });
       renderSatisfaction(P.getAppData().satisfaction || []);
