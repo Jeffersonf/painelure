@@ -289,7 +289,10 @@
                       <td class="supervisor-justification-cell">
                         <div class="supervisor-justification-editor">
                           <textarea data-supervisor-justification="${index}" maxlength="2000" rows="1" aria-label="Justificativa de ${escapeHtml(item.supervisor.name)}" placeholder="Digite a justificativa...">${escapeHtml(supervisorJustification(item.supervisor))}</textarea>
-                          <button class="supervisor-justification-save" type="button" data-save-justification="${index}" title="Salvar justificativa" aria-label="Salvar justificativa">Salvar</button>
+                          <div class="supervisor-justification-actions">
+                            <button class="supervisor-justification-toggle" type="button" data-toggle-justification="${index}" aria-expanded="false">Ler mais</button>
+                            <button class="supervisor-justification-save" type="button" data-save-justification="${index}" title="Salvar justificativa" aria-label="Salvar justificativa">Salvar</button>
+                          </div>
                         </div>
                         <small data-justification-status="${index}"></small>
                       </td>
@@ -344,6 +347,18 @@
     });
     host.querySelectorAll("[data-supervisor-justification]").forEach(field => {
       field.addEventListener("click", event => event.stopPropagation());
+    });
+    host.querySelectorAll("[data-toggle-justification]").forEach(button => {
+      button.addEventListener("click", event => {
+        event.stopPropagation();
+        const index = button.dataset.toggleJustification;
+        const editor = button.closest(".supervisor-justification-editor");
+        const field = host.querySelector(`[data-supervisor-justification="${index}"]`);
+        const expanded = editor?.classList.toggle("is-expanded") || false;
+        button.textContent = expanded ? "Recolher" : "Ler mais";
+        button.setAttribute("aria-expanded", String(expanded));
+        if (expanded) field?.focus?.();
+      });
     });
     host.querySelectorAll("[data-save-justification]").forEach(button => {
       button.addEventListener("click", async event => {

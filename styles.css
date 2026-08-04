@@ -5044,7 +5044,7 @@ html:not(.site-maintenance) .maintenance-message {
 
 .supervisor-justification-editor {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 72px;
   align-items: stretch;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--bd) 82%, white);
@@ -5060,8 +5060,8 @@ html:not(.site-maintenance) .maintenance-message {
 
 .supervisor-justification-cell textarea {
   width: 100%;
-  height: 38px;
-  min-height: 38px;
+  height: 58px;
+  min-height: 58px;
   resize: none;
   overflow: hidden;
   border: 0;
@@ -5074,23 +5074,45 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .supervisor-justification-cell textarea:focus {
-  height: 68px;
-  overflow: auto;
   outline: 0;
 }
 
-.supervisor-justification-save {
-  min-width: 58px;
-  border: 0;
+.supervisor-justification-editor.is-expanded textarea {
+  height: 180px;
+  overflow: auto;
+}
+
+.supervisor-justification-actions {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
   border-left: 1px solid var(--bd);
-  padding: 0 10px;
-  background: color-mix(in srgb, var(--ac) 18%, var(--sf2));
-  color: var(--ac);
+}
+
+.supervisor-justification-actions button {
+  min-width: 0;
+  border: 0;
+  padding: 0 7px;
   font: inherit;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
   cursor: pointer;
+}
+
+.supervisor-justification-toggle {
+  border-bottom: 1px solid var(--bd) !important;
+  background: color-mix(in srgb, var(--sf2) 92%, white);
+  color: var(--tx2);
+}
+
+.supervisor-justification-toggle:hover {
+  background: color-mix(in srgb, var(--sf2) 82%, white);
+  color: var(--tx);
+}
+
+.supervisor-justification-save {
+  background: color-mix(in srgb, var(--ac) 18%, var(--sf2));
+  color: var(--ac);
 }
 
 .supervisor-justification-save:hover {
