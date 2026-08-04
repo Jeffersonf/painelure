@@ -685,7 +685,7 @@
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
       { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mês" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
       { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuário" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
-      { id: "satisfaction", roles: ["administrador"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Área pronta para formulários", tone: data.satisfaction?.length ? "info" : "warn" },
+      { id: "satisfaction", roles: ["*"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa", value: data.satisfaction?.length || 0, note: data.satisfaction?.length ? "Campanhas e devolutivas" : "Área pronta para formulários", tone: data.satisfaction?.length ? "info" : "warn" },
       { id: "internal", roles: ["administrador", "seintec", "ctc", "tecnicos ctc"], page: "internal", icon: "&#9749;", label: "Café", value: "Café", note: "Vaquinha e rifa", tone: "info" },
       { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatórios", value: P.selectedMonthLabel?.() || "Mês", note: "Consolidado administrativo", tone: "info" },
       { id: "profiles", roles: ["administrador", "seintec"], page: "profiles", icon: "&#129513;", label: "Perfis", value: "Acessos", note: "Matriz de perfis", tone: "info" },
@@ -695,9 +695,7 @@
   }
 
   function dashboardWidgetsForRole(data, context) {
-    const role = P.normalize(P.currentRole?.() || "");
-    return dashboardWidgetDefinitions(data, context)
-      .filter(widget => widget.page !== "satisfaction" || role.includes("administrador"));
+    return dashboardWidgetDefinitions(data, context);
   }
 
   function dashboardWidgetMarkup(widget) {
@@ -3194,15 +3192,15 @@
               <tbody>
                 ${tableRows.map(item => `
                   <tr data-satisfaction-select="${attrValue(item.id)}" data-search="${P.searchText([item.sourceId, item.period, item.sector, item.subject, item.resolved, item.rating, item.wait, item.observation])}">
-                    <td>${item.sourceId || "-"}</td>
-                    <td>${item.period || "-"}</td>
-                    <td>${attrValue(item.sector || item.audience || "-")}</td>
-                    <td>${attrValue(item.subject || item.title || "-")}</td>
-                    <td><span class="status-pill ${satisfactionResolved(item) ? "ok" : "warn"}">${item.resolved || "-"}</span></td>
-                    <td>${item.rating || item.score || "-"}</td>
-                    <td>${item.cordial || "-"}</td>
-                    <td>${item.wait || "-"}</td>
-                    <td title="${attrValue(item.observation || "")}">${attrValue(item.observation || "-")}</td>
+                    <td data-label="ID">${item.sourceId || "-"}</td>
+                    <td data-label="Data">${item.period || "-"}</td>
+                    <td data-label="Setor">${attrValue(item.sector || item.audience || "-")}</td>
+                    <td data-label="Assunto">${attrValue(item.subject || item.title || "-")}</td>
+                    <td data-label="Resolvido"><span class="status-pill ${satisfactionResolved(item) ? "ok" : "warn"}">${item.resolved || "-"}</span></td>
+                    <td data-label="Avaliação">${item.rating || item.score || "-"}</td>
+                    <td data-label="Cordial">${item.cordial || "-"}</td>
+                    <td data-label="Espera">${item.wait || "-"}</td>
+                    <td data-label="Observação" title="${attrValue(item.observation || "")}">${attrValue(item.observation || "-")}</td>
                   </tr>
                 `).join("")}
               </tbody>

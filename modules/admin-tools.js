@@ -116,7 +116,6 @@
     P.$all("[data-page], [data-jump]").forEach(button => {
       const page = button.dataset.page || button.dataset.jump;
       const denied = !canAccess(page, role);
-      button.hidden = page === "satisfaction" && denied;
       button.classList.toggle("access-disabled", denied);
       button.setAttribute("aria-disabled", denied ? "true" : "false");
       if (denied) {

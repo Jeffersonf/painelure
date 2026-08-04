@@ -6446,6 +6446,15 @@ html:not(.site-maintenance) .maintenance-message {
   color: var(--tx);
 }
 
+#satisfactionGrid {
+  display: block;
+  min-width: 0;
+}
+
+#satisfactionGrid > * {
+  width: 100%;
+}
+
 .satisfaction-bi-title {
   display: grid;
   place-items: center;
@@ -6808,6 +6817,50 @@ html:not(.site-maintenance) .maintenance-message {
   .satisfaction-rating-bars {
     justify-content: flex-start;
     overflow-x: auto;
+  }
+
+  .satisfaction-data-table {
+    min-width: 0;
+  }
+
+  .satisfaction-data-table thead {
+    display: none;
+  }
+
+  .satisfaction-data-table,
+  .satisfaction-data-table tbody,
+  .satisfaction-data-table tr,
+  .satisfaction-data-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .satisfaction-data-table tr {
+    margin: 10px 0;
+    padding: 10px 12px;
+    border: 1px solid var(--bd);
+    border-radius: 14px;
+    background: var(--sf2);
+  }
+
+  .satisfaction-data-table td {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 10px;
+    max-width: none !important;
+    padding: 7px 0;
+    border: 0;
+    white-space: normal !important;
+    overflow: visible !important;
+  }
+
+  .satisfaction-data-table td::before {
+    content: attr(data-label);
+    color: var(--mt);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    text-transform: uppercase;
   }
 
   .bi-executive-panel,
