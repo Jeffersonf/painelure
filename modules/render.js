@@ -3294,22 +3294,30 @@
     "Margarete", "Eugênia", "Renata", "Nazaré", "Mirtes"
   ];
   const INTERNAL_COFFEE_NAMES = ["Jefferson", "Elcio", "Gustavo", "Rodolfo", "Richard"];
+  const INTERNAL_COFFEE_2_NAMES = ["Priscila", "Fabricio", "Nélio", "Danilo", "Bruno"];
 
   function internalDefaultState() {
     return {
       raffle: {
         price: 10,
         prize: "Cafeteira Dolce Gusto",
+        closed: true,
+        winnerName: "Raquel",
+        winnerBuyer: "Melina",
         entries: INTERNAL_RAFFLE_NAMES.map((name, index) => ({
           number: index + 1,
           chosenName: name,
-          buyer: "",
+          buyer: name === "Raquel" ? "Melina" : "",
           paid: false
         }))
       },
       coffee: {
         amount: 50,
         months: {}
+      },
+      coffee2: {
+        amount: 55,
+        entries: INTERNAL_COFFEE_2_NAMES.map(name => ({ name, paid: false }))
       }
     };
   }
@@ -3331,16 +3339,29 @@
       number: entry.number,
       chosenName: entry.chosenName
     }));
+    const coffee2Entries = INTERNAL_COFFEE_2_NAMES.map(name => {
+      const savedEntry = (saved.coffee2?.entries || []).find(item => P.normalize(item.name) === P.normalize(name));
+      return { name, paid: Boolean(savedEntry?.paid) };
+    });
+    const winnerEntry = entries.find(entry => P.normalize(entry.chosenName) === P.normalize("Raquel"));
+    if (winnerEntry) winnerEntry.buyer = "Melina";
     return {
       raffle: {
         ...base.raffle,
         ...(saved.raffle || {}),
         price: 10,
+        closed: true,
+        winnerName: "Raquel",
+        winnerBuyer: "Melina",
         entries
       },
       coffee: {
         amount: 50,
         months: saved.coffee?.months || {}
+      },
+      coffee2: {
+        amount: 55,
+        entries: coffee2Entries
       }
     };
   }
@@ -3444,6 +3465,10 @@
     const coffeeTotal = coffeePaid * coffeeAmount;
     const coffeeCash = Math.max(0, coffeeTotal - coffeeGoal);
     const coffeeMissing = Math.max(0, coffeeGoal - coffeeTotal);
+    const coffee2Entries = state.coffee2.entries || [];
+    const coffee2Amount = 55;
+    const coffee2Paid = coffee2Entries.filter(item => item.paid).length;
+    const coffee2Total = coffee2Paid * coffee2Amount;
 
     host.innerHTML = `
       <section class="internal-layout">
@@ -3490,10 +3515,40 @@
             <span><strong>${coffeeTotal >= coffeeGoal ? "Em caixa" : "Falta"}</strong><em>${currency(coffeeTotal >= coffeeGoal ? coffeeCash : coffeeMissing)}</em></span>
           </div>
         </article>
+        <article class="box internal-coffee-box" data-search="cafe 2.0 Priscila Fabricio Nélio Danilo Bruno contribuição única">
+          <div class="box-head">
+            <div><strong>&#9749; Café 2.0</strong><small>Contribuição única de ${currency(coffee2Amount)} por pessoa.</small></div>
+            <span class="status-pill ${coffee2Paid === coffee2Entries.length ? "ok" : "warn"}">${coffee2Paid}/${coffee2Entries.length} pago(s)</span>
+          </div>
+          <div class="internal-coffee-table-wrap">
+            <table class="internal-coffee-table">
+              <thead><tr><th>Nome</th><th>Valor</th><th>Status</th></tr></thead>
+              <tbody>
+                ${coffee2Entries.map(person => `
+                  <tr data-search="${P.searchText([person.name, "cafe 2.0", person.paid ? "pago" : "pendente"])}">
+                    <th>${htmlValue(person.name)}</th>
+                    <td><strong>${currency(coffee2Amount)}</strong></td>
+                    <td>
+                      <label class="internal-coffee-cell" title="${htmlValue(person.name)} - contribuição única">
+                        <input type="checkbox" data-coffee2-paid="${htmlValue(person.name)}"${person.paid ? " checked" : ""}>
+                        <span class="internal-toggle ${person.paid ? "is-paid" : ""}">${person.paid ? "Pago" : "Pendente"}</span>
+                      </label>
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+          <div class="internal-coffee-total">
+            <span><strong>Total previsto</strong><em>${currency(coffee2Entries.length * coffee2Amount)}</em></span>
+            <span><strong>Total arrecadado</strong><em>${currency(coffee2Total)}</em></span>
+            <span><strong>Falta</strong><em>${currency((coffee2Entries.length - coffee2Paid) * coffee2Amount)}</em></span>
+          </div>
+        </article>
         <article class="box internal-raffle-box" data-search="rifa 100 nomes comprador nome escolhido pago">
           <div class="box-head">
-            <div><strong>&#127915; Rifa da cafeteira</strong><small>Cartela 10x10, ${currency(price)} por nome. Arrecadado: ${currency(received)} de ${currency(raffleTotal * price)}.</small></div>
-            <span class="status-pill ${pending ? "warn" : "info"}">${sold}/${raffleTotal} vendido(s)</span>
+            <div><strong>&#127915; Rifa da cafeteira</strong><small>Encerrada — ganhadora: Raquel, comprada por Melina.</small></div>
+            <span class="status-pill ok">Rifa encerrada</span>
           </div>
           <div class="internal-raffle-summary" data-search="rifa arrecadado vendido pendente">
             <span><strong>${sold}/${raffleTotal}</strong><small>vendido(s)</small></span>
@@ -3515,9 +3570,9 @@
                   <span>${String(item.number).padStart(2, "0")}</span>
                   <strong>${htmlValue(item.chosenName)}</strong>
                 </div>
-                <input type="text" value="${htmlValue(item.buyer)}" placeholder="Quem comprou" data-raffle-buyer="${item.number}">
+                <input type="text" value="${htmlValue(item.buyer)}" placeholder="Quem comprou" data-raffle-buyer="${item.number}" disabled>
                 <label>
-                  <input type="checkbox" data-raffle-paid="${item.number}"${item.paid ? " checked" : ""}>
+                  <input type="checkbox" data-raffle-paid="${item.number}"${item.paid ? " checked" : ""} disabled>
                   <em class="internal-toggle ${item.paid ? "is-paid" : ""}">${item.paid ? "Pago" : "Pendente"}</em>
                 </label>
               </div>
@@ -3541,6 +3596,15 @@
         const current = loadInternalState();
         const entry = current.raffle.entries.find(item => Number(item.number) === Number(input.dataset.rafflePaid));
         if (entry) entry.paid = input.checked;
+        saveInternalState(current);
+        renderInternal();
+      });
+    });
+    host.querySelectorAll("[data-coffee2-paid]").forEach(input => {
+      input.addEventListener("change", () => {
+        const current = loadInternalState();
+        const person = current.coffee2.entries.find(item => P.normalize(item.name) === P.normalize(input.dataset.coffee2Paid));
+        if (person) person.paid = input.checked;
         saveInternalState(current);
         renderInternal();
       });
