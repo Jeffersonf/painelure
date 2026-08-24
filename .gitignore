@@ -8,6 +8,7 @@ server/storage/*.json
 
 # Android build artifacts and local SDK configuration
 android-kotlin/build/
+android-kotlin/**/build/
 android-kotlin/.gradle/
 android-kotlin/local.properties
 
