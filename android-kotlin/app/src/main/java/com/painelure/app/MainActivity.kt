@@ -29,7 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 private const val API_BASE = "https://painelure2-api.onrender.com"
-data class PanelData(val schoolNames: List<String> = emptyList(), val calendarItems: List<String> = emptyList(), val networkNames: List<String> = emptyList()) {
+data class PanelData(val schoolNames: List<String> = emptyList(), val calendarItems: List<String> = emptyList(), val networkNames: List<String> = emptyList(), val inventoryCount: Int = 0, val supervisionCount: Int = 0, val contactsCount: Int = 0, val carsCount: Int = 0) {
     val schools get() = schoolNames.size
     val calendar get() = calendarItems.size
     val networks get() = networkNames.size
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable private fun MainScreen(token: String, onLogout: () -> Unit, onToggleTheme: () -> Unit) {
     var tab by remember { mutableStateOf(0) }; var query by remember { mutableStateOf("") }; var data by remember { mutableStateOf(PanelData()) }; var loading by remember { mutableStateOf(true) }; val labels = listOf("Painel", "Escolas", "Redes", "Agenda", "Mais"); val isWide = LocalConfiguration.current.screenWidthDp >= 600
-    LaunchedEffect(token) { val a = withContext(Dispatchers.IO) { Api.data(token) }; val d = a?.optJSONObject("appData"); data = PanelData(Api.names(d?.optJSONArray("schools"), "name", "school", "nome"), Api.names(d?.optJSONArray("calendar"), "label", "title", "evento"), d?.optJSONObject("networkData")?.keys()?.asSequence()?.toList() ?: emptyList()); loading = false }
+    LaunchedEffect(token) { val a = withContext(Dispatchers.IO) { Api.data(token) }; val d = a?.optJSONObject("appData"); data = PanelData(Api.names(d?.optJSONArray("schools"), "name", "school", "nome"), Api.names(d?.optJSONArray("calendar"), "label", "title", "evento"), d?.optJSONObject("networkData")?.keys()?.asSequence()?.toList() ?: emptyList(), d?.optJSONArray("inventory")?.length() ?: d?.optJSONArray("schoolAssets")?.length() ?: 0, d?.optJSONArray("supervisors")?.length() ?: 0, d?.optJSONArray("contacts")?.length() ?: 0, d?.optJSONArray("cars")?.length() ?: 0); loading = false }
     Scaffold(bottomBar = { if (!isWide) NavigationBar(containerColor = PanelSurface) { labels.forEachIndexed { i, l -> NavigationBarItem(tab == i, { tab = i }, icon = { Icon(if (i == 0) Icons.Default.Home else if (i == 1) Icons.Default.School else if (i == 2) Icons.Default.Public else if (i == 3) Icons.Default.Event else Icons.Default.Menu, l) }, label = { Text(l) }) } } }) { p -> LazyColumn(Modifier.fillMaxSize().padding(p).padding(horizontal = if (isWide) 48.dp else 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(top = 28.dp, bottom = 28.dp)) {
         if (isWide) item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) { labels.forEachIndexed { i, l -> TextButton(onClick = { tab = i }) { Text(l, color = if (tab == i) Lime else Muted) } } } }
         item { Text("PAINELURE", style = MaterialTheme.typography.labelLarge, color = Lime); Text(if (tab == 0) "Visão geral" else labels[tab], style = MaterialTheme.typography.headlineLarge); Text("Dados oficiais do PainelURE", color = Muted) }
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
     } }
 }
 
-@Composable private fun HeroCard(d: PanelData) { Card(colors = CardDefaults.cardColors(containerColor = PanelSurface), shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) { Column(Modifier.padding(22.dp)) { Text("DADOS ONLINE", color = Mint, style = MaterialTheme.typography.labelMedium); Text("Tudo sob controle.", style = MaterialTheme.typography.headlineSmall); Spacer(Modifier.height(16.dp)); Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) { Metric(d.schools.toString(), "Escolas"); Metric(d.networks.toString(), "Redes"); Metric(d.calendar.toString(), "Agenda") } } } }
+@Composable private fun HeroCard(d: PanelData) { Card(colors = CardDefaults.cardColors(containerColor = PanelSurface), shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) { Column(Modifier.padding(22.dp)) { Text("DADOS ONLINE", color = Mint, style = MaterialTheme.typography.labelMedium); Text("Tudo sob controle.", style = MaterialTheme.typography.headlineSmall); Spacer(Modifier.height(16.dp)); Row(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.fillMaxWidth()) { Metric(d.schools.toString(), "Escolas"); Metric(d.networks.toString(), "Redes"); Metric(d.inventoryCount.toString(), "Inventário"); Metric(d.calendar.toString(), "Agenda") } } } }
 @Composable private fun Metric(v: String, l: String) { Column { Text(v, style = MaterialTheme.typography.titleLarge, color = Lime); Text(l, color = Muted, style = MaterialTheme.typography.bodySmall) } }
 @Composable private fun QuickCard(s: String) { Card(colors = CardDefaults.cardColors(containerColor = PanelSurface), shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) { Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.ChevronRight, null, tint = Lime); Spacer(Modifier.width(12.dp)); Text(s, style = MaterialTheme.typography.titleMedium); Spacer(Modifier.weight(1f)); Text("Consultar", color = Muted, style = MaterialTheme.typography.bodySmall) } } }
 
