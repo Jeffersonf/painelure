@@ -2,6 +2,8 @@ package com.painelure.app
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -20,9 +22,15 @@ import com.painelure.app.ui.theme.*
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private const val API_BASE = "https://painelure2-api.onrender.com"
-data class PanelData(val schools: Int = 0, val calendar: Int = 0, val networks: Int = 0)
+data class PanelData(val schoolNames: List<String> = emptyList(), val calendarItems: List<String> = emptyList(), val networkNames: List<String> = emptyList()) {
+    val schools get() = schoolNames.size
+    val calendar get() = calendarItems.size
+    val networks get() = networkNames.size
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { PainelURETheme { PainelUREApp(this) } } }
@@ -30,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable private fun PainelUREApp(context: Context) {
     var token by remember { mutableStateOf(context.getSharedPreferences("painelure", 0).getString("token", "") ?: "") }
-    if (token.isBlank()) LoginScreen({ user, pass, done -> Thread { val r = Api.login(user, pass); done(r?.optString("token").orEmpty(), r?.optString("error").orEmpty()) }.start() }, { value -> context.getSharedPreferences("painelure", 0).edit().putString("token", value).apply(); token = value })
+    if (token.isBlank()) LoginScreen({ user, pass, done -> Thread { val r = Api.login(user, pass); Handler(Looper.getMainLooper()).post { done(r?.optString("token").orEmpty(), r?.optString("error").orEmpty()) } }.start() }, { value -> context.getSharedPreferences("painelure", 0).edit().putString("token", value).apply(); token = value })
     else MainScreen(token) { context.getSharedPreferences("painelure", 0).edit().remove("token").apply(); token = "" }
 }
 
@@ -45,13 +53,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable private fun MainScreen(token: String, onLogout: () -> Unit) {
     var tab by remember { mutableStateOf(0) }; var data by remember { mutableStateOf(PanelData()) }; var loading by remember { mutableStateOf(true) }; val labels = listOf("Painel", "Escolas", "Redes", "Agenda", "Mais")
-    LaunchedEffect(token) { Thread { val a = Api.data(token); val d = a?.optJSONObject("appData"); data = PanelData(d?.optJSONArray("schools")?.length() ?: 0, d?.optJSONArray("calendar")?.length() ?: 0, d?.optJSONObject("networkData")?.length() ?: 0); loading = false }.start() }
+    LaunchedEffect(token) { val a = withContext(Dispatchers.IO) { Api.data(token) }; val d = a?.optJSONObject("appData"); data = PanelData(Api.names(d?.optJSONArray("schools"), "name", "school", "nome"), Api.names(d?.optJSONArray("calendar"), "label", "title", "evento"), d?.optJSONObject("networkData")?.keys()?.asSequence()?.toList() ?: emptyList()); loading = false }
     Scaffold(bottomBar = { NavigationBar(containerColor = Surface) { labels.forEachIndexed { i, l -> NavigationBarItem(tab == i, { tab = i }, icon = { Icon(if (i == 0) Icons.Default.Home else if (i == 1) Icons.Default.School else if (i == 2) Icons.Default.Public else if (i == 3) Icons.Default.Event else Icons.Default.Menu, l) }, label = { Text(l) }) } } }) { p -> LazyColumn(Modifier.fillMaxSize().padding(p).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(top = 28.dp, bottom = 28.dp)) {
         item { Text("PAINELURE", style = MaterialTheme.typography.labelLarge, color = Lime); Text(if (tab == 0) "Visão geral" else labels[tab], style = MaterialTheme.typography.headlineLarge); Text("Dados oficiais do PainelURE", color = Muted) }
         if (loading) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
         if (tab == 0) { item { HeroCard(data) }; item { Text("Acesso rápido", style = MaterialTheme.typography.titleLarge) }; items(listOf("Escolas", "Redes e câmeras", "Inventário", "Supervisão")) { QuickCard(it) } }
         else if (tab == 4) item { Button(onClick = onLogout) { Text("Sair da conta") } }
-        else { item { Text("${labels[tab]} carregados do backend", color = Muted) }; items((if (tab == 1) data.schools else if (tab == 2) data.networks else data.calendar).coerceAtMost(20)) { QuickCard("Registro ${it + 1}") } }
+        else { val rows = if (tab == 1) data.schoolNames else if (tab == 2) data.networkNames else data.calendarItems; item { Text("${rows.size} registro(s) carregado(s) do backend", color = Muted) }; items(rows.take(50)) { QuickCard(it) } }
     } }
 }
 
@@ -63,4 +71,5 @@ private object Api {
     private fun request(path: String, method: String, body: String? = null, token: String = ""): JSONObject? = try { val c = URL(API_BASE + path).openConnection() as HttpURLConnection; c.requestMethod = method; c.connectTimeout = 15000; c.readTimeout = 30000; c.setRequestProperty("Content-Type", "application/json"); if (token.isNotBlank()) c.setRequestProperty("Authorization", "Bearer $token"); if (body != null) { c.doOutput = true; c.outputStream.use { it.write(body.toByteArray()) } }; val stream = if (c.responseCode in 200..299) c.inputStream else c.errorStream; JSONObject(stream.bufferedReader().use { it.readText() }) } catch (_: Exception) { null }
     fun login(user: String, pass: String) = request("/api/auth/login", "POST", JSONObject().put("username", user).put("password", pass).toString())
     fun data(token: String) = request("/api/data", "GET", token = token)?.optJSONObject("data")
+    fun names(array: org.json.JSONArray?, vararg fields: String): List<String> = if (array == null) emptyList() else (0 until array.length()).mapNotNull { i -> val item = array.opt(i); when (item) { is JSONObject -> fields.firstNotNullOfOrNull { key -> item.optString(key).takeIf { it.isNotBlank() } }; else -> item?.toString() } }.filter { it.isNotBlank() }
 }
