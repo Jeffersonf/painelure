@@ -8231,9 +8231,7 @@ html:not(.site-maintenance) .maintenance-message {
 .rede2026-number { width: 110px; color: #71e0c1; font-weight: 800; white-space: nowrap; }
 .rede2026-date { width: 130px; color: #aeb9ca; white-space: nowrap; }
 .rede2026-subject { color: #f0f4fa; font-weight: 600; line-height: 1.4; }
-.rede2026-action { width: 105px; text-align: right; white-space: nowrap; }
-.rede2026-action a { color: #71e0c1; font-size: 12px; font-weight: 800; text-decoration: none; }
-.rede2026-action a:hover { color: #fff; }
-.rede2026-action span { font-size: 15px; }
+.rede2026-number a { color: #71e0c1; text-decoration: none; }
+.rede2026-number a:hover { color: #fff; text-decoration: underline; }
 .rede2026-empty { padding: 42px !important; color: #91a0b7; text-align: center; }
 @media (max-width: 640px) { .rede2026-toolbar { align-items: stretch; flex-direction: column; gap: 10px; } .rede2026-count { align-self: flex-end; } .rede2026-table td { padding: 13px 12px; } .rede2026-table th { padding: 11px 12px; } }

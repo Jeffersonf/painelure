@@ -2929,7 +2929,7 @@
       const visible = items.filter(item => !query || P.normalize([item.label, item.value, item.note].join(" ")).includes(query));
       if (count) count.textContent = `${visible.length} registro(s)`;
       grid.innerHTML = visible.length ? visible.map(item => `
-        <tr><td class="rede2026-number">${item.note.replace(/^Rede nº /, "")}</td><td class="rede2026-date">${item.value}</td><td class="rede2026-subject">${item.label}</td><td class="rede2026-action">${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">Ver PDF <span>↗</span></a>` : ""}</td></tr>`).join("") : `<tr><td class="rede2026-empty" colspan="4">Nenhum documento encontrado.</td></tr>`;
+        <tr><td class="rede2026-number">${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">${item.note.replace(/^Rede nº /, "")}</a>` : item.note.replace(/^Rede nº /, "")}</td><td class="rede2026-date">${item.value}</td><td class="rede2026-subject">${item.label}</td></tr>`).join("") : `<tr><td class="rede2026-empty" colspan="3">Nenhum documento encontrado.</td></tr>`;
     };
     if (search && !search.dataset.bound) { search.dataset.bound = "true"; search.addEventListener("input", draw); }
     draw();
