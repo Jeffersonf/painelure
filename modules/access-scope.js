@@ -25,6 +25,7 @@
     Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
   };
   Object.keys(DEFAULT_ACCESS).forEach(role => {
+    if (DEFAULT_ACCESS[role].includes("calendar") && !DEFAULT_ACCESS[role].includes("rede-2026")) DEFAULT_ACCESS[role].push("rede-2026");
     if (role !== "Administrador") DEFAULT_ACCESS[role] = DEFAULT_ACCESS[role].filter(page => page !== "satisfaction");
   });
   const ACCESS = DEFAULT_ACCESS;

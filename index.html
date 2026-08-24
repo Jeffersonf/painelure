@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "toast-autoclose-20260804";
+      window.PAINELURE_BUILD = "rede-2026-20260824";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -143,6 +143,7 @@
       <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
       <button class="nav-item" type="button" data-page="satisfaction"><span>&#128221;</span>Pesquisa</button>
       <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
+      <button class="nav-item" type="button" data-page="rede-2026"><span>&#128196;</span>Redes 2026</button>
     </nav>
     <section class="sidebar-card sidebar-tools-card" aria-label="Atalhos">
       <div class="sidebar-shortcuts icon-only">
@@ -152,6 +153,7 @@
         <button type="button" data-jump="bi-equipment" title="BI Equipamentos" aria-label="BI Equipamentos">&#128202;</button>
         <button type="button" data-jump="ctc" title="Chamados CTC" aria-label="Chamados CTC">&#128229;</button>
         <button type="button" data-jump="calendar" title="Agenda" aria-label="Agenda">&#128197;</button>
+        <button type="button" data-jump="rede-2026" title="Redes 2026" aria-label="Redes 2026">&#128196;</button>
         <button type="button" data-jump="internal" title="Café" aria-label="Café">&#9749;</button>
         <button type="button" data-jump="reports" title="Relatórios" aria-label="Relatórios">&#128200;</button>
       </div>
