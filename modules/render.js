@@ -2922,11 +2922,17 @@
   function renderRede2026(items = []) {
     const grid = P.$("#rede2026Grid");
     if (!grid) return;
-    grid.innerHTML = items.length ? items.map(item => `
-      <article class="detail-widget" data-search="${P.searchText([item.label, item.value, item.note])}">
-        <div><small>${item.value} · ${item.note}</small><strong>${item.label}</strong></div>
-        ${item.link ? `<a class="ghost-btn" href="${item.link}" target="_blank" rel="noopener">Abrir documento</a>` : ""}
-      </article>`).join("") : `<div class="empty-state">Nenhum documento em Redes 2026.</div>`;
+    const search = P.$("#rede2026Search");
+    const count = P.$("#rede2026Count");
+    const draw = () => {
+      const query = P.normalize(search?.value || "");
+      const visible = items.filter(item => !query || P.normalize([item.label, item.value, item.note].join(" ")).includes(query));
+      if (count) count.textContent = `${visible.length} registro(s)`;
+      grid.innerHTML = visible.length ? visible.map(item => `
+        <tr><td>${item.note.replace(/^Rede nº /, "")}</td><td>${item.value}</td><td>${item.label}</td><td>${item.link ? `<a class="ghost-btn" href="${item.link}" target="_blank" rel="noopener">Abrir</a>` : ""}</td></tr>`).join("") : `<tr><td colspan="4">Nenhum documento encontrado.</td></tr>`;
+    };
+    if (search && !search.dataset.bound) { search.dataset.bound = "true"; search.addEventListener("input", draw); }
+    draw();
   }
 
   function satisfactionText(value = "") {
