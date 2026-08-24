@@ -33,6 +33,9 @@
     calendar(data) {
       P.renderCalendar(data.calendar);
     },
+    "rede-2026"() {
+      P.renderRede2026?.(P.rede2026 || []);
+    },
     satisfaction(data) {
       P.renderSatisfaction(data.satisfaction);
     },

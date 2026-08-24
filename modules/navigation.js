@@ -14,6 +14,7 @@
     supervision: "supervisao",
     contacts: "contatos",
     calendar: "calendario",
+    "rede-2026": "redes-2026",
     satisfaction: "pesquisa-de-satisfacao",
     internal: "cafe",
     reports: "relatorios",

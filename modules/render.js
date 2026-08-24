@@ -2919,6 +2919,16 @@
     return 0;
   }
 
+  function renderRede2026(items = []) {
+    const grid = P.$("#rede2026Grid");
+    if (!grid) return;
+    grid.innerHTML = items.length ? items.map(item => `
+      <article class="detail-widget" data-search="${P.searchText([item.label, item.value, item.note])}">
+        <div><small>${item.value} · ${item.note}</small><strong>${item.label}</strong></div>
+        ${item.link ? `<a class="ghost-btn" href="${item.link}" target="_blank" rel="noopener">Abrir documento</a>` : ""}
+      </article>`).join("") : `<div class="empty-state">Nenhum documento em Redes 2026.</div>`;
+  }
+
   function satisfactionText(value = "") {
     const text = String(value ?? "");
     if (!/[ÃÂâ]/.test(text)) return text;
@@ -3851,6 +3861,7 @@
   P.renderBiEquipment = renderBiEquipment;
   P.renderContacts = renderContacts;
   P.renderCalendar = renderCalendar;
+  P.renderRede2026 = renderRede2026;
   P.renderCars = renderCars;
   P.renderProfiles = renderProfiles;
   P.renderQuality = renderQuality;
