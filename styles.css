@@ -8213,3 +8213,27 @@ html:not(.site-maintenance) .maintenance-message {
     align-self: flex-start;
   }
 }
+.rede2026-panel { overflow: hidden; }
+.rede2026-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 4px 0 22px; }
+.rede2026-search { display: flex; align-items: center; gap: 10px; width: min(540px, 100%); padding: 12px 16px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.045); color: #91a0b7; }
+.rede2026-search:focus-within { border-color: #71e0c1; box-shadow: 0 0 0 3px rgba(113,224,193,.12); }
+.rede2026-search span { font-size: 23px; line-height: 1; }
+.rede2026-search input { width: 100%; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; }
+.rede2026-search input::placeholder { color: #758299; }
+.rede2026-count { color: #91a0b7; white-space: nowrap; }
+.rede2026-table-wrap { overflow-x: auto; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; }
+.rede2026-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+.rede2026-table th { padding: 13px 18px; background: rgba(255,255,255,.055); color: #91a0b7; font-size: 11px; letter-spacing: .1em; text-align: left; text-transform: uppercase; }
+.rede2026-table td { padding: 16px 18px; border-top: 1px solid rgba(255,255,255,.065); vertical-align: middle; }
+.rede2026-table tbody tr { transition: background .18s ease; }
+.rede2026-table tbody tr:nth-child(even) { background: rgba(255,255,255,.018); }
+.rede2026-table tbody tr:hover { background: rgba(113,224,193,.07); }
+.rede2026-number { width: 110px; color: #71e0c1; font-weight: 800; white-space: nowrap; }
+.rede2026-date { width: 130px; color: #aeb9ca; white-space: nowrap; }
+.rede2026-subject { color: #f0f4fa; font-weight: 600; line-height: 1.4; }
+.rede2026-action { width: 105px; text-align: right; white-space: nowrap; }
+.rede2026-action a { color: #71e0c1; font-size: 12px; font-weight: 800; text-decoration: none; }
+.rede2026-action a:hover { color: #fff; }
+.rede2026-action span { font-size: 15px; }
+.rede2026-empty { padding: 42px !important; color: #91a0b7; text-align: center; }
+@media (max-width: 640px) { .rede2026-toolbar { align-items: stretch; flex-direction: column; gap: 10px; } .rede2026-count { align-self: flex-end; } .rede2026-table td { padding: 13px 12px; } .rede2026-table th { padding: 11px 12px; } }
