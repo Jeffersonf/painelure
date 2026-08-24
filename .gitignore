@@ -5,3 +5,14 @@ node_modules/
 server/storage/*.json
 !server/storage/.gitkeep
 .env
+
+# Android build artifacts and local SDK configuration
+android-kotlin/build/
+android-kotlin/.gradle/
+android-kotlin/local.properties
+
+# Temporary wrapper/assets accidentally created at repository root during Android setup
+/font/
+/gradle/
+/gradlew
+/gradlew.bat

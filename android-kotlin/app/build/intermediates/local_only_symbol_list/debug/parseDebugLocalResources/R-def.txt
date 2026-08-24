@@ -1,0 +1,12 @@
+R_DEF: Internal format may change without notice
+local
+font dm_sans_300
+font dm_sans_400
+font dm_sans_500
+font dm_sans_600
+font dm_sans_700
+font dm_sans_800
+font syne_600
+font syne_700
+font syne_800
+style Theme.PainelURE
