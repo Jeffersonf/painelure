@@ -170,6 +170,7 @@
   }
 
   function canAccessData(page, role = P.currentRole?.()) {
+    if (page === "rede-2026") return roleAccess(role).includes("calendar");
     if (page === "satisfaction") return roleKey(role) === "Administrador";
     if (page === "supervision" && isVanessaSupervisionUser()) return true;
     if (page === "bi-equipment") return roleKey(role) === "Administrador";
