@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import com.painelure.app.ui.theme.*
@@ -57,9 +58,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable private fun MainScreen(token: String, onLogout: () -> Unit, onToggleTheme: () -> Unit) {
-    var tab by remember { mutableStateOf(0) }; var query by remember { mutableStateOf("") }; var data by remember { mutableStateOf(PanelData()) }; var loading by remember { mutableStateOf(true) }; val labels = listOf("Painel", "Escolas", "Redes", "Agenda", "Mais")
+    var tab by remember { mutableStateOf(0) }; var query by remember { mutableStateOf("") }; var data by remember { mutableStateOf(PanelData()) }; var loading by remember { mutableStateOf(true) }; val labels = listOf("Painel", "Escolas", "Redes", "Agenda", "Mais"); val isWide = LocalConfiguration.current.screenWidthDp >= 600
     LaunchedEffect(token) { val a = withContext(Dispatchers.IO) { Api.data(token) }; val d = a?.optJSONObject("appData"); data = PanelData(Api.names(d?.optJSONArray("schools"), "name", "school", "nome"), Api.names(d?.optJSONArray("calendar"), "label", "title", "evento"), d?.optJSONObject("networkData")?.keys()?.asSequence()?.toList() ?: emptyList()); loading = false }
-    Scaffold(bottomBar = { NavigationBar(containerColor = PanelSurface) { labels.forEachIndexed { i, l -> NavigationBarItem(tab == i, { tab = i }, icon = { Icon(if (i == 0) Icons.Default.Home else if (i == 1) Icons.Default.School else if (i == 2) Icons.Default.Public else if (i == 3) Icons.Default.Event else Icons.Default.Menu, l) }, label = { Text(l) }) } } }) { p -> LazyColumn(Modifier.fillMaxSize().padding(p).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(top = 28.dp, bottom = 28.dp)) {
+    Scaffold(bottomBar = { if (!isWide) NavigationBar(containerColor = PanelSurface) { labels.forEachIndexed { i, l -> NavigationBarItem(tab == i, { tab = i }, icon = { Icon(if (i == 0) Icons.Default.Home else if (i == 1) Icons.Default.School else if (i == 2) Icons.Default.Public else if (i == 3) Icons.Default.Event else Icons.Default.Menu, l) }, label = { Text(l) }) } } }) { p -> LazyColumn(Modifier.fillMaxSize().padding(p).padding(horizontal = if (isWide) 48.dp else 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(top = 28.dp, bottom = 28.dp)) {
+        if (isWide) item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) { labels.forEachIndexed { i, l -> TextButton(onClick = { tab = i }) { Text(l, color = if (tab == i) Lime else Muted) } } } }
         item { Text("PAINELURE", style = MaterialTheme.typography.labelLarge, color = Lime); Text(if (tab == 0) "Visão geral" else labels[tab], style = MaterialTheme.typography.headlineLarge); Text("Dados oficiais do PainelURE", color = Muted) }
         if (loading) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
         if (tab == 0) { item { HeroCard(data) }; item { Text("Acesso rápido", style = MaterialTheme.typography.titleLarge) }; items(listOf("Escolas", "Redes e câmeras", "Inventário", "Supervisão")) { QuickCard(it) } }
