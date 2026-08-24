@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutId="quick_expense"
+        android:shortcutLongLabel="@string/shortcut_quick_expense_long"
+        android:shortcutShortLabel="@string/shortcut_quick_expense_short">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.finanza.app.QuickExpenseShortcutActivity"
+            android:targetPackage="com.finanza.app" />
+    </shortcut>
+</shortcuts>

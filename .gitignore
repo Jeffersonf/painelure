@@ -11,6 +11,9 @@ android-kotlin/build/
 android-kotlin/**/build/
 android-kotlin/.gradle/
 android-kotlin/local.properties
+android-kotlin/build-output/
+android-kotlin/.kotlin/
+android-kotlin/app/src/main/assets/painelure/
 
 # Temporary wrapper/assets accidentally created at repository root during Android setup
 /font/

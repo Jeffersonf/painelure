@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Finanza</string>
+    <string name="widget_summary_desc">Resumo financeiro do mes</string>
+    <string name="widget_agenda_desc">Proximos vencimentos e agenda</string>
+    <string name="widget_quick_expense_desc">Atalho rapido para lancar gasto</string>
+    <string name="widget_empty"></string>
+    <string name="widget_you">Voce</string>
+    <string name="widget_amount_placeholder">R$ 0,00</string>
+    <string name="widget_spent_placeholder">Gasto: R$ 0,00</string>
+    <string name="widget_budget_placeholder">Base: R$ 0,00</string>
+    <string name="widget_due_placeholder">0 vencimento(s) em breve</string>
+    <string name="widget_quick_mark">+</string>
+    <string name="widget_quick_title">Folha rapida</string>
+    <string name="widget_quick_subtitle">Valor primeiro</string>
+    <string name="widget_quick_account">Conta principal</string>
+    <string name="widget_quick_open">Digitar</string>
+    <string name="widget_agenda_title">Agenda financeira</string>
+    <string name="widget_agenda_count_placeholder">0 item(ns) futuros</string>
+    <string name="widget_agenda_name_placeholder">Sem contas na agenda</string>
+    <string name="widget_agenda_meta_placeholder">Adicione vencimentos no app</string>
+    <string name="widget_agenda_category_placeholder">Finanza</string>
+    <string name="shortcut_quick_expense_short">Novo gasto</string>
+    <string name="shortcut_quick_expense_long">Abrir folha rapida</string>
+</resources>
