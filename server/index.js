@@ -43,7 +43,7 @@ let dbReady = false;
 let dbError = "";
 let frontendSeedStore = null;
 const DATA_ACCESS = {
-  Administrador: ["dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
+  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
   "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
@@ -69,8 +69,19 @@ const DATA_ACCESS = {
 Object.keys(DATA_ACCESS).forEach(role => {
   if (role !== "Administrador") DATA_ACCESS[role] = DATA_ACCESS[role].filter(page => page !== "satisfaction");
 });
-const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "bi-equipment", "satisfaction"].includes(page));
+const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "satisfaction"].includes(page));
 const OFFICIAL_SOURCE_FIXES = {
+  inventory: {
+    label: "Equipamentos",
+    type: "powerbi-embed",
+    url: "",
+    status: "replaced",
+    metadata: {
+      domain: "Equipamentos",
+      source: "powerbi-embed",
+      autoLoad: false
+    }
+  },
   satisfaction: {
     label: "Pesquisa de satisfação",
     type: "sharepoint-list",
@@ -160,7 +171,6 @@ function loadFrontendSeedData() {
     "data/school-profiles.js",
     "data/school-operational.js",
     "data/inventory.js",
-    "data/bi-equipments.js",
     "data/supervision.js",
     "data/contacts.js",
     "data/users.js",
@@ -753,7 +763,6 @@ function canAccessData(page, user = null, appData = {}) {
   const userValues = [user?.name, user?.username, user?.login, user?.email].map(normalizeText).filter(Boolean);
   const isVanessa = userValues.some(value => value === "vanessa" || value === "deitv@educacao.sp.gov.br");
   if (page === "supervision" && isVanessa) return true;
-  if (page === "bi-equipment") return normalizeText(user?.role || "Consulta").includes("administrador");
   if (page === "network") return true;
   const access = accessForRole(user?.role || "Consulta", appData);
   if (page === "calls" || page === "ctc") return access.includes("calls") || access.includes("ctc");
@@ -892,7 +901,6 @@ function scopeAppDataForUser(appData = {}, user = null) {
     supervisors: canAccessData("supervision", user, appData) ? supervisors : [],
     networkData: canAccessData("network", user, appData) ? networkScopedObject(appData.networkData || {}) : {},
     schoolInventoryMetrics: canAccessData("inventory", user, appData) ? schoolScopedObject(appData.schoolInventoryMetrics || {}) : {},
-    biEquipmentReport: canAccessData("bi-equipment", user, appData) ? (appData.biEquipmentReport || null) : null,
     schoolProfiles: canAccessData("schools", user, appData) ? schoolScopedItems(appData.schoolProfiles || []) : [],
     schoolAssets: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.schoolAssets || []) : [],
     inventory: canAccessData("inventory", user, appData) ? schoolScopedItems(appData.inventory || []) : [],
@@ -911,7 +919,11 @@ function scopeAppDataForUser(appData = {}, user = null) {
     profiles: canAccessData("profiles", user, appData) ? (appData.profiles || []) : [],
     quality: canAccessData("quality", user, appData) ? (appData.quality || []) : [],
     users: canAccessData("admin", user, appData) ? (appData.users || []) : [],
-    adminChecks: canAccessData("admin", user, appData) ? (appData.adminChecks || []) : []
+    adminChecks: canAccessData("admin", user, appData) ? (appData.adminChecks || []) : [],
+    // These settings are needed by every client to render the same module
+    // visibility/maintenance state as the web panel. They contain no secrets.
+    accessRules: appData.accessRules || {},
+    pageMaintenance: appData.pageMaintenance || {}
   };
 }
 
@@ -1208,6 +1220,59 @@ async function fetchSharePointListRows(sourceUrl) {
   }
   const payload = JSON.parse(text);
   return Array.isArray(payload.value) ? payload.value : [];
+}
+
+function officialSourceCsvUrl(source) {
+  const raw = String(source?.url || "").trim();
+  const gid = String(source?.metadata?.gid || "").trim();
+  if (!gid || !/docs\.google\.com\/spreadsheets\/d\//i.test(raw)) return raw;
+  const published = raw.match(/docs\.google\.com\/spreadsheets\/d\/e\/([^/]+)/i);
+  if (published) return `https://docs.google.com/spreadsheets/d/e/${published[1]}/pub?output=csv&single=true&gid=${encodeURIComponent(gid)}`;
+  const regular = raw.match(/docs\.google\.com\/spreadsheets\/d\/([^/]+)/i);
+  return regular
+    ? `https://docs.google.com/spreadsheets/d/${regular[1]}/export?format=csv&gid=${encodeURIComponent(gid)}`
+    : raw;
+}
+
+async function fetchOfficialSourceRows(source) {
+  if (String(source?.type || "").toLowerCase() === "sharepoint-list") {
+    return fetchSharePointListRows(source.url);
+  }
+  const response = await fetch(officialSourceCsvUrl(source), {
+    headers: { Accept: "text/csv,text/plain,*/*", "User-Agent": "PainelURE/2.0" }
+  });
+  const text = await response.text();
+  if (!response.ok) throw new Error(`Fonte respondeu ${response.status}.`);
+  return parseCsv(text);
+}
+
+async function refreshOfficialSources(keys = []) {
+  const selected = new Set(Array.isArray(keys) ? keys.filter(Boolean) : []);
+  const sources = await listOfficialSources();
+  const targets = sources.filter(source => (!selected.size || selected.has(source.key)) && source.url);
+  const store = await readStore() || { appData: {} };
+  const appData = { ...(store.appData || {}) };
+  const results = [];
+  for (const source of targets) {
+    try {
+      const rows = await fetchOfficialSourceRows(source);
+      const normalized = normalizeRows(source.key, rows);
+      if (source.key === "network") appData.networkData = normalized;
+      else if (source.key === "inventory") appData.schoolAssets = normalized;
+      else if (source.key === "supervision") {
+        const current = new Map((appData.supervisors || []).map(item => [normalizeText(item.name), item]));
+        appData.supervisors = normalized.map(item => ({ ...item, justifications: current.get(normalizeText(item.name))?.justifications || {} }));
+      } else appData[source.key] = normalized;
+      await recordImportRun(source.key, rows.length, "ok", `${source.key} atualizado pela fonte oficial`);
+      results.push({ key: source.key, status: "loaded", rows: rows.length });
+    } catch (error) {
+      await recordImportRun(source.key, 0, "error", error.message);
+      results.push({ key: source.key, status: "error", rows: 0, error: error.message });
+    }
+  }
+  const loaded = results.some(item => item.status === "loaded");
+  const saved = loaded ? await saveStore(appData, "official-sources", { force: true }) : store;
+  return { results, data: saved };
 }
 
 function valueToText(value) {
@@ -1685,6 +1750,15 @@ async function handleApi(req, res, pathname) {
     return;
   }
 
+  if (req.method === "POST" && pathname === "/api/sources/refresh") {
+    if (!requireAdmin(req, res, "Apenas administrador pode atualizar fontes oficiais.")) return;
+    const body = JSON.parse(await readBody(req) || "{}");
+    const payload = await refreshOfficialSources(body.keys || []);
+    await audit(req, "refresh", "official_sources", "all", "Fontes oficiais atualizadas pelo app nativo.", { results: payload.results });
+    send(res, 200, { ok: true, ...payload, storage: await storeStatus() });
+    return;
+  }
+
   if (req.method === "GET" && pathname === "/api/snapshots") {
     if (!requireAdmin(req, res, "Apenas administrador pode listar snapshots.")) return;
     send(res, 200, { ok: true, snapshots: await listSnapshots(new URL(req.url, `http://${req.headers.host}`).searchParams.get("limit")) });
@@ -1706,6 +1780,51 @@ async function handleApi(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/data") {
     if (!requireAuth(req, res)) return;
     send(res, 200, { ok: true, data: await scopedStoreForRequest(req), storage: await storeStatus() });
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/mobile/actions") {
+    if (!requireAuth(req, res)) return;
+    const body = JSON.parse(await readBody(req) || "{}");
+    const type = String(body.type || "").trim().toLowerCase();
+    const allowedTypes = new Set(["calls", "ctcvisits", "cars", "calendar", "inventory"]);
+    if (!allowedTypes.has(type) || !body.record || typeof body.record !== "object" || Array.isArray(body.record)) {
+      send(res, 400, { ok: false, error: "Tipo e registro operacional são obrigatórios." });
+      return;
+    }
+    const recordInput = body.record;
+    const requiredByType = {
+      calls: ["title", "description"],
+      cars: ["date", "destination"],
+      calendar: ["date", "title"],
+      inventory: ["school", "name"],
+      ctcvisits: ["date", "place", "objective"]
+    };
+    const missing = (requiredByType[type] || []).filter(field => !String(recordInput[field] || "").trim());
+    if (missing.length) {
+      send(res, 400, { ok: false, error: `Campos obrigatórios ausentes: ${missing.join(", ")}.` });
+      return;
+    }
+    const user = await currentSessionUser(req);
+    const permission = type === "inventory" ? "inventory" : type === "ctcvisits" ? "ctc" : type;
+    const store = await readStore() || { appData: {} };
+    const appData = store.appData || {};
+    if (!canAccessData(permission, user, appData)) {
+      send(res, 403, { ok: false, error: "Perfil sem acesso a esta operação." });
+      return;
+    }
+    const collection = type === "inventory" ? "schoolAssets" : type === "ctcvisits" ? "ctcVisits" : type;
+    const current = Array.isArray(appData[collection]) ? appData[collection] : [];
+    const record = {
+      ...body.record,
+      id: String(body.record.id || `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`),
+      createdAt: body.record.createdAt || new Date().toISOString(),
+      createdBy: body.record.createdBy || user?.username || user?.name || "mobile"
+    };
+    const nextData = { ...appData, [collection]: [...current, record] };
+    const saved = await saveStore(nextData, `mobile:${type}`, { force: true });
+    await audit(req, "create", `mobile_${type}`, record.id, `Registro ${type} criado pelo app.`, { role: user?.role || "Consulta" });
+    send(res, 201, { ok: true, type, record, data: saved });
     return;
   }
 

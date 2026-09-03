@@ -1,5 +1,22 @@
 @charset "UTF-8";
 
+.powerbi-embed-shell {
+  width: 100%;
+  min-height: calc(100vh - 190px);
+  overflow: hidden;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 18px;
+  background: #fff;
+}
+
+.powerbi-embed {
+  display: block;
+  width: 100%;
+  min-height: calc(100vh - 192px);
+  border: 0;
+  background: #fff;
+}
+
 @font-face {
   font-family: "DM Sans";
   src: url("./assets/fonts/dm-sans-500.ttf") format("truetype");
@@ -8237,3 +8254,20 @@ html:not(.site-maintenance) .maintenance-message {
 .rede2026-number a:hover { color: #fff; text-decoration: underline; }
 .rede2026-empty { padding: 42px !important; color: #91a0b7; text-align: center; }
 @media (max-width: 640px) { .rede2026-toolbar { align-items: stretch; flex-direction: column; gap: 10px; } .rede2026-count { align-self: flex-end; } .rede2026-table td { padding: 13px 12px; } .rede2026-table th { padding: 11px 12px; } }
+/* O inventário operacional foi substituído pelo BI oficial incorporado. */
+.powerbi-embed-shell {
+  width: 100%;
+  min-height: calc(100vh - 190px);
+  overflow: hidden;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 18px;
+  background: #fff;
+}
+
+.powerbi-embed {
+  display: block;
+  width: 100%;
+  min-height: calc(100vh - 192px);
+  border: 0;
+  background: #fff;
+}

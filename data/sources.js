@@ -18,16 +18,15 @@
     },
     inventory: {
       label: "Inventário",
-      type: "sharepoint-list",
-      url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACUz84zfYrYRIadNAPXJvISAetLbQd40ptsKrcSMFs4TNQ?e=Ae9Qvg",
-      status: "official",
+      type: "powerbi-embed",
+      url: "",
+      status: "replaced",
       metadata: {
         domain: "Inventário",
         cadence: "sob demanda",
         owner: "SETEC/CTC",
-        source: "InventarioEquipamentosEscolas",
-        autoLoad: false,
-        schoolLookupUrl: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JACZ5y0MlGBTQI4wlCbHtIPeASsrN5V7U1knW4j85cHF7tk?e=v1BVFU"
+        source: "powerbi-embed",
+        autoLoad: false
       }
     },
     supervision: {
@@ -54,7 +53,7 @@
     },
     satisfaction: {
       label: "Pesquisa de satisfação",
-      type: "sharepoint-list",
+      type: "powerbi-embed",
       url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JADpBjs_DuTvSZyxa7kBWSezAaggBDoxC1kO4aT04Yv8SoA?e=iNCKJF",
       status: "official",
       metadata: { domain: "Pesquisa de satisfação", cadence: "por campanha", owner: "Gabinete", source: "PesquisaSatisfacao", locked: true }

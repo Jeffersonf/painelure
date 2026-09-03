@@ -9,8 +9,7 @@
     dashboard: "painel",
     schools: "escolas",
     network: "redes",
-    inventory: "inventario",
-    "bi-equipment": "bi-equipamentos",
+    inventory: "equipamentos",
     supervision: "supervisao",
     contacts: "contatos",
     calendar: "calendario",
@@ -27,6 +26,7 @@
     quality: "qualidade"
   };
   const PAGE_BY_SLUG = Object.fromEntries(Object.entries(PAGE_SLUGS).map(([page, slug]) => [slug, page]));
+  PAGE_BY_SLUG.inventario = "inventory";
   PAGE_BY_SLUG.interno = "internal";
 
   let previousPage = "dashboard";
@@ -74,6 +74,9 @@
       url.pathname = base ? `${base}/` : "/";
     } else {
       url.pathname = base ? `${base}/${slug}` : `/${slug}`;
+    }
+    if (location.protocol === "file:" && page !== "dashboard") {
+      return `${location.pathname}${url.search}#${page}`;
     }
     return `${url.pathname}${url.search}`;
   }

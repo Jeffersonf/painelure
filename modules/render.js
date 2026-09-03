@@ -405,9 +405,9 @@
         note: `${configuredSources}/${sources.length} fonte(s) configurada(s), ${sourceLoaded} carregada(s) nesta sessão, ${sourceErrors} erro(s).`
       },
       {
-        label: "Fonte do inventário",
-        status: sourceRuntimeStatus("inventory") === "error" ? "danger" : "info",
-        note: `Inventário: ${sourceRuntimeStatus("inventory")}. Mapa de escolas: ${P.sources?.inventory?.metadata?.schoolLookupUrl ? "configurado" : "pendente"}.`
+        label: "BI de equipamentos",
+        status: "ok",
+        note: "Power BI oficial incorporado; fonte SharePoint antiga desativada."
       },
       {
         label: "Supervisão mensal",
@@ -678,8 +678,7 @@
       { id: "schools", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "schools", icon: "&#127979;", label: "Escolas", value: data.schools?.length || 0, note: `${data.schools?.length || 0} unidade(s) na base regional`, tone: "info" },
       { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
-      { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Inventário", value: data.schoolAssets?.length || 0, note: context.inventoryAlerts ? `${context.inventoryAlerts} alerta(s) de ativo` : "Itens consolidados", tone: context.inventoryAlerts ? "warn" : "ok" },
-      { id: "biEquipment", roles: ["administrador"], page: "bi-equipment", icon: "&#128202;", label: "BI Equipamentos", value: data.schoolAssets?.length || 0, note: "Power BI do inventario", tone: "info" },
+      { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Equipamentos", value: data.schoolAssets?.length || 0, note: "Power BI oficial", tone: "info" },
       { id: "ctc", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados CTC", value: context.openCalls, note: context.openCalls ? "Fila de T.I. em acompanhamento" : "Fila de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
       { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
@@ -904,7 +903,7 @@
     setText("#dashboardNoticeNote", [profile.noticeNote, supervisionMonthNote()].filter(Boolean).join(" "));
     setText("#shortcutSchoolsNote", profile.shortcuts?.schools || `${data.schools.length} unidade(s) na base regional`);
     setText("#shortcutNetworkNote", profile.shortcuts?.network || (missingNetwork ? `${missingNetwork} escola(s) ainda sem rede` : `${networkCount} rede(s) mapeada(s)`));
-    setText("#shortcutInventoryNote", profile.shortcuts?.inventory || (inventoryAlerts ? `${inventoryAlerts} unidade(s) em manutenção/defeito` : `${data.schoolAssets.length} linha(s) consolidadas`));
+    setText("#shortcutInventoryNote", profile.shortcuts?.inventory || "BI oficial de equipamentos e patrimônio");
     setText("#shortcutSupervisionNote", profile.shortcuts?.supervision || (pendingVisits ? `${pendingVisits} visita(s) pendente(s)` : `${data.supervisors.length} responsável(is) ativos`));
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
     const shortcutGrid = P.$(".shortcut-grid");
@@ -3864,7 +3863,6 @@
   P.renderSchools = renderSchools;
   P.renderNetworkOptions = renderNetworkOptions;
   P.renderInventory = renderInventory;
-  P.renderBiEquipment = renderBiEquipment;
   P.renderContacts = renderContacts;
   P.renderCalendar = renderCalendar;
   P.renderRede2026 = renderRede2026;

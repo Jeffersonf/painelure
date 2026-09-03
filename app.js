@@ -18,12 +18,7 @@
     network(data) {
       P.renderNetworkOptions(data.networkData);
     },
-    inventory(data) {
-      P.renderInventory(data);
-    },
-    "bi-equipment"(data) {
-      P.renderBiEquipment(data);
-    },
+    inventory() {},
     supervision(data) {
       P.renderSupervisors(data.supervisors);
     },
