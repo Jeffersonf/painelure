@@ -14,7 +14,8 @@
     contacts: "contatos",
     calendar: "calendario",
     "rede-2026": "redes-2026",
-    satisfaction: "pesquisa-de-satisfacao",
+    satisfaction: "pesquisa-de-satisfacao-presencial",
+    "satisfaction-online": "pesquisa-de-satisfacao-online",
     internal: "cafe",
     reports: "relatorios",
     cars: "carros",
@@ -27,6 +28,7 @@
   };
   const PAGE_BY_SLUG = Object.fromEntries(Object.entries(PAGE_SLUGS).map(([page, slug]) => [slug, page]));
   PAGE_BY_SLUG.inventario = "inventory";
+  PAGE_BY_SLUG["pesquisa-de-satisfacao"] = "satisfaction";
   PAGE_BY_SLUG.interno = "internal";
 
   let previousPage = "dashboard";

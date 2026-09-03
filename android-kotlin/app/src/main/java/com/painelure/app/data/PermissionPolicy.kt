@@ -4,7 +4,7 @@ import java.text.Normalizer
 
 object PermissionPolicy {
     private val access = mapOf(
-        "Administrador" to setOf("dashboard", "schools", "network", "inventory", "bi-equipment", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "internal", "reports", "profiles", "quality", "admin"),
+        "Administrador" to setOf("dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "satisfaction-online", "internal", "reports", "profiles", "quality", "admin"),
         "Supervisao" to setOf("dashboard", "schools", "supervision", "contacts", "calendar"),
         "Tecnicos CTC" to setOf("dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "internal", "reports", "profiles", "quality"),
         "SETEC" to setOf("dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar"),

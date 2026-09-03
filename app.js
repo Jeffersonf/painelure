@@ -32,6 +32,7 @@
       P.renderRede2026?.(P.rede2026 || []);
     },
     satisfaction() {},
+    "satisfaction-online"() {},
     internal() {
       P.renderInternal?.();
     },

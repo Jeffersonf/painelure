@@ -43,7 +43,7 @@ let dbReady = false;
 let dbError = "";
 let frontendSeedStore = null;
 const DATA_ACCESS = {
-  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
+  Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "satisfaction-online", "internal", "reports", "profiles", "quality", "admin"],
   "Supervisao": ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction", "reports"],
   "Técnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
   SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "satisfaction", "reports"],
@@ -67,9 +67,9 @@ const DATA_ACCESS = {
   Consulta: ["dashboard", "schools", "contacts", "calendar", "satisfaction"]
 };
 Object.keys(DATA_ACCESS).forEach(role => {
-  if (role !== "Administrador") DATA_ACCESS[role] = DATA_ACCESS[role].filter(page => page !== "satisfaction");
+  if (role !== "Administrador") DATA_ACCESS[role] = DATA_ACCESS[role].filter(page => !["satisfaction", "satisfaction-online"].includes(page));
 });
-const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "satisfaction"].includes(page));
+const FULL_NON_ADMIN_ACCESS = DATA_ACCESS.Administrador.filter(page => !["admin", "satisfaction", "satisfaction-online"].includes(page));
 const OFFICIAL_SOURCE_FIXES = {
   inventory: {
     label: "Equipamentos",
@@ -83,12 +83,12 @@ const OFFICIAL_SOURCE_FIXES = {
     }
   },
   satisfaction: {
-    label: "Pesquisa de Satisfação Online",
+    label: "Pesquisa de Satisfação Presencial",
     type: "powerbi-embed",
     url: "",
     status: "replaced",
     metadata: {
-      domain: "Pesquisa de Satisfação Online",
+      domain: "Pesquisa de Satisfação Presencial",
       cadence: "sob demanda",
       owner: "Gabinete",
       source: "powerbi-embed",
@@ -758,7 +758,7 @@ function accessForRole(role, appData = {}) {
 }
 
 function canAccessData(page, user = null, appData = {}) {
-  if (page === "satisfaction") return normalizeText(user?.role || "Consulta").includes("administrador");
+  if (["satisfaction", "satisfaction-online"].includes(page)) return normalizeText(user?.role || "Consulta").includes("administrador");
   const userValues = [user?.name, user?.username, user?.login, user?.email].map(normalizeText).filter(Boolean);
   const isVanessa = userValues.some(value => value === "vanessa" || value === "deitv@educacao.sp.gov.br");
   if (page === "supervision" && isVanessa) return true;

@@ -1,7 +1,7 @@
 (function () {
   const P = window.PainelURE;
   const DEFAULT_ACCESS = {
-    Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"],
+    Administrador: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "satisfaction-online", "internal", "reports", "profiles", "quality", "admin"],
     Supervisao: ["dashboard", "schools", "supervision", "contacts", "calendar", "satisfaction"],
     "Tecnicos CTC": ["dashboard", "schools", "network", "inventory", "ctc", "calls", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality"],
     SETEC: ["dashboard", "schools", "network", "inventory", "ctc", "calls", "contacts", "cars", "calendar", "satisfaction"],
@@ -26,10 +26,10 @@
   };
   Object.keys(DEFAULT_ACCESS).forEach(role => {
     if (DEFAULT_ACCESS[role].includes("calendar") && !DEFAULT_ACCESS[role].includes("rede-2026")) DEFAULT_ACCESS[role].push("rede-2026");
-    if (role !== "Administrador") DEFAULT_ACCESS[role] = DEFAULT_ACCESS[role].filter(page => page !== "satisfaction");
+    if (role !== "Administrador") DEFAULT_ACCESS[role] = DEFAULT_ACCESS[role].filter(page => !["satisfaction", "satisfaction-online"].includes(page));
   });
   const ACCESS = DEFAULT_ACCESS;
-    const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => !["admin", "satisfaction"].includes(page));
+    const FULL_NON_ADMIN_ACCESS = DEFAULT_ACCESS.Administrador.filter(page => !["admin", "satisfaction", "satisfaction-online"].includes(page));
   const ROLE_EMOJI = {
     Administrador: "🛡️",
     Supervisao: "🧭",
@@ -172,7 +172,7 @@
 
   function canAccessData(page, role = P.currentRole?.()) {
     if (page === "rede-2026") return roleAccess(role).includes("calendar");
-    if (page === "satisfaction") return roleKey(role) === "Administrador";
+    if (["satisfaction", "satisfaction-online"].includes(page)) return roleKey(role) === "Administrador";
     if (page === "supervision" && isVanessaSupervisionUser()) return true;
     if (page === "network") return true;
     if (page === "calls" || page === "ctc") {

@@ -52,11 +52,11 @@
       metadata: { domain: "Calendario", cadence: "mensal", owner: "Gabinete" }
     },
     satisfaction: {
-      label: "Pesquisa de Satisfação Online",
+      label: "Pesquisa de Satisfação Presencial",
       type: "powerbi-embed",
       url: "",
       status: "replaced",
-      metadata: { domain: "Pesquisa de Satisfação Online", cadence: "sob demanda", owner: "Gabinete", source: "powerbi-embed", autoLoad: false }
+      metadata: { domain: "Pesquisa de Satisfação Presencial", cadence: "sob demanda", owner: "Gabinete", source: "powerbi-embed", autoLoad: false }
     },
     cars: {
       label: "Agendamento de carros",

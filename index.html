@@ -25,7 +25,8 @@
         contacts: "contatos",
         calendar: "calendario",
         "rede-2026": "redes-2026",
-        satisfaction: "pesquisa-de-satisfacao",
+        satisfaction: "pesquisa-de-satisfacao-presencial",
+        "satisfaction-online": "pesquisa-de-satisfacao-online",
         internal: "cafe",
         reports: "relatorios",
         cars: "carros",
@@ -38,6 +39,7 @@
       };
       const bySlug = Object.fromEntries(Object.entries(slugs).map(([page, slug]) => [slug, page]));
       bySlug.inventario = "inventory";
+      bySlug["pesquisa-de-satisfacao"] = "satisfaction";
       bySlug.interno = "internal";
       const basePath = (() => {
         const path = location.pathname.replace(/\/+$/, "");
@@ -141,7 +143,8 @@
       <button class="nav-item active" type="button" data-page="dashboard"><span>&#128202;</span>Painel</button>
       <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>Supervisão</button>
       <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
-      <button class="nav-item" type="button" data-page="satisfaction"><span>&#128221;</span>Pesquisa</button>
+      <button class="nav-item" type="button" data-page="satisfaction"><span>&#128221;</span>Pesquisa Presencial</button>
+      <button class="nav-item" type="button" data-page="satisfaction-online"><span>&#128221;</span>Pesquisa Online</button>
       <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
       <button class="nav-item" type="button" data-page="rede-2026"><span>&#128196;</span>Redes 2026</button>
     </nav>
@@ -474,11 +477,20 @@
 
     <section class="page" id="page-satisfaction">
       <header class="page-header compact">
-        <div><h1>Pesquisa de Satisfação Online</h1><p>BI online de respostas e indicadores.</p></div>
+        <div><h1>Pesquisa de Satisfação Presencial</h1><p>BI da pesquisa presencial.</p></div>
       </header>
       <div class="powerbi-embed-shell">
         <iframe title="satisfacao" class="powerbi-embed" src="https://app.powerbi.com/view?r=eyJrIjoiNTI3NWEyZmItMjM4Yi00OWMzLWIwNTgtNzBhNmE5N2Y2MWEyIiwidCI6IjE2Yjg3Nzk4LTQ1MTctNDQyYy05MjAwLWNlMWNjYTkzMjU5YyIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
       </div>
+    </section>
+
+    <section class="page" id="page-satisfaction-online">
+      <header class="page-header compact">
+        <div><h1>Pesquisa de Satisfação Online</h1><p>Esta categoria será disponibilizada em breve.</p></div>
+      </header>
+      <article class="box summary-box">
+        <div class="box-head"><div><strong>Em breve</strong><small>A Pesquisa de Satisfação Online está em preparação.</small></div><span class="status-pill info">em breve</span></div>
+      </article>
     </section>
 
     <section class="page" id="page-internal">
@@ -725,7 +737,7 @@
                 <option value="network">Redes e câmeras</option>
                 <option value="cars">Carros</option>
                 <option value="calendar">Calendário</option>
-                <option value="satisfaction">Pesquisa de Satisfação Online</option>
+                <option value="satisfaction">Pesquisa de Satisfação Presencial</option>
                 <option value="supervision">Supervisão</option>
               </select>
               <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
@@ -766,7 +778,8 @@
     <button class="active" type="button" data-page="dashboard">&#128202;<span>Painel</span></button>
     <button type="button" data-page="supervision">&#129517;<span>Supervisão</span></button>
     <button type="button" data-page="cars">&#128663;<span>Carros</span></button>
-    <button type="button" data-page="satisfaction">&#128221;<span>Pesquisa Online</span></button>
+    <button type="button" data-page="satisfaction">&#128221;<span>Presencial</span></button>
+    <button type="button" data-page="satisfaction-online">&#128221;<span>Online</span></button>
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
