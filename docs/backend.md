@@ -54,7 +54,9 @@ Use `CORS_ORIGIN` quando o frontend estiver no GitHub Pages e o backend em outro
 - `GET /api/health`
 - `GET /health`
 - `GET /api/data`
+- `POST /api/mobile/actions` cria uma operação autenticada de `calls`, `cars`, `calendar` ou `inventory`, aplicando o escopo do perfil e registrando auditoria.
 - `PUT /api/data` exige `baseUpdatedAt` da ultima leitura. Retorna `409 STALE_APP_STATE` se o cliente tentar gravar sobre uma versao mais nova. Scripts administrativos podem enviar `force: true`.
+- `PUT /api/internal` salva dados internos e exige administrador.
 - `POST /api/import/:tipo`
 - `POST /api/auth/login`
 - `POST /api/auth/logout`

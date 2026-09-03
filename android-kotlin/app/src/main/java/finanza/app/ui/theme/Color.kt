@@ -1,4 +1,4 @@
-﻿package com.painelure.app.ui.theme
+package com.painelure.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -39,4 +39,5 @@ val CategoryColors = listOf(
     Color(0xFF67D6B8),
     Color(0xFFE978A4)
 )
+
 

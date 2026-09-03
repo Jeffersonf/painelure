@@ -1,10 +1,16 @@
 plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android'; id 'org.jetbrains.kotlin.plugin.compose' }
 android { namespace 'com.painelure.app'; compileSdk 36
-    buildDir = file("$rootDir/build-output")
-    defaultConfig { applicationId 'com.painelure.app'; minSdk 26; targetSdk 36; versionCode 1; versionName '1.0' }
+    buildDir = file("$rootDir/build-output-v56")
+    defaultConfig { applicationId 'com.painelure.app'; minSdk 26; targetSdk 36; versionCode 138; versionName '11.9.0' }
     buildTypes { release { signingConfig signingConfigs.debug } }
     buildFeatures { compose true }
+    // O aplicativo é 100% nativo; não empacotar os assets web legados.
+    sourceSets { main { assets.srcDirs = [] } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+tasks.withType(Test).configureEach {
+    reports.junitXml.outputLocation = layout.buildDirectory.dir("test-results-alt/$name")
+    binaryResultsDirectory = layout.buildDirectory.dir("test-results-alt/$name/binary")
 }
 kotlin { jvmToolchain(17) }
 dependencies {
@@ -16,4 +22,5 @@ dependencies {
     implementation 'androidx.compose.foundation:foundation'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
+    testImplementation 'junit:junit:4.13.2'
 }

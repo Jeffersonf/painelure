@@ -1,4 +1,4 @@
-﻿package com.painelure.app.ui.theme
+package com.painelure.app.ui.theme
 
 import android.app.Activity
 import androidx.compose.material3.MaterialTheme
@@ -87,4 +87,5 @@ fun FinanceAppTheme(darkTheme: Boolean, content: @Composable () -> Unit) {
     }
     MaterialTheme(colorScheme = colors, typography = AppTypography, content = content)
 }
+
 
