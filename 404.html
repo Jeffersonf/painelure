@@ -176,7 +176,7 @@
     <div class="global-month-bar">
       <div class="global-page-heading" aria-live="polite">
         <strong id="globalPageTitle">Painel</strong>
-        <small id="globalPageNote">Centro do dia para consultar escolas, redes, equipamentos, visitas e agenda da URE.</small>
+        <small id="globalPageNote">Centro do dia para consultar escolas, redes, visitas e agenda da URE.</small>
       </div>
       <div class="sync-banner" id="globalSyncBanner" aria-live="polite"></div>
       <div class="month-switcher" aria-label="Selecionar mês global">
@@ -189,7 +189,7 @@
       <header class="page-header">
         <div>
           <h1>Painel</h1>
-        <p>Centro do dia para consultar escolas, redes, equipamentos, visitas e agenda da URE.</p>
+        <p>Centro do dia para consultar escolas, redes, visitas e agenda da URE.</p>
         </div>
         <div class="header-actions">
           <div class="month-switcher" aria-label="Selecionar mês">
@@ -210,17 +210,12 @@
           <button class="shortcut-card" type="button" data-jump="schools">
             <span>&#127979;</span>
             <strong>Escolas</strong>
-            <small id="shortcutSchoolsNote">Unidades, fichas e equipamentos por escola</small>
+            <small id="shortcutSchoolsNote">Unidades e fichas principais</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="network">
             <span>&#127760;</span>
             <strong>Redes e Câmeras</strong>
             <small id="shortcutNetworkNote">Rede, IPs, DVR e infraestrutura</small>
-          </button>
-          <button class="shortcut-card" type="button" data-jump="inventory">
-            <span>&#128187;</span>
-            <strong>Equipamentos</strong>
-            <small id="shortcutInventoryNote">BI de equipamentos e patrimônio</small>
           </button>
           <button class="shortcut-card" type="button" data-jump="supervision">
             <span>&#129517;</span>
@@ -234,22 +229,6 @@
           </button>
         </div>
       </section>
-
-      <button class="notice-card" type="button" data-jump="reports">
-        <span class="notice-icon">i</span>
-        <span>
-          <strong id="dashboardNoticeTitle">Base operacional carregada</strong>
-          <small id="dashboardNoticeNote">Escolas, supervisão, equipamentos e redes disponíveis para consulta. Calendário aguarda fonte oficial.</small>
-        </span>
-        <em>Relatórios</em>
-      </button>
-
-      <div class="manager-strip">
-        <div>
-          <strong>Pagina inicial da URE</strong>
-          <span id="dashboardSummary">consulta rápida | dados locais primeiro | fontes oficiais em segundo plano</span>
-        </div>
-      </div>
 
       <section class="dashboard-command" id="dashboardCommand"></section>
 
@@ -380,7 +359,7 @@
           <label><span>Data</span><input id="ctcNewDate" type="date" required></label>
           <label><span>Hora</span><input id="ctcNewTime" type="time" required></label>
           <label><span>Escola</span><select id="ctcNewSchool" required></select></label>
-          <label class="wide"><span>Objetivo</span><input id="ctcNewObjective" type="text" placeholder="Rede, câmera, inventário, suporte..." required></label>
+          <label class="wide"><span>Objetivo</span><input id="ctcNewObjective" type="text" placeholder="Rede, câmera, suporte..." required></label>
           <button class="ghost-btn" type="submit">Adicionar visita</button>
         </form>
       </article>
@@ -479,13 +458,11 @@
 
     <section class="page" id="page-satisfaction">
       <header class="page-header compact">
-        <div><h1>Pesquisa de satisfação</h1><p>Formulários, respostas e devolutivas das campanhas oficiais.</p></div>
+        <div><h1>Pesquisa de Satisfação Online</h1><p>BI online de respostas e indicadores.</p></div>
       </header>
-      <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo das pesquisas</strong><small>Campanhas e respostas consolidadas</small></div></div>
-        <div class="row-list compact" id="satisfactionSummaryRows"></div>
-      </article>
-      <div class="calendar-grid" id="satisfactionGrid"></div>
+      <div class="powerbi-embed-shell">
+        <iframe title="satisfacao" class="powerbi-embed" src="https://app.powerbi.com/view?r=eyJrIjoiNTI3NWEyZmItMjM4Yi00OWMzLWIwNTgtNzBhNmE5N2Y2MWEyIiwidCI6IjE2Yjg3Nzk4LTQ1MTctNDQyYy05MjAwLWNlMWNjYTkzMjU5YyIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
+      </div>
     </section>
 
     <section class="page" id="page-internal">
@@ -732,7 +709,7 @@
                 <option value="network">Redes e câmeras</option>
                 <option value="cars">Carros</option>
                 <option value="calendar">Calendário</option>
-                <option value="satisfaction">Pesquisa de satisfação</option>
+                <option value="satisfaction">Pesquisa de Satisfação Online</option>
                 <option value="supervision">Supervisão</option>
               </select>
               <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
@@ -773,7 +750,7 @@
     <button class="active" type="button" data-page="dashboard">&#128202;<span>Painel</span></button>
     <button type="button" data-page="supervision">&#129517;<span>Supervisão</span></button>
     <button type="button" data-page="cars">&#128663;<span>Carros</span></button>
-    <button type="button" data-page="satisfaction">&#128221;<span>Pesquisa</span></button>
+    <button type="button" data-page="satisfaction">&#128221;<span>Pesquisa Online</span></button>
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
   </nav>
 
@@ -785,7 +762,6 @@
   <script src="./data/contacts.js?v=stability-polish-20260528"></script>
   <script src="./data/users.js?v=stability-polish-20260528"></script>
   <script src="./data/governance.js?v=stability-polish-20260528"></script>
-  <script src="./data/satisfaction.js?v=satisfaction-dashboard-20260608"></script>
   <script src="./data/operations.js?v=stability-polish-20260528"></script>
   <script src="./data/calls-report.js?v=stability-polish-20260528"></script>
   <script src="./data/sources.js?v=satisfaction-sharepoint-20260602"></script>

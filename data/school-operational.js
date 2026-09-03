@@ -59,7 +59,7 @@
     },
     "EE Bairro Boa Vista Intervales": {
       network: ["Rede administrativa 10.109.42.128", "Gateway ADM 10.109.42.129", "Rede pedagógica 10.121.243.0"],
-      ips: ["CIE 915075", "Banda 2 Mbps", "Rede importada do inventário técnico"],
+      ips: ["CIE 915075", "Banda 2 Mbps", "Rede importada da base técnica"],
       cameras: ["29 câmeras instaladas", "29 câmeras em funcionamento"]
     },
     "PEI EE Jeminiano David Muzel": {
@@ -84,7 +84,7 @@
     },
     "PEI EE Oscar Kurtz Camargo": {
       network: ["Rede administrativa 10.109.42.192", "Gateway ADM 10.109.42.193", "Rede pedagógica 10.119.161.0"],
-      ips: ["CIE 15076", "Banda 8 Mbps", "Rede importada do inventário técnico"],
+      ips: ["CIE 15076", "Banda 8 Mbps", "Rede importada da base técnica"],
       cameras: ["DVR1 16-9", "DVR2 16-16", "DVR3 16-16"]
     },
     "PEI EE Otavio Ferrari": {
@@ -109,7 +109,7 @@
     },
     "EE Professor Silverio Monteiro": {
       network: ["Rede administrativa 10.109.41.192", "Gateway ADM 10.109.41.193", "Rede pedagógica 10.121.245.0"],
-      ips: ["CIE 35336", "Banda 2 Mbps", "Rede importada do inventário técnico"],
+      ips: ["CIE 35336", "Banda 2 Mbps", "Rede importada da base técnica"],
       cameras: ["Dados de câmera não informados"]
     },
     "PEI EE Simpliciano Campolim de Almeida": {

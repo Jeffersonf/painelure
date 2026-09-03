@@ -31,9 +31,7 @@
     "rede-2026"() {
       P.renderRede2026?.(P.rede2026 || []);
     },
-    satisfaction(data) {
-      P.renderSatisfaction(data.satisfaction);
-    },
+    satisfaction() {},
     internal() {
       P.renderInternal?.();
     },

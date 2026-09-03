@@ -83,16 +83,16 @@ const OFFICIAL_SOURCE_FIXES = {
     }
   },
   satisfaction: {
-    label: "Pesquisa de satisfação",
-    type: "sharepoint-list",
-    url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JADpBjs_DuTvSZyxa7kBWSezAaggBDoxC1kO4aT04Yv8SoA?e=iNCKJF",
-    status: "official",
+    label: "Pesquisa de Satisfação Online",
+    type: "powerbi-embed",
+    url: "",
+    status: "replaced",
     metadata: {
-      domain: "Pesquisa de satisfação",
-      cadence: "por campanha",
+      domain: "Pesquisa de Satisfação Online",
+      cadence: "sob demanda",
       owner: "Gabinete",
-      source: "PesquisaSatisfacao",
-      locked: true
+      source: "powerbi-embed",
+      autoLoad: false
     }
   }
 };
@@ -175,7 +175,6 @@ function loadFrontendSeedData() {
     "data/contacts.js",
     "data/users.js",
     "data/governance.js",
-    "data/satisfaction.js",
     "data/operations.js",
     "data/calls-report.js"
   ];

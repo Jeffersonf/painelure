@@ -17,12 +17,12 @@
       metadata: { domain: "Escolas", cadence: "mensal", owner: "URE" }
     },
     inventory: {
-      label: "Inventário",
+      label: "Equipamentos",
       type: "powerbi-embed",
       url: "",
       status: "replaced",
       metadata: {
-        domain: "Inventário",
+        domain: "Equipamentos",
         cadence: "sob demanda",
         owner: "SETEC/CTC",
         source: "powerbi-embed",
@@ -52,11 +52,11 @@
       metadata: { domain: "Calendario", cadence: "mensal", owner: "Gabinete" }
     },
     satisfaction: {
-      label: "Pesquisa de satisfação",
+      label: "Pesquisa de Satisfação Online",
       type: "powerbi-embed",
-      url: "https://seesp-my.sharepoint.com/:l:/g/personal/itv_seintec_educacao_sp_gov_br/JADpBjs_DuTvSZyxa7kBWSezAaggBDoxC1kO4aT04Yv8SoA?e=iNCKJF",
-      status: "official",
-      metadata: { domain: "Pesquisa de satisfação", cadence: "por campanha", owner: "Gabinete", source: "PesquisaSatisfacao", locked: true }
+      url: "",
+      status: "replaced",
+      metadata: { domain: "Pesquisa de Satisfação Online", cadence: "sob demanda", owner: "Gabinete", source: "powerbi-embed", autoLoad: false }
     },
     cars: {
       label: "Agendamento de carros",

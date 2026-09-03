@@ -47,9 +47,9 @@
     if (role.includes("ctc") || role.includes("setec") || role.includes("seintec")) {
       return {
         title: "Operação técnica",
-        note: `${context.networkCount} rede(s) mapeada(s), ${data.schoolAssets.length} item(ns) de inventário.`,
+        note: `${context.networkCount} rede(s) mapeada(s) e ${context.openCalls} chamado(s) em acompanhamento.`,
         notice: "Base técnica pronta para consulta",
-        noticeNote: "Redes, IPs, câmeras, inventário e chamados aparecem no mesmo fluxo operacional.",
+        noticeNote: "Redes, IPs, câmeras e chamados aparecem no mesmo fluxo operacional.",
         shortcuts: null
       };
     }
@@ -76,8 +76,8 @@
       note: `${data.schools.length} escola(s), contatos e dados liberados para consulta.`,
       notice: context.calendarCount ? "Base operacional atualizada" : "Base operacional pronta",
       noticeNote: context.calendarCount
-        ? "Escolas, supervisão, inventário, redes e agenda disponíveis para consulta."
-        : "Escolas, supervisão, inventário, redes e contatos disponíveis para consulta.",
+        ? "Escolas, supervisão, redes e agenda disponíveis para consulta."
+        : "Escolas, supervisão, redes e contatos disponíveis para consulta.",
       shortcuts: null
     };
   }
@@ -344,19 +344,8 @@
   }
 
   function qualityDiagnostics(data) {
-    const schools = data.schools || [];
-    const assets = data.schoolAssets || [];
     const supervisors = data.supervisors || [];
     const sources = Object.entries(P.sources || {});
-    const normalizedAssetSchools = new Set(assets.map(asset => P.normalize(asset.school)).filter(Boolean));
-    const schoolsWithoutInventory = schools.filter(school => !normalizedAssetSchools.has(P.normalize(school.name)));
-    const unresolvedSchoolIds = assets.filter(asset => /^Escola #\d+$/i.test(asset.school || "")).length;
-    const unresolvedEquipmentIds = assets.filter(asset => /^Equipamento #\d+$/i.test(asset.name || "")).length;
-    const missingSchool = assets.filter(asset => !asset.school || asset.school === "Escola sem nome").length;
-    const missingEquipment = assets.filter(asset => !asset.name || asset.name === "Item").length;
-    const missingSerial = assets.filter(asset => !assetHasNoteValue(asset, "Serie")).length;
-    const missingPatrimony = assets.filter(asset => !assetHasNoteValue(asset, "Patrimonio")).length;
-    const alertAssets = assets.filter(asset => asset.status && asset.status !== "ok").length;
     const sourceErrors = (P.sourceStatus || []).filter(item => item.status === "error").length;
     const configuredSources = sources.filter(([, source]) => source.url).length;
     const sourceLoaded = (P.sourceStatus || []).filter(item => item.status === "loaded").length;
@@ -369,45 +358,9 @@
     }, { done: 0, total: 0, pending: 0 });
     return [
       {
-        label: "Inventário: escolas mapeadas",
-        status: unresolvedSchoolIds || missingSchool ? "warn" : "ok",
-        note: unresolvedSchoolIds
-          ? `${unresolvedSchoolIds} item(ns) ainda usam Escola #ID. Verifique o mapa de escolas.`
-          : `${assets.length} item(ns) com escola resolvida; ${missingSchool} sem escola.`
-      },
-      {
-        label: "Inventário: equipamentos mapeados",
-        status: unresolvedEquipmentIds ? "warn" : "ok",
-        note: unresolvedEquipmentIds
-          ? `${unresolvedEquipmentIds} item(ns) ainda usam Equipamento #ID. Falta o link/lista de Equipamento.`
-          : "Tipos de equipamento resolvidos."
-      },
-      {
-        label: "Inventário: identificação dos ativos",
-        status: missingSerial || missingPatrimony || missingEquipment ? "warn" : "ok",
-        note: `Sem série: ${missingSerial}. Sem patrimônio: ${missingPatrimony}. Sem tipo: ${missingEquipment}.`
-      },
-      {
-        label: "Inventário: manutenção/defeito",
-        status: alertAssets ? "warn" : "ok",
-        note: alertAssets ? `${alertAssets} ativo(s) fora de OK.` : "Nenhum ativo fora de OK na base atual."
-      },
-      {
-        label: "Escolas sem inventário",
-        status: schoolsWithoutInventory.length ? "warn" : "ok",
-        note: schoolsWithoutInventory.length
-          ? `${schoolsWithoutInventory.length} escola(s) sem itens vinculados: ${schoolsWithoutInventory.slice(0, 4).map(item => item.name).join(", ")}${schoolsWithoutInventory.length > 4 ? "..." : ""}`
-          : "Todas as escolas carregadas têm algum item de inventário."
-      },
-      {
         label: "Fontes oficiais",
         status: sourceErrors ? "danger" : (configuredSources ? "info" : "warn"),
         note: `${configuredSources}/${sources.length} fonte(s) configurada(s), ${sourceLoaded} carregada(s) nesta sessão, ${sourceErrors} erro(s).`
-      },
-      {
-        label: "BI de equipamentos",
-        status: "ok",
-        note: "Power BI oficial incorporado; fonte SharePoint antiga desativada."
       },
       {
         label: "Supervisão mensal",
@@ -423,8 +376,8 @@
       },
       {
         label: "Bloqueios finais",
-        status: unresolvedEquipmentIds ? "warn" : "info",
-        note: "Final da fila: links de Equipamento e Status do Equipamento para remover os IDs restantes."
+        status: "info",
+        note: "Revisar apenas pendências de escolas, redes, supervisão e agenda."
       }
     ];
   }
@@ -678,7 +631,6 @@
       { id: "schools", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "schools", icon: "&#127979;", label: "Escolas", value: data.schools?.length || 0, note: `${data.schools?.length || 0} unidade(s) na base regional`, tone: "info" },
       { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
-      { id: "inventory", roles: ["administrador", "setec", "seintec", "ctc"], page: "inventory", icon: "&#128187;", label: "Equipamentos", value: data.schoolAssets?.length || 0, note: "Power BI oficial", tone: "info" },
       { id: "ctc", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados CTC", value: context.openCalls, note: context.openCalls ? "Fila de T.I. em acompanhamento" : "Fila de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
       { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
       { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
@@ -727,33 +679,15 @@
   }
 
   function adminDashboardTasks(data, context) {
-    const assets = data.schoolAssets || [];
     const supervisors = data.supervisors || [];
-    const lookupIds = assets.filter(item => /^(Escola|Equipamento) #\d+/i.test(item.school || "") || /^(Escola|Equipamento) #\d+/i.test(item.name || "")).length;
-    const sourceInventory = P.sourceResult?.("inventory");
     const sourceSupervision = P.sourceResult?.("supervision");
     const sourceCars = P.sourceResult?.("cars");
-    const sourceSatisfaction = P.sourceResult?.("satisfaction");
     return [
-      {
-        id: "inventory-lookups",
-        title: "Resolver nomes do inventário",
-        note: lookupIds
-          ? `${lookupIds} item(ns) ainda aparecem com ID do SharePoint. Precisa liberar as listas lookup ou cadastrar o mapa ID -> nome.`
-          : "Inventário sem IDs aparentes de escola/equipamento.",
-        tone: lookupIds ? "warn" : "ok"
-      },
       {
         id: "brand-logo",
         title: "Refazer logo da barra lateral",
         note: "Logo removido da sidebar. Manter PainelURE limpo até termos uma versão que funcione em tamanho pequeno.",
         tone: "warn"
-      },
-      {
-        id: "inventory-source",
-        title: "Validar planilha de equipamentos",
-        note: `${assets.length} linha(s) carregada(s). Status da fonte: ${sourceInventory?.status || "sem sincronização nesta sessão"}.`,
-        tone: assets.length ? "info" : "warn"
       },
       {
         id: "supervision-month",
@@ -768,12 +702,6 @@
         tone: sourceCars?.status === "loaded" || context.carCount ? "info" : "warn"
       },
       {
-        id: "satisfaction-source",
-        title: "Definir pesquisa de satisfação",
-        note: `${(data.satisfaction || []).length} resposta(s) carregada(s). A fonte oficial ainda está ${sourceSatisfaction?.status || "sem URL"} no cadastro de fontes.`,
-        tone: (data.satisfaction || []).length ? "info" : "warn"
-      },
-      {
         id: "home-review",
         title: "Revisar utilidade da inicial",
         note: "Checar se os widgets e atalhos ajudam na rotina. Remover o que não tiver ação clara.",
@@ -782,8 +710,8 @@
       {
         id: "official-sources",
         title: "Rodar atualização geral",
-        note: `Supervisão: ${sourceSupervision?.status || "sem sessão"} | Inventário: ${sourceInventory?.status || "sem sessão"} | Carros: ${sourceCars?.status || "sem sessão"}.`,
-        tone: sourceInventory?.status === "loaded" && sourceSupervision?.status === "loaded" ? "ok" : "warn"
+        note: `Supervisão: ${sourceSupervision?.status || "sem sessão"} | Carros: ${sourceCars?.status || "sem sessão"}.`,
+        tone: sourceSupervision?.status === "loaded" ? "ok" : "warn"
       }
     ];
   }
@@ -840,9 +768,6 @@
       page: item.label.includes("Inventário") ? "inventory" : item.label.includes("Supervisão") ? "supervision" : item.label.includes("Fonte") ? "admin" : "quality"
     }));
     const actions = [
-      context.inventoryAlerts
-        ? { icon: "IN", title: "Triar inventário", note: `${context.inventoryAlerts} ativo(s) fora de OK ou com identificação pendente.`, label: "abrir", tone: "warn", page: "inventory" }
-        : { icon: "IN", title: "Inventário estável", note: `${data.schoolAssets.length} linha(s) consolidadas para consulta.`, label: "ok", tone: "ok", page: "inventory" },
       context.missingNetwork
         ? { icon: "RD", title: "Completar redes", note: `${context.missingNetwork} escola(s) sem infraestrutura mapeada.`, label: "rede", tone: "warn", page: "network" }
         : { icon: "RD", title: "Redes mapeadas", note: `${context.networkCount} escola(s) com dados técnicos.`, label: "ok", tone: "ok", page: "network" },
@@ -883,14 +808,11 @@
     const calendarCount = monthFiltered(data.calendar || [], item => item.date || item.value).length;
     const carCount = monthFiltered(carBookings(data), item => item.date).length;
     const missingNetwork = Math.max((data.schools?.length || 0) - networkCount, 0);
-    const assetAlerts = (data.schoolAssets || []).filter(item => item.status && item.status !== "ok").length;
-    const metricAlerts = Object.values(data.schoolInventoryMetrics || {}).reduce((sum, item) => sum + Number(item.alerts || 0), 0);
-    const inventoryAlerts = Math.max(assetAlerts, metricAlerts);
     const pendingVisits = (data.supervisors || []).reduce((sum, item) => sum + Number(item.pending || 0), 0);
     const openCalls = (data.calls || []).filter(item => item.status !== "resolvido").length;
     const ctcVisits = monthFiltered(data.ctcVisits || [], item => item.date).length;
     const officialSources = (P.sourceStatus || []).filter(item => item.status === "loaded").length;
-    const context = { networkCount, calendarCount, carCount, missingNetwork, inventoryAlerts, pendingVisits, openCalls, ctcVisits };
+    const context = { networkCount, calendarCount, carCount, missingNetwork, pendingVisits, openCalls, ctcVisits };
     const profile = dashboardProfile(data, context);
     const dashboardWidgets = dashboardWidgetsForRole(data, context);
     const visibleDashboardWidgets = dashboardWidgets;
@@ -903,7 +825,6 @@
     setText("#dashboardNoticeNote", [profile.noticeNote, supervisionMonthNote()].filter(Boolean).join(" "));
     setText("#shortcutSchoolsNote", profile.shortcuts?.schools || `${data.schools.length} unidade(s) na base regional`);
     setText("#shortcutNetworkNote", profile.shortcuts?.network || (missingNetwork ? `${missingNetwork} escola(s) ainda sem rede` : `${networkCount} rede(s) mapeada(s)`));
-    setText("#shortcutInventoryNote", profile.shortcuts?.inventory || "BI oficial de equipamentos e patrimônio");
     setText("#shortcutSupervisionNote", profile.shortcuts?.supervision || (pendingVisits ? `${pendingVisits} visita(s) pendente(s)` : `${data.supervisors.length} responsável(is) ativos`));
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
     const shortcutGrid = P.$(".shortcut-grid");
@@ -925,9 +846,6 @@
       missingNetwork
         ? { icon: "&#127760;", title: "Completar dados de rede", note: `${missingNetwork} escola(s) sem infraestrutura mapeada.`, label: "Rede", tone: "warn", page: "network" }
         : { icon: "&#127760;", title: "Redes mapeadas", note: `${networkCount} escola(s) com dados técnicos disponíveis.`, label: "OK", tone: "ok", page: "network" },
-      inventoryAlerts
-        ? { icon: "&#128187;", title: "Inventário com manutenção/defeito", note: `${inventoryAlerts} unidade(s) fora de OK.`, label: "Invent.", tone: "warn", page: "inventory" }
-        : { icon: "&#128187;", title: "Inventário consolidado", note: `${data.schoolAssets.length} linha(s) carregada(s).`, label: "OK", tone: "ok", page: "inventory" },
       pendingVisits
         ? { icon: "&#129517;", title: "Acompanhar visitas pendentes", note: `${pendingVisits} visita(s) faltando nas metas atuais.`, label: "Meta", tone: "warn", page: "supervision" }
         : { icon: "&#129517;", title: "Supervisão em dia", note: `${data.supervisors.length} responsável(is) ativos no painel.`, label: "OK", tone: "ok", page: "supervision" }
@@ -1104,9 +1022,6 @@
     const detail = P.$(target);
     if (!detail || !school) return;
     const data = P.getAppData();
-    const assets = schoolAssets(school.name);
-    const totals = inventoryTotals(assets);
-    const metrics = data.schoolInventoryMetrics?.[school.name] || { items: school.items || 0, alerts: school.alerts || 0 };
     const profile = schoolProfile(school.name);
     const profilePct = schoolProfileCompletion(school.name);
     const missingProfile = schoolMissingProfileFields(school.name);
@@ -1115,32 +1030,22 @@
     const calls = (data.calls || []).filter(call => P.normalize(call.school) === P.normalize(school.name));
     const networkStatus = network ? "Mapeada" : "Pendente";
     const profileNote = missingProfile.length ? `Pendências: ${missingProfile.slice(0, 4).join(", ")}.` : firstNote(profile?.notes) || "Dados principais da escola preenchidos.";
-    const schoolTone = totals.alertUnits || metrics.alerts ? "warn" : (!network || profilePct < 65 || calls.length ? "info" : "ok");
-    const inventoryPreview = assets.slice(0, 6);
+    const schoolTone = !network || profilePct < 65 || calls.length ? "info" : "ok";
     const networkItems = [
       { title: "Rede", value: network?.network?.[0] || "Sem informação" },
       { title: "IPs", value: network?.ips?.[0] || "Sem IP cadastrado" },
       { title: "Câmeras", value: network?.câmeras?.[0] || "Sem câmera cadastrada" }
     ];
     const guideWidgets = [
-      { key: "inventory", title: "&#128187; Inventário", note: totals.alertUnits || metrics.alerts ? `${totals.alertUnits || metrics.alerts} item(ns) pedem revisão` : `${totals.lines || metrics.items || 0} item(ns) sem alerta`, label: totals.alertUnits || metrics.alerts ? "Revisar" : "Abrir", tone: totals.alertUnits || metrics.alerts ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("inventory") },
       { key: "network", title: "&#127760; Redes", note: network ? `${networkItems.filter(item => !item.value.includes("Sem")).length}/3 grupos mapeados` : "Rede e câmeras pendentes", label: network ? "Abrir" : "Pendente", tone: network ? "info" : "warn", enabled: Boolean(network) && (!P.canAccess || P.canAccess("network")) },
       { key: "supervisor", title: "&#129517; Supervisão", note: supervisor ? `${supervisor.name} | mês ${supervisor.month || "0/12"}` : "Sem supervisor vinculado", label: supervisor ? "Abrir" : "Pendente", tone: supervisor ? "info" : "warn", enabled: Boolean(supervisor) },
       { key: "calls", title: "&#128229; Chamados", note: calls.length ? `${calls.length} chamado(s) vinculados` : "Sem fila vinculada", label: calls.length ? "Ver fila" : "Estável", tone: calls.length ? "warn" : "ok", enabled: !P.canAccess || P.canAccess("calls") }
     ];
-    const schoolAssetIds = assets.filter(asset => /^Escola #\d+$/i.test(asset.school || "")).length;
-    const equipmentIds = assets.filter(asset => /^Equipamento #\d+$/i.test(asset.name || "")).length;
-    const missingSerial = assets.filter(asset => !assetHasNoteValue(asset, "Serie")).length;
-    const missingPatrimony = assets.filter(asset => !assetHasNoteValue(asset, "Patrimonio")).length;
     const openCalls = calls.filter(call => call.status !== "resolvido").length;
     const sourceChecks = [
-      { title: "Inventário", note: assets.length ? `${assets.length} linha(s) vinculada(s) a esta escola.` : "Nenhum item vinculado no inventário.", status: assets.length ? "ok" : "warn" },
-      { title: "Equipamentos por ID", note: equipmentIds ? `${equipmentIds} item(ns) ainda usam Equipamento #ID.` : "Tipos de equipamento sem ID aparente.", status: equipmentIds ? "warn" : "ok" },
-      { title: "Identificação dos ativos", note: `Sem série: ${missingSerial}. Sem patrimônio: ${missingPatrimony}.`, status: missingSerial || missingPatrimony ? "warn" : "ok" },
       { title: "Rede e câmeras", note: network ? "Infraestrutura vinculada na fonte de redes." : "Sem rede vinculada para esta escola.", status: network ? "ok" : "warn" },
       { title: "Supervisão", note: supervisor ? `${supervisor.name} vinculado(a).` : "Sem supervisor vinculado na base atual.", status: supervisor ? "ok" : "warn" },
       { title: "Chamados", note: openCalls ? `${openCalls} chamado(s) ainda não resolvido(s).` : "Sem chamado aberto vinculado.", status: openCalls ? "warn" : "ok" },
-      { title: "Mapa de escola", note: schoolAssetIds ? `${schoolAssetIds} item(ns) ainda usam Escola #ID.` : "Nome da escola resolvido no inventário.", status: schoolAssetIds ? "warn" : "ok" }
     ];
     detail.innerHTML = `
       <section class="school-profile-page school-profile-${schoolTone}">
@@ -1161,8 +1066,6 @@
 
         <section class="school-profile-metrics">
           <article><span>&#128203;</span><small>Ficha</small><strong>${profilePct}%</strong><i style="--pct:${profilePct}%"></i></article>
-          <article><span>&#128187;</span><small>Inventário</small><strong>${totals.lines || metrics.items || 0}</strong><i style="--pct:100%"></i></article>
-          <article><span>&#128736;&#65039;</span><small>Manutenção</small><strong>${totals.alertUnits || metrics.alerts || 0}</strong><i style="--pct:${totals.alertUnits || metrics.alerts ? 100 : 0}%"></i></article>
           <article><span>&#127760;</span><small>Rede</small><strong>${networkStatus}</strong><i style="--pct:${network ? 100 : 0}%"></i></article>
           <article><span>&#128229;</span><small>Chamados</small><strong>${calls.length}</strong><i style="--pct:${calls.length ? 100 : 0}%"></i></article>
         </section>
@@ -1177,7 +1080,7 @@
 
         <section class="school-profile-grid">
           <article class="box school-profile-card wide">
-            <div class="box-head"><div><strong>Divergências entre fontes</strong><small>Conferência cruzada de inventário, rede, supervisão e chamados.</small></div><span class="status-pill ${sourceChecks.some(item => item.status !== "ok") ? "warn" : "ok"}">${sourceChecks.filter(item => item.status !== "ok").length || "ok"}</span></div>
+            <div class="box-head"><div><strong>Divergências entre fontes</strong><small>Conferência cruzada de rede, supervisão e chamados.</small></div><span class="status-pill ${sourceChecks.some(item => item.status !== "ok") ? "warn" : "ok"}">${sourceChecks.filter(item => item.status !== "ok").length || "ok"}</span></div>
             <div class="row-list compact">
               ${sourceChecks.map(item => `
                 <div class="data-row compact" data-search="${P.searchText([school.name, item.title, item.note, item.status])}">
@@ -1220,18 +1123,6 @@
             ${!P.canAccess || P.canAccess("network") ? `<button class="ghost-btn block" type="button" data-open-network="${school.name}" ${network ? "" : "disabled"}>Abrir redes</button>` : ""}
           </article>
 
-          <article class="box school-profile-card wide">
-            <div class="box-head"><div><strong>Inventário</strong><small>Resumo consolidado da escola.</small></div><span class="status-pill ${totals.alertUnits || metrics.alerts ? "warn" : "ok"}">${totals.alertUnits || metrics.alerts ? "revisar" : "ok"}</span></div>
-            <div class="school-inventory-preview">
-              ${inventoryPreview.length ? inventoryPreview.map(asset => `<button class="data-row compact" type="button" data-open-inventory="${school.name}">
-                <span class="row-icon">&#128187;</span>
-                <span><strong>${asset.name}</strong><small>${asset.description || `${asset.quantity || 0} unidade(s)`}</small></span>
-                <em class="status-pill ${statusClass(asset.status)}">${asset.status || "base"}</em>
-              </button>`).join("") : `<div class="empty-state">Sem linhas de inventário para esta escola.</div>`}
-            </div>
-            ${!P.canAccess || P.canAccess("inventory") ? `<button class="ghost-btn block" type="button" data-open-inventory="${school.name}">Abrir inventário completo</button>` : ""}
-          </article>
-
           <article class="box school-profile-card">
             <div class="box-head"><div><strong>Chamados</strong><small>Fila vinculada a escola.</small></div><span class="status-pill ${calls.length ? "warn" : "ok"}">${calls.length}</span></div>
             <div class="school-profile-stack">
@@ -1262,16 +1153,12 @@
     detail.querySelectorAll("[data-open-network]").forEach(button => {
       button.addEventListener("click", event => focusNetworkSchool(event.currentTarget.dataset.openNetwork));
     });
-    detail.querySelectorAll("[data-open-inventory]").forEach(button => {
-      button.addEventListener("click", event => focusInventorySchool(event.currentTarget.dataset.openInventory));
-    });
     detail.querySelectorAll("[data-open-supervisor]").forEach(button => {
       button.addEventListener("click", event => focusSupervisor(event.currentTarget.dataset.openSupervisor));
     });
     detail.querySelectorAll("[data-school-guide]").forEach(button => {
       button.addEventListener("click", event => {
         const guide = event.currentTarget.dataset.schoolGuide;
-        if (guide === "inventory") focusInventorySchool(school.name);
         if (guide === "network") focusNetworkSchool(school.name);
         if (guide === "supervisor") focusSupervisor(supervisor?.name);
         if (guide === "calls") P.setPage?.("calls");
@@ -1284,7 +1171,6 @@
   }
 
   function followUpText(missingProfile, alertCount, network, callCount) {
-    if (alertCount) return "Conferir inventário com manutenção ou defeito.";
     if (callCount) return "Chamados vinculados na escola.";
     if (missingProfile.length) return `Completar ficha: ${missingProfile.slice(0, 3).join(", ")}.`;
     if (!network) return "Mapear rede e câmeras para completar a base técnica.";
@@ -3764,7 +3650,6 @@
     }
     const systemChecks = [
       { label: "Escolas carregadas", status: data.schools.length === 21 ? "ok" : "warn", note: `${data.schools.length}/21 escola(s)` },
-      { label: "Inventário carregado", status: data.schoolAssets.length ? "ok" : "warn", note: `${data.schoolAssets.length} linha(s)` },
       { label: "Supervisão carregada", status: data.supervisors.length === 6 ? "ok" : "warn", note: `${data.supervisors.length}/6 supervisor(es)` },
       { label: "Contatos carregados", status: data.contacts.length ? "ok" : "warn", note: `${data.contacts.length} contato(s)` },
       {
