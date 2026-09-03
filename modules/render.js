@@ -829,7 +829,8 @@
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
     const shortcutGrid = P.$(".shortcut-grid");
     if (shortcutGrid) {
-      shortcutGrid.innerHTML = dashboardWidgets.map(widget => {
+      const quickAccessPages = ["schools", "network", "supervision", "cars"];
+      shortcutGrid.innerHTML = dashboardWidgets.filter(widget => quickAccessPages.includes(widget.page)).map(widget => {
         const modeAttr = widget.mode ? ` data-calendar-mode-target="${widget.mode}"` : "";
         const denied = P.canAccess && !P.canAccess(widget.page);
         return `
