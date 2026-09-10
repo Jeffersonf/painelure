@@ -266,7 +266,7 @@
     activateLocalSession(role);
     showPinChange(false);
     const text = reason || "Servidor indisponível. Você entrou no modo local e a sincronização pode ser feita depois.";
-    P.showToast?.("Modo offline", text, "warn", { delay: 9000 });
+    console.warn("[PainelURE] Modo offline: " + text);
     showLoginStatus(text);
     return user;
   }
@@ -519,7 +519,7 @@
           return null;
         }
         restoreCachedSession(cachedUser);
-        P.showToast?.("Offline", "Não foi possível sincronizar agora. Mantendo sessão local.", "warn", { delay: 9000 });
+        console.warn("[PainelURE] Sessão local mantida em cache.");
         return cachedUser;
       } finally {
         document.documentElement.classList.remove("auth-pending");

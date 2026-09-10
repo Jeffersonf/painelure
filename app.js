@@ -114,12 +114,12 @@
           if (payload?.data?.appData) {
             refreshRenderedPages();
           } else {
-            P.showToast?.("Modo local", "Servidor não respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
+            console.warn("[PainelURE] Operando em modo local.");
           }
         })
         .catch(error => {
           console.warn("[PainelURE] Backend carregando em segundo plano:", error);
-          P.showToast?.("Modo local", "Servidor não respondeu. Mantendo dados locais.", "warn", { delay: 9000 });
+          console.warn("[PainelURE] Operando em modo local.");
         });
     };
 
