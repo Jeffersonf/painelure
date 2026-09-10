@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark" class="auth-pending">
 <head>
   <meta charset="utf-8">
@@ -8,7 +8,7 @@
   <title>PainelURE</title>
   <script>
     try {
-      window.PAINELURE_BUILD = "toast-autoclose-20260804";
+      window.PAINELURE_BUILD = "ctc-chamados-20260910";
       const params = new URLSearchParams(location.search);
       const adminEntry = params.get("admin") === "1" || /\/acesso-admin\/?$/i.test(location.pathname);
       if (adminEntry) sessionStorage.setItem("painelure_maintenance_bypass", "1");
@@ -24,6 +24,7 @@
         supervision: "supervisao",
         contacts: "contatos",
         calendar: "calendario",
+        "rede-2026": "redes-2026",
         satisfaction: "pesquisa-de-satisfacao-presencial",
         "satisfaction-online": "pesquisa-de-satisfacao-online",
         internal: "cafe",
@@ -140,9 +141,11 @@
     <div class="nav-label">Menu</div>
     <nav class="nav" aria-label="Navegação principal">
       <button class="nav-item active" type="button" data-page="dashboard"><span>&#128202;</span>Painel</button>
+      <button class="nav-item" type="button" data-page="ctc"><span>&#128229;</span>Chamados CTC</button>
       <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>Supervisão</button>
       <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
       <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
+      <button class="nav-item" type="button" data-page="rede-2026"><span>&#128196;</span>Redes 2026</button>
     </nav>
     <section class="sidebar-card sidebar-tools-card" aria-label="Atalhos">
       <div class="sidebar-shortcuts icon-only">
@@ -151,6 +154,7 @@
         <button type="button" data-jump="inventory" title="Equipamentos" aria-label="Equipamentos">&#128187;</button>
         <button type="button" data-jump="ctc" title="Chamados CTC" aria-label="Chamados CTC">&#128229;</button>
         <button type="button" data-jump="calendar" title="Agenda" aria-label="Agenda">&#128197;</button>
+        <button type="button" data-jump="rede-2026" title="Redes 2026" aria-label="Redes 2026">&#128196;</button>
         <button type="button" data-jump="internal" title="Café" aria-label="Café">&#9749;</button>
         <button type="button" data-jump="reports" title="Relatórios" aria-label="Relatórios">&#128200;</button>
       </div>
@@ -278,55 +282,11 @@
     </section>
 
     <section class="page" id="page-ctc">
-      <header class="page-header compact">
-        <div><h1>Chamados CTC</h1><p>Chamados de T.I., agenda técnica e acompanhamento das escolas.</p></div>
-      </header>
-      <section class="ctc-hero">
-        <div class="ctc-hero-copy">
-          <span>Operação técnica</span>
-          <strong>Fila e visitas CTC</strong>
-          <p id="ctcFilterSummary">Chamados e visitas carregados.</p>
-        </div>
-        <div class="ctc-kpi-grid" id="ctcSummaryRows"></div>
-      </section>
-      <div class="selector-panel operation-filters">
-        <label>
-          <span>Técnico</span>
-          <select id="ctcOwnerFilter"></select>
-        </label>
-        <label>
-          <span>Escola</span>
-          <select id="ctcSchoolFilter"></select>
-        </label>
-        <label>
-          <span>Status</span>
-          <select id="ctcStatusFilter">
-            <option value="all">Todos</option>
-            <option value="aberto">Aberto</option>
-            <option value="em_rota">Em atendimento</option>
-            <option value="resolvido">Resolvido</option>
-          </select>
-        </label>
-        <label>
-          <span>Categoria</span>
-          <select id="ctcCategoryFilter"></select>
-        </label>
-        <button class="ghost-btn filter-reset" type="button" id="ctcFilterReset">Limpar</button>
+      <div class="ctc-embed-card" style="width: 100%; height: calc(100vh - 120px); min-height: 850px; border-radius: 8px; overflow: hidden; background: #06090f; margin-top: 6px;">
+        <iframe src="https://jeffersonf.github.io/central-chamados/" style="width: 100%; height: 100%; border: none; display: block;" allowfullscreen></iframe>
       </div>
-      <div class="calendar-grid" id="ctcCallsGrid"></div>
-      <article class="box ctc-scheduler-card">
-        <div class="box-head"><div><strong>Agendar visita CTC</strong><small>Cadastre a agenda dos técnicos no painel.</small></div><span class="status-pill info">local</span></div>
-        <form class="ctc-scheduler-form" id="ctcVisitForm">
-          <label><span>Técnico</span><input id="ctcNewOwner" type="text" placeholder="Nome do técnico" required></label>
-          <label><span>Data</span><input id="ctcNewDate" type="date" required></label>
-          <label><span>Hora</span><input id="ctcNewTime" type="time" required></label>
-          <label><span>Escola</span><select id="ctcNewSchool" required></select></label>
-          <label class="wide"><span>Objetivo</span><input id="ctcNewObjective" type="text" placeholder="Rede, câmera, suporte..." required></label>
-          <button class="ghost-btn" type="submit">Adicionar visita</button>
-        </form>
-      </article>
-      <div class="calendar-grid" id="ctcGrid"></div>
     </section>
+
 
     <section class="page" id="page-calls">
       <header class="page-header compact">
@@ -416,6 +376,19 @@
         <div class="row-list compact" id="calendarSummaryRows"></div>
       </article>
       <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+
+    <section class="page" id="page-rede-2026">
+      <header class="page-header compact">
+        <div><h1>Redes 2026</h1><p>Comunicados e documentos da categoria Redes 2026.</p></div>
+      </header>
+      <article class="box rede2026-panel">
+        <div class="rede2026-toolbar">
+          <label class="rede2026-search" for="rede2026Search"><span>⌕</span><input id="rede2026Search" type="search" placeholder="Buscar por número, data ou assunto"></label>
+          <small class="rede2026-count" id="rede2026Count"></small>
+        </div>
+        <div class="rede2026-table-wrap"><table class="rede2026-table"><thead><tr><th>Rede</th><th>Data</th><th>Assunto</th></tr></thead><tbody id="rede2026Grid"></tbody></table></div>
+      </article>
     </section>
 
     <section class="page" id="page-satisfaction">
@@ -719,6 +692,7 @@
 
   <nav class="mobile-nav" aria-label="Navegação mobile">
     <button class="active" type="button" data-page="dashboard">&#128202;<span>Painel</span></button>
+    <button type="button" data-page="ctc">&#128229;<span>Chamados</span></button>
     <button type="button" data-page="supervision">&#129517;<span>Supervisão</span></button>
     <button type="button" data-page="cars">&#128663;<span>Carros</span></button>
     <button type="button" data-page="contacts">&#9742;&#65039;<span>Contatos</span></button>
@@ -735,6 +709,7 @@
   <script src="./data/operations.js?v=stability-polish-20260528"></script>
   <script src="./data/calls-report.js?v=stability-polish-20260528"></script>
   <script src="./data/sources.js?v=satisfaction-sharepoint-20260602"></script>
+  <script src="./data/rede-2026.js?v=rede-2026-1"></script>
   <script src="./modules/dom.js?v=stability-polish-20260528"></script>
   <script src="./modules/ui-catalog.js?v=cafe-dashboard-20260612g"></script>
   <script src="./modules/data-store.js?v=cafe-dashboard-20260612g"></script>
@@ -747,10 +722,10 @@
   <script src="./config.js?v=stability-polish-20260528"></script>
   <script src="./modules/backend-client.js?v=supervision-session-fix-20260803"></script>
   <script src="./modules/search.js?v=cafe-dashboard-20260612g"></script>
-  <script src="./modules/render.js?v=satisfaction-layout-fix-20260804"></script>
+  <script src="./modules/render.js?v=ctc-chamados-20260910"></script>
   <script src="./modules/supervision-render.js?v=supervision-readable-notes-20260804"></script>
   <script src="./modules/navigation.js?v=toast-autoclose-20260804"></script>
   <script src="./modules/admin-tools.js?v=satisfaction-layout-fix-20260804"></script>
-  <script src="./app.js?v=cafe-dashboard-20260612g"></script>
+  <script src="./app.js?v=ctc-chamados-20260910"></script>
 </body>
 </html>

@@ -2466,7 +2466,7 @@
     if (!form || form.dataset.bound) return;
     form.dataset.bound = "true";
     const schoolSelect = P.$("#ctcNewSchool");
-    if (schoolSelect && !schoolSelect.options.length) {
+    if (schoolSelect && (!schoolSelect.options || !schoolSelect.options.length)) {
       const schools = (P.getAppData().schools || []).map(school => school.name).filter(Boolean).sort((a, b) => a.localeCompare(b));
       schoolSelect.innerHTML = schools.map(name => `<option value="${name}">${name}</option>`).join("");
     }

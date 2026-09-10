@@ -42,9 +42,7 @@
     quality(data) {
       P.renderQuality(data);
     },
-    ctc(data) {
-      P.renderCtc(data.ctcVisits, data.calls);
-    },
+    ctc() {},
     cars(data) {
       P.renderCars(data);
     },
