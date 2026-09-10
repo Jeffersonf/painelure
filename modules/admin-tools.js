@@ -377,27 +377,50 @@
 
   async function syncOfficialDataBeforeOpen() {
     showLoginStatus("Sincronizando dados oficiais...");
-    P.showSyncProgress?.(5, "Preparando seu painel", "Sua sessão foi reconhecida. Agora vamos conferir os dados salvos no servidor e as planilhas oficiais.", "info", { id: "login-sync" });
+    P.showSyncProgress?.(5, "Preparando seu painel", "Conferindo servidor e fontes oficiais...", "info", {
+      id: "official-sync",
+      itemKey: "server",
+      itemLabel: "Base do Servidor",
+      itemStatus: "loading"
+    });
     let backendPayload = null;
     try {
       backendPayload = await loadScopedBackendData({ render: false });
       if (backendPayload?.data?.appData) {
-        P.showSyncProgress?.(24, "Base online conferida", "Os dados do servidor foram carregados. Agora estamos verificando as fontes oficiais de cada área.", "info", { id: "login-sync" });
+        P.showSyncProgress?.(24, "Base online conferida", "Servidor conectado com sucesso.", "info", {
+          id: "official-sync",
+          itemKey: "server",
+          itemLabel: "Base do Servidor",
+          itemStatus: "done",
+          itemDetail: "Conectado"
+        });
       } else {
-        P.showSyncProgress?.(24, "Usando a cópia deste navegador", "O servidor não enviou dados agora. O painel preservou sua cópia local e continuará conferindo as planilhas oficiais.", "warn", { id: "login-sync", delay: 22000 });
+        P.showSyncProgress?.(24, "Usando cópia local", "Servidor não respondeu. Usando dados locais.", "warn", {
+          id: "official-sync",
+          itemKey: "server",
+          itemLabel: "Base do Servidor",
+          itemStatus: "warn",
+          itemDetail: "Cópia local"
+        });
       }
     } catch (error) {
-      P.showSyncProgress?.(24, "Servidor temporariamente indisponível", "O painel continuará com a cópia salva neste navegador. Nenhum dado local foi apagado.", "warn", { id: "login-sync", delay: 22000 });
+      P.showSyncProgress?.(24, "Servidor indisponível", "Mantendo dados salvos neste navegador.", "warn", {
+        id: "official-sync",
+        itemKey: "server",
+        itemLabel: "Base do Servidor",
+        itemStatus: "warn",
+        itemDetail: "Modo local"
+      });
     }
     if (P.loadConfiguredSources) {
       showLoginStatus("Sincronizando fontes oficiais...");
-      const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision", "satisfaction"], order: ["cars", "supervision", "satisfaction"], progressStart: 24, progressEnd: 94, progressId: "login-sync" });
+      const results = await P.loadConfiguredSources({ includeManual: true, keys: ["cars", "supervision", "satisfaction"], order: ["cars", "supervision", "satisfaction"], progressStart: 24, progressEnd: 94, progressId: "official-sync" });
       const failed = (results || []).filter(item => item.status === "error");
       if (failed.length) {
         const labels = failed.map(item => P.sources?.[item.key]?.label || item.key).join(", ");
-        P.showSyncProgress?.(100, "Painel aberto com avisos", `${labels} não respondeu agora. Mantivemos os dados anteriores dessas áreas para você continuar trabalhando.`, "warn", { id: "login-sync", delay: 24000 });
+        P.showSyncProgress?.(100, "Painel aberto com avisos", `${labels} indisponível(is). Dados locais preservados.`, "warn", { id: "official-sync", delay: 4500 });
       } else {
-        P.showSyncProgress?.(100, "Painel pronto para uso", "A base online e as fontes oficiais foram conferidas. As informações mais recentes já estão disponíveis.", "ok", { id: "login-sync", delay: 18000 });
+        P.showSyncProgress?.(100, "Painel Sincronizado", "Base online e fontes oficiais conferidas.", "ok", { id: "official-sync", delay: 4000 });
       }
     }
     P.saveAppData?.();

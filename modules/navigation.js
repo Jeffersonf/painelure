@@ -88,6 +88,9 @@
   }
 
   function showToast(title, message = "", tone = "info", options = {}) {
+    if (options.id && (options.id.includes("sync") || options.id.startsWith("source-"))) {
+      return showSyncProgress(options.progress ?? (tone === "ok" ? 100 : 50), title, message, tone, options);
+    }
     let stack = P.$("#toastStack");
     if (!stack) {
       stack = document.createElement("div");
@@ -143,20 +146,172 @@
     return toast;
   }
 
-  function showSyncProgress(progress, title, message, tone = "info", options = {}) {
-    const done = Number(progress) >= 100;
-    return showToast(
-      title || (done ? "Sincronização concluída" : "Sincronizando dados"),
-      message || (done
-        ? "Os dados mais recentes já estão disponíveis no painel."
-        : "Aguarde enquanto o PainelURE confere e atualiza as informações oficiais."),
-      tone,
-      {
-        id: options.id || "official-sync",
-        progress,
-        delay: options.delay || (done ? 18000 : 30000)
+  const SYNC_ICONS = {
+    session: "🛡️",
+    server: "🌐",
+    supervision: "🧭",
+    schools: "🏫",
+    contacts: "📞",
+    network: "📡",
+    calendar: "📅",
+    cars: "🚗",
+    inventory: "💻",
+    ctc: "📥",
+    calls: "📥",
+    satisfaction: "📝"
+  };
+
+  const syncWidgetState = {
+    progress: 0,
+    title: "Sincronizando dados",
+    message: "Aguarde enquanto as informações oficiais são verificadas.",
+    tone: "info",
+    items: new Map(),
+    dismissTimer: null
+  };
+
+  function dismissSyncWidget() {
+    const widget = document.getElementById("syncWidget");
+    if (!widget) return;
+    window.clearTimeout(syncWidgetState.dismissTimer);
+    widget.classList.remove("show");
+    widget.classList.add("hiding");
+    window.setTimeout(() => {
+      widget.remove();
+      syncWidgetState.items.clear();
+      syncWidgetState.progress = 0;
+    }, 280);
+  }
+
+  function renderSyncWidget() {
+    let widget = document.getElementById("syncWidget");
+    if (!widget) {
+      widget = document.createElement("div");
+      widget.id = "syncWidget";
+      widget.className = "sync-widget";
+      widget.setAttribute("role", "status");
+      widget.setAttribute("aria-live", "polite");
+      document.body.appendChild(widget);
+
+      widget.addEventListener("click", event => {
+        if (event.target.closest(".sync-close-btn")) {
+          dismissSyncWidget();
+        }
+      });
+    }
+
+    const { progress, title, message, tone, items } = syncWidgetState;
+    const isDone = Number(progress) >= 100;
+    const percent = Math.max(0, Math.min(100, Math.round(Number(progress))));
+
+    widget.className = `sync-widget sync-widget-${tone || "info"}${isDone ? " sync-widget-done" : ""}`;
+
+    const itemsHtml = [...items.values()].map(item => {
+      const icon = item.icon || SYNC_ICONS[item.key] || "📊";
+      let statusLabel = "Na fila";
+      let statusClass = "pending";
+      let barWidth = "0%";
+
+      if (item.status === "loading") {
+        statusLabel = "Carregando...";
+        statusClass = "loading";
+        barWidth = "65%";
+      } else if (item.status === "done" || item.status === "loaded" || item.status === "ok") {
+        statusLabel = item.detail || "✓ OK";
+        statusClass = "done";
+        barWidth = "100%";
+      } else if (item.status === "warn" || item.status === "empty") {
+        statusLabel = item.detail || "Sem novos dados";
+        statusClass = "warn";
+        barWidth = "100%";
+      } else if (item.status === "error") {
+        statusLabel = item.detail || "Falha";
+        statusClass = "error";
+        barWidth = "100%";
       }
-    );
+
+      return `
+        <div class="sync-item sync-item-${statusClass}" data-key="${item.key}">
+          <div class="sync-item-header">
+            <span class="sync-item-label"><span class="sync-item-emoji">${icon}</span> ${item.label}</span>
+            <span class="sync-item-badge ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="sync-item-track">
+            <div class="sync-item-bar" style="width: ${barWidth};"></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    widget.innerHTML = `
+      <div class="sync-widget-head">
+        <div class="sync-widget-icon">
+          ${isDone 
+            ? `<span class="sync-icon-done">✓</span>` 
+            : `<span class="sync-spinner"></span>`}
+        </div>
+        <div class="sync-widget-titles">
+          <strong>${title}</strong>
+          <span>${message}</span>
+        </div>
+        <div class="sync-widget-actions">
+          <span class="sync-percent-pill">${percent}%</span>
+          <button type="button" class="sync-close-btn" aria-label="Fechar notificação">✕</button>
+        </div>
+      </div>
+      <div class="sync-overall-track" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100">
+        <div class="sync-overall-fill ${tone}" style="width: ${percent}%;"></div>
+      </div>
+      ${items.size ? `<div class="sync-items-container">${itemsHtml}</div>` : ""}
+    `;
+
+    requestAnimationFrame(() => {
+      widget.classList.add("show");
+    });
+  }
+
+  function showSyncProgress(progress, title, message, tone = "info", options = {}) {
+    window.clearTimeout(syncWidgetState.dismissTimer);
+
+    syncWidgetState.progress = progress;
+    if (title) syncWidgetState.title = title;
+    if (message) syncWidgetState.message = message;
+    syncWidgetState.tone = tone;
+
+    if (Array.isArray(options.items)) {
+      options.items.forEach(item => {
+        if (!syncWidgetState.items.has(item.key)) {
+          syncWidgetState.items.set(item.key, {
+            key: item.key,
+            label: item.label,
+            status: item.status || "pending",
+            detail: item.detail || "",
+            icon: item.icon || SYNC_ICONS[item.key]
+          });
+        }
+      });
+    }
+
+    if (options.itemKey) {
+      const existing = syncWidgetState.items.get(options.itemKey) || {};
+      syncWidgetState.items.set(options.itemKey, {
+        key: options.itemKey,
+        label: options.itemLabel || existing.label || options.itemKey,
+        status: options.itemStatus || existing.status || "loading",
+        detail: options.itemDetail !== undefined ? options.itemDetail : (existing.detail || ""),
+        icon: options.itemIcon || existing.icon || SYNC_ICONS[options.itemKey]
+      });
+    }
+
+    renderSyncWidget();
+
+    const isDone = Number(progress) >= 100;
+    if (isDone) {
+      const delay = Number(options.delay || 4000);
+      syncWidgetState.dismissTimer = window.setTimeout(dismissSyncWidget, delay);
+    }
+
+    return document.getElementById("syncWidget");
   }
 
   function updateGlobalPageHeading(id) {

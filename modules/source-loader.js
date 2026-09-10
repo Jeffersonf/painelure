@@ -62,7 +62,12 @@
   async function refreshSource(key) {
     const appData = { ...P.getAppData() };
     const label = P.sources?.[key]?.label || key;
-    P.showSyncProgress?.(8, "Atualizando dados oficiais", `Estamos buscando as informações mais recentes de ${label}. Você pode continuar usando o painel enquanto isso.`, "info", { id: `source-${key}` });
+    P.showSyncProgress?.(25, "Atualizando fonte oficial", `Buscando informações de ${label}...`, "info", {
+      id: "official-sync",
+      itemKey: key,
+      itemLabel: label,
+      itemStatus: "loading"
+    });
     const result = await loadSourceOnce(key);
     result.updatedAt = new Date().toISOString();
     if (result.status === "loaded" && result.data && hasMeaningfulSourceData(result.data)) {
@@ -77,8 +82,21 @@
       ...(P.sourceStatus || []).filter(item => item.key !== key),
       result
     ];
-    if (result.status === "loaded") P.showSyncProgress?.(100, "Atualização concluída", `${label} foi conferida e ${result.rows?.length || 0} registro(s) foram carregados com sucesso.`, "ok", { id: `source-${key}` });
-    if (result.status === "empty") P.showSyncProgress?.(100, "Nenhum dado novo encontrado", `${label} respondeu sem registros. Para sua segurança, as informações anteriores foram mantidas.`, "warn", { id: `source-${key}`, delay: 20000 });
+    const status = result.status === "error" ? "error" : (result.status === "empty" ? "warn" : "done");
+    const countText = result.rows?.length ? `${result.rows.length} registros` : (result.status === "empty" ? "Sem dados novos" : (status === "error" ? "Falha" : "OK"));
+    P.showSyncProgress?.(100,
+      status === "done" ? "Atualização concluída" : "Atualização finalizada",
+      `${label}: ${countText}.`,
+      status === "error" ? "warn" : (status === "warn" ? "warn" : "ok"),
+      {
+        id: "official-sync",
+        itemKey: key,
+        itemLabel: label,
+        itemStatus: status,
+        itemDetail: countText,
+        delay: 4500
+      }
+    );
     return result;
   }
 
@@ -166,7 +184,15 @@
     const progressEnd = Number(options.progressEnd ?? 100);
     let progressDone = 0;
     if (progressKeys.length) {
-      P.showSyncProgress?.(progressStart, "Sincronizando fontes oficiais", `O PainelURE vai conferir ${progressKeys.length} fonte(s) de informação. Isso pode levar alguns instantes.`, "info", { id: options.progressId || "official-sync" });
+      const initialItems = progressKeys.map(k => ({
+        key: k,
+        label: P.sources?.[k]?.label || k,
+        status: "pending"
+      }));
+      P.showSyncProgress?.(progressStart, "Sincronizando fontes oficiais", `Conferindo ${progressKeys.length} fontes de informação...`, "info", {
+        id: options.progressId || "official-sync",
+        items: initialItems
+      });
     }
 
     for (const key of keys) {
@@ -175,6 +201,16 @@
         if (!includeManual && P.sources[key]?.metadata?.autoLoad === false) {
           results.push({ key, status: "skipped", rows: [], data: null, reason: "manual", updatedAt: new Date().toISOString() });
           continue;
+        }
+        if (progressKeys.includes(key)) {
+          const label = P.sources?.[key]?.label || key;
+          const currentProgress = progressStart + ((progressEnd - progressStart) * progressDone / progressKeys.length);
+          P.showSyncProgress?.(currentProgress, "Sincronizando fontes oficiais", `Carregando ${label}...`, "info", {
+            id: options.progressId || "official-sync",
+            itemKey: key,
+            itemLabel: label,
+            itemStatus: "loading"
+          });
         }
         const result = await loadSourceOnce(key);
         result.updatedAt = new Date().toISOString();
@@ -193,7 +229,16 @@
           progressDone += 1;
           const progress = progressStart + ((progressEnd - progressStart) * progressDone / progressKeys.length);
           const label = P.sources?.[key]?.label || key;
-          P.showSyncProgress?.(progress, "Sincronizando fontes oficiais", `${label} foi conferida. Restam ${Math.max(0, progressKeys.length - progressDone)} fonte(s).`, "info", { id: options.progressId || "official-sync" });
+          const lastResult = results[results.length - 1];
+          const status = lastResult?.status === "error" ? "error" : (lastResult?.status === "empty" ? "warn" : "done");
+          const countText = lastResult?.rows?.length ? `${lastResult.rows.length} itens` : (lastResult?.status === "empty" ? "Sem dados" : (status === "error" ? "Falhou" : "OK"));
+          P.showSyncProgress?.(progress, "Sincronizando fontes oficiais", `${label}: ${countText}`, "info", {
+            id: options.progressId || "official-sync",
+            itemKey: key,
+            itemLabel: label,
+            itemStatus: status,
+            itemDetail: countText
+          });
         }
       }
     }
@@ -206,12 +251,12 @@
     if (progressKeys.length && progressEnd >= 100) {
       const failed = results.filter(result => result.status === "error");
       P.showSyncProgress?.(100,
-        failed.length ? "Sincronização concluída com avisos" : "Sincronização concluída",
+        failed.length ? "Sincronização concluída com avisos" : "Painel Sincronizado",
         failed.length
-          ? `${failed.length} fonte(s) não responderam. Os dados anteriores foram mantidos e você pode tentar novamente mais tarde.`
-          : "Todas as fontes disponíveis foram conferidas. O painel já mostra as informações mais recentes.",
+          ? `${failed.length} fonte(s) indisponível(is). Dados locais mantidos.`
+          : "Todas as fontes e informações estão atualizadas.",
         failed.length ? "warn" : "ok",
-        { id: options.progressId || "official-sync", delay: failed.length ? 22000 : 18000 }
+        { id: options.progressId || "official-sync", delay: 4000 }
       );
     }
     return results;
