@@ -7886,6 +7886,64 @@ html:not(.site-maintenance) .maintenance-message {
   margin-top: 0;
 }
 
+.contact-sector-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(90, 160, 245, 0.12);
+  border: 1px solid rgba(90, 160, 245, 0.28);
+  color: #7ab8ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-ramal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: rgba(200, 245, 90, 0.1);
+  border: 1px solid rgba(200, 245, 90, 0.3);
+  color: var(--ac);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  font-feature-settings: "tnum";
+}
+
+.channel-icon {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 12px;
+  opacity: .85;
+}
+
+.contact-phone-val a,
+.contact-email-val a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--tx);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: color .15s ease;
+}
+
+.contact-phone-val a:hover,
+.contact-email-val a:hover {
+  color: var(--ac);
+  text-decoration: underline;
+}
+
 .empty-state {
   grid-column: 1 / -1;
   min-height: 180px;
@@ -7915,6 +7973,18 @@ html:not(.site-maintenance) .maintenance-message {
 [data-theme="light"] .contact-avatar {
   background: #f4f8f0;
   border-color: rgba(28, 39, 62, .12);
+}
+
+[data-theme="light"] .contact-sector-badge {
+  background: rgba(14, 98, 200, 0.08);
+  border-color: rgba(14, 98, 200, 0.22);
+  color: #0b55b3;
+}
+
+[data-theme="light"] .contact-ramal-badge {
+  background: rgba(104, 169, 0, 0.09);
+  border-color: rgba(104, 169, 0, 0.26);
+  color: #3b6b00;
 }
 
 @media (max-width: 1120px) {

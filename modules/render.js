@@ -554,7 +554,7 @@
     return `
       <article class="contact-card contact-row" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone, contact.ramal])}">
         <div class="contact-sector-col">
-          <em class="status-pill info">${contact.sector || "Geral"}</em>
+          <span class="contact-sector-badge">${contact.sector || "Geral"}</span>
         </div>
         <div class="contact-identity">
           <div class="contact-avatar${photo ? " has-photo" : ""}"${photo ? ` style="background-image:url('${photo}')"` : ""}>${initials(contact.name)}</div>
@@ -565,15 +565,15 @@
         </div>
         <div class="contact-channel contact-phone-col">
           <span class="contact-channel-label">Telefone</span>
-          <strong class="contact-channel-value">${contact.phone ? `<a href="tel:${cleanPhone}">${contact.phone}</a>` : "—"}</strong>
+          <span class="contact-channel-value contact-phone-val">${contact.phone ? `<a href="tel:${cleanPhone}"><span class="channel-icon" aria-hidden="true">&#128222;</span>${contact.phone}</a>` : "—"}</span>
         </div>
         <div class="contact-channel contact-ramal-col">
           <span class="contact-channel-label">Ramal</span>
-          <strong class="contact-channel-value">${contact.ramal || "—"}</strong>
+          <span class="contact-ramal-badge">${contact.ramal || "—"}</span>
         </div>
         <div class="contact-channel contact-email-col">
           <span class="contact-channel-label">E-mail</span>
-          <strong class="contact-channel-value" title="${contact.email}">${contact.email ? `<a href="mailto:${contact.email}">${contact.email}</a>` : "—"}</strong>
+          <span class="contact-channel-value contact-email-val" title="${contact.email}">${contact.email ? `<a href="mailto:${contact.email}"><span class="channel-icon" aria-hidden="true">&#9993;&#65039;</span>${contact.email}</a>` : "—"}</span>
         </div>
         <div class="contact-actions">
           ${contact.email ? `<a class="ghost-btn compact" href="mailto:${contact.email}" title="Enviar e-mail">E-mail</a>` : ""}
@@ -3243,7 +3243,7 @@
     "Margarete", "Eugênia", "Renata", "Nazaré", "Mirtes"
   ];
   const INTERNAL_COFFEE_NAMES = ["Jefferson", "Elcio", "Gustavo", "Rodolfo", "Richard"];
-  const INTERNAL_COFFEE_2_NAMES = ["Priscila", "Fabricio", "Nélio", "Danilo", "Bruno"];
+  const INTERNAL_COFFEE_2_NAMES = ["Priscila", "Fabricio", "Nélio", "Rafael", "Roque"];
 
   function internalDefaultState() {
     return {
@@ -3464,7 +3464,7 @@
             <span><strong>${coffeeTotal >= coffeeGoal ? "Em caixa" : "Falta"}</strong><em>${currency(coffeeTotal >= coffeeGoal ? coffeeCash : coffeeMissing)}</em></span>
           </div>
         </article>
-        <article class="box internal-coffee-box" data-search="cafe 2.0 Priscila Fabricio Nélio Danilo Bruno contribuição única">
+        <article class="box internal-coffee-box" data-search="cafe 2.0 Priscila Fabricio Nélio Rafael Roque contribuição única">
           <div class="box-head">
             <div><strong>&#9749; Café 2.0</strong><small>Contribuição única de ${currency(coffee2Amount)} por pessoa.</small></div>
             <span class="status-pill ${coffee2Paid === coffee2Entries.length ? "ok" : "warn"}">${coffee2Paid}/${coffee2Entries.length} pago(s)</span>

@@ -30,20 +30,20 @@
     { name: "WhatsApp", role: "WhatsApp Institucional", sector: "SEINTEC / SETEC", phone: "(15) 3526-6210", ramal: "6210", email: "itv.setec@educacao.sp.gov.br" },
     { name: "Elcio Renato Bonifacio de Azevedo", role: "Chefe de Serviço", sector: "SEINTEC / SETEC", phone: "(15) 3526-6211", ramal: "6211", email: "elcio.azevedo@educacao.sp.gov.br" },
     { name: "Jefferson Felipe", role: "Chefe de Seção", sector: "SEINTEC / SETEC", phone: "(15) 3526-6213", ramal: "6213", email: "jefferson.paula@educacao.sp.gov.br" },
-    { name: "Gustavo", role: "CTC", sector: "SEINTEC / SETEC", phone: "(15) 3526-6235", ramal: "6235", email: "itv.setec@educacao.sp.gov.br" },
+    { name: "Gustavo Miller", role: "CTC", sector: "SEINTEC / SETEC", phone: "(15) 3526-6235", ramal: "6235", email: "itv.setec@educacao.sp.gov.br" },
     { name: "Jaqueline de Oliveira Cunha Borelli", role: "PEC - Arte", sector: "EEC", phone: "(15) 3526-6212", ramal: "6212", email: "deitvnpe@educacao.sp.gov.br" },
-    { name: "José Neto", role: "PEC - Projetos Especiais", sector: "EEC", phone: "(15) 3526-6218", ramal: "6218", email: "deitvnpe@educacao.sp.gov.br" },
+    { name: "José do Amaral Netto (José Neto)", role: "PEC - Projetos Especiais", sector: "EEC", phone: "(15) 3526-6218", ramal: "6218", email: "deitvnpe@educacao.sp.gov.br" },
     { name: "Paula", role: "Especialista em Currículo", sector: "EEC", phone: "(15) 3526-6226", ramal: "6226", email: "deitvnpe@educacao.sp.gov.br" },
     { name: "Marcio Nunes da Cruz", role: "Supervisor Educacional", sector: "ESE", phone: "(15) 3526-6208", ramal: "6208", email: "marcio.cruz@educacao.sp.gov.br" },
     { name: "Maria Luiza Brizolla de Queiroz", role: "Supervisor Educacional", sector: "ESE", phone: "(15) 3526-6216", ramal: "6216", email: "maria.queiroz14@educacao.sp.gov.br" },
     { name: "Edilene da Silva Almeida Oliveira", role: "Supervisor Educacional", sector: "ESE", phone: "(15) 3526-6217", ramal: "6217", email: "edilene.oliveira@educacao.sp.gov.br" },
-    { name: "Adilson Fogaça", role: "Supervisor Educacional", sector: "ESE", phone: "(15) 3526-6224", ramal: "6224", email: "adilson.fogaca@educacao.sp.gov.br" },
+    { name: "Adilson Manoel Fogaça", role: "Supervisor Educacional", sector: "ESE", phone: "(15) 3526-6224", ramal: "6224", email: "adilson.fogaca@educacao.sp.gov.br" },
     { name: "Daiane Aparecida de Oliveira Ribeiro", role: "Supervisor Educacional", sector: "ESE", phone: "(15) 3526-6227", ramal: "6227", email: "daiane.ribeiro@educacao.sp.gov.br" },
     { name: "Magda Gisele Silva de Oliveira", role: "Supervisor Educacional", sector: "ESE", phone: "(15) 3526-6232", ramal: "6232", email: "magda.oliveira@educacao.sp.gov.br" },
-    { name: "Auditório", role: "Auditório Regional", sector: "Auditório", phone: "(15) 3526-6214", ramal: "6214", email: "deitv@educacao.sp.gov.br" },
+    { name: "Auditório Regional", role: "Auditório Regional", sector: "Auditório", phone: "(15) 3526-6214", ramal: "6214", email: "deitv@educacao.sp.gov.br" },
     { name: "Sonia", role: "Multiplica SP", sector: "Multiplica", phone: "(15) 3526-6244", ramal: "6244", email: "deitvnpe@educacao.sp.gov.br" },
-    { name: "Sala Reunião 1", role: "Sala de Reunião", sector: "Reunião", phone: "(15) 3526-6242", ramal: "6242", email: "deitv@educacao.sp.gov.br" },
-    { name: "Sala Reunião 2", role: "Sala de Reunião", sector: "Reunião", phone: "(15) 3526-6243", ramal: "6243", email: "deitv@educacao.sp.gov.br" }
+    { name: "Sala de Reunião 1", role: "Sala de Reunião", sector: "Reunião", phone: "(15) 3526-6242", ramal: "6242", email: "deitv@educacao.sp.gov.br" },
+    { name: "Sala de Reunião 2", role: "Sala de Reunião", sector: "Reunião", phone: "(15) 3526-6243", ramal: "6243", email: "deitv@educacao.sp.gov.br" }
   ];
 
   window.PainelURE = window.PainelURE || {};
