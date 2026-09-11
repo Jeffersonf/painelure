@@ -1,0 +1,122 @@
+[
+    {
+        "merged": "com.painelure.app-release-42:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.painelure.app-main-36:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_dm_sans_700.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/dm_sans_700.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_ic_launcher_monochrome.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/ic_launcher_monochrome.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_widget_background.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/widget_background.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_ic_stat_finanza.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/ic_stat_finanza.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_dm_sans_800.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/dm_sans_800.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_dm_sans_300.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/dm_sans_300.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/xml_finanza_summary_widget_info.xml.flat",
+        "source": "com.painelure.app-main-36:/xml/finanza_summary_widget_info.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/anim_quick_sheet_enter.xml.flat",
+        "source": "com.painelure.app-main-36:/anim/quick_sheet_enter.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/layout_widget_summary.xml.flat",
+        "source": "com.painelure.app-main-36:/layout/widget_summary.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_widget_quick_mark_bg.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/widget_quick_mark_bg.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_brand_mark.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/brand_mark.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_dm_sans_600.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/dm_sans_600.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/xml_finanza_quick_expense_widget_info.xml.flat",
+        "source": "com.painelure.app-main-36:/xml/finanza_quick_expense_widget_info.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/layout_widget_agenda.xml.flat",
+        "source": "com.painelure.app-main-36:/layout/widget_agenda.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_dm_sans_400.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/dm_sans_400.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_dm_sans_500.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/dm_sans_500.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_ic_launcher.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/ic_launcher.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/layout_widget_quick_expense.xml.flat",
+        "source": "com.painelure.app-main-36:/layout/widget_quick_expense.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.painelure.app-main-36:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/xml_finanza_agenda_widget_info.xml.flat",
+        "source": "com.painelure.app-main-36:/xml/finanza_agenda_widget_info.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_brand_mark_monochrome.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/brand_mark_monochrome.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_syne_600.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/syne_600.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/drawable_widget_quick_button_bg.xml.flat",
+        "source": "com.painelure.app-main-36:/drawable/widget_quick_button_bg.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_syne_800.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/syne_800.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/font_syne_700.ttf.flat",
+        "source": "com.painelure.app-main-36:/font/syne_700.ttf"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/xml_shortcuts.xml.flat",
+        "source": "com.painelure.app-main-36:/xml/shortcuts.xml"
+    },
+    {
+        "merged": "com.painelure.app-release-42:/anim_quick_sheet_exit.xml.flat",
+        "source": "com.painelure.app-main-36:/anim/quick_sheet_exit.xml"
+    }
+]

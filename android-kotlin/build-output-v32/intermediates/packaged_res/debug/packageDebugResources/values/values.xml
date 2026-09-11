@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Finanza</string>
+    <string name="shortcut_quick_expense_long">Abrir folha rapida</string>
+    <string name="shortcut_quick_expense_short">Novo gasto</string>
+    <string name="widget_agenda_category_placeholder">Finanza</string>
+    <string name="widget_agenda_count_placeholder">0 item(ns) futuros</string>
+    <string name="widget_agenda_desc">Proximos vencimentos e agenda</string>
+    <string name="widget_agenda_meta_placeholder">Adicione vencimentos no app</string>
+    <string name="widget_agenda_name_placeholder">Sem contas na agenda</string>
+    <string name="widget_agenda_title">Agenda financeira</string>
+    <string name="widget_amount_placeholder">R$ 0,00</string>
+    <string name="widget_budget_placeholder">Base: R$ 0,00</string>
+    <string name="widget_due_placeholder">0 vencimento(s) em breve</string>
+    <string name="widget_empty"/>
+    <string name="widget_quick_account">Conta principal</string>
+    <string name="widget_quick_expense_desc">Atalho rapido para lancar gasto</string>
+    <string name="widget_quick_mark">+</string>
+    <string name="widget_quick_open">Digitar</string>
+    <string name="widget_quick_subtitle">Valor primeiro</string>
+    <string name="widget_quick_title">Folha rapida</string>
+    <string name="widget_spent_placeholder">Gasto: R$ 0,00</string>
+    <string name="widget_summary_desc">Resumo financeiro do mes</string>
+    <string name="widget_you">Voce</string>
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#F3F3F5</item>
+        <item name="android:navigationBarColor">#F3F3F5</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <style name="QuickExpenseTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@style/QuickExpenseWindowAnimation</item>
+        <item name="android:colorAccent">#35C96F</item>
+    </style>
+    <style name="QuickExpenseWindowAnimation">
+        <item name="android:windowEnterAnimation">@anim/quick_sheet_enter</item>
+        <item name="android:windowExitAnimation">@anim/quick_sheet_exit</item>
+    </style>
+    <style name="ShortcutTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+    <style name="Theme.PainelURE" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

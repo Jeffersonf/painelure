@@ -26,8 +26,8 @@
     pageMaintenance: {},
     adminChecks: []
   };
-  const STORAGE_VERSION = 2;
-  const STORAGE_KEY = "painelure2_state_v2";
+  const STORAGE_VERSION = 3;
+  const STORAGE_KEY = "painelure2_state_v3";
 
   function hasMeaningfulAppData(source = {}) {
     return Boolean(
@@ -109,6 +109,41 @@
     };
   }
 
+  function staticContactCatalog() {
+    return Array.isArray(P.seedData?.contacts) ? P.seedData.contacts : [];
+  }
+
+  function contactKey(contact = {}) {
+    return P.normalize?.(contact.name || "") || String(contact.name || "").toLowerCase().trim();
+  }
+
+  function normalizeContacts(source = {}) {
+    const fixedContacts = staticContactCatalog();
+    if (!fixedContacts.length) {
+      return (Array.isArray(source.contacts) ? source.contacts : []).map(contact => ({
+        ...contact,
+        photo: cleanContactPhoto(contact.photo)
+      }));
+    }
+    const incoming = Array.isArray(source.contacts) ? source.contacts : [];
+    const incomingByRamal = new Map();
+    const incomingByName = new Map();
+    incoming.forEach(c => {
+      if (c.ramal) incomingByRamal.set(String(c.ramal).trim(), c);
+      if (c.name) incomingByName.set(contactKey(c), c);
+    });
+
+    return fixedContacts.map(fixed => {
+      const existing = (fixed.ramal && incomingByRamal.get(String(fixed.ramal).trim()))
+        || incomingByName.get(contactKey(fixed))
+        || {};
+      return {
+        ...fixed,
+        photo: cleanContactPhoto(existing.photo || fixed.photo)
+      };
+    });
+  }
+
   function normalizeAppData(source = {}) {
     const callData = freshestCalls(source);
     return {
@@ -120,10 +155,7 @@
       schoolAssets: Array.isArray(source.schoolAssets) ? source.schoolAssets : [],
       inventory: Array.isArray(source.inventory) ? source.inventory : [],
       supervisors: Array.isArray(source.supervisors) ? source.supervisors : [],
-      contacts: Array.isArray(source.contacts) ? source.contacts.map(contact => ({
-        ...contact,
-        photo: cleanContactPhoto(contact.photo)
-      })) : [],
+      contacts: normalizeContacts(source),
       calendar: Array.isArray(source.calendar) ? source.calendar : [],
       satisfaction: Array.isArray(source.satisfaction) ? source.satisfaction : [],
       profiles: Array.isArray(source.profiles) ? source.profiles : [],
@@ -165,6 +197,7 @@
             return setAppData({ ...(P.mockData || EMPTY_DATA), ...(P.seedData || {}) });
           }
           const merged = { ...(P.mockData || EMPTY_DATA), ...(P.seedData || {}), ...saved.appData };
+          merged.contacts = normalizeContacts(saved.appData);
           if (!saved.appData.schoolProfiles?.length && P.seedData?.schoolProfiles?.length) {
             merged.schoolProfiles = P.seedData.schoolProfiles;
           }

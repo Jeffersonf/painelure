@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.painelure.app.data.PendingWriteQueueTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-08-28T03:45:17.964Z" hostname="JEFFERSON" time="0.102">
+  <properties/>
+  <testcase name="successfulWritesAreRemovedAndFailuresRemain" classname="com.painelure.app.data.PendingWriteQueueTest" time="0.065"/>
+  <testcase name="staleStateIsNotQueued" classname="com.painelure.app.data.PendingWriteQueueTest" time="0.035"/>
+  <testcase name="appendPreservesOrderAndMethod" classname="com.painelure.app.data.PendingWriteQueueTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

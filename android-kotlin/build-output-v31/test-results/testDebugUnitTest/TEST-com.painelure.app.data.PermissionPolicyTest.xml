@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.painelure.app.data.PermissionPolicyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-08-27T13:00:55.001Z" hostname="JEFFERSON" time="0.044">
+  <properties/>
+  <testcase name="accentsAndUnknownRolesAreHandledSafely" classname="com.painelure.app.data.PermissionPolicyTest" time="0.041"/>
+  <testcase name="administratorSeesAdministrativeModules" classname="com.painelure.app.data.PermissionPolicyTest" time="0.001"/>
+  <testcase name="consultaCannotSeeRestrictedModules" classname="com.painelure.app.data.PermissionPolicyTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -433,10 +433,15 @@
         return;
       }
 
-      const sectorButton = event.target.closest("[data-sector]");
+      const sectorButton = event.target.closest(".clickable-sector[data-sector]");
       if (sectorButton) {
-        P.$all("[data-sector]").forEach(tab => tab.classList.toggle("active", tab === sectorButton));
-        onContactSector(sectorButton.dataset.sector);
+        const sector = sectorButton.dataset.sector;
+        const select = P.$("#contactSectorFilter");
+        if (select) {
+          const hasOption = Array.from(select.options).some(opt => opt.value === sector);
+          select.value = hasOption ? sector : "Todos";
+          select.dispatchEvent(new Event("change"));
+        }
       }
     });
 

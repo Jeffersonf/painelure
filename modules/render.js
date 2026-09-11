@@ -464,7 +464,8 @@
     P.setPage?.("contacts");
     requestAnimationFrame(() => {
       const selectedSector = sector || "Todos";
-      P.$all("[data-sector]").forEach(tab => tab.classList.toggle("active", tab.dataset.sector === selectedSector));
+      const select = P.$("#contactSectorFilter");
+      if (select) select.value = selectedSector;
       renderContacts(P.getAppData().contacts, selectedSector);
       const target = P.$(`[data-contact-key="${P.searchText([name])}"]`);
       if (!target) return;
@@ -550,11 +551,13 @@
 
   function contactCard(contact) {
     const photo = contact.photo || "";
-    const cleanPhone = String(contact.phone || contact.ramal || "").replace(/[^0-9+]/g, "");
+    const ramal = contact.ramal || (contact.phone && contact.phone.length <= 5 ? contact.phone : "") || "—";
+    const phone = contact.phone || (ramal !== "—" ? `(15) 3526-${ramal.slice(0, 4)}` : "");
+    const cleanPhone = String(phone || ramal || "").replace(/[^0-9+]/g, "");
     return `
-      <article class="contact-card contact-row" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone, contact.ramal])}">
+      <article class="contact-card contact-row" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, phone, ramal])}">
         <div class="contact-sector-col">
-          <span class="contact-sector-badge">${contact.sector || "Geral"}</span>
+          <button class="contact-sector-badge clickable-sector" type="button" data-sector="${contact.sector || "Geral"}" title="Filtrar por ${contact.sector || "Geral"}">${contact.sector || "Geral"}</button>
         </div>
         <div class="contact-identity">
           <div class="contact-avatar${photo ? " has-photo" : ""}"${photo ? ` style="background-image:url('${photo}')"` : ""}>${initials(contact.name)}</div>
@@ -565,11 +568,11 @@
         </div>
         <div class="contact-channel contact-phone-col">
           <span class="contact-channel-label">Telefone</span>
-          <span class="contact-channel-value contact-phone-val">${contact.phone ? `<a href="tel:${cleanPhone}"><span class="channel-icon" aria-hidden="true">&#128222;</span>${contact.phone}</a>` : "—"}</span>
+          <span class="contact-channel-value contact-phone-val">${phone ? `<a href="tel:${cleanPhone}"><span class="channel-icon" aria-hidden="true">&#128222;</span>${phone}</a>` : "—"}</span>
         </div>
         <div class="contact-channel contact-ramal-col">
           <span class="contact-channel-label">Ramal</span>
-          <span class="contact-ramal-badge">${contact.ramal || "—"}</span>
+          <span class="contact-ramal-badge" title="Ramal ${ramal}">${ramal}</span>
         </div>
         <div class="contact-channel contact-email-col">
           <span class="contact-channel-label">E-mail</span>
@@ -1954,46 +1957,70 @@
     renderSummaryRows("#contactSummaryRows", rows);
   }
 
-  const CONTACT_FILTER_GROUPS = {
-    "todos": null,
-    "gabinete": ["gab", "asure"],
-    "tecnologia": ["seintec", "setec"],
-    "rh": ["sepes", "seape"],
-    "financas": ["sefisc", "sefin", "seafin"],
-    "obras": ["seom"],
-    "pagamento": ["sefrep"],
-    "pagamentos": ["sefrep"],
-    "pedagogico": ["eec", "multiplica", "segre", "semat", "sevesc"],
-    "supervisao": ["ese"],
-    "salas": ["auditorio", "reuniao"]
-  };
+  let contactFiltersBound = false;
 
-  function renderContacts(contacts, sector = "Todos") {
+  function bindContactFilters() {
+    if (contactFiltersBound) return;
+    const select = P.$("#contactSectorFilter");
+    const searchInput = P.$("#contactSearchInput");
+
+    select?.addEventListener("change", () => {
+      renderContacts(P.getAppData().contacts, select.value, searchInput?.value || "");
+    });
+
+    searchInput?.addEventListener("input", () => {
+      renderContacts(P.getAppData().contacts, select?.value || "Todos", searchInput.value);
+    });
+
+    contactFiltersBound = true;
+  }
+
+  function renderContacts(contacts, sector = "Todos", searchQuery = "") {
     const grid = P.$("#contactGrid");
     if (!grid) return;
-    const tabsContainer = P.$(".contact-tabs");
-    if (tabsContainer) {
-      tabsContainer.querySelectorAll("[data-sector]").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.sector === sector);
-      });
-    }
-    const filterKey = P.normalize(sector);
-    let visible = contacts || [];
-    if (filterKey && filterKey !== "todos") {
-      const tokens = CONTACT_FILTER_GROUPS[filterKey];
-      if (tokens) {
-        visible = visible.filter(contact => {
-          const sec = P.normalize(contact.sector || "");
-          return tokens.some(token => sec.includes(token));
-        });
-      } else {
-        visible = visible.filter(contact => P.normalize(contact.sector || "") === filterKey);
+    bindContactFilters();
+
+    const select = P.$("#contactSectorFilter");
+    if (select && sector && select.value !== sector) {
+      const hasOption = Array.from(select.options).some(opt => opt.value === sector);
+      if (hasOption) {
+        select.value = sector;
+      } else if (sector === "Todos") {
+        select.value = "Todos";
       }
     }
-    renderContactOperationalSummary(contacts, visible, sector);
+
+    const searchInput = P.$("#contactSearchInput");
+    const query = searchQuery !== undefined && searchQuery !== null ? searchQuery : (searchInput?.value || "");
+    const activeSector = select?.value || sector || "Todos";
+    const filterKey = P.normalize(activeSector);
+
+    let visible = contacts || [];
+    if (filterKey && filterKey !== "todos") {
+      visible = visible.filter(contact => {
+        const sec = P.normalize(contact.sector || "");
+        return sec === filterKey || sec.includes(filterKey) || filterKey.includes(sec);
+      });
+    }
+
+    if (query && query.trim()) {
+      const qNorm = P.normalize(query.trim());
+      visible = visible.filter(contact => {
+        const text = P.normalize([contact.name, contact.role, contact.sector, contact.email, contact.phone, contact.ramal].join(" "));
+        return text.includes(qNorm);
+      });
+    }
+
+    renderContactOperationalSummary(contacts, visible, activeSector);
+
+    const countBadge = P.$("#contactCountBadge");
+    if (countBadge) {
+      countBadge.textContent = `${visible.length} servidor(es)`;
+    }
+
     grid.innerHTML = visible.length
       ? visible.map(contactCard).join("")
-      : `<div class="empty-state">Nenhum contato cadastrado para ${sector} ainda.</div>`;
+      : `<div class="empty-state">Nenhum contato encontrado para ${activeSector !== "Todos" ? activeSector : "os filtros aplicados"}.</div>`;
   }
 
   function carStatusTone(status) {
