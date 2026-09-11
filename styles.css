@@ -7726,7 +7726,7 @@ html:not(.site-maintenance) .maintenance-message {
 
 .contact-list-header {
   display: grid;
-  grid-template-columns: 44px minmax(200px, 1.4fr) minmax(110px, 0.8fr) minmax(100px, 0.7fr) minmax(220px, 1.4fr) 140px;
+  grid-template-columns: minmax(130px, 0.9fr) minmax(220px, 1.4fr) minmax(130px, 0.9fr) minmax(85px, 0.6fr) minmax(200px, 1.3fr) 130px;
   align-items: center;
   gap: 16px;
   padding: 8px 18px;
@@ -7759,7 +7759,7 @@ html:not(.site-maintenance) .maintenance-message {
 .contact-card {
   min-height: 58px;
   display: grid;
-  grid-template-columns: 44px minmax(200px, 1.4fr) minmax(110px, 0.8fr) minmax(100px, 0.7fr) minmax(220px, 1.4fr) 140px;
+  grid-template-columns: minmax(130px, 0.9fr) minmax(220px, 1.4fr) minmax(130px, 0.9fr) minmax(85px, 0.6fr) minmax(200px, 1.3fr) 130px;
   align-items: center;
   gap: 16px;
   padding: 10px 18px;
@@ -7800,6 +7800,13 @@ html:not(.site-maintenance) .maintenance-message {
 }
 
 .contact-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.contact-name-wrap {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -7910,16 +7917,16 @@ html:not(.site-maintenance) .maintenance-message {
   border-color: rgba(28, 39, 62, .12);
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1120px) {
   .contact-list-header {
-    grid-template-columns: 42px minmax(180px, 1.4fr) 110px 80px 130px;
+    grid-template-columns: minmax(110px, 0.9fr) minmax(170px, 1.4fr) minmax(120px, 0.9fr) 75px 120px;
     gap: 12px;
   }
-  .contact-list-header span:nth-child(4) {
+  .contact-list-header span:nth-child(5) {
     display: none;
   }
   .contact-card {
-    grid-template-columns: 42px minmax(180px, 1.4fr) 110px 80px 130px;
+    grid-template-columns: minmax(110px, 0.9fr) minmax(170px, 1.4fr) minmax(120px, 0.9fr) 75px 120px;
     gap: 12px;
   }
   .contact-email-col {
@@ -7932,42 +7939,28 @@ html:not(.site-maintenance) .maintenance-message {
     display: none;
   }
   .contact-card {
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
-    grid-template-areas:
-      "avatar identity"
-      "avatar meta"
-      "actions actions";
-    gap: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
     padding: 14px;
     min-height: auto;
   }
-  .contact-avatar {
-    grid-area: avatar;
+  .contact-card .contact-sector-col {
     align-self: flex-start;
   }
-  .contact-identity {
-    grid-area: identity;
-  }
-  .contact-sector-col {
-    display: inline-flex;
-    margin-top: 2px;
-  }
-  .contact-channel-label {
+  .contact-card .contact-channel-label {
     display: inline;
-    margin-right: 4px;
+    margin-right: 6px;
   }
-  .contact-phone-col,
-  .contact-email-col {
-    display: flex;
+  .contact-card .contact-channel {
     flex-direction: row;
     align-items: center;
-    font-size: 12px;
+    font-size: 13px;
   }
   .contact-actions {
-    grid-column: 1 / -1;
     justify-content: flex-start;
-    margin-top: 6px;
+    margin-top: 4px;
   }
 }
 

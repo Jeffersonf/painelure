@@ -550,20 +550,26 @@
 
   function contactCard(contact) {
     const photo = contact.photo || "";
-    const cleanPhone = String(contact.phone || "").replace(/[^0-9+]/g, "");
+    const cleanPhone = String(contact.phone || contact.ramal || "").replace(/[^0-9+]/g, "");
     return `
-      <article class="contact-card contact-row" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone])}">
-        <div class="contact-avatar${photo ? " has-photo" : ""}"${photo ? ` style="background-image:url('${photo}')"` : ""}>${initials(contact.name)}</div>
-        <div class="contact-identity">
-          <h2 class="contact-name">${contact.name}</h2>
-          <small class="contact-role">${contact.role || "URE Itapeva"}</small>
-        </div>
+      <article class="contact-card contact-row" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone, contact.ramal])}">
         <div class="contact-sector-col">
-          <em class="status-pill info">${contact.sector}</em>
+          <em class="status-pill info">${contact.sector || "Geral"}</em>
+        </div>
+        <div class="contact-identity">
+          <div class="contact-avatar${photo ? " has-photo" : ""}"${photo ? ` style="background-image:url('${photo}')"` : ""}>${initials(contact.name)}</div>
+          <div class="contact-name-wrap">
+            <h2 class="contact-name">${contact.name}</h2>
+            <small class="contact-role">${contact.role || "URE Itapeva"}</small>
+          </div>
         </div>
         <div class="contact-channel contact-phone-col">
+          <span class="contact-channel-label">Telefone</span>
+          <strong class="contact-channel-value">${contact.phone ? `<a href="tel:${cleanPhone}">${contact.phone}</a>` : "—"}</strong>
+        </div>
+        <div class="contact-channel contact-ramal-col">
           <span class="contact-channel-label">Ramal</span>
-          <strong class="contact-channel-value">${contact.phone || "—"}</strong>
+          <strong class="contact-channel-value">${contact.ramal || "—"}</strong>
         </div>
         <div class="contact-channel contact-email-col">
           <span class="contact-channel-label">E-mail</span>
@@ -1948,21 +1954,42 @@
     renderSummaryRows("#contactSummaryRows", rows);
   }
 
+  const CONTACT_FILTER_GROUPS = {
+    "todos": null,
+    "gabinete": ["gab", "asure"],
+    "tecnologia": ["seintec", "setec"],
+    "rh": ["sepes", "seape"],
+    "financas": ["sefisc", "sefin", "seafin"],
+    "obras": ["seom"],
+    "pagamento": ["sefrep"],
+    "pagamentos": ["sefrep"],
+    "pedagogico": ["eec", "multiplica", "segre", "semat", "sevesc"],
+    "supervisao": ["ese"],
+    "salas": ["auditorio", "reuniao"]
+  };
+
   function renderContacts(contacts, sector = "Todos") {
     const grid = P.$("#contactGrid");
     if (!grid) return;
     const tabsContainer = P.$(".contact-tabs");
-    if (tabsContainer && Array.isArray(contacts)) {
-      const distinctSectors = ["Todos", ...Array.from(new Set(contacts.map(c => c.sector).filter(Boolean)))];
-      const currentButtons = Array.from(tabsContainer.querySelectorAll("[data-sector]"));
-      const currentTabs = currentButtons.map(btn => btn.dataset.sector);
-      if (distinctSectors.length > 1 && (currentTabs.length !== distinctSectors.length || !distinctSectors.every((s, i) => currentTabs[i] === s))) {
-        tabsContainer.innerHTML = distinctSectors.map(s => `<button type="button" data-sector="${s}" class="${s === sector ? "active" : ""}">${s}</button>`).join("");
+    if (tabsContainer) {
+      tabsContainer.querySelectorAll("[data-sector]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.sector === sector);
+      });
+    }
+    const filterKey = P.normalize(sector);
+    let visible = contacts || [];
+    if (filterKey && filterKey !== "todos") {
+      const tokens = CONTACT_FILTER_GROUPS[filterKey];
+      if (tokens) {
+        visible = visible.filter(contact => {
+          const sec = P.normalize(contact.sector || "");
+          return tokens.some(token => sec.includes(token));
+        });
       } else {
-        currentButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.sector === sector));
+        visible = visible.filter(contact => P.normalize(contact.sector || "") === filterKey);
       }
     }
-    const visible = sector === "Todos" ? contacts : contacts.filter(contact => contact.sector === sector);
     renderContactOperationalSummary(contacts, visible, sector);
     grid.innerHTML = visible.length
       ? visible.map(contactCard).join("")
