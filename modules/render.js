@@ -550,19 +550,28 @@
 
   function contactCard(contact) {
     const photo = contact.photo || "";
+    const cleanPhone = String(contact.phone || "").replace(/[^0-9+]/g, "");
     return `
-      <article class="contact-card" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone])}">
+      <article class="contact-card contact-row" data-contact-key="${P.searchText([contact.name])}" data-search="${P.searchText([contact.name, contact.role, contact.sector, contact.email, contact.phone])}">
         <div class="contact-avatar${photo ? " has-photo" : ""}"${photo ? ` style="background-image:url('${photo}')"` : ""}>${initials(contact.name)}</div>
-        <div>
-          <small>${contact.role}</small>
-          <h2>${contact.name}</h2>
+        <div class="contact-identity">
+          <h2 class="contact-name">${contact.name}</h2>
+          <small class="contact-role">${contact.role || "URE Itapeva"}</small>
+        </div>
+        <div class="contact-sector-col">
           <em class="status-pill info">${contact.sector}</em>
-          <div class="contact-line"><span>Email</span><strong>${contact.email}</strong></div>
-          <div class="contact-line"><span>Ramal</span><strong>${contact.phone}</strong></div>
-          <div class="contact-actions">
-            ${contact.email ? `<a class="ghost-btn" href="mailto:${contact.email}">Email</a>` : ""}
-            ${contact.phone ? `<a class="ghost-btn" href="tel:${String(contact.phone).replace(/[^0-9+]/g, "")}">Ligar</a>` : ""}
-          </div>
+        </div>
+        <div class="contact-channel contact-phone-col">
+          <span class="contact-channel-label">Ramal</span>
+          <strong class="contact-channel-value">${contact.phone || "—"}</strong>
+        </div>
+        <div class="contact-channel contact-email-col">
+          <span class="contact-channel-label">E-mail</span>
+          <strong class="contact-channel-value" title="${contact.email}">${contact.email ? `<a href="mailto:${contact.email}">${contact.email}</a>` : "—"}</strong>
+        </div>
+        <div class="contact-actions">
+          ${contact.email ? `<a class="ghost-btn compact" href="mailto:${contact.email}" title="Enviar e-mail">E-mail</a>` : ""}
+          ${cleanPhone ? `<a class="ghost-btn compact" href="tel:${cleanPhone}" title="Ligar">Ligar</a>` : ""}
         </div>
       </article>
     `;
