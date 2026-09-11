@@ -20,6 +20,8 @@ A atualização é manual, sem agendamento. A data exibida é a última importa�
 
 Publicar o frontend junto com a API que oferece `POST /api/network/import`. A API exige administrador, normaliza novamente os campos permitidos, mescla somente as escolas reconhecidas e registra a importação e auditoria. O projeto mantém os mecanismos existentes de armazenamento e snapshots.
 
+O GitHub Pages usa o workflow `.github/workflows/pages.yml`, com fonte de publicação **GitHub Actions**. O pacote contém somente HTML, CSS, JavaScript, assets, dados estáticos e o leitor Excel. O diretório Android e os arquivos do servidor ficam fora da publicação do site. O backend continua com publicação independente.
+
 Leitor local: SheetJS CE 0.20.3 em `vendor/xlsx.full.min.js`, obtido de https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js. Licença em `vendor/SheetJS-LICENSE.txt`. O leitor é carregado somente ao selecionar um arquivo.
 
 ## Verificação
