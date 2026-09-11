@@ -60,10 +60,7 @@
     return nextContact;
   }
 
-  [
-    { name: "Bruno", role: "CTC", sector: "Tecnologia", email: "itv.setec@educacao.sp.gov.br", phone: "6235" },
-    { name: "Danilo", role: "CTC", sector: "Tecnologia", email: "itv.setec@educacao.sp.gov.br", phone: "6235" }
-  ].forEach(ensureContact);
+
 
   const supervisorUsers = (P.seedData.supervisors || []).map((supervisor, index) => mapUser({
     id: `user-supervisor-${index + 1}`,

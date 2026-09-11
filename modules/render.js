@@ -1951,6 +1951,17 @@
   function renderContacts(contacts, sector = "Todos") {
     const grid = P.$("#contactGrid");
     if (!grid) return;
+    const tabsContainer = P.$(".contact-tabs");
+    if (tabsContainer && Array.isArray(contacts)) {
+      const distinctSectors = ["Todos", ...Array.from(new Set(contacts.map(c => c.sector).filter(Boolean)))];
+      const currentButtons = Array.from(tabsContainer.querySelectorAll("[data-sector]"));
+      const currentTabs = currentButtons.map(btn => btn.dataset.sector);
+      if (distinctSectors.length > 1 && (currentTabs.length !== distinctSectors.length || !distinctSectors.every((s, i) => currentTabs[i] === s))) {
+        tabsContainer.innerHTML = distinctSectors.map(s => `<button type="button" data-sector="${s}" class="${s === sector ? "active" : ""}">${s}</button>`).join("");
+      } else {
+        currentButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.sector === sector));
+      }
+    }
     const visible = sector === "Todos" ? contacts : contacts.filter(contact => contact.sector === sector);
     renderContactOperationalSummary(contacts, visible, sector);
     grid.innerHTML = visible.length
