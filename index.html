@@ -136,38 +136,25 @@
     </label>
     <div class="global-search" id="globalSearchResults"></div>
 
-    <div class="nav-label">Geral</div>
-    <nav class="nav" aria-label="Navegação geral">
-      <button class="nav-item active" type="button" data-page="dashboard"><span class="nav-icon">&#128202;</span><span class="nav-text">Painel</span></button>
+    <div class="nav-label">Menu</div>
+    <nav class="nav" aria-label="Navegação principal">
+      <button class="nav-item active" type="button" data-page="dashboard"><span>&#128202;</span>Painel</button>
+      <button class="nav-item" type="button" data-page="ctc"><span>&#128229;</span>Chamados CTC</button>
+      <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>Supervisão</button>
+      <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
+      <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
+      <button class="nav-item" type="button" data-page="rede-2026"><span>&#128196;</span>Redes 2026</button>
     </nav>
-
-    <div class="nav-label">Categorias</div>
-    <nav class="nav" aria-label="Categorias">
-      <button class="nav-item" type="button" data-page="schools"><span class="nav-icon">&#127979;</span><span class="nav-text">Escolas</span></button>
-      <button class="nav-item" type="button" data-page="network"><span class="nav-icon">&#127760;</span><span class="nav-text">Redes e Câmeras</span></button>
-      <button class="nav-item" type="button" data-page="inventory"><span class="nav-icon">&#128187;</span><span class="nav-text">Equipamentos</span></button>
-      <button class="nav-item" type="button" data-page="ctc"><span class="nav-icon">&#128229;</span><span class="nav-text">Chamados CTC</span></button>
-      <button class="nav-item" type="button" data-page="supervision"><span class="nav-icon">&#129517;</span><span class="nav-text">Supervisão</span></button>
-      <button class="nav-item" type="button" data-page="cars"><span class="nav-icon">&#128663;</span><span class="nav-text">Carros</span></button>
-      <button class="nav-item" type="button" data-page="contacts"><span class="nav-icon">&#9742;&#65039;</span><span class="nav-text">Contatos</span></button>
-      <button class="nav-item" type="button" data-page="rede-2026"><span class="nav-icon">&#128196;</span><span class="nav-text">Redes 2026</span></button>
-      <button class="nav-item" type="button" data-page="satisfaction"><span class="nav-icon">&#128221;</span><span class="nav-text">Pesquisa Presencial</span></button>
-      <button class="nav-item" type="button" data-page="satisfaction-online"><span class="nav-icon">&#128203;</span><span class="nav-text">Pesquisa Online</span></button>
-      <button class="nav-item" type="button" data-page="internal"><span class="nav-icon">&#9749;</span><span class="nav-text">Café</span></button>
-    </nav>
-    <div class="sidebar-shortcuts" hidden aria-hidden="true">
-      <button type="button" data-jump="schools">Escolas</button>
-      <button type="button" data-jump="network">Redes</button>
-      <button type="button" data-jump="inventory">Equipamentos</button>
-      <button type="button" data-jump="ctc">CTC</button>
-      <button type="button" data-jump="supervision">Supervisão</button>
-      <button type="button" data-jump="cars">Carros</button>
-      <button type="button" data-jump="contacts">Contatos</button>
-      <button type="button" data-jump="rede-2026">Redes 2026</button>
-      <button type="button" data-jump="satisfaction">Pesquisa</button>
-      <button type="button" data-jump="satisfaction-online">Pesquisa Online</button>
-      <button type="button" data-jump="internal">Café</button>
-    </div>
+    <section class="sidebar-card sidebar-tools-card" aria-label="Atalhos">
+      <div class="sidebar-shortcuts icon-only">
+        <button type="button" data-jump="schools" title="Escolas" aria-label="Escolas">&#127979;</button>
+        <button type="button" data-jump="network" title="Redes e câmeras" aria-label="Redes e câmeras">&#127760;</button>
+        <button type="button" data-jump="inventory" title="Equipamentos" aria-label="Equipamentos">&#128187;</button>
+        <button type="button" data-jump="ctc" title="Chamados CTC" aria-label="Chamados CTC">&#128229;</button>
+        <button type="button" data-jump="rede-2026" title="Redes 2026" aria-label="Redes 2026">&#128196;</button>
+        <button type="button" data-jump="internal" title="Café" aria-label="Café">&#9749;</button>
+      </div>
+    </section>
     <div class="account">
       <button class="account-row" type="button" id="accountBtn" aria-expanded="false" aria-controls="accountPop">
         <div class="avatar user-avatar" id="accountAvatar">JE</div>
