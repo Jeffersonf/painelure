@@ -42,12 +42,12 @@
       "inventory",
       "supervision",
       "contacts",
-      "calendar",
+      "rede-2026",
       "ctc",
       "cars",
       "satisfaction",
-      "internal",
-      "reports"
+      "satisfaction-online",
+      "internal"
     ].map(page => {
       const meta = P.pageMeta(page);
       return { page, title: meta.label, type: meta.type, note: meta.note };
@@ -66,7 +66,6 @@
       })),
       ...(data.supervisors || []).map(item => ({ page: "supervision", title: item.name, type: "Supervisão", note: item.email || `${item.schools} escola(s)`, focus: item.name })),
       ...(data.contacts || []).map(item => ({ page: "contacts", title: item.name, type: item.sector, note: item.role || item.email, focus: item.name, sector: item.sector })),
-      ...(data.calendar || []).map(item => ({ page: "calendar", title: item.label, type: "Calendário", note: item.note || item.value, focus: searchText([item.label, item.value]) })),
       ...(data.ctcVisits || []).map(item => ({
         page: "ctc",
         title: `${item.owner} em ${item.place}`,

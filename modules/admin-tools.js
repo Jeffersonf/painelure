@@ -37,7 +37,7 @@
   Object.keys(ROLE_ACCESS).forEach(role => {
     if (role !== "Administrador") ROLE_ACCESS[role] = ROLE_ACCESS[role].filter(page => page !== "satisfaction");
   });
-  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "cars", "supervision", "contacts", "calendar", "satisfaction", "internal", "reports", "profiles", "quality", "admin"];
+  const ADMIN_PAGE_CHOICES = ["dashboard", "schools", "network", "inventory", "ctc", "cars", "supervision", "contacts", "rede-2026", "satisfaction", "satisfaction-online", "internal", "profiles", "quality", "admin"];
 
   function currentRole() {
     return P.onlineUser?.()?.role || localStorage.getItem(ROLE_KEY) || P.displayUser?.().role || "Administrador";
@@ -1191,7 +1191,7 @@
   function defaultPrefs() {
     return {
       widgets: { shortcuts: true, metrics: true, operations: true },
-      shortcuts: { network: true, inventory: true, ctc: true, cars: true, calendar: true, satisfaction: true, reports: true }
+      shortcuts: { schools: true, network: true, inventory: true, ctc: true, supervision: true, cars: true, contacts: true, "rede-2026": true, satisfaction: true, "satisfaction-online": true, internal: true }
     };
   }
 

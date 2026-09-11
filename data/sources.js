@@ -44,13 +44,6 @@
       status: "pending",
       metadata: { domain: "Redes e Câmeras", cadence: "sob demanda", owner: "SETEC/SEINTEC/CTC", sensitive: "credentials" }
     },
-    calendar: {
-      label: "Calendario URE",
-      type: "csv",
-      url: "",
-      status: "pending",
-      metadata: { domain: "Calendario", cadence: "mensal", owner: "Gabinete" }
-    },
     satisfaction: {
       label: "Pesquisa de Satisfação Presencial",
       type: "powerbi-embed",

@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const P = window.PainelURE;
 
   function statusClass(status) {
@@ -56,28 +56,26 @@
     if (role.includes("gabinete")) {
       return {
         title: "Acompanhamento do gabinete",
-        note: `${context.openCalls} chamado(s) em acompanhamento e ${context.calendarCount} evento(s) na agenda.`,
+        note: `${context.openCalls} chamado(s) em acompanhamento.`,
         notice: "Fila administrativa consolidada",
-        noticeNote: "Chamados, escolas, contatos e agenda ficam priorizados para resposta rápida.",
+        noticeNote: "Chamados, escolas e contatos ficam priorizados para resposta rápida.",
         shortcuts: null
       };
     }
     if (role.includes("pedagog")) {
       return {
         title: "Acompanhamento pedagógico",
-        note: `${data.schools.length} escola(s), ${data.supervisors.length} supervisor(es) e agenda institucional.`,
+        note: `${data.schools.length} escola(s) e ${data.supervisors.length} supervisor(es) no painel regional.`,
         notice: "Visão escolar e de supervisão",
-        noticeNote: "Escolas, supervisão, contatos e calendário ficam em primeiro plano.",
+        noticeNote: "Escolas, supervisão e contatos ficam em primeiro plano.",
         shortcuts: null
       };
     }
     return {
       title: "Pagina inicial da URE",
       note: `${data.schools.length} escola(s), contatos e dados liberados para consulta.`,
-      notice: context.calendarCount ? "Base operacional atualizada" : "Base operacional pronta",
-      noticeNote: context.calendarCount
-        ? "Escolas, supervisão, redes e agenda disponíveis para consulta."
-        : "Escolas, supervisão, redes e contatos disponíveis para consulta.",
+      notice: "Base operacional pronta",
+      noticeNote: "Escolas, supervisão, redes e contatos disponíveis para consulta.",
       shortcuts: null
     };
   }
@@ -617,9 +615,6 @@
   }
 
   function dashboardWidgetDefinitions(data, context) {
-    const calendarSource = calendarWithOperationalFallback(data.calendar || [], data);
-    const sharedCalendarCount = monthFiltered(calendarByMode(calendarSource, "shared"), item => item.date || item.value).length;
-    const personalCalendarCount = monthFiltered(calendarByMode(data.calendar || [], "personal"), item => item.date || item.value).length;
     const supervisionPct = (data.supervisors || []).reduce((acc, item) => {
       const month = progressParts(item.month);
       acc.done += month.done;
@@ -629,17 +624,16 @@
     const supervisionValue = supervisionPct.total ? `${Math.round((supervisionPct.done / supervisionPct.total) * 100)}%` : "0%";
     return [
       { id: "schools", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "schools", icon: "&#127979;", label: "Escolas", value: data.schools?.length || 0, note: `${data.schools?.length || 0} unidade(s) na base regional`, tone: "info" },
-      { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
-      { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
+      { id: "network", roles: ["administrador", "setec", "seintec", "ctc"], page: "network", icon: "&#127760;", label: "Redes e Câmeras", value: context.networkCount, note: context.missingNetwork ? `${context.missingNetwork} escola(s) sem rede` : "Infraestrutura mapeada", tone: context.missingNetwork ? "warn" : "ok" },
+      { id: "inventory", roles: ["*"], page: "inventory", icon: "&#128187;", label: "Equipamentos", value: "BI", note: "BI de equipamentos e patrimônio", tone: "info" },
       { id: "ctc", roles: ["administrador", "gabinete", "setec", "seintec", "ctc"], page: "ctc", icon: "&#128229;", label: "Chamados CTC", value: context.openCalls, note: context.openCalls ? "Fila de T.I. em acompanhamento" : "Fila de T.I. em dia", tone: context.openCalls ? "warn" : "ok" },
+      { id: "supervision", roles: ["administrador", "gabinete", "seintec", "supervis", "pedagog"], page: "supervision", icon: "&#129517;", label: "Supervisão", value: supervisionValue, note: context.pendingVisits ? `${context.pendingVisits} visita(s) pendente(s)` : "Metas em dia no recorte", tone: context.pendingVisits ? "warn" : "ok" },
       { id: "cars", roles: ["administrador", "gabinete", "seom", "seintec", "ctc", "carro"], page: "cars", icon: "&#128663;", label: "Carros", value: context.carCount, note: context.carCount ? "Reservas no recorte" : "Sem reservas no mês", tone: context.carCount ? "info" : "ok" },
-      { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#128222;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
-      { id: "sharedCalendar", roles: ["*"], page: "calendar", mode: "shared", icon: "&#128197;", label: "Compartilhado", value: sharedCalendarCount, note: sharedCalendarCount ? "Eventos institucionais do mês" : "Sem eventos compartilhados", tone: sharedCalendarCount ? "info" : "ok" },
-      { id: "personalCalendar", roles: ["*"], page: "calendar", mode: "personal", icon: "&#128198;", label: "Pessoal", value: personalCalendarCount, note: personalCalendarCount ? "Eventos vinculados ao usuário" : "Nenhum evento pessoal", tone: personalCalendarCount ? "info" : "ok" },
+      { id: "contacts", roles: ["administrador", "gabinete", "supervis", "pedagog", "consulta", "seom", "setec", "seintec", "ctc"], page: "contacts", icon: "&#9742;&#65039;", label: "Contatos", value: data.contacts?.length || 0, note: "Canais institucionais", tone: "info" },
+      { id: "rede-2026", roles: ["*"], page: "rede-2026", icon: "&#128196;", label: "Redes 2026", value: data.rede2026?.length || P.rede2026?.length || 0, note: "Comunicados e documentos oficiais", tone: "info" },
       { id: "satisfaction", roles: ["*"], page: "satisfaction", icon: "&#128221;", label: "Pesquisa Presencial", value: "BI", note: "Pesquisa de satisfação presencial", tone: "info" },
       { id: "satisfaction-online", roles: ["*"], page: "satisfaction-online", icon: "&#128221;", label: "Pesquisa Online", value: "Em breve", note: "Categoria em preparação", tone: "info" },
       { id: "internal", roles: ["administrador", "seintec", "ctc", "tecnicos ctc"], page: "internal", icon: "&#9749;", label: "Café", value: "Café", note: "Vaquinha e rifa", tone: "info" },
-      { id: "reports", roles: ["administrador", "gabinete", "setec", "seintec", "seom", "ctc"], page: "reports", icon: "&#128200;", label: "Relatórios", value: P.selectedMonthLabel?.() || "Mês", note: "Consolidado administrativo", tone: "info" },
       { id: "profiles", roles: ["administrador", "seintec"], page: "profiles", icon: "&#129513;", label: "Perfis", value: "Acessos", note: "Matriz de perfis", tone: "info" },
       { id: "quality", roles: ["administrador", "seintec"], page: "quality", icon: "&#9989;", label: "Qualidade", value: "Checklist", note: "Publicação e riscos", tone: "info" },
       { id: "admin", roles: ["administrador"], page: "admin", icon: "&#128274;", label: "Admin", value: "Online", note: "Fontes, usuários e backups", tone: "info" }
@@ -830,15 +824,31 @@
     setText("#shortcutCarsNote", carCount ? `${carCount} reserva(s) no recorte` : "Agenda de carros pronta");
     const shortcutGrid = P.$(".shortcut-grid");
     if (shortcutGrid) {
-      const quickAccessPages = ["schools", "network", "supervision", "cars", "satisfaction", "satisfaction-online"];
-      shortcutGrid.innerHTML = dashboardWidgets.filter(widget => quickAccessPages.includes(widget.page)).map(widget => {
-        const modeAttr = widget.mode ? ` data-calendar-mode-target="${widget.mode}"` : "";
-        const denied = P.canAccess && !P.canAccess(widget.page);
+      const quickAccessPages = [
+        "schools",
+        "network",
+        "inventory",
+        "ctc",
+        "supervision",
+        "cars",
+        "contacts",
+        "rede-2026",
+        "satisfaction",
+        "satisfaction-online",
+        "internal"
+      ];
+      shortcutGrid.innerHTML = quickAccessPages.map(page => {
+        const widget = dashboardWidgets.find(w => w.page === page);
+        const meta = P.pageMeta?.(page) || {};
+        const icon = widget?.icon || meta.icon || "";
+        const label = widget?.label || meta.label || page;
+        const note = widget?.note || meta.note || "";
+        const denied = P.canAccess && !P.canAccess(page);
         return `
-          <button class="shortcut-card${denied ? " access-disabled" : ""}" type="button" data-jump="${widget.page}"${modeAttr}${denied ? ` title="Acesso indisponível para este perfil"` : ""}>
-            <span>${widget.icon}</span>
-            <strong>${widget.label}</strong>
-            <small>${denied ? "Indisponível para este perfil" : widget.note}</small>
+          <button class="shortcut-card${denied ? " access-disabled" : ""}" type="button" data-jump="${page}"${denied ? ` title="Acesso indisponível para este perfil"` : ""}>
+            <span>${icon}</span>
+            <strong>${label}</strong>
+            <small>${denied ? "Indisponível para este perfil" : note}</small>
           </button>
         `;
       }).join("");
@@ -854,9 +864,6 @@
     ];
 
     const agenda = [
-      calendarCount
-        ? { icon: "&#128197;", title: "Agenda com eventos", note: `${calendarCount} evento(s) carregado(s) para consulta.`, label: "Agenda", tone: "info", page: "calendar" }
-        : { icon: "&#128197;", title: "Calendário preparado", note: "Área pronta para a agenda institucional da URE.", label: "Agenda", tone: "info", page: "calendar" },
       ctcVisits
         ? { icon: "&#128736;&#65039;", title: "Visitas técnicas previstas", note: `${ctcVisits} compromisso(s) técnico(s) na base atual.`, label: "CTC", tone: "info", page: "ctc" }
         : { icon: "&#128736;&#65039;", title: "Agenda CTC pronta", note: "Área preparada para rotas e compromissos técnicos.", label: "CTC", tone: "info", page: "ctc" },
@@ -879,9 +886,8 @@
 
     const command = P.$("#dashboardCommand");
     if (command) {
-      const focusWidget = dashboardWidgets.find(item => item.page !== "calendar" && (!P.canAccess || P.canAccess(item.page)))
-        || dashboardWidgets.find(item => !P.canAccess || P.canAccess(item.page))
-        || { page: "calendar", mode: "shared" };
+      const focusWidget = dashboardWidgets.find(item => (!P.canAccess || P.canAccess(item.page)))
+        || { page: "schools" };
       const focusModeAttr = focusWidget.mode ? ` data-calendar-mode-target="${focusWidget.mode}"` : "";
       command.innerHTML = `
         <article class="command-primary command-${profile.notice === "Base operacional pronta" ? "info" : "ok"}">
@@ -904,7 +910,6 @@
     const decisionRows = P.$("#decisionRows");
     const agendaRows = P.$("#agendaRows");
     const widgetRows = dashboardWidgets
-      .filter(item => item.page !== "calendar")
       .map(item => ({
         icon: item.icon,
         title: item.label,
@@ -914,19 +919,8 @@
         page: item.page,
         mode: item.mode
       }));
-    const calendarRows = dashboardWidgets
-      .filter(item => item.page === "calendar")
-      .map(item => ({
-        icon: item.icon,
-        title: `Calendário ${item.label.toLowerCase()}`,
-        note: item.note,
-        label: String(item.value),
-        tone: item.tone,
-        page: "calendar",
-        mode: item.mode
-      }));
     if (decisionRows) decisionRows.innerHTML = [profileDecision, ...widgetRows, ...decisions].map(item => dashboardRow(item)).join("");
-    if (agendaRows) agendaRows.innerHTML = [...calendarRows, ...agenda].map(item => dashboardRow(item, true)).join("");
+    if (agendaRows) agendaRows.innerHTML = agenda.map(item => dashboardRow(item, true)).join("");
   }
 
   function renderUser(data) {

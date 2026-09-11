@@ -23,12 +23,10 @@
         inventory: "equipamentos",
         supervision: "supervisao",
         contacts: "contatos",
-        calendar: "calendario",
         "rede-2026": "redes-2026",
         satisfaction: "pesquisa-de-satisfacao-presencial",
         "satisfaction-online": "pesquisa-de-satisfacao-online",
         internal: "cafe",
-        reports: "relatorios",
         cars: "carros",
         ctc: "ctc",
         calls: "chamados",
@@ -153,10 +151,8 @@
         <button type="button" data-jump="network" title="Redes e câmeras" aria-label="Redes e câmeras">&#127760;</button>
         <button type="button" data-jump="inventory" title="Equipamentos" aria-label="Equipamentos">&#128187;</button>
         <button type="button" data-jump="ctc" title="Chamados CTC" aria-label="Chamados CTC">&#128229;</button>
-        <button type="button" data-jump="calendar" title="Agenda" aria-label="Agenda">&#128197;</button>
         <button type="button" data-jump="rede-2026" title="Redes 2026" aria-label="Redes 2026">&#128196;</button>
         <button type="button" data-jump="internal" title="Café" aria-label="Café">&#9749;</button>
-        <button type="button" data-jump="reports" title="Relatórios" aria-label="Relatórios">&#128200;</button>
       </div>
     </section>
     <div class="account">
@@ -208,6 +204,16 @@
             <strong>Redes e Câmeras</strong>
             <small id="shortcutNetworkNote">Rede, IPs, DVR e infraestrutura</small>
           </button>
+          <button class="shortcut-card" type="button" data-jump="inventory">
+            <span>&#128187;</span>
+            <strong>Equipamentos</strong>
+            <small id="shortcutInventoryNote">BI de equipamentos e patrimônio</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="ctc">
+            <span>&#128229;</span>
+            <strong>Chamados CTC</strong>
+            <small id="shortcutCtcNote">Central de chamados e fila técnica</small>
+          </button>
           <button class="shortcut-card" type="button" data-jump="supervision">
             <span>&#129517;</span>
             <strong>Supervisão</strong>
@@ -217,6 +223,31 @@
             <span>&#128663;</span>
             <strong>Carros</strong>
             <small id="shortcutCarsNote">Agendamentos e motoristas</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="contacts">
+            <span>&#9742;&#65039;</span>
+            <strong>Contatos</strong>
+            <small id="shortcutContactsNote">Nomes, setores, cargos e ramais</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="rede-2026">
+            <span>&#128196;</span>
+            <strong>Redes 2026</strong>
+            <small id="shortcutRede2026Note">Comunicados e documentos oficiais</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="satisfaction">
+            <span>&#128221;</span>
+            <strong>Pesquisa Presencial</strong>
+            <small id="shortcutSatisfactionNote">BI da pesquisa presencial</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="satisfaction-online">
+            <span>&#128221;</span>
+            <strong>Pesquisa Online</strong>
+            <small id="shortcutSatisfactionOnlineNote">Categoria em preparação</small>
+          </button>
+          <button class="shortcut-card" type="button" data-jump="internal">
+            <span>&#9749;</span>
+            <strong>Café</strong>
+            <small id="shortcutInternalNote">Organização da rifa e da vaquinha</small>
           </button>
         </div>
       </section>
@@ -363,21 +394,6 @@
       <div class="contact-grid" id="contactGrid"></div>
     </section>
 
-    <section class="page" id="page-calendar">
-      <header class="page-header compact">
-        <div><h1>Calendário URE</h1><p>Eventos e recursos compartilhados da Diretoria de Ensino.</p></div>
-      </header>
-      <div class="contact-tabs calendar-tabs">
-        <button class="active" type="button" data-calendar-mode="shared">Compartilhado</button>
-        <button type="button" data-calendar-mode="personal">Pessoal</button>
-      </div>
-      <article class="box summary-box">
-        <div class="box-head"><div><strong>Resumo da agenda</strong><small>Eventos e prazos institucionais</small></div></div>
-        <div class="row-list compact" id="calendarSummaryRows"></div>
-      </article>
-      <div class="calendar-grid" id="calendarGrid"></div>
-    </section>
-
     <section class="page" id="page-rede-2026">
       <header class="page-header compact">
         <div><h1>Redes 2026</h1><p>Comunicados e documentos da categoria Redes 2026.</p></div>
@@ -420,31 +436,6 @@
         </div>
       </section>
       <div id="internalDashboard"></div>
-    </section>
-
-    <section class="page" id="page-reports">
-      <header class="page-header compact">
-        <div><h1>Relatórios</h1><p>Visitas, acompanhamentos e devolutivas da URE.</p></div>
-      </header>
-      <section class="reports-hero-panel">
-        <div>
-          <span class="eyebrow">Próxima etapa</span>
-          <strong>Relatórios de visitas</strong>
-          <p>Área preparada para registrar visitas técnicas, supervisão, deslocamentos, acompanhamentos escolares e devolutivas formais.</p>
-        </div>
-        <button class="ghost-btn" type="button" data-jump="admin">Configurar fontes</button>
-      </section>
-      <div class="metric-grid reports-metric-grid" id="reportsGrid"></div>
-      <section class="reports-layout">
-        <div class="box">
-          <div class="box-head"><div><strong>Resumo operacional</strong><small>Indicadores derivados da base carregada</small></div></div>
-          <div class="row-list" id="reportsList"></div>
-        </div>
-        <div class="box">
-          <div class="box-head"><div><strong>Modelos previstos</strong><small>Visitas e acompanhamentos que entram na próxima atualização</small></div></div>
-          <div class="row-list" id="reportsPlanList"></div>
-        </div>
-      </section>
     </section>
 
     <section class="page" id="page-user">
@@ -652,19 +643,11 @@
                 <option value="contacts">Contatos</option>
                 <option value="network">Redes e câmeras</option>
                 <option value="cars">Carros</option>
-                <option value="calendar">Calendário</option>
                 <option value="satisfaction">Pesquisa de Satisfação Presencial</option>
                 <option value="supervision">Supervisão</option>
               </select>
               <label class="ghost-btn file-btn" for="csvImportInput">Importar CSV</label>
               <input id="csvImportInput" type="file" accept=".csv,text/csv" hidden>
-            </div>
-          </div>
-          <div class="settings-row">
-            <div><strong>Calendário oficial</strong><small>URL pública CSV para agenda institucional.</small></div>
-            <div class="settings-actions wide">
-              <input id="calendarSourceInput" type="url" placeholder="https://.../pub?output=csv">
-              <button class="ghost-btn" type="button" id="saveCalendarSourceBtn">Salvar</button>
             </div>
           </div>
         </section>
