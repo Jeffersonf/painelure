@@ -332,6 +332,12 @@
     return fetchApi(`/api/imports?limit=${encodeURIComponent(limit)}`, { headers, timeoutMs: 4000 });
   }
 
+  P.importNetworkRows = (token, rows) => fetchApi("/api/network/import", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify({ rows }),
+    timeoutMs: 30000
+  });
   P.loadBackendData = loadBackendData;
   P.pushBackendData = pushBackendData;
   P.saveSupervisionJustification = saveSupervisionJustification;

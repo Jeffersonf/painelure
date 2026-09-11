@@ -7,6 +7,7 @@ const path = require("path");
 const vm = require("vm");
 const { Pool } = require("pg");
 const { URL } = require("url");
+const networkImport = require("../modules/network-import-core.js");
 
 const ROOT = path.resolve(__dirname, "..");
 
@@ -1896,6 +1897,33 @@ async function handleApi(req, res, pathname) {
     const data = await saveStore({ ...appData, supervisors: nextSupervisors }, "supervision:justification", { force: true });
     await audit(req, "update", "supervision_justification", supervisorName, `Justificativa de ${monthKey} atualizada.`, {});
     send(res, 200, { ok: true, supervisor: updatedSupervisor, data: { updatedAt: data.updatedAt } });
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/api/network/import") {
+    if (!requireAdmin(req, res, "Apenas administrador pode importar redes e câmeras.")) return;
+    let result;
+    const store = await readStore() || { appData: {} };
+    try {
+      const body = JSON.parse(await readBody(req) || "{}");
+      if (!Array.isArray(body.rows) || body.rows.some(row => !row || typeof row !== "object" || Array.isArray(row))) throw new Error("Linhas inválidas.");
+      result = networkImport.normalize(body.rows, store.appData || {});
+      if (result.issues.length || !Object.keys(result.updates).length) throw new Error(result.issues.join(" ") || "Nenhuma escola reconhecida.");
+    } catch (error) {
+      send(res, 400, { ok: false, error: error.message });
+      return;
+    }
+    const appData = { ...store.appData, networkData: { ...(store.appData?.networkData || {}) } };
+    Object.entries(result.updates).forEach(([name, record]) => {
+      // Preserve existing protected credentials; this import never receives or changes them.
+      appData.networkData[name] = { ...appData.networkData[name], ...record };
+    });
+    const meta = { importedAt: new Date().toISOString(), schools: Object.keys(result.updates).length, method: "manual" };
+    appData.networkImportMeta = meta;
+    const saved = await saveStore(appData, "import:network-manual", { force: true });
+    await recordImportRun("network", meta.schools, "ok", "Importação manual de redes, sem credenciais.");
+    await audit(req, "import", "network", "network", "Importação manual de redes e câmeras.", { rows: meta.schools });
+    send(res, 200, { ok: true, networkData: appData.networkData, meta, updatedAt: saved.updatedAt });
     return;
   }
 

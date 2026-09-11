@@ -1231,7 +1231,6 @@
           ${sorted.map((name, index) => {
             const school = findSchool(name);
             const item = data[name] || {};
-            const cameraCount = countItems(item.cameras || item.câmeras);
             return `
               <button class="school-card school-compact-card network-school-card ${index === 0 ? "active" : ""}" type="button" data-network-school="${name}" data-network-school-key="${P.searchText([name])}" data-search="${P.searchText([name, schoolCity(school), schoolCie(school)])}">
                 <div class="school-compact-main">
@@ -1244,7 +1243,7 @@
                 <div class="network-school-metrics">
                   <span><b>${countItems(item.network)}</b><small>redes</small></span>
                   <span><b>${countItems(item.ips)}</b><small>IPs</small></span>
-                  <span><b>${cameraCount}</b><small>câmeras</small></span>
+                  <span><b>${item.cameraMetrics?.installed ?? "—"}</b><small>câmeras instaladas</small></span>
                 </div>
               </button>
             `;
@@ -1259,6 +1258,7 @@
   }
 
   function renderNetwork(networkData, requestedName = "") {
+    const escapeNetworkText = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const layout = P.$("#networkLayout");
     if (!layout) return;
     const list = value => {
@@ -1316,7 +1316,7 @@
           ${items.map((item, index) => `
             <span>
               <small>${icon} ${String(index + 1).padStart(2, "0")}</small>
-              <strong>${item}</strong>
+              <strong>${escapeNetworkText(item)}</strong>
             </span>
           `).join("")}
         </div>
@@ -1333,7 +1333,7 @@
         <div class="network-score">
           <span><b>${networkItems.length}</b><small>redes</small></span>
           <span><b>${ipItems.length}</b><small>IPs</small></span>
-          <span><b>${cameraItems.length}</b><small>câmeras</small></span>
+          <span><b>${data.cameraMetrics?.installed ?? "—"}</b><small>câmeras instaladas</small></span>
         </div>
         <div class="detail-actions">
           <button class="ghost-btn" type="button" data-open-school="${effectiveName}">Abrir escola</button>
@@ -1343,12 +1343,12 @@
       </article>
       <section class="network-widget-grid" aria-label="Dados de rede e câmeras">
       ${widgets.map(([key, title, items, icon, tone, label], index) => `
-      <button class="network-mini-widget ${index === 0 ? "is-active" : ""}" type="button" data-network-detail="${key}" data-search="${P.searchText([title, ...items])}">
+      <button class="network-mini-widget ${index === 0 ? "is-active" : ""}" type="button" data-network-detail="${key}" data-search="${escapeNetworkText(P.searchText([title, ...items]))}">
         <span class="network-mini-icon">${icon}</span>
         <div>
           <small>${title}</small>
           <strong>${items.length}</strong>
-          <p>${items[0]}</p>
+          <p>${escapeNetworkText(items[0])}</p>
         </div>
         <span class="status-pill ${tone}">${label}</span>
       </button>

@@ -16,6 +16,7 @@
       P.renderSchools(data.schools);
     },
     network(data) {
+      P.renderNetworkDashboard?.(data);
       P.renderNetworkOptions(data.networkData);
     },
     inventory() {},
@@ -182,6 +183,7 @@
       }
     });
     P.bindAdminTools();
+    P.bindNetworkImport?.();
     P.restoreBackendSession?.();
     P.bindSearch();
     P.restoreInitialPage() || P.setPage("dashboard");

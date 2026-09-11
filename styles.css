@@ -8953,3 +8953,21 @@ html:not(.site-maintenance) .maintenance-message {
   border: 0;
   background: #fff;
 }
+/* Manual network import and camera dashboard. */
+.network-dashboard { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.network-kpi { border: 1px solid var(--border, #64748b55); border-radius: 14px; padding: 18px; background: var(--surface, #64748b0c); }
+.network-kpi small, .network-kpi strong { display: block; }
+.network-kpi strong { font-size: 28px; margin-top: 8px; }
+.network-import-note { font-size: 13px; line-height: 1.6; margin-bottom: 16px; }
+.network-import { border: 1px solid var(--border, #64748b55); border-radius: 14px; padding: 18px; margin-bottom: 20px; }
+.network-import summary { cursor: pointer; font-weight: 700; }
+.network-import p { line-height: 1.6; margin: 12px 0; }
+.network-import-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+.network-import-actions label { display: grid; gap: 8px; max-width: 100%; }
+.network-import-actions .primary-btn { width: auto; padding: 12px 20px; margin: 0; }
+.network-import input { max-width: 100%; }
+.network-import-table { overflow: auto; max-height: 420px; }
+.network-import-table table { border-collapse: collapse; width: 100%; min-width: 580px; font-size: 13px; }
+.network-import-table th, .network-import-table td { text-align: left; border-bottom: 1px solid var(--border, #64748b55); padding: 12px; }
+.network-import [hidden], .network-import[hidden] { display: none !important; }
+@media (max-width: 700px) { .network-dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -76,7 +76,7 @@
   </script>
   <link rel="preload" href="./assets/fonts/dm-sans-700.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="./assets/fonts/syne-800.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=native-theme-sync-20260910b">
+  <link rel="stylesheet" href="./styles.css?v=network-manual-20260911">
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -333,6 +333,20 @@
       <header class="page-header compact">
         <div><h1>Redes e Câmeras</h1><p>Infraestrutura, IPs e câmeras por escola.</p></div>
       </header>
+      <div id="networkDashboard" class="network-dashboard" aria-label="Resumo de câmeras"></div>
+      <p id="networkImportLast" class="network-import-note"></p>
+      <details id="networkImportControls" class="network-import" hidden>
+        <summary>Importar planilha de redes e câmeras</summary>
+        <p>Selecione o CSV ou Excel baixado do SharePoint. Confira a prévia antes de aplicar. A importação exige acesso de administrador.</p>
+        <div class="network-import-actions">
+          <label>Arquivo CSV ou Excel <input id="networkImportFile" type="file" accept=".csv,.xlsx"></label>
+          <label id="networkImportSheetLabel" hidden>Aba <select id="networkImportSheet"></select></label>
+          <button id="networkImportApply" class="primary-btn" type="button" disabled>Aplicar importação</button>
+          <button id="networkImportCancel" class="ghost-btn" type="button">Cancelar</button>
+        </div>
+        <p id="networkImportStatus" role="status" aria-live="polite"></p>
+        <div id="networkImportPreview"></div>
+      </details>
       <div class="network-school-grid" id="networkSchoolGrid"></div>
       <div class="network-layout" id="networkLayout"></div>
     </section>
@@ -775,7 +789,7 @@
   <script src="./data/rede-2026.js?v=rede-2026-1"></script>
   <script src="./modules/dom.js?v=stability-polish-20260528"></script>
   <script src="./modules/ui-catalog.js?v=cafe-dashboard-20260612g"></script>
-  <script src="./modules/data-store.js?v=cafe-dashboard-20260612g"></script>
+  <script src="./modules/data-store.js?v=network-manual-20260911"></script>
   <script src="./modules/identity.js?v=stability-polish-20260528"></script>
   <script src="./modules/access-scope.js?v=satisfaction-admin-only-20260804"></script>
   <script src="./modules/month-state.js?v=supervision-monthkey-fix-20260601"></script>
@@ -783,12 +797,14 @@
   <script src="./modules/normalizers.js?v=satisfaction-repair-20260804"></script>
   <script src="./modules/source-loader.js?v=sync-widget-20260910"></script>
   <script src="./config.js?v=stability-polish-20260528"></script>
-  <script src="./modules/backend-client.js?v=supervision-session-fix-20260803"></script>
+  <script src="./modules/backend-client.js?v=network-manual-20260911"></script>
   <script src="./modules/search.js?v=cafe-dashboard-20260612g"></script>
-  <script src="./modules/render.js?v=ctc-chamados-20260910"></script>
+  <script src="./modules/render.js?v=network-manual-20260911"></script>
   <script src="./modules/supervision-render.js?v=supervision-readable-notes-20260804"></script>
   <script src="./modules/navigation.js?v=native-theme-sync-20260910b"></script>
   <script src="./modules/admin-tools.js?v=native-theme-sync-20260910b"></script>
-  <script src="./app.js?v=native-theme-sync-20260910b"></script>
+  <script src="./modules/network-import-core.js?v=network-manual-20260911"></script>
+  <script src="./modules/network-import.js?v=network-manual-20260911"></script>
+  <script src="./app.js?v=network-manual-20260911"></script>
 </body>
 </html>

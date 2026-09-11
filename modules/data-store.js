@@ -149,6 +149,7 @@
     return {
       schools: normalizeSchools(source),
       networkData: source.networkData && typeof source.networkData === "object" ? source.networkData : {},
+      networkImportMeta: source.networkImportMeta && typeof source.networkImportMeta === "object" ? source.networkImportMeta : null,
       schoolInventoryMetrics: source.schoolInventoryMetrics && typeof source.schoolInventoryMetrics === "object" ? source.schoolInventoryMetrics : {},
       biEquipmentReport: source.biEquipmentReport && typeof source.biEquipmentReport === "object" ? source.biEquipmentReport : P.biEquipmentReport || null,
       schoolProfiles: Array.isArray(source.schoolProfiles) ? source.schoolProfiles : [],
