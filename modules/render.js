@@ -846,9 +846,14 @@
         const denied = P.canAccess && !P.canAccess(page);
         return `
           <button class="shortcut-card${denied ? " access-disabled" : ""}" type="button" data-jump="${page}"${denied ? ` title="Acesso indisponível para este perfil"` : ""}>
-            <span>${icon}</span>
-            <strong>${label}</strong>
-            <small>${denied ? "Indisponível para este perfil" : note}</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">${icon}</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">${label}</strong>
+              <small class="shortcut-note">${denied ? "Indisponível para este perfil" : note}</small>
+            </div>
           </button>
         `;
       }).join("");

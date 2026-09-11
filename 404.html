@@ -136,25 +136,38 @@
     </label>
     <div class="global-search" id="globalSearchResults"></div>
 
-    <div class="nav-label">Menu</div>
-    <nav class="nav" aria-label="Navegação principal">
-      <button class="nav-item active" type="button" data-page="dashboard"><span>&#128202;</span>Painel</button>
-      <button class="nav-item" type="button" data-page="ctc"><span>&#128229;</span>Chamados CTC</button>
-      <button class="nav-item" type="button" data-page="supervision"><span>&#129517;</span>Supervisão</button>
-      <button class="nav-item" type="button" data-page="cars"><span>&#128663;</span>Carros</button>
-      <button class="nav-item" type="button" data-page="contacts"><span>&#9742;&#65039;</span>Contatos</button>
-      <button class="nav-item" type="button" data-page="rede-2026"><span>&#128196;</span>Redes 2026</button>
+    <div class="nav-label">Geral</div>
+    <nav class="nav" aria-label="Navegação geral">
+      <button class="nav-item active" type="button" data-page="dashboard"><span class="nav-icon">&#128202;</span><span class="nav-text">Painel</span></button>
     </nav>
-    <section class="sidebar-card sidebar-tools-card" aria-label="Atalhos">
-      <div class="sidebar-shortcuts icon-only">
-        <button type="button" data-jump="schools" title="Escolas" aria-label="Escolas">&#127979;</button>
-        <button type="button" data-jump="network" title="Redes e câmeras" aria-label="Redes e câmeras">&#127760;</button>
-        <button type="button" data-jump="inventory" title="Equipamentos" aria-label="Equipamentos">&#128187;</button>
-        <button type="button" data-jump="ctc" title="Chamados CTC" aria-label="Chamados CTC">&#128229;</button>
-        <button type="button" data-jump="rede-2026" title="Redes 2026" aria-label="Redes 2026">&#128196;</button>
-        <button type="button" data-jump="internal" title="Café" aria-label="Café">&#9749;</button>
-      </div>
-    </section>
+
+    <div class="nav-label">Categorias</div>
+    <nav class="nav" aria-label="Categorias">
+      <button class="nav-item" type="button" data-page="schools"><span class="nav-icon">&#127979;</span><span class="nav-text">Escolas</span></button>
+      <button class="nav-item" type="button" data-page="network"><span class="nav-icon">&#127760;</span><span class="nav-text">Redes e Câmeras</span></button>
+      <button class="nav-item" type="button" data-page="inventory"><span class="nav-icon">&#128187;</span><span class="nav-text">Equipamentos</span></button>
+      <button class="nav-item" type="button" data-page="ctc"><span class="nav-icon">&#128229;</span><span class="nav-text">Chamados CTC</span></button>
+      <button class="nav-item" type="button" data-page="supervision"><span class="nav-icon">&#129517;</span><span class="nav-text">Supervisão</span></button>
+      <button class="nav-item" type="button" data-page="cars"><span class="nav-icon">&#128663;</span><span class="nav-text">Carros</span></button>
+      <button class="nav-item" type="button" data-page="contacts"><span class="nav-icon">&#9742;&#65039;</span><span class="nav-text">Contatos</span></button>
+      <button class="nav-item" type="button" data-page="rede-2026"><span class="nav-icon">&#128196;</span><span class="nav-text">Redes 2026</span></button>
+      <button class="nav-item" type="button" data-page="satisfaction"><span class="nav-icon">&#128221;</span><span class="nav-text">Pesquisa Presencial</span></button>
+      <button class="nav-item" type="button" data-page="satisfaction-online"><span class="nav-icon">&#128203;</span><span class="nav-text">Pesquisa Online</span></button>
+      <button class="nav-item" type="button" data-page="internal"><span class="nav-icon">&#9749;</span><span class="nav-text">Café</span></button>
+    </nav>
+    <div class="sidebar-shortcuts" hidden aria-hidden="true">
+      <button type="button" data-jump="schools">Escolas</button>
+      <button type="button" data-jump="network">Redes</button>
+      <button type="button" data-jump="inventory">Equipamentos</button>
+      <button type="button" data-jump="ctc">CTC</button>
+      <button type="button" data-jump="supervision">Supervisão</button>
+      <button type="button" data-jump="cars">Carros</button>
+      <button type="button" data-jump="contacts">Contatos</button>
+      <button type="button" data-jump="rede-2026">Redes 2026</button>
+      <button type="button" data-jump="satisfaction">Pesquisa</button>
+      <button type="button" data-jump="satisfaction-online">Pesquisa Online</button>
+      <button type="button" data-jump="internal">Café</button>
+    </div>
     <div class="account">
       <button class="account-row" type="button" id="accountBtn" aria-expanded="false" aria-controls="accountPop">
         <div class="avatar user-avatar" id="accountAvatar">JE</div>
@@ -195,59 +208,114 @@
         </div>
         <div class="shortcut-grid">
           <button class="shortcut-card" type="button" data-jump="schools">
-            <span>&#127979;</span>
-            <strong>Escolas</strong>
-            <small id="shortcutSchoolsNote">Unidades e fichas principais</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#127979;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Escolas</strong>
+              <small class="shortcut-note" id="shortcutSchoolsNote">Unidades e fichas principais</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="network">
-            <span>&#127760;</span>
-            <strong>Redes e Câmeras</strong>
-            <small id="shortcutNetworkNote">Rede, IPs, DVR e infraestrutura</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#127760;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Redes e Câmeras</strong>
+              <small class="shortcut-note" id="shortcutNetworkNote">Rede, IPs, DVR e infraestrutura</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="inventory">
-            <span>&#128187;</span>
-            <strong>Equipamentos</strong>
-            <small id="shortcutInventoryNote">BI de equipamentos e patrimônio</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#128187;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Equipamentos</strong>
+              <small class="shortcut-note" id="shortcutInventoryNote">BI de equipamentos e patrimônio</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="ctc">
-            <span>&#128229;</span>
-            <strong>Chamados CTC</strong>
-            <small id="shortcutCtcNote">Central de chamados e fila técnica</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#128229;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Chamados CTC</strong>
+              <small class="shortcut-note" id="shortcutCtcNote">Central de chamados e fila técnica</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="supervision">
-            <span>&#129517;</span>
-            <strong>Supervisão</strong>
-            <small id="shortcutSupervisionNote">Metas, visitas e escolas vinculadas</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#129517;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Supervisão</strong>
+              <small class="shortcut-note" id="shortcutSupervisionNote">Metas, visitas e escolas vinculadas</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="cars">
-            <span>&#128663;</span>
-            <strong>Carros</strong>
-            <small id="shortcutCarsNote">Agendamentos e motoristas</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#128663;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Carros</strong>
+              <small class="shortcut-note" id="shortcutCarsNote">Agendamentos e motoristas</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="contacts">
-            <span>&#9742;&#65039;</span>
-            <strong>Contatos</strong>
-            <small id="shortcutContactsNote">Nomes, setores, cargos e ramais</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#9742;&#65039;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Contatos</strong>
+              <small class="shortcut-note" id="shortcutContactsNote">Nomes, setores, cargos e ramais</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="rede-2026">
-            <span>&#128196;</span>
-            <strong>Redes 2026</strong>
-            <small id="shortcutRede2026Note">Comunicados e documentos oficiais</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#128196;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Redes 2026</strong>
+              <small class="shortcut-note" id="shortcutRede2026Note">Comunicados e documentos oficiais</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="satisfaction">
-            <span>&#128221;</span>
-            <strong>Pesquisa Presencial</strong>
-            <small id="shortcutSatisfactionNote">BI da pesquisa presencial</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#128221;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Pesquisa Presencial</strong>
+              <small class="shortcut-note" id="shortcutSatisfactionNote">BI da pesquisa presencial</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="satisfaction-online">
-            <span>&#128221;</span>
-            <strong>Pesquisa Online</strong>
-            <small id="shortcutSatisfactionOnlineNote">Categoria em preparação</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#128203;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Pesquisa Online</strong>
+              <small class="shortcut-note" id="shortcutSatisfactionOnlineNote">Categoria em preparação</small>
+            </div>
           </button>
           <button class="shortcut-card" type="button" data-jump="internal">
-            <span>&#9749;</span>
-            <strong>Café</strong>
-            <small id="shortcutInternalNote">Organização da rifa e da vaquinha</small>
+            <div class="shortcut-card-top">
+              <span class="shortcut-icon-badge">&#9749;</span>
+              <span class="shortcut-arrow" aria-hidden="true">&rsaquo;</span>
+            </div>
+            <div class="shortcut-card-body">
+              <strong class="shortcut-title">Café</strong>
+              <small class="shortcut-note" id="shortcutInternalNote">Organização da rifa e da vaquinha</small>
+            </div>
           </button>
         </div>
       </section>
